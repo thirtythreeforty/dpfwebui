@@ -152,6 +152,7 @@ BASE_FLAGS += -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -DPLUGIN_BIN_BASENAME=$(NAME) \
 ifeq ($(MACOS),true)
 # This is needed otherwise expect crashes on older macOS when compiling on newer
 # systems. Minimum supported target is High Sierra when WKWebView was introduced.
+# Warn: ... was built for newer macOS version (11.0) than being linked (10.13)
 BASE_FLAGS += -mmacosx-version-min=10.13
 endif
 

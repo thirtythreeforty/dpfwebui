@@ -18,12 +18,11 @@ from the DSP core. The latter can be implemented in C++ or optionally [AssemblyS
 * Based on DISTRHO Plugin Framework (DPF)
 * C++ or AssemblyScript for DSP code
 * HTML / CSS / JS for UI development
-* VST2 / VST3 (*) / LV2 plugin formats
+* VST2 / LV2 plugin formats
 * Linux / Mac / Windows
 * Just the powerful basics
 
-(*) Alpha as of Oct '21. See [bugs](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt)
- and [to-do](https://github.com/lucianoiam/hiphop/blob/master/doc/todo.txt) lists.
+See [bugs](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
 
 The following DSP / UI language combinations are possible:
 
