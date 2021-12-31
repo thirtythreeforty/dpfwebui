@@ -224,6 +224,7 @@ endif
 
 ifeq ($(AS_DSP),true)
 WASMER_PATH = $(HIPHOP_LIB_PATH)/wasmer
+WASMER_VERSION = 2.1.1
 
 TARGETS += $(WASMER_PATH)
 
@@ -234,12 +235,12 @@ endif
 ifeq ($(MACOS),true)
 WASMER_PKG_FILE = wasmer-darwin-amd64.tar.gz
 endif
-WASMER_URL = https://github.com/wasmerio/wasmer/releases/download/2.0.0/$(WASMER_PKG_FILE)
+WASMER_URL = https://github.com/wasmerio/wasmer/releases/download/$(WASMER_VERSION)/$(WASMER_PKG_FILE)
 endif
 ifeq ($(WINDOWS),true)
 # Wasmer official Windows binary distribution requires MSVC, download a custom build for MinGW
-WASMER_PKG_FILE = wasmer-mingw-amd64.tar.gz
-WASMER_URL = https://github.com/lucianoiam/hiphop/files/6795372/wasmer-mingw-amd64.tar.gz
+WASMER_PKG_FILE = wasmer-mingw-amd64-$(WASMER_VERSION).tar.gz
+WASMER_URL = https://github.com/lucianoiam/hiphop/files/7796845/$(WASMER_PKG_FILE)
 endif
 
 # https://stackoverflow.com/questions/37038472/osx-how-to-statically-link-a-library-and-dynamically-link-the-standard-library
