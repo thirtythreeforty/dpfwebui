@@ -125,7 +125,7 @@ FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/%)
 endif
 
 # ------------------------------------------------------------------------------
-# Optional support for macOS universal binaries
+# Optional support for macOS universal binaries, keep this before DPF include.
 ifeq ($(MACOS),true)
 HIPHOP_MACOS_UNIVERSAL ?= true
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
@@ -229,8 +229,12 @@ info:
 ifneq ($(WEB_UI),true)
 TARGETS += $(DPF_PATH)/build/libdgl.a
 
+ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
+	DGL_MAKE_FLAGS = dgl NOOPT=true DGL_FLAGS="$(MACOS_UNIVERSAL_FLAGS)" DGL_LIBS="$(MACOS_UNIVERSAL_FLAGS)"
+endif
+
 $(DPF_PATH)/build/libdgl.a:
-	make -C $(DPF_PATH) dgl
+	make -C $(DPF_PATH) $(DGL_MAKE_FLAGS)
 endif
 
 # ------------------------------------------------------------------------------
@@ -247,20 +251,30 @@ ifeq ($(LINUX),true)
 WASMER_PKG_FILE = wasmer-linux-amd64.tar.gz
 endif
 ifeq ($(MACOS),true)
-WASMER_PKG_FILE = wasmer-darwin-amd64.tar.gz
+# There is no macOS universal binary of Wasmer, download both architectures and combine.
+WASMER_PKG_FILE_INTEL = wasmer-darwin-amd64.tar.gz
+WASMER_PKG_FILE_ARM = wasmer-darwin-arm64.tar.gz
+ifeq ($(CPU_I386_OR_X86_64),true)
+WASMER_PKG_FILE = $(WASMER_PKG_FILE_INTEL)
+WASMER_PKG_FILE_2 = $(WASMER_PKG_FILE_ARM)
+else
+WASMER_PKG_FILE = $(WASMER_PKG_FILE_ARM)
+WASMER_PKG_FILE_2 = $(WASMER_PKG_FILE_INTEL)
 endif
-WASMER_URL = https://github.com/wasmerio/wasmer/releases/download/$(WASMER_VERSION)/$(WASMER_PKG_FILE)
+endif
+WASMER_URL = https://github.com/wasmerio/wasmer/releases/download
+WASMER_PKG_URL = $(WASMER_URL)/$(WASMER_VERSION)/$(WASMER_PKG_FILE)
 endif
 ifeq ($(WINDOWS),true)
-# Wasmer official Windows binary distribution requires MSVC, download a custom build for MinGW
+# Wasmer official Windows binary distribution requires MSVC, download a custom build for MinGW.
 WASMER_PKG_FILE = wasmer-mingw-amd64-$(WASMER_VERSION).tar.gz
-WASMER_URL = https://github.com/lucianoiam/hiphop/files/7796845/$(WASMER_PKG_FILE)
+WASMER_PKG_URL = https://github.com/lucianoiam/hiphop/files/7796845/$(WASMER_PKG_FILE)
 endif
 
 # https://stackoverflow.com/questions/37038472/osx-how-to-statically-link-a-library-and-dynamically-link-the-standard-library
 $(WASMER_PATH):
-	@wget -4 -O /tmp/$(WASMER_PKG_FILE) $(WASMER_URL)
 	@mkdir -p $(WASMER_PATH)
+	@wget -4 -O /tmp/$(WASMER_PKG_FILE) $(WASMER_PKG_URL)
 	@tar xzf /tmp/$(WASMER_PKG_FILE) -C $(WASMER_PATH)
 ifeq ($(LINUX),true)
 	@mv $(WASMER_PATH)/lib/libwasmer.so $(WASMER_PATH)/lib/libwasmer.so.ignore
@@ -269,6 +283,17 @@ ifeq ($(MACOS),true)
 	@mv $(WASMER_PATH)/lib/libwasmer.dylib $(WASMER_PATH)/lib/libwasmer.dylib.ignore
 endif
 	@rm /tmp/$(WASMER_PKG_FILE)
+ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
+	@wget -4 -O /tmp/$(WASMER_PKG_FILE_2) $(WASMER_URL)/$(WASMER_VERSION)/$(WASMER_PKG_FILE_2)
+	@mkdir -p /tmp/wasmer-2
+	@tar xzf /tmp/$(WASMER_PKG_FILE_2) -C /tmp/wasmer-2
+	@lipo -create $(WASMER_PATH)/lib/libwasmer.a /tmp/wasmer-2/lib/libwasmer.a -o $(WASMER_PATH)/lib/libwasmer-universal.a
+	@rm $(WASMER_PATH)/lib/libwasmer.a
+	@mv $(WASMER_PATH)/lib/libwasmer-universal.a $(WASMER_PATH)/lib/libwasmer.a
+	@rm /tmp/$(WASMER_PKG_FILE_2)
+	@rm -rf /tmp/wasmer-2
+else
+endif
 endif
 
 # ------------------------------------------------------------------------------
