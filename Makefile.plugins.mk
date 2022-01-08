@@ -125,6 +125,20 @@ FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/%)
 endif
 
 # ------------------------------------------------------------------------------
+# Optional support for macOS universal binaries
+ifeq ($(MACOS),true)
+HIPHOP_MACOS_UNIVERSAL ?= true
+ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
+# Non CPU-specific optimization flags, see DPF Makefile.base.mk
+NOOPT = true
+MACOS_UNIVERSAL_FLAGS = -arch x86_64 -arch arm64
+CFLAGS += $(MACOS_UNIVERSAL_FLAGS)
+CXXFLAGS += $(MACOS_UNIVERSAL_FLAGS)
+LDFLAGS += $(MACOS_UNIVERSAL_FLAGS)
+endif
+endif
+
+# ------------------------------------------------------------------------------
 # Include DPF Makefile for plugins
 
 ifeq (,$(wildcard $(DPF_PATH)/Makefile))
