@@ -36,7 +36,7 @@ WebGainExamplePlugin::WebGainExamplePlugin()
 
 void WebGainExamplePlugin::initParameter(uint32_t index, Parameter& parameter)
 {
-    parameter.hints = kParameterIsAutomable;
+    parameter.hints = kParameterIsAutomatable;
 
     switch (index)
     {

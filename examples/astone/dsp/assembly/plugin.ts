@@ -50,7 +50,7 @@ export default class AsToneExamplePlugin extends DISTRHO.Plugin implements DISTR
     initParameter(index: u32, parameter: DISTRHO.Parameter): void {
         switch (index) {
             case 0:
-                parameter.hints = DISTRHO.kParameterIsAutomable
+                parameter.hints = DISTRHO.kParameterIsAutomatable
                 parameter.name = 'Frequency'
                 parameter.ranges.def = 440.0
                 parameter.ranges.min = 220.0

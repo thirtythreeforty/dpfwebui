@@ -138,7 +138,7 @@ export default namespace DISTRHO {
 
     // Parameter hint constants
 
-    export const kParameterIsAutomable: u32   = 0x01
+    export const kParameterIsAutomatable: u32 = 0x01
     export const kParameterIsBoolean: u32     = 0x02
     export const kParameterIsInteger: u32     = 0x04
     export const kParameterIsLogarithmic: u32 = 0x08
