@@ -24,7 +24,7 @@ from the DSP core. The latter can be implemented in C++ or optionally [AssemblyS
 
 See [bugs](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
 
-The following DSP / UI language combinations are possible:
+The following language combinations are possible:
 
 DSP|UI |Comments
 ---|---|---------------------------------------------------------------------------
@@ -82,7 +82,7 @@ export default class ExamplePlugin extends DISTRHO.Plugin implements DISTRHO.Plu
     }
 
     run(inputs: Float32Array[], outputs: Float32Array[], midiEvents: DISTRHO.MidiEvent[]): void {
-        // Process an audio channel, input and output buffers have equal size
+        // Process a single audio channel, input and output buffers have equal size
 
         for (let i = 0; i < inputs[0].length; ++i) {
             outputs[0][i] = this.gain * inputs[0][i]
