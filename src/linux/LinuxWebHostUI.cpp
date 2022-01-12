@@ -24,13 +24,13 @@
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(uintptr_t /*window*/)
+float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
 {
-    ChildProcessWebView* webview = (ChildProcessWebView*)getWebView();
-
-    if (webview == 0) {
+    if (ui == nullptr) {
         return 1.f;
     }
+
+    ChildProcessWebView* webview = static_cast<ChildProcessWebView*>(ui->getWebView());
 
     return webview->getDisplayScaleFactor();
 }

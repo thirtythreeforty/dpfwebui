@@ -29,7 +29,8 @@
 
 START_NAMESPACE_DISTRHO
 
-float getDisplayScaleFactor(uintptr_t window);
+class AbstractWebHostUI;
+float getDisplayScaleFactor(AbstractWebHostUI* ui);
 
 class AbstractWebHostUI : public UI, private WebViewEventHandler
 {
@@ -45,12 +46,12 @@ public:
     uint getInitialWidth() const { return fInitialWidth; }
     uint getInitHeight() const { return fInitHeight; }
 
+    AbstractWebView* getWebView();
+
     virtual void openSystemWebBrowser(String& url) = 0;
 
 protected:
     bool shouldCreateWebView();
-
-    AbstractWebView* getWebView();
     void setWebView(AbstractWebView* webView);
 
     void load();

@@ -27,14 +27,14 @@ USE_NAMESPACE_DISTRHO
 
 // DPF implementation of VST3 on macOS needs final/already scaled dimensions to
 // be passed to the DISTRHO::UI constructor because the setSize() call in
-// setWebView() gets ignored - https://github.com/DISTRHO/DPF/issues/359. This
-// works for most cases with caveats: #1 getDisplayScaleFactor() is called twice
-// and #2 since the window is still not available for passing to getDisplayScaleFactor(),
-// it is assumed the plugin will be displayed on the main display.
+// setWebView() is being ignored - https://github.com/DISTRHO/DPF/issues/359 .
+// This works for most cases with caveats: #1 getDisplayScaleFactor() is called
+// twice and #2 since the window becomes available only later, it is assumed the
+// plugin UI is being opened on the main display.
 
 AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight, 
         uint32_t backgroundColor, bool /*startLoading*/)
-    : UI(getDisplayScaleFactor(0) * baseWidth, getDisplayScaleFactor(0) * baseHeight)
+    : UI(getDisplayScaleFactor(nullptr) * baseWidth, getDisplayScaleFactor(nullptr) * baseHeight)
     , fBaseWidth(baseWidth)
     , fBaseHeight(baseHeight)
     , fBackgroundColor(backgroundColor)
@@ -199,7 +199,7 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
 
     // Web views adjust their contents following the system display scale factor,
     // adjust window size so it correctly wraps content on high density displays.
-    float k = getDisplayScaleFactor(parent);
+    float k = getDisplayScaleFactor(this);
     fInitialWidth = k * fBaseWidth;
     fInitHeight = k * fBaseHeight;
 
