@@ -544,6 +544,10 @@ edge_lib:
 		&& mkdir -p $(LIB_DIR_LV2) \
 		&& cp $(WEBVIEW_DLL) $(LIB_DIR_LV2) \
 		) || true
+	@($(TEST_VST3) \
+		&& mkdir -p $(LIB_DIR_VST3) \
+		&& cp $(WEBVIEW_DLL) $(LIB_DIR_VST3) \
+		) || true
 	@($(TEST_NOBUNDLE) \
 		&& mkdir -p $(LIB_DIR_NOBUNDLE) \
 		&& cp $(WEBVIEW_DLL) $(LIB_DIR_NOBUNDLE) \
