@@ -24,9 +24,10 @@ BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam);
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(uintptr_t window)
+float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
 {
     float k = 1.f;
+
     const HMODULE shcore = LoadLibrary("Shcore.dll");
 
     if (shcore == 0) {
@@ -55,8 +56,8 @@ float DISTRHO::getDisplayScaleFactor(uintptr_t window)
             && (dpiAware != PROCESS_DPI_UNAWARE)) {
 
         // https://devblogs.microsoft.com/oldnewthing/20070809-00/?p=25643
-        const HMONITOR hMon = window == 0 ? MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY)
-            : MonitorFromWindow((HWND)window, MONITOR_DEFAULTTOPRIMARY);
+        const HMONITOR hMon = ui != 0 ? MonitorFromWindow((HWND)ui->getParent(), MONITOR_DEFAULTTOPRIMARY)
+                                      : MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
 
         DEVICE_SCALE_FACTOR scaleFactor;
 
