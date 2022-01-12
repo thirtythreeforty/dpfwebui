@@ -31,8 +31,7 @@ public:
         uint32_t backgroundColor = 0xffffffff, bool startLoading = true);
     virtual ~WindowsWebHostUI();
 
-    float getDisplayScaleFactor(uintptr_t window) override;
-    void  openSystemWebBrowser(String& url) override;
+    void openSystemWebBrowser(String& url) override;
 
 protected:
     uintptr_t createStandaloneWindow() override;

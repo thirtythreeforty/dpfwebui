@@ -24,6 +24,52 @@ BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam);
 
 USE_NAMESPACE_DISTRHO
 
+float DISTRHO::getDisplayScaleFactor(uintptr_t window)
+{
+    float k = 1.f;
+    const HMODULE shcore = LoadLibrary("Shcore.dll");
+
+    if (shcore == 0) {
+        return k;
+    }
+
+    typedef HRESULT (*PFN_GetProcessDpiAwareness)(HANDLE hProc, PROCESS_DPI_AWARENESS *pValue);
+    typedef HRESULT (*PFN_GetScaleFactorForMonitor)(HMONITOR hMon, DEVICE_SCALE_FACTOR *pScale);
+
+# if defined(__GNUC__) && (__GNUC__ >= 9)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wcast-function-type"
+# endif
+    const PFN_GetProcessDpiAwareness GetProcessDpiAwareness
+        = (PFN_GetProcessDpiAwareness)GetProcAddress(shcore, "GetProcessDpiAwareness");
+    const PFN_GetScaleFactorForMonitor GetScaleFactorForMonitor
+        = (PFN_GetScaleFactorForMonitor)GetProcAddress(shcore, "GetScaleFactorForMonitor");
+# if defined(__GNUC__) && (__GNUC__ >= 9)
+#  pragma GCC diagnostic pop
+# endif
+
+    PROCESS_DPI_AWARENESS dpiAware;
+
+    if ((GetProcessDpiAwareness != 0) && (GetScaleFactorForMonitor != 0)
+            && (SUCCEEDED(GetProcessDpiAwareness(0, &dpiAware)))
+            && (dpiAware != PROCESS_DPI_UNAWARE)) {
+
+        // https://devblogs.microsoft.com/oldnewthing/20070809-00/?p=25643
+        const HMONITOR hMon = window == 0 ? MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY)
+            : MonitorFromWindow((HWND)window, MONITOR_DEFAULTTOPRIMARY);
+
+        DEVICE_SCALE_FACTOR scaleFactor;
+
+        if (SUCCEEDED(GetScaleFactorForMonitor(hMon, &scaleFactor))) {
+            k = static_cast<float>(scaleFactor) / 100.f;
+        }
+    }
+
+    FreeLibrary(shcore);
+
+    return k;
+}
+
 WindowsWebHostUI::WindowsWebHostUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
     : AbstractWebHostUI(baseWidth, baseHeight, backgroundColor)
@@ -60,50 +106,6 @@ WindowsWebHostUI::WindowsWebHostUI(uint baseWidth, uint baseHeight,
 WindowsWebHostUI::~WindowsWebHostUI()
 {
     // TODO - standalone support
-}
-
-float WindowsWebHostUI::getDisplayScaleFactor(uintptr_t window)
-{
-    float k = 1.f;
-    const HMODULE shcore = LoadLibrary("Shcore.dll");
-
-    if (shcore == 0) {
-        return k;
-    }
-
-    typedef HRESULT (*PFN_GetProcessDpiAwareness)(HANDLE hProc, PROCESS_DPI_AWARENESS *pValue);
-    typedef HRESULT (*PFN_GetScaleFactorForMonitor)(HMONITOR hMon, DEVICE_SCALE_FACTOR *pScale);
-
-# if defined(__GNUC__) && (__GNUC__ >= 9)
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wcast-function-type"
-# endif
-    const PFN_GetProcessDpiAwareness GetProcessDpiAwareness
-        = (PFN_GetProcessDpiAwareness)GetProcAddress(shcore, "GetProcessDpiAwareness");
-    const PFN_GetScaleFactorForMonitor GetScaleFactorForMonitor
-        = (PFN_GetScaleFactorForMonitor)GetProcAddress(shcore, "GetScaleFactorForMonitor");
-# if defined(__GNUC__) && (__GNUC__ >= 9)
-#  pragma GCC diagnostic pop
-# endif
-
-    PROCESS_DPI_AWARENESS dpiAware;
-
-    if ((GetProcessDpiAwareness != 0) && (GetScaleFactorForMonitor != 0)
-            && (SUCCEEDED(GetProcessDpiAwareness(0, &dpiAware)))
-            && (dpiAware != PROCESS_DPI_UNAWARE)) {
-
-        const HMONITOR hMon = MonitorFromWindow((HWND)window, MONITOR_DEFAULTTOPRIMARY);
-
-        DEVICE_SCALE_FACTOR scaleFactor;
-
-        if (SUCCEEDED(GetScaleFactorForMonitor(hMon, &scaleFactor))) {
-            k = static_cast<float>(scaleFactor) / 100.f;
-        }
-    }
-
-    FreeLibrary(shcore);
-
-    return k;
 }
 
 void WindowsWebHostUI::openSystemWebBrowser(String& url)

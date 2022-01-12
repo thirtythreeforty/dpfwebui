@@ -29,6 +29,8 @@
 
 START_NAMESPACE_DISTRHO
 
+float getDisplayScaleFactor(uintptr_t window);
+
 class AbstractWebHostUI : public UI, private WebViewEventHandler
 {
 public:
@@ -43,8 +45,7 @@ public:
     uint getInitWidth() const { return fInitWidth; }
     uint getInitHeight() const { return fInitHeight; }
 
-    virtual float getDisplayScaleFactor(uintptr_t window) = 0;
-    virtual void  openSystemWebBrowser(String& url) = 0;
+    virtual void openSystemWebBrowser(String& url) = 0;
 
 protected:
     bool shouldCreateWebView();
@@ -93,12 +94,14 @@ private:
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
 
-    AbstractWebView*  fWebView;
+    uint              fBaseWidth;
+    uint              fBaseHeight;
+    uint32_t          fBackgroundColor;
     uint              fInitWidth;
     uint              fInitHeight;
-    uint32_t          fBackgroundColor;
     bool              fMessageQueueReady;
     bool              fUiBlockQueued;
+    AbstractWebView*  fWebView;
     UiBlock           fUiBlock;
     InitMessageQueue  fInitMessageQueue;
     MessageHandlerMap fHandler;

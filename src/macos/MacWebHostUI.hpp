@@ -31,7 +31,6 @@ public:
         uint32_t backgroundColor = 0xffffffff, bool startLoading = true);
     virtual ~MacWebHostUI();
 
-    float getDisplayScaleFactor(uintptr_t window) override;
     void  openSystemWebBrowser(String& url) override;
 
 protected:

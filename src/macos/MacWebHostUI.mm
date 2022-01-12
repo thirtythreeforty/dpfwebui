@@ -24,6 +24,16 @@
 
 USE_NAMESPACE_DISTRHO
 
+float DISTRHO::getDisplayScaleFactor(uintptr_t window)
+{
+    if (window == 0) {
+        return [NSScreen mainScreen].backingScaleFactor;
+    }
+    NSWindow* nsw = [(id)window isKindOfClass:[NSView class]] ?
+        [(NSView *)window window] : (NSWindow *)window;
+    return nsw.backingScaleFactor;
+}
+
 MacWebHostUI::MacWebHostUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
     : AbstractWebHostUI(baseWidth, baseHeight, backgroundColor)
@@ -44,13 +54,6 @@ MacWebHostUI::~MacWebHostUI()
         [fNsWindow orderOut:nil];
         [fNsWindow release];
     }
-}
-
-float MacWebHostUI::getDisplayScaleFactor(uintptr_t window)
-{
-    NSWindow* nsw = [(id)window isKindOfClass:[NSView class]] ?
-        [(NSView *)window window] : (NSWindow *)window;
-    return (nsw.screen ? nsw.screen : [NSScreen mainScreen]).backingScaleFactor;
 }
 
 void MacWebHostUI::openSystemWebBrowser(String& url)

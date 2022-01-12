@@ -24,6 +24,17 @@
 
 USE_NAMESPACE_DISTRHO
 
+float DISTRHO::getDisplayScaleFactor(uintptr_t /*window*/)
+{
+    ChildProcessWebView* webview = (ChildProcessWebView*)getWebView();
+
+    if (webview == 0) {
+        return 1.f;
+    }
+
+    return webview->getDisplayScaleFactor();
+}
+
 LinuxWebHostUI::LinuxWebHostUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
     : AbstractWebHostUI(baseWidth, baseHeight, backgroundColor)
@@ -54,17 +65,6 @@ LinuxWebHostUI::LinuxWebHostUI(uint baseWidth, uint baseHeight,
 LinuxWebHostUI::~LinuxWebHostUI()
 {
     // TODO - standalone support
-}
-
-float LinuxWebHostUI::getDisplayScaleFactor(uintptr_t /*window*/)
-{
-    ChildProcessWebView* webview = (ChildProcessWebView*)getWebView();
-
-    if (webview == 0) {
-        return 1.f;
-    }
-
-    return webview->getDisplayScaleFactor();
 }
 
 void LinuxWebHostUI::openSystemWebBrowser(String& url)

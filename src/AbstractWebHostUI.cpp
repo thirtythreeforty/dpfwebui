@@ -25,15 +25,24 @@
 
 USE_NAMESPACE_DISTRHO
 
+// DPF implementation of VST3 on macOS needs final/already scaled dimensions to
+// be passed to the DISTRHO::UI constructor because the setSize() call in
+// setWebView() gets ignored - https://github.com/DISTRHO/DPF/issues/359. This
+// works for most cases with caveats: #1 getDisplayScaleFactor() is called twice
+// and #2 since the window is still not available for passing to getDisplayScaleFactor(),
+// it is assumed the plugin will be displayed on the main display.
+
 AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight, 
         uint32_t backgroundColor, bool /*startLoading*/)
-    : UI(baseWidth, baseHeight)
-    , fWebView(0)
+    : UI(getDisplayScaleFactor(0) * baseWidth, getDisplayScaleFactor(0) * baseHeight)
+    , fBaseWidth(baseWidth)
+    , fBaseHeight(baseHeight)
+    , fBackgroundColor(backgroundColor)
     , fInitWidth(0)
     , fInitHeight(0)
-    , fBackgroundColor(backgroundColor)
     , fMessageQueueReady(false)
     , fUiBlockQueued(false)
+    , fWebView(0)
 {
     // It is not possible to implement JS synchronous calls that return values
     // without resorting to dirty hacks. Use JS async functions instead, and
@@ -191,8 +200,8 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
     // Web views adjust their contents following the system display scale factor,
     // adjust window size so it correctly wraps content on high density displays.
     float k = getDisplayScaleFactor(parent);
-    fInitWidth = k * getWidth();
-    fInitHeight = k * getHeight();
+    fInitWidth = k * fBaseWidth;
+    fInitHeight = k * fBaseHeight;
 
     fWebView->setParent(parent);
     fWebView->setBackgroundColor(fBackgroundColor);
@@ -200,7 +209,7 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
     fWebView->realize();
 
     setSize(fInitWidth, fInitHeight);
-};
+}
 
 void AbstractWebHostUI::load()
 {
