@@ -56,8 +56,9 @@ float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
             && (dpiAware != PROCESS_DPI_UNAWARE)) {
 
         // https://devblogs.microsoft.com/oldnewthing/20070809-00/?p=25643
-        const HMONITOR hMon = ui != 0 ? MonitorFromWindow((HWND)ui->getParent(), MONITOR_DEFAULTTOPRIMARY)
-                                      : MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
+        const HMONITOR hMon = ui != 0 ?
+              MonitorFromWindow((HWND)ui->getPlatformWindow(), MONITOR_DEFAULTTOPRIMARY)
+            : MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
 
         DEVICE_SCALE_FACTOR scaleFactor;
 

@@ -42,7 +42,7 @@ AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight,
     , fInitialHeight(0)
     , fMessageQueueReady(false)
     , fUiBlockQueued(false)
-    , fParent(0)
+    , fPlatformWindow(0)
     , fWebView(0)
 {
     // It is not possible to implement JS synchronous calls that return values
@@ -191,7 +191,7 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
     fWebView->injectScript(js);
 
     // Cannot call virtual method createStandaloneWindow() from constructor.
-    fParent = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
+    fPlatformWindow = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
 
     // Web views adjust their contents following the system display scale factor,
     // adjust window size so it correctly wraps content on high density displays.
@@ -199,7 +199,7 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
     fInitialWidth = k * fBaseWidth;
     fInitialHeight = k * fBaseHeight;
 
-    fWebView->setParent(fParent);
+    fWebView->setParent(fPlatformWindow);
     fWebView->setBackgroundColor(fBackgroundColor);
     fWebView->setSize(fInitialWidth, fInitialHeight);
     fWebView->realize();

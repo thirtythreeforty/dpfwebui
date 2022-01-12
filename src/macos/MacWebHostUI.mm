@@ -30,7 +30,7 @@ float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
         return [NSScreen mainScreen].backingScaleFactor;
     }
 
-    NSWindow* window = [(NSView *)ui->getParent() window];
+    NSWindow* window = [(NSView *)ui->getPlatformWindow() window];
 
     return window.backingScaleFactor;
 }

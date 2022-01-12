@@ -46,7 +46,7 @@ public:
     uint getInitialWidth() const { return fInitialWidth; }
     uint getInitialHeight() const { return fInitialHeight; }
 
-    uintptr_t getParent() const { return fParent; }
+    uintptr_t getPlatformWindow() const { return fPlatformWindow; }
 
     AbstractWebView* getWebView() { return fWebView; }
 
@@ -104,7 +104,7 @@ private:
     uint              fInitialHeight;
     bool              fMessageQueueReady;
     bool              fUiBlockQueued;
-    uintptr_t         fParent;
+    uintptr_t         fPlatformWindow;
     AbstractWebView*  fWebView;
     UiBlock           fUiBlock;
     InitMessageQueue  fInitMessageQueue;
