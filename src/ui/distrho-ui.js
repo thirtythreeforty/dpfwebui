@@ -137,9 +137,9 @@ class UI {
         this._call('openSystemWebBrowser', url);
     }
 
-    // uint WebHostUI::getInitWidth()
-    async getInitWidth() {
-        return this._callAndExpectReply('getInitWidth');
+    // uint WebHostUI::getInitialWidth()
+    async getInitialWidth() {
+        return this._callAndExpectReply('getInitialWidth');
     }
 
     // uint WebHostUI::getInitHeight()

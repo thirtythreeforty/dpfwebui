@@ -85,7 +85,7 @@ class StubUI {
         window.open(url);
     }
 
-    async getInitWidth() {
+    async getInitialWidth() {
         return document.body.clientWidth;
     }
 

@@ -42,7 +42,7 @@ public:
 
     void queue(const UiBlock& block);
     
-    uint getInitWidth() const { return fInitWidth; }
+    uint getInitialWidth() const { return fInitialWidth; }
     uint getInitHeight() const { return fInitHeight; }
 
     virtual void openSystemWebBrowser(String& url) = 0;
@@ -97,7 +97,7 @@ private:
     uint              fBaseWidth;
     uint              fBaseHeight;
     uint32_t          fBackgroundColor;
-    uint              fInitWidth;
+    uint              fInitialWidth;
     uint              fInitHeight;
     bool              fMessageQueueReady;
     bool              fUiBlockQueued;

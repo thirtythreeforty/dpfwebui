@@ -38,7 +38,7 @@ AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight,
     , fBaseWidth(baseWidth)
     , fBaseHeight(baseHeight)
     , fBackgroundColor(backgroundColor)
-    , fInitWidth(0)
+    , fInitialWidth(0)
     , fInitHeight(0)
     , fMessageQueueReady(false)
     , fUiBlockQueued(false)
@@ -140,8 +140,8 @@ AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight,
         openSystemWebBrowser(url);
     });
 
-    fHandler["getInitWidth"] = std::make_pair(0, [this](const JsValueVector&) {
-        webViewPostMessage({"UI", "getInitWidth", static_cast<double>(getInitWidth())});
+    fHandler["getInitialWidth"] = std::make_pair(0, [this](const JsValueVector&) {
+        webViewPostMessage({"UI", "getInitialWidth", static_cast<double>(getInitialWidth())});
     });
 
     fHandler["getInitHeight"] = std::make_pair(0, [this](const JsValueVector&) {
@@ -200,15 +200,15 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
     // Web views adjust their contents following the system display scale factor,
     // adjust window size so it correctly wraps content on high density displays.
     float k = getDisplayScaleFactor(parent);
-    fInitWidth = k * fBaseWidth;
+    fInitialWidth = k * fBaseWidth;
     fInitHeight = k * fBaseHeight;
 
     fWebView->setParent(parent);
     fWebView->setBackgroundColor(fBackgroundColor);
-    fWebView->setSize(fInitWidth, fInitHeight);
+    fWebView->setSize(fInitialWidth, fInitHeight);
     fWebView->realize();
 
-    setSize(fInitWidth, fInitHeight);
+    setSize(fInitialWidth, fInitHeight);
 }
 
 void AbstractWebHostUI::load()
