@@ -34,14 +34,15 @@ USE_NAMESPACE_DISTRHO
 
 AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight, 
         uint32_t backgroundColor, bool /*startLoading*/)
-    : UI(getDisplayScaleFactor(nullptr) * baseWidth, getDisplayScaleFactor(nullptr) * baseHeight)
+    : UI(getDisplayScaleFactor(0) * baseWidth, getDisplayScaleFactor(0) * baseHeight)
     , fBaseWidth(baseWidth)
     , fBaseHeight(baseHeight)
     , fBackgroundColor(backgroundColor)
     , fInitialWidth(0)
-    , fInitHeight(0)
+    , fInitialHeight(0)
     , fMessageQueueReady(false)
     , fUiBlockQueued(false)
+    , fParent(0)
     , fWebView(0)
 {
     // It is not possible to implement JS synchronous calls that return values
@@ -144,8 +145,8 @@ AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight,
         webViewPostMessage({"UI", "getInitialWidth", static_cast<double>(getInitialWidth())});
     });
 
-    fHandler["getInitHeight"] = std::make_pair(0, [this](const JsValueVector&) {
-        webViewPostMessage({"UI", "getInitHeight", static_cast<double>(getInitHeight())});
+    fHandler["getInitialHeight"] = std::make_pair(0, [this](const JsValueVector&) {
+        webViewPostMessage({"UI", "getInitialHeight", static_cast<double>(getInitialHeight())});
     });
 
     fHandler["flushInitMessageQueue"] = std::make_pair(0, [this](const JsValueVector&) {
@@ -173,11 +174,6 @@ bool AbstractWebHostUI::shouldCreateWebView()
     return isStandalone() || (getParentWindowHandle() != 0);
 }
 
-AbstractWebView* AbstractWebHostUI::getWebView()
-{
-    return fWebView;
-}
-
 void AbstractWebHostUI::setWebView(AbstractWebView* webView)
 {
     fWebView = webView;
@@ -195,20 +191,20 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
     fWebView->injectScript(js);
 
     // Cannot call virtual method createStandaloneWindow() from constructor.
-    uintptr_t parent = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
+    fParent = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
 
     // Web views adjust their contents following the system display scale factor,
     // adjust window size so it correctly wraps content on high density displays.
     float k = getDisplayScaleFactor(this);
     fInitialWidth = k * fBaseWidth;
-    fInitHeight = k * fBaseHeight;
+    fInitialHeight = k * fBaseHeight;
 
-    fWebView->setParent(parent);
+    fWebView->setParent(fParent);
     fWebView->setBackgroundColor(fBackgroundColor);
-    fWebView->setSize(fInitialWidth, fInitHeight);
+    fWebView->setSize(fInitialWidth, fInitialHeight);
     fWebView->realize();
 
-    setSize(fInitialWidth, fInitHeight);
+    setSize(fInitialWidth, fInitialHeight);
 }
 
 void AbstractWebHostUI::load()

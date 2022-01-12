@@ -24,14 +24,15 @@
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(uintptr_t window)
+float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
 {
-    if (window == 0) {
+    if (ui == 0) {
         return [NSScreen mainScreen].backingScaleFactor;
     }
-    NSWindow* nsw = [(id)window isKindOfClass:[NSView class]] ?
-        [(NSView *)window window] : (NSWindow *)window;
-    return nsw.backingScaleFactor;
+
+    NSWindow* window = [(NSView *)ui->getParent() window];
+
+    return window.backingScaleFactor;
 }
 
 MacWebHostUI::MacWebHostUI(uint baseWidth, uint baseHeight,

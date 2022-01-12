@@ -89,7 +89,7 @@ class StubUI {
         return document.body.clientWidth;
     }
 
-    async getInitHeight() {
+    async getInitialHeight() {
         return document.body.clientHeight;
     }
 

@@ -142,9 +142,9 @@ class UI {
         return this._callAndExpectReply('getInitialWidth');
     }
 
-    // uint WebHostUI::getInitHeight()
-    async getInitHeight() {
-        return this._callAndExpectReply('getInitHeight');
+    // uint WebHostUI::getInitialHeight()
+    async getInitialHeight() {
+        return this._callAndExpectReply('getInitialHeight');
     }
 
     // void WebHostUI::webViewPostMessage(const JsValueVector& args)

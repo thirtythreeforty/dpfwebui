@@ -26,7 +26,7 @@ USE_NAMESPACE_DISTRHO
 
 float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
 {
-    if (ui == nullptr) {
+    if (ui == 0) {
         return 1.f;
     }
 
