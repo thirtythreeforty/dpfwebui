@@ -52,7 +52,7 @@ AbstractWebView::AbstractWebView()
         , fParent(0)
         , fKeyboardFocus(false)
         , fPrintTraffic(false)
-        , fHandler(0)
+        , fHandler(nullptr)
 {}
 
 uint AbstractWebView::getWidth()
@@ -146,7 +146,7 @@ void AbstractWebView::handleLoadFinished()
     ;
     addStylesheet(css);
 
-    if (fHandler != 0) {
+    if (fHandler != nullptr) {
         fHandler->handleWebViewLoadFinished();
     }
 }
@@ -154,7 +154,7 @@ void AbstractWebView::handleLoadFinished()
 void AbstractWebView::handleScriptMessage(const JsValueVector& args)
 {
     if ((args.size() == 3) && (args[0].getString() == "console")) {
-        if (fHandler != 0) {
+        if (fHandler != nullptr) {
             fHandler->handleWebViewConsole(args[1].getString(), args[2].getString());
         }
     } else {
@@ -163,7 +163,7 @@ void AbstractWebView::handleScriptMessage(const JsValueVector& args)
                 << std::endl << std::flush;
         }
         
-        if (fHandler != 0) {
+        if (fHandler != nullptr) {
             fHandler->handleWebViewScriptMessage(args);
         }
     }

@@ -31,7 +31,7 @@ std::ostream& operator<<(std::ostream &os, const JsValue &val) {
             break;
 
         case JsValue::TDouble: {
-            double d = val.getDouble();
+            const double d = val.getDouble();
             if (std::isnan(d)) {
                 os << "NaN";
             } else if (std::isinf(d)) {
@@ -45,7 +45,7 @@ std::ostream& operator<<(std::ostream &os, const JsValue &val) {
         case JsValue::TString: {
             const String& s = val.getString();
             const char *buf = s.buffer();
-            int len = s.length();
+            const int len = s.length();
             os << '"';
             for (int i = 0; i < len; i++) {
                 if (buf[i] != '"') {

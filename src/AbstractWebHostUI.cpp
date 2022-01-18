@@ -43,7 +43,7 @@ AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight,
     , fMessageQueueReady(false)
     , fUiBlockQueued(false)
     , fPlatformWindow(0)
-    , fWebView(0)
+    , fWebView(nullptr)
 {
     // It is not possible to implement JS synchronous calls that return values
     // without resorting to dirty hacks. Use JS async functions instead, and
@@ -156,7 +156,7 @@ AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight,
 
 AbstractWebHostUI::~AbstractWebHostUI()
 {
-    if (fWebView != 0) {
+    if (fWebView != nullptr) {
         delete fWebView;
     }
 }
@@ -195,7 +195,7 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
 
     // Web views adjust their contents following the system display scale factor,
     // adjust window size so it correctly wraps content on high density displays.
-    float k = getDisplayScaleFactor(this);
+    const float k = getDisplayScaleFactor(this);
     fInitialWidth = k * fBaseWidth;
     fInitialHeight = k * fBaseHeight;
 
@@ -209,7 +209,7 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
 
 void AbstractWebHostUI::load()
 {
-    if (fWebView != 0) {
+    if (fWebView != nullptr) {
         String url = "file://" + path::getLibraryPath() + "/ui/index.html";
         fWebView->navigate(url);
     }
@@ -217,7 +217,7 @@ void AbstractWebHostUI::load()
 
 void AbstractWebHostUI::runScript(String& source)
 {
-    if (fWebView != 0) {
+    if (fWebView != nullptr) {
         fWebView->runScript(source);
     }
 }
@@ -225,7 +225,7 @@ void AbstractWebHostUI::runScript(String& source)
 void AbstractWebHostUI::injectScript(String& source)
 {
     // Cannot inject scripts after navigation has started
-    if (fWebView != 0) {
+    if (fWebView != nullptr) {
         fWebView->injectScript(source);
     }
 }

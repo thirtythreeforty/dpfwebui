@@ -120,8 +120,8 @@ public:
 
     void release()
     {
-        fOwnerWeakRef = 0;
-        if (decRefCount() == 0) {
+        fOwnerWeakRef = nullptr;
+        if (decRefCount() == nullptr) {
             delete this;
         }
     }
@@ -129,7 +129,7 @@ public:
     HRESULT handleWebView2EnvironmentCompleted(HRESULT result,
                                     ICoreWebView2Environment* environment) override
     {
-        if (fOwnerWeakRef != 0) {
+        if (fOwnerWeakRef != nullptr) {
             return fOwnerWeakRef->handleWebView2EnvironmentCompleted(result, environment);
         } else {
             return E_ABORT;
@@ -139,7 +139,7 @@ public:
     HRESULT handleWebView2ControllerCompleted(HRESULT result,
                                     ICoreWebView2Controller* controller) override
     {
-        if (fOwnerWeakRef != 0) {
+        if (fOwnerWeakRef != nullptr) {
             return fOwnerWeakRef->handleWebView2ControllerCompleted(result, controller);
         } else {
             return E_ABORT;
@@ -149,7 +149,7 @@ public:
     HRESULT handleWebView2NavigationCompleted(ICoreWebView2 *sender,
                                     ICoreWebView2NavigationCompletedEventArgs *eventArgs) override
     {
-        if (fOwnerWeakRef != 0) {
+        if (fOwnerWeakRef != nullptr) {
             return fOwnerWeakRef->handleWebView2NavigationCompleted(sender, eventArgs);
         } else {
             return E_ABORT;
@@ -159,7 +159,7 @@ public:
     HRESULT handleWebView2WebMessageReceived(ICoreWebView2 *sender,
                                     ICoreWebView2WebMessageReceivedEventArgs *eventArgs) override
     {
-        if (fOwnerWeakRef != 0) {
+        if (fOwnerWeakRef != nullptr) {
             return fOwnerWeakRef->handleWebView2WebMessageReceived(sender, eventArgs);
         } else {
             return E_ABORT;

@@ -31,7 +31,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
                                 std::shared_ptr<WasmEngine> engine)
     : Plugin(parameterCount, programCount, stateCount)
 {   
-    if (engine != 0) {
+    if (engine != nullptr) {
         fEngine = engine;
         return; // caller initializes engine
     }
@@ -39,7 +39,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
     fEngine.reset(new WasmEngine());
 
     try {
-        String path = path::getLibraryPath() + "/dsp/main.wasm";
+        const String path = path::getLibraryPath() + "/dsp/main.wasm";
         fEngine->load(path);
 
         WasmFunctionMap hf; // host functions
@@ -200,9 +200,9 @@ void WasmHostPlugin::setState(const char* key, const char* value)
 {
     try {
         throwIfEngineStopped();
-        WasmValue wkey = fEngine->getGlobal("_rw_string_1");
+        const WasmValue wkey = fEngine->getGlobal("_rw_string_1");
         fEngine->copyCStringToMemory(wkey, key);
-        WasmValue wval = fEngine->getGlobal("_rw_string_2");
+        const WasmValue wval = fEngine->getGlobal("_rw_string_2");
         fEngine->copyCStringToMemory(wval, value);
         fEngine->callFunction("_set_state", { wkey, wval });
     } catch (const std::exception& ex) {
@@ -215,7 +215,7 @@ String WasmHostPlugin::getState(const char* key) const
 {
     try {
         throwIfEngineStopped();
-        WasmValue wkey = fEngine->getGlobal("_rw_string_1");
+        const WasmValue wkey = fEngine->getGlobal("_rw_string_1");
         fEngine->copyCStringToMemory(wkey, key);
         const char* val = fEngine->callFunctionReturnCString("_get_state", { wkey });
         return String(val);

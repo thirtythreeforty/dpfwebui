@@ -26,7 +26,7 @@ USE_NAMESPACE_DISTRHO
 
 float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
 {
-    if (ui == 0) {
+    if (ui == nullptr) {
         return [NSScreen mainScreen].backingScaleFactor;
     }
 
@@ -51,10 +51,8 @@ MacWebHostUI::MacWebHostUI(uint baseWidth, uint baseHeight,
 
 MacWebHostUI::~MacWebHostUI()
 {
-    if (fNsWindow != 0) {
-        [fNsWindow orderOut:nil];
-        [fNsWindow release];
-    }
+    [fNsWindow orderOut:nil];
+    [fNsWindow release];
 }
 
 void MacWebHostUI::openSystemWebBrowser(String& url)
