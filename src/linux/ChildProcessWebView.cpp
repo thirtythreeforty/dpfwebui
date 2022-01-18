@@ -51,8 +51,8 @@ ChildProcessWebView::ChildProcessWebView()
     : fDisplay(0)
     , fBackground(0)
     , fPid(-1)
-    , fIpc(0)
-    , fIpcThread(0)
+    , fIpc(nullptr)
+    , fIpcThread(nullptr)
     , fChildInit(false)
     , fDisplayScaleFactor(1.f)
 {
@@ -92,7 +92,7 @@ ChildProcessWebView::ChildProcessWebView()
     String helperPath = libPath + "/ui-helper";
     const char *argv[] = { helperPath, rfd, wfd, 0 };
 
-    int status = posix_spawnp(&fPid, helperPath, &fa, 0, (char* const*)argv, environ);
+    const int status = posix_spawnp(&fPid, helperPath, &fa, 0, (char* const*)argv, environ);
 
     if (status != 0) {
         HIPHOP_LOG_STDERR_ERRNO("Could not spawn helper child process");
@@ -156,7 +156,7 @@ ChildProcessWebView::~ChildProcessWebView()
 void ChildProcessWebView::realize()
 {
     ::Window parent = (::Window)getParent();
-    unsigned long color = getBackgroundColor() >> 8;
+    const unsigned long color = getBackgroundColor() >> 8;
 
     // The only reliable way to keep background color while window manager open
     // and close animations are performed is to paint the provided window. This
@@ -210,7 +210,7 @@ void ChildProcessWebView::onSize(uint width, uint height)
 
 void ChildProcessWebView::onKeyboardFocus(bool focus)
 {
-    char val = focus ? 1 : 0;
+    const char val = focus ? 1 : 0;
     fIpc->write(OP_SET_KEYBOARD_FOCUS, &val, sizeof(val));
 }
 

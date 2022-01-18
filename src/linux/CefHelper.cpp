@@ -57,8 +57,8 @@ int main(int argc, char* argv[])
 CefHelper::CefHelper()
     : fScaleFactor(1.f)
     , fRunMainLoop(false)
-    , fIpc(0)
-    , fDisplay(0)
+    , fIpc(nullptr)
+    , fDisplay(nullptr)
     , fContainer(0)
 {
     fInjectedScripts = CefListValue::Create();
@@ -66,7 +66,7 @@ CefHelper::CefHelper()
 
 CefHelper::~CefHelper()
 {
-    if (fIpc != 0) {
+    if (fIpc != nullptr) {
         delete fIpc;
     }
 
@@ -74,7 +74,7 @@ CefHelper::~CefHelper()
         XDestroyWindow(fDisplay, fContainer);
     }
 
-    if (fDisplay != 0) {
+    if (fDisplay != nullptr) {
         XCloseDisplay(fDisplay);
     }
 }
@@ -87,8 +87,8 @@ int CefHelper::run(const CefMainArgs& args)
         return -1;
     }
 
-    int fdr = std::atoi(args.argv[1]);
-    int fdw = std::atoi(args.argv[2]);
+    const int fdr = std::atoi(args.argv[1]);
+    const int fdw = std::atoi(args.argv[2]);
 
     if ((fdr == 0) || (fdw == 0)) {
         HIPHOP_LOG_STDERR("Invalid file descriptor");
@@ -149,7 +149,7 @@ void CefHelper::runMainLoop()
         CefDoMessageLoopWork();
 
         // Use a non-zero timeout for throotling down CefDoMessageLoopWork()
-        rc = fIpc->read(&packet, 5/* ms */);
+        rc = fIpc->read(&packet, 5/*ms*/);
 
         if (rc == 0) {
             dispatch(packet);
@@ -195,7 +195,7 @@ bool CefHelper::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                          CefRefPtr<CefProcessMessage> message)
 {
     if ((sourceProcess == PID_RENDERER) && (message->GetName() == "ScriptMessage")) {
-        CefRefPtr<CefBinaryValue> val = message->GetArgumentList()->GetBinary(0);
+        const CefRefPtr<CefBinaryValue> val = message->GetArgumentList()->GetBinary(0);
         char payload[val->GetSize()];
         val->GetData(payload, sizeof(payload), 0);
         fIpc->write(OP_HANDLE_SCRIPT_MESSAGE, payload, sizeof(payload));
@@ -215,7 +215,7 @@ void CefHelper::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> f
                             TransitionType transitionType)
 {
     // Chromium weird scaling https://magpcss.org/ceforum/viewtopic.php?t=11491
-    float zoomLevel = std::log(fScaleFactor) / std::log(1.2f);
+    const float zoomLevel = std::log(fScaleFactor) / std::log(1.2f);
     browser->GetHost()->SetZoomLevel(zoomLevel);
 }
 
@@ -281,7 +281,7 @@ void CefHelper::navigate(const char* url)
 
 void CefHelper::runScript(const char* js)
 {
-    CefRefPtr<CefFrame> frame = fBrowser->GetMainFrame();
+    const CefRefPtr<CefFrame> frame = fBrowser->GetMainFrame();
     frame->ExecuteJavaScript(js, frame->GetURL(), 0);
 }
 
@@ -292,10 +292,10 @@ void CefHelper::injectScript(const char* js)
 
 void CefHelper::setSize(const msg_win_size_t* size)
 {
-    unsigned width = size->width;
-    unsigned height = size->height;
+    const unsigned width = size->width;
+    const unsigned height = size->height;
 
-    if (fBrowser != 0) {
+    if (fBrowser != nullptr) {
         ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
         XResizeWindow(fDisplay, w, width, height);
     }
@@ -308,7 +308,7 @@ void CefHelper::setSize(const msg_win_size_t* size)
 
 void CefHelper::setKeyboardFocus(bool keyboardFocus)
 {
-    if (fBrowser == 0) {
+    if (fBrowser == nullptr) {
         return;
     }
     
