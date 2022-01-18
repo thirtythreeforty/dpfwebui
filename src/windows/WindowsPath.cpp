@@ -51,7 +51,7 @@ String path::getCachesPath()
 {
     // Get path inside user files folder: C:\Users\< USERNAME >\AppData\Local\PluginName\cache
     char dataPath[MAX_PATH];
-    HRESULT result = SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_DEFAULT, dataPath);
+    const HRESULT result = SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_DEFAULT, dataPath);
     
     if (FAILED(result)) {
         HIPHOP_LOG_STDERR_INT("Could not determine user app data folder", result);

@@ -50,9 +50,9 @@ USE_NAMESPACE_DISTRHO
 EdgeWebView::EdgeWebView()
     : fHelperHwnd(0)
     , fKeyboardHook(0)
-    , fHandler(0)
-    , fController(0)
-    , fView(0)
+    , fHandler(nullptr)
+    , fController(nullptr)
+    , fView(nullptr)
 {
     ZeroMemory(&fHelperClass, sizeof(fHelperClass));
     
@@ -118,7 +118,7 @@ EdgeWebView::EdgeWebView()
 
 EdgeWebView::~EdgeWebView()
 {
-    if (fHandler != 0) {
+    if (fHandler != nullptr) {
         fHandler->release();
     }
 
@@ -126,7 +126,7 @@ EdgeWebView::~EdgeWebView()
         UnhookWindowsHookEx(fKeyboardHook);
     }
 
-    if (fController != 0) {
+    if (fController != nullptr) {
         ICoreWebView2Controller2_Close(fController);
         ICoreWebView2Controller2_Release(fController);
     }
@@ -135,7 +135,7 @@ EdgeWebView::~EdgeWebView()
         DestroyWindow(fHelperHwnd);
     }
 
-    if (fHelperClass.lpszClassName != 0) {
+    if (fHelperClass.lpszClassName != nullptr) {
         UnregisterClass(fHelperClass.lpszClassName, 0);
         free((void*)fHelperClass.lpszClassName);
     }
@@ -143,13 +143,13 @@ EdgeWebView::~EdgeWebView()
 
 void EdgeWebView::realize()
 {
-    SetParent(fHelperHwnd, (HWND)getParent());
+    SetParent(fHelperHwnd, reinterpret_cast<HWND>(getParent()));
     RedrawWindow(fHelperHwnd, 0, 0, RDW_ERASE);
 }
 
 void EdgeWebView::navigate(String& url)
 {
-    if (fView == 0) {
+    if (fView == nullptr) {
         fUrl = url;
     } else {
         ICoreWebView2_Navigate(fView, TO_LPCWSTR(url));
@@ -158,16 +158,16 @@ void EdgeWebView::navigate(String& url)
 
 void EdgeWebView::runScript(String& source)
 {
-    // For the plugin specific use case fView==0 means a programming error.
+    // For the plugin specific use case fView==nullptr means a programming error.
     // There is no point in queuing these, just wait for the view to load its
     // contents before trying to run scripts. Otherwise use injectScript().
-    assert(fView != 0);
+    assert(fView != nullptr);
     ICoreWebView2_ExecuteScript(fView, TO_LPCWSTR(source), 0);
 }
 
 void EdgeWebView::injectScript(String& source)
 {
-    if (fController == 0) {
+    if (fController == nullptr) {
         fInjectedScripts.push_back(source);
     } else {
         ICoreWebView2_AddScriptToExecuteOnDocumentCreated(fView, TO_LPCWSTR(source), 0);
@@ -178,7 +178,7 @@ void EdgeWebView::onSize(uint width, uint height)
 {
     SetWindowPos(fHelperHwnd, 0, 0, 0, width, height, SWP_NOOWNERZORDER | SWP_NOMOVE);
 
-    if (fController != 0) {
+    if (fController != nullptr) {
         RECT bounds;
         bounds.left = 0;
         bounds.top = 0;
@@ -214,8 +214,8 @@ HRESULT EdgeWebView::handleWebView2ControllerCompleted(HRESULT result,
 
     ICoreWebView2Controller2_AddRef(fController);
     ICoreWebView2Controller2_get_CoreWebView2(fController, &fView);
-    ICoreWebView2_add_NavigationCompleted(fView, fHandler, 0);
-    ICoreWebView2_add_WebMessageReceived(fView, fHandler, 0);
+    ICoreWebView2_add_NavigationCompleted(fView, fHandler, nullptr);
+    ICoreWebView2_add_WebMessageReceived(fView, fHandler, nullptr);
 
     // Run pending requests
 
@@ -223,7 +223,7 @@ HRESULT EdgeWebView::handleWebView2ControllerCompleted(HRESULT result,
 
     // Edge WebView2 currently only supports alpha=0 or alpha=1
 
-    uint32_t rgba = getBackgroundColor();
+    const uint32_t rgba = getBackgroundColor();
     COREWEBVIEW2_COLOR color;
     
     color.A = static_cast<BYTE>(rgba & 0x000000ff);
@@ -270,11 +270,11 @@ HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
     JsValueVector args;
     
     if (cJSON_IsArray(jArgs)) {
-        int numArgs = cJSON_GetArraySize(jArgs);
+        const int numArgs = cJSON_GetArraySize(jArgs);
 
         if (numArgs > 0) {
             for (int i = 0; i < numArgs; i++) {
-                cJSON* jArg = cJSON_GetArrayItem(jArgs, i);
+                const cJSON* jArg = cJSON_GetArrayItem(jArgs, i);
 
                 if (cJSON_IsFalse(jArg)) {
                     args.push_back(JsValue(false));
@@ -315,7 +315,8 @@ void EdgeWebView::webViewLoaderErrorMessageBox(HRESULT result)
 
     std::wstring ws = wss.str();
 
-    int id = MessageBox(0, ws.c_str(), TEXT(DISTRHO_PLUGIN_NAME), MB_OKCANCEL | MB_ICONEXCLAMATION);
+    const int id = MessageBox(0, ws.c_str(), TEXT(DISTRHO_PLUGIN_NAME),
+        MB_OKCANCEL | MB_ICONEXCLAMATION);
 
     if (id == IDOK) {
         ShellExecute(0, L"open", L"" WEBVIEW2_DOWNLOAD_URL, 0, 0, SW_SHOWNORMAL);
@@ -326,13 +327,13 @@ LRESULT CALLBACK HelperWindowProc(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lP
 {
     if (umsg == WM_ERASEBKGND) {
         EdgeWebView* view = reinterpret_cast<EdgeWebView *>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-        uint32_t rgba = view->getBackgroundColor();
+        const uint32_t rgba = view->getBackgroundColor();
 
         if (rgba != COLOR_TRANSPARENT) {
             RECT rc;
             GetClientRect(hwnd, &rc);
-            COLORREF bgr = ((rgba & 0xff000000) >> 24) | ((rgba & 0x00ff0000) >> 8)
-                            | ((rgba & 0x0000ff00) << 8);
+            const COLORREF bgr = ((rgba & 0xff000000) >> 24) | ((rgba & 0x00ff0000) >> 8)
+                                | ((rgba & 0x0000ff00) << 8);
             SetBkColor((HDC)wParam, bgr);
             ExtTextOut((HDC)wParam, 0, 0, ETO_OPAQUE, &rc, 0, 0, 0);
         }
@@ -369,7 +370,7 @@ LRESULT CALLBACK KeyboardFilterProc(int nCode, WPARAM wParam, LPARAM lParam)
         if (helperHwnd != 0) {
             EdgeWebView* view = reinterpret_cast<EdgeWebView *>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
             KBDLLHOOKSTRUCT* lpData = reinterpret_cast<KBDLLHOOKSTRUCT *>(lParam);
-            bool focus = view->getKeyboardFocus();
+            const bool focus = view->getKeyboardFocus();
 
             if (view->lowLevelKeyboardHookCallback) {
                 view->lowLevelKeyboardHookCallback((UINT)wParam, lpData, focus);

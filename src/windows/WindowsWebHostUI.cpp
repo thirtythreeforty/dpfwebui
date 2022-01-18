@@ -30,7 +30,7 @@ float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
 
     const HMODULE shcore = LoadLibrary("Shcore.dll");
 
-    if (shcore == 0) {
+    if (shcore == nullptr) {
         return k;
     }
 
@@ -51,12 +51,12 @@ float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
 
     PROCESS_DPI_AWARENESS dpiAware;
 
-    if ((GetProcessDpiAwareness != 0) && (GetScaleFactorForMonitor != 0)
+    if ((GetProcessDpiAwareness != nullptr) && (GetScaleFactorForMonitor != nullptr)
             && (SUCCEEDED(GetProcessDpiAwareness(0, &dpiAware)))
             && (dpiAware != PROCESS_DPI_UNAWARE)) {
 
         // https://devblogs.microsoft.com/oldnewthing/20070809-00/?p=25643
-        const HMONITOR hMon = ui != 0 ?
+        const HMONITOR hMon = ui != nullptr ?
               MonitorFromWindow((HWND)ui->getPlatformWindow(), MONITOR_DEFAULTTOPRIMARY)
             : MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
 

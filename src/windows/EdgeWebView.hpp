@@ -121,7 +121,7 @@ public:
     void release()
     {
         fOwnerWeakRef = nullptr;
-        if (decRefCount() == nullptr) {
+        if (decRefCount() == 0) {
             delete this;
         }
     }
