@@ -48,16 +48,15 @@ LRESULT CALLBACK KeyboardFilterProc(int nCode, WPARAM wParam, LPARAM lParam);
 USE_NAMESPACE_DISTRHO
 
 EdgeWebView::EdgeWebView()
-    : fHelperHwnd(0)
+    : fHelperClassName(nullptr)
+    , fHelperHwnd(0)
     , fKeyboardHook(0)
     , fHandler(nullptr)
     , fController(nullptr)
     , fView(nullptr)
 {
-    ZeroMemory(&fHelperClass, sizeof(fHelperClass));
-    
     SetDllDirectory(TO_LPCWSTR(path::getLibraryPath()));
-    HMODULE hm = LoadLibrary(L"WebView2Loader.dll");
+    const HMODULE hm = LoadLibrary(L"WebView2Loader.dll");
 
     if (hm == 0) {
         errorMessageBox(L"Could not load WebView2Loader.dll");
@@ -66,15 +65,19 @@ EdgeWebView::EdgeWebView()
 
     setBackgroundColor(COLOR_TRANSPARENT);
 
-    WCHAR className[256];
-    swprintf(className, sizeof(className), L"EdgeWebView_%s_%d", XSTR(HIPHOP_PROJECT_ID_HASH), std::rand());
-    fHelperClass.cbSize = sizeof(WNDCLASSEX);
-    fHelperClass.cbWndExtra = 2 * sizeof(LONG_PTR);
-    fHelperClass.lpszClassName = wcsdup(className);
-    fHelperClass.lpfnWndProc = HelperWindowProc;
-    RegisterClassEx(&fHelperClass);
+    constexpr size_t maxClassName = 256;
+    fHelperClassName = new WCHAR[maxClassName];
+    swprintf(fHelperClassName, maxClassName, L"EdgeWebView_%s_%d", XSTR(HIPHOP_PROJECT_ID_HASH),
+        std::rand());
+    WNDCLASSEX helperClass;
+    ZeroMemory(&helperClass, sizeof(helperClass));
+    helperClass.cbSize = sizeof(helperClass);
+    helperClass.cbWndExtra = 2 * sizeof(LONG_PTR);
+    helperClass.lpszClassName = fHelperClassName;
+    helperClass.lpfnWndProc = HelperWindowProc;
+    RegisterClassEx(&helperClass);
 
-    fHelperHwnd = CreateWindowEx(0, fHelperClass.lpszClassName, L"EdgeWebView Helper",
+    fHelperHwnd = CreateWindowEx(0, helperClass.lpszClassName, L"EdgeWebView Helper",
                                     WS_CHILD, 0, 0, 0, 0, HWND_MESSAGE, 0, 0, 0);
     SetWindowLongPtr(fHelperHwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
     ShowWindow(fHelperHwnd, SW_SHOW);
@@ -107,7 +110,8 @@ EdgeWebView::EdgeWebView()
 #  pragma GCC diagnostic pop
 # endif
 
-    HRESULT result = pfnCreateCoreWebView2EnvironmentWithOptions(0, TO_LPCWSTR(path::getCachesPath()), 0, fHandler);
+    const HRESULT result = pfnCreateCoreWebView2EnvironmentWithOptions(0, TO_LPCWSTR(path::getCachesPath()),
+        0, fHandler);
 
     if (FAILED(result)) {
         webViewLoaderErrorMessageBox(result);
@@ -135,9 +139,9 @@ EdgeWebView::~EdgeWebView()
         DestroyWindow(fHelperHwnd);
     }
 
-    if (fHelperClass.lpszClassName != nullptr) {
-        UnregisterClass(fHelperClass.lpszClassName, 0);
-        free((void*)fHelperClass.lpszClassName);
+    if (fHelperClassName != nullptr) {
+        UnregisterClass(fHelperClassName, 0);
+        delete[] fHelperClassName;
     }
 }
 
