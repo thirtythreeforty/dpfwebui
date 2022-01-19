@@ -155,7 +155,7 @@ ChildProcessWebView::~ChildProcessWebView()
 
 void ChildProcessWebView::realize()
 {
-    ::Window parent = (::Window)getParent();
+    const ::Window parent = (::Window)getParent();
     const unsigned long color = getBackgroundColor() >> 8;
 
     // The only reliable way to keep background color while window manager open
@@ -197,7 +197,7 @@ void ChildProcessWebView::injectScript(String& source)
 
 void ChildProcessWebView::onSize(uint width, uint height)
 {
-    msg_win_size_t sizePkt = { width, height };
+    const msg_win_size_t sizePkt = { width, height };
     fIpc->write(OP_SET_SIZE, &sizePkt, sizeof(sizePkt));
 
     if (fBackground == 0) {

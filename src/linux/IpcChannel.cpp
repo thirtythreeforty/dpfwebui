@@ -34,7 +34,7 @@ IpcChannel::IpcChannel(int fdr, int fdw)
 
 IpcChannel::~IpcChannel()
 {
-    if (fIpc != 0) {
+    if (fIpc != nullptr) {
         ipc_destroy(fIpc);
     }
 }
@@ -56,16 +56,16 @@ int IpcChannel::read(tlv_t* packet, int timeoutMs) const
     }
 
     fd_set rfds;
-    struct timeval tv;  
-    int fd, rc;
-
-    fd = getFdRead();
     FD_ZERO(&rfds);
+
+    const int fd = getFdRead();
     FD_SET(fd, &rfds);
+
+    struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 1000L * timeoutMs;
 
-    rc = select(fd + 1, &rfds, 0, 0, &tv);
+    const int rc = select(fd + 1, &rfds, 0, 0, &tv);
 
     if (rc == -1) {
         HIPHOP_LOG_STDERR_ERRNO("Failed select() on IPC channel");
@@ -112,7 +112,7 @@ int IpcChannel::write(msg_opcode_t opcode, const void* payload, int payloadSize)
     packet.l = payloadSize;
     packet.v = payload;
 
-    int rc = ipc_write(fIpc, &packet);
+    const int rc = ipc_write(fIpc, &packet);
 
     if (rc == -1) {
         HIPHOP_LOG_STDERR_ERRNO("Could not write to IPC channel");

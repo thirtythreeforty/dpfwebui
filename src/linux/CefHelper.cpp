@@ -257,7 +257,7 @@ void CefHelper::realize(const msg_win_cfg_t* config)
         nullptr, nullptr);
 
     // Reduce artifacts when resizing
-    ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
+    const ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
     XSetWindowBackground(fDisplay, w, config->color);
 }
 
@@ -315,7 +315,7 @@ void CefHelper::setKeyboardFocus(bool keyboardFocus)
     if (keyboardFocus) {
         // CEFKBDFOCUSBUG - This works but generates Xlib errors
         // type 0, error_code 129, request_code 131, minor_code 51 (and 52)
-        ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
+        const ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
         XSetInputFocus(fDisplay, w, RevertToNone, CurrentTime);
         XIEventMask evmask;
         evmask.deviceid = XIAllMasterDevices;
