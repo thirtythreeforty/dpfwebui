@@ -40,19 +40,19 @@
 #define CSS_DISABLE_OVERFLOW     "body { overflow: hidden; }"
 
 /**
-   Keep this class generic; specific plugin features belong to WebHostUI.
+ * Keep this class generic; specific plugin features belong to AbstractWebHostUI.
  */
 
 USE_NAMESPACE_DISTRHO
 
 AbstractWebView::AbstractWebView()
-        : fWidth(0)
-        , fHeight(0)
-        , fBackgroundColor(0)
-        , fParent(0)
-        , fKeyboardFocus(false)
-        , fPrintTraffic(false)
-        , fHandler(nullptr)
+    : fWidth(0)
+    , fHeight(0)
+    , fBackgroundColor(0)
+    , fParent(0)
+    , fKeyboardFocus(false)
+    , fPrintTraffic(false)
+    , fHandler(nullptr)
 {}
 
 uint AbstractWebView::getWidth()
@@ -132,8 +132,7 @@ void AbstractWebView::injectDefaultScripts()
     String js = String(JS_DISABLE_CONTEXT_MENU)
               + String(JS_DISABLE_PRINT)
               + String(JS_CREATE_CONSOLE)
-              + String(JS_CREATE_HOST_OBJECT)
-    ;
+              + String(JS_CREATE_HOST_OBJECT);
     injectScript(js);
 }
 
@@ -142,8 +141,7 @@ void AbstractWebView::handleLoadFinished()
     String css = String(CSS_DISABLE_IMAGE_DRAG)
                + String(CSS_DISABLE_SELECTION)
                + String(CSS_DISABLE_PINCH_ZOOM)
-               + String(CSS_DISABLE_OVERFLOW)
-    ;
+               + String(CSS_DISABLE_OVERFLOW);
     addStylesheet(css);
 
     if (fHandler != nullptr) {

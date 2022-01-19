@@ -53,7 +53,7 @@ void WasmEngine::load(const char* modulePath)
     }
 
     fseek(file, 0L, SEEK_END);
-    size_t fileSize = ftell(file);
+    const size_t fileSize = ftell(file);
     fseek(file, 0L, SEEK_SET);
 
     wasm_byte_vec_t fileBytes;
@@ -414,8 +414,8 @@ WasmValueVector WasmEngine::nonWasiAssemblyScriptAbort(WasmValueVector params)
 {
     const char *msg = WTF16ToCString(params[0]);
     const char *filename = WTF16ToCString(params[1]);
-    int32_t lineNumber = params[2].of.i32;
-    int32_t columnNumber = params[3].of.i32;
+    const int32_t lineNumber = params[2].of.i32;
+    const int32_t columnNumber = params[3].of.i32;
 
     // Copy format from WASI abort()
     std::cerr << "abort: " << msg << " in " << filename << "(" << lineNumber
