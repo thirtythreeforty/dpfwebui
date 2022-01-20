@@ -21,7 +21,6 @@
 #include <iostream>
 
 #include "Path.hpp"
-#include "macro.h"
 
 USE_NAMESPACE_DISTRHO
 
@@ -313,7 +312,7 @@ void AbstractWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
     String key = args[1].getString();
 
     if (fHandler.find(key.buffer()) == fHandler.end()) {
-        DBG_COLOR("Unknown WebHostUI method");
+        d_stderr2("Unknown WebHostUI method");
         return;
     }
 
@@ -322,7 +321,7 @@ void AbstractWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
     ArgumentCountAndMessageHandler handler = fHandler[key.buffer()];
 
     if (handler.first != static_cast<int>(handlerArgs.size())) {
-        DBG_COLOR("Incorrect WebHostUI method argument count");
+        d_stderr2("Incorrect WebHostUI method argument count");
         return;
     }
 

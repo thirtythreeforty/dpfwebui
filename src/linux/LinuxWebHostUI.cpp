@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 
 #include "LinuxWebHostUI.hpp"
-#include "macro.h"
 
 USE_NAMESPACE_DISTRHO
 
@@ -73,7 +73,7 @@ void LinuxWebHostUI::openSystemWebBrowser(String& url)
     snprintf(buf, sizeof(buf), "xdg-open %s", url.buffer());
 
     if (system(buf) != 0) {
-        DBG_ERRNO("Could not open system web browser");
+        d_stderr("Could not open system web browser - %s", strerror(errno));
     }
 }
 

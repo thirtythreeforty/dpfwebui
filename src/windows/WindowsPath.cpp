@@ -54,7 +54,7 @@ String path::getCachesPath()
     const HRESULT result = SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_DEFAULT, dataPath);
     
     if (FAILED(result)) {
-        DBG_INT("Could not determine user app data folder", result);
+        d_stderr("Could not determine user app data folder - %x", result);
         return String();
     }
 
@@ -66,7 +66,7 @@ String path::getCachesPath()
     char exePath[MAX_PATH];
     
     if (GetModuleFileName(0, exePath, sizeof(exePath)) == 0) {
-        DBG_INT("Could not determine host executable path", GetLastError());
+        d_stderr("Could not determine host executable path - %x", GetLastError());
         return String();
     }
 

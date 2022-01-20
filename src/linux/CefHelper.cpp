@@ -25,7 +25,6 @@
 #include <X11/extensions/XInput2.h>
 
 #include "Path.hpp"
-#include "macro.h"
 
 #define JS_POST_MESSAGE_SHIM "window.webviewHost.postMessage = (args) => window.hostPostMessage(args);"
 
@@ -83,7 +82,7 @@ int CefHelper::run(const CefMainArgs& args)
 {
     // Parse command line arguments and create IPC channel
     if (args.argc < 3) {
-        DBG("Invalid argument count");
+        d_stderr("Invalid argument count");
         return -1;
     }
 
@@ -91,7 +90,7 @@ int CefHelper::run(const CefMainArgs& args)
     const int fdw = std::atoi(args.argv[2]);
 
     if ((fdr == 0) || (fdw == 0)) {
-        DBG("Invalid file descriptor");
+        d_stderr("Invalid file descriptor");
         return -1;
     }
 
@@ -105,7 +104,7 @@ int CefHelper::run(const CefMainArgs& args)
     fDisplay = XOpenDisplay(NULL);
 
     if (fDisplay == 0) {
-        DBG("Cannot open display");
+        d_stderr("Cannot open display");
         return -1;
     }
 
@@ -394,7 +393,7 @@ bool CefSubprocess::Execute(const CefString& name, CefRefPtr<CefV8Value> object,
                                   CefRefPtr<CefV8Value>& retval, CefString& exception)
 {
     if ((name != "hostPostMessage") || (arguments.size() != 1) || (!arguments[0]->IsArray())) {
-        DBG_COLOR("Invalid call to host");
+        d_stderr2("Invalid call to host");
         return false;
     }
 
@@ -455,7 +454,7 @@ static int XErrorHandlerImpl(Display* display, XErrorEvent* event)
        << "request_code " << static_cast<int>(event->request_code) << ", "
        << "minor_code " << static_cast<int>(event->minor_code);
 
-    DBG_COLOR(ss.str().c_str());
+    d_stderr2(ss.str().c_str());
     
     return 0;
 }

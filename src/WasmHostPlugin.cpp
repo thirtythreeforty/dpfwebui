@@ -21,7 +21,6 @@
 #include "WasmHostPlugin.hpp"
 
 #include "Path.hpp"
-#include "macro.h"
 
 #define ERROR_STR "Error"
 
@@ -59,7 +58,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
         fEngine->setGlobal("_rw_num_inputs", MakeI32(DISTRHO_PLUGIN_NUM_INPUTS));
         fEngine->setGlobal("_rw_num_outputs", MakeI32(DISTRHO_PLUGIN_NUM_OUTPUTS));
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 
@@ -69,7 +68,7 @@ const char* WasmHostPlugin::getLabel() const
         throwIfEngineStopped();
         return fEngine->callFunctionReturnCString("_get_label");
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 
     return ERROR_STR;
@@ -81,7 +80,7 @@ const char* WasmHostPlugin::getMaker() const
         throwIfEngineStopped();
         return fEngine->callFunctionReturnCString("_get_maker");
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 
     return ERROR_STR;
@@ -93,7 +92,7 @@ const char* WasmHostPlugin::getLicense() const
         throwIfEngineStopped();
         return fEngine->callFunctionReturnCString("_get_license");
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 
     return ERROR_STR;
@@ -105,7 +104,7 @@ uint32_t WasmHostPlugin::getVersion() const
         throwIfEngineStopped();
         return fEngine->callFunctionReturnSingleValue("_get_version").of.i32;
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 
     return 0;
@@ -117,7 +116,7 @@ int64_t WasmHostPlugin::getUniqueId() const
         throwIfEngineStopped();
         return fEngine->callFunctionReturnSingleValue("_get_unique_id").of.i64;
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 
     return 0;
@@ -134,7 +133,7 @@ void WasmHostPlugin::initParameter(uint32_t index, Parameter& parameter)
         parameter.ranges.min = fEngine->getGlobal("_rw_float32_2").of.f32;
         parameter.ranges.max = fEngine->getGlobal("_rw_float32_3").of.f32;
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 
@@ -145,7 +144,7 @@ float WasmHostPlugin::getParameterValue(uint32_t index) const
         return fEngine->callFunctionReturnSingleValue("_get_parameter_value",
             { MakeI32(index) }).of.f32;
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 
     return 0;
@@ -157,7 +156,7 @@ void WasmHostPlugin::setParameterValue(uint32_t index, float value)
         throwIfEngineStopped();
         fEngine->callFunction("_set_parameter_value", { MakeI32(index), MakeF32(value) });
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 
@@ -168,7 +167,7 @@ void WasmHostPlugin::initProgramName(uint32_t index, String& programName)
         throwIfEngineStopped();
         programName = fEngine->callFunctionReturnCString("_init_program_name", { MakeI32(index) });
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 
@@ -178,7 +177,7 @@ void WasmHostPlugin::loadProgram(uint32_t index)
         throwIfEngineStopped();
         fEngine->callFunction("_load_program", { MakeI32(index) });
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 #endif // DISTRHO_PLUGIN_WANT_PROGRAMS
@@ -192,7 +191,7 @@ void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& default
         stateKey = fEngine->getGlobalAsCString("_ro_string_1");
         defaultStateValue = fEngine->getGlobalAsCString("_ro_string_2");
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 
@@ -206,7 +205,7 @@ void WasmHostPlugin::setState(const char* key, const char* value)
         fEngine->copyCStringToMemory(wval, value);
         fEngine->callFunction("_set_state", { wkey, wval });
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 
@@ -220,7 +219,7 @@ String WasmHostPlugin::getState(const char* key) const
         const char* val = fEngine->callFunctionReturnCString("_get_state", { wkey });
         return String(val);
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 
     return String();
@@ -235,7 +234,7 @@ void WasmHostPlugin::activate()
         throwIfEngineStopped();
         fEngine->callFunction("_activate");
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 
@@ -245,7 +244,7 @@ void WasmHostPlugin::deactivate()
         throwIfEngineStopped();
         fEngine->callFunction("_deactivate");
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 
@@ -295,7 +294,7 @@ void WasmHostPlugin::deactivate()
             memcpy(outputs[i], audioBlock + i * frames, frames * 4);
         }
     } catch (const std::exception& ex) {
-        DBG_COLOR(ex.what());
+        d_stderr2(ex.what());
     }
 }
 

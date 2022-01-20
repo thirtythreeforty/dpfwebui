@@ -22,7 +22,10 @@
 
 #include "CocoaWebView.hpp"
 
-#include "macro.h"
+#define UNPACK_RGBA_NORMALIZED(c,t)  ( c >> 24)               / (t)(255), \
+                                     ((c & 0x00ff0000) >> 16) / (t)(255), \
+                                     ((c & 0x0000ff00) >> 8 ) / (t)(255), \
+                                     ( c & 0x000000ff)        / (t)(255)
 
 // Avoid symbol name collisions
 #define OBJC_INTERFACE_NAME_HELPER_1(INAME, SEP, SUFFIX) INAME ## SEP ## SUFFIX

@@ -18,9 +18,8 @@
 
 #include "IpcChannel.hpp"
 
+#include <errno.h>
 #include <sys/select.h>
-
-#include "macro.h"
 
 USE_NAMESPACE_DISTRHO
 
@@ -68,7 +67,7 @@ int IpcChannel::read(tlv_t* packet, int timeoutMs) const
     const int rc = select(fd + 1, &rfds, 0, 0, &tv);
 
     if (rc == -1) {
-        DBG_ERRNO("Failed select() on IPC channel");
+        d_stderr("Failed select() on IPC channel - %s", strerror(errno));
         return -1;
     }
 
@@ -86,7 +85,7 @@ int IpcChannel::read(tlv_t* packet, int timeoutMs) const
 int IpcChannel::waitAndRead(tlv_t* packet) const
 {
     if (ipc_read(fIpc, packet) == -1) {
-        DBG_ERRNO("Could not read from IPC channel");
+        d_stderr("Could not read from IPC channel - %s", strerror(errno));
         return -1;
     }
 
@@ -115,7 +114,7 @@ int IpcChannel::write(msg_opcode_t opcode, const void* payload, int payloadSize)
     const int rc = ipc_write(fIpc, &packet);
 
     if (rc == -1) {
-        DBG_ERRNO("Could not write to IPC channel");
+        d_stderr("Could not write to IPC channel - %s", strerror(errno));
     }
 
     return rc;

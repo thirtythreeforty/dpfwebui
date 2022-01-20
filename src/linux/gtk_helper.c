@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <gdk/gdkx.h>
@@ -26,7 +28,6 @@
 
 #include "ipc.h"
 #include "ipc_message.h"
-#include "macro.h"
 
 // WKGTKRESIZEBUG : webview created with a fixed maximum size, see comprehensive
 // explanation in realize(). Plugins that do not change their UI size during
@@ -81,12 +82,12 @@ int main(int argc, char* argv[])
     memset(&ctx, 0, sizeof(ctx));
 
     if (argc < 3) {
-        DBG("Invalid argument count");
+        fprintf(stderr, "Invalid argument count");
         return -1;
     }
 
     if ((sscanf(argv[1], "%d", &conf.fd_r) == 0) || (sscanf(argv[2], "%d", &conf.fd_w) == 0)) {
-        DBG("Invalid file descriptor");
+        fprintf(stderr, "Invalid file descriptor");
         return -1;
     }
 
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
     ctx.display = XOpenDisplay(NULL);
 
     if (ctx.display == NULL) {
-        DBG("Cannot open display");
+        fprintf(stderr, "Cannot open display");
         return -1;
     }
 
@@ -402,7 +403,7 @@ static gboolean ipc_read_cb(GIOChannel *source, GIOCondition condition, gpointer
     }
 
     if (ipc_read(ctx->ipc, &packet) == -1) {
-        DBG_ERRNO("Could not read from IPC channel");
+        fprintf(stderr, "Could not read from IPC channel - %s", strerror(errno));
         return TRUE;
     }
 
@@ -448,7 +449,7 @@ static int ipc_write_simple(const context_t *ctx, msg_opcode_t opcode, const voi
     packet.v = payload;
 
     if ((retval = ipc_write(ctx->ipc, &packet)) == -1) {
-        DBG_ERRNO("Could not write to IPC channel");
+        fprintf(stderr, "Could not write to IPC channel - %s", strerror(errno));
     }
 
     return retval;

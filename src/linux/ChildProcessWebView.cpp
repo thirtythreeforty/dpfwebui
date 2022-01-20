@@ -19,6 +19,7 @@
 #include "ChildProcessWebView.hpp"
 
 #include <cstdio>
+#include <errno.h>
 #include <libgen.h>
 #include <signal.h>
 #include <spawn.h>
@@ -62,7 +63,7 @@ ChildProcessWebView::ChildProcessWebView()
     fPipeFd[0][1] = -1;
 
     if (pipe(fPipeFd[0]) == -1) {
-        DBG_ERRNO("Could not create host->helper pipe");
+        d_stderr("Could not create host->helper pipe - %s", strerror(errno));
         return;
     }
 
@@ -70,7 +71,7 @@ ChildProcessWebView::ChildProcessWebView()
     fPipeFd[1][1] = -1;
 
     if (pipe(fPipeFd[1]) == -1) {
-        DBG_ERRNO("Could not create helper->host pipe");
+        d_stderr("Could not create helper->host pipe - %s", strerror(errno));
         return;
     }
 
@@ -95,7 +96,7 @@ ChildProcessWebView::ChildProcessWebView()
     const int status = posix_spawnp(&fPid, helperPath, &fa, 0, (char* const*)argv, environ);
 
     if (status != 0) {
-        DBG_ERRNO("Could not spawn helper child process");
+        d_stderr("Could not spawn helper child process - %s", strerror(errno));
         return;
     }
 
@@ -105,7 +106,7 @@ ChildProcessWebView::ChildProcessWebView()
     }
 
     if (!fChildInit) {
-        DBG_COLOR("Timeout waiting for UI helper init")
+        d_stderr("Timeout waiting for UI helper init - %s", strerror(errno));
     }
 
     injectDefaultScripts(); // non-virtual, safe to call
@@ -139,7 +140,7 @@ ChildProcessWebView::~ChildProcessWebView()
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
             if ((fPipeFd[i][j] != -1) && (close(fPipeFd[i][j]) == -1)) {
-                DBG_ERRNO("Could not close pipe");
+                d_stderr("Could not close pipe - %s", strerror(errno));
             }
 
             fPipeFd[i][j] = -1;
