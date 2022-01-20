@@ -35,7 +35,7 @@ float getDisplayScaleFactor(AbstractWebHostUI* ui);
 class AbstractWebHostUI : public UI, private WebViewEventHandler
 {
 public:
-    AbstractWebHostUI(uint baseWidth, uint baseHeight, uint32_t backgroundColor, 
+    AbstractWebHostUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
         bool startLoading = true);
     virtual ~AbstractWebHostUI();
 
@@ -97,11 +97,9 @@ private:
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
 
-    uint              fBaseWidth;
-    uint              fBaseHeight;
-    uint32_t          fBackgroundColor;
     uint              fInitialWidth;
     uint              fInitialHeight;
+    uint32_t          fBackgroundColor;
     bool              fMessageQueueReady;
     bool              fUiBlockQueued;
     uintptr_t         fPlatformWindow;

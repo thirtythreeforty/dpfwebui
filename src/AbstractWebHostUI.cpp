@@ -25,21 +25,20 @@
 
 USE_NAMESPACE_DISTRHO
 
-// DPF implementation of VST3 on macOS needs final/already scaled dimensions to
-// be passed to the DISTRHO::UI constructor because the setSize() call in
-// setWebView() is being ignored - https://github.com/DISTRHO/DPF/issues/359 .
-// This works for most cases with caveats: #1 getDisplayScaleFactor() is called
-// twice and #2 since the window becomes available only later, it is assumed the
-// plugin UI is being opened on the main display.
+// DPF implementation of VST3 on macOS needs the DISTRHO::UI constructor to be
+// called with already scaled dimensions because the later setSize() request in
+// setWebView() is ignored; see https://github.com/DISTRHO/DPF/issues/359. Since
+// the parent native window only becomes available later on during UI lifecycle,
+// scale factor for secondary displays cannot be determined on UI construction.
+// VST3/Mac plugins on secondary displays might open with wrong dimensions.
+#define MAIN_DISPLAY_SCALE_FACTOR() getDisplayScaleFactor(0)
 
-AbstractWebHostUI::AbstractWebHostUI(uint baseWidth, uint baseHeight, 
+AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
         uint32_t backgroundColor, bool /*startLoading*/)
-    : UI(getDisplayScaleFactor(0) * baseWidth, getDisplayScaleFactor(0) * baseHeight)
-    , fBaseWidth(baseWidth)
-    , fBaseHeight(baseHeight)
+    : UI(MAIN_DISPLAY_SCALE_FACTOR() * widthCssPx, MAIN_DISPLAY_SCALE_FACTOR() * heightCssPx)
+    , fInitialWidth(widthCssPx)
+    , fInitialHeight(heightCssPx)
     , fBackgroundColor(backgroundColor)
-    , fInitialWidth(0)
-    , fInitialHeight(0)
     , fMessageQueueReady(false)
     , fUiBlockQueued(false)
     , fPlatformWindow(0)
@@ -193,18 +192,19 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
     // Cannot call virtual method createStandaloneWindow() from constructor.
     fPlatformWindow = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
 
-    // Web views adjust their contents following the system display scale factor,
-    // adjust window size so it correctly wraps content on high density displays.
+    // Convert CSS pixels to native pixels following the system display scale
+    // factor. Then adjust window size so it correctly wraps web content on
+    // high density displays, known as Retina or HiDPI.
     const float k = getDisplayScaleFactor(this);
-    fInitialWidth = k * fBaseWidth;
-    fInitialHeight = k * fBaseHeight;
+    const uint width = static_cast<uint>(k * static_cast<float>(fInitialWidth));
+    const uint height = static_cast<uint>(k * static_cast<float>(fInitialHeight));
 
     fWebView->setParent(fPlatformWindow);
     fWebView->setBackgroundColor(fBackgroundColor);
-    fWebView->setSize(fInitialWidth, fInitialHeight);
+    fWebView->setSize(width, height);
     fWebView->realize();
 
-    setSize(fInitialWidth, fInitialHeight);
+    setSize(width, height);
 }
 
 void AbstractWebHostUI::load()
