@@ -62,7 +62,7 @@ ChildProcessWebView::ChildProcessWebView()
     fPipeFd[0][1] = -1;
 
     if (pipe(fPipeFd[0]) == -1) {
-        HIPHOP_LOG_STDERR_ERRNO("Could not create host->helper pipe");
+        DBG_ERRNO("Could not create host->helper pipe");
         return;
     }
 
@@ -70,7 +70,7 @@ ChildProcessWebView::ChildProcessWebView()
     fPipeFd[1][1] = -1;
 
     if (pipe(fPipeFd[1]) == -1) {
-        HIPHOP_LOG_STDERR_ERRNO("Could not create helper->host pipe");
+        DBG_ERRNO("Could not create helper->host pipe");
         return;
     }
 
@@ -95,7 +95,7 @@ ChildProcessWebView::ChildProcessWebView()
     const int status = posix_spawnp(&fPid, helperPath, &fa, 0, (char* const*)argv, environ);
 
     if (status != 0) {
-        HIPHOP_LOG_STDERR_ERRNO("Could not spawn helper child process");
+        DBG_ERRNO("Could not spawn helper child process");
         return;
     }
 
@@ -105,7 +105,7 @@ ChildProcessWebView::ChildProcessWebView()
     }
 
     if (!fChildInit) {
-        HIPHOP_LOG_STDERR_COLOR("Timeout waiting for UI helper init")
+        DBG_COLOR("Timeout waiting for UI helper init")
     }
 
     injectDefaultScripts(); // non-virtual, safe to call
@@ -139,7 +139,7 @@ ChildProcessWebView::~ChildProcessWebView()
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
             if ((fPipeFd[i][j] != -1) && (close(fPipeFd[i][j]) == -1)) {
-                HIPHOP_LOG_STDERR_ERRNO("Could not close pipe");
+                DBG_ERRNO("Could not close pipe");
             }
 
             fPipeFd[i][j] = -1;

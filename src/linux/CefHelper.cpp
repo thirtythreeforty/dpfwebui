@@ -83,7 +83,7 @@ int CefHelper::run(const CefMainArgs& args)
 {
     // Parse command line arguments and create IPC channel
     if (args.argc < 3) {
-        HIPHOP_LOG_STDERR("Invalid argument count");
+        DBG("Invalid argument count");
         return -1;
     }
 
@@ -91,7 +91,7 @@ int CefHelper::run(const CefMainArgs& args)
     const int fdw = std::atoi(args.argv[2]);
 
     if ((fdr == 0) || (fdw == 0)) {
-        HIPHOP_LOG_STDERR("Invalid file descriptor");
+        DBG("Invalid file descriptor");
         return -1;
     }
 
@@ -105,7 +105,7 @@ int CefHelper::run(const CefMainArgs& args)
     fDisplay = XOpenDisplay(NULL);
 
     if (fDisplay == 0) {
-        HIPHOP_LOG_STDERR("Cannot open display");
+        DBG("Cannot open display");
         return -1;
     }
 
@@ -394,7 +394,7 @@ bool CefSubprocess::Execute(const CefString& name, CefRefPtr<CefV8Value> object,
                                   CefRefPtr<CefV8Value>& retval, CefString& exception)
 {
     if ((name != "hostPostMessage") || (arguments.size() != 1) || (!arguments[0]->IsArray())) {
-        HIPHOP_LOG_STDERR_COLOR("Invalid call to host");
+        DBG_COLOR("Invalid call to host");
         return false;
     }
 
@@ -455,7 +455,7 @@ static int XErrorHandlerImpl(Display* display, XErrorEvent* event)
        << "request_code " << static_cast<int>(event->request_code) << ", "
        << "minor_code " << static_cast<int>(event->minor_code);
 
-    HIPHOP_LOG_STDERR_COLOR(ss.str().c_str());
+    DBG_COLOR(ss.str().c_str());
     
     return 0;
 }

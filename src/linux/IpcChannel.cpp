@@ -68,7 +68,7 @@ int IpcChannel::read(tlv_t* packet, int timeoutMs) const
     const int rc = select(fd + 1, &rfds, 0, 0, &tv);
 
     if (rc == -1) {
-        HIPHOP_LOG_STDERR_ERRNO("Failed select() on IPC channel");
+        DBG_ERRNO("Failed select() on IPC channel");
         return -1;
     }
 
@@ -86,7 +86,7 @@ int IpcChannel::read(tlv_t* packet, int timeoutMs) const
 int IpcChannel::waitAndRead(tlv_t* packet) const
 {
     if (ipc_read(fIpc, packet) == -1) {
-        HIPHOP_LOG_STDERR_ERRNO("Could not read from IPC channel");
+        DBG_ERRNO("Could not read from IPC channel");
         return -1;
     }
 
@@ -115,7 +115,7 @@ int IpcChannel::write(msg_opcode_t opcode, const void* payload, int payloadSize)
     const int rc = ipc_write(fIpc, &packet);
 
     if (rc == -1) {
-        HIPHOP_LOG_STDERR_ERRNO("Could not write to IPC channel");
+        DBG_ERRNO("Could not write to IPC channel");
     }
 
     return rc;

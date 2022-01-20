@@ -313,7 +313,7 @@ void AbstractWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
     String key = args[1].getString();
 
     if (fHandler.find(key.buffer()) == fHandler.end()) {
-        HIPHOP_LOG_STDERR_COLOR("Unknown WebHostUI method");
+        DBG_COLOR("Unknown WebHostUI method");
         return;
     }
 
@@ -322,7 +322,7 @@ void AbstractWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
     ArgumentCountAndMessageHandler handler = fHandler[key.buffer()];
 
     if (handler.first != static_cast<int>(handlerArgs.size())) {
-        HIPHOP_LOG_STDERR_COLOR("Incorrect WebHostUI method argument count");
+        DBG_COLOR("Incorrect WebHostUI method argument count");
         return;
     }
 

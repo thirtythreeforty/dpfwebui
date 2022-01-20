@@ -73,7 +73,7 @@ void LinuxWebHostUI::openSystemWebBrowser(String& url)
     snprintf(buf, sizeof(buf), "xdg-open %s", url.buffer());
 
     if (system(buf) != 0) {
-        HIPHOP_LOG_STDERR_ERRNO("Could not open system web browser");
+        DBG_ERRNO("Could not open system web browser");
     }
 }
 

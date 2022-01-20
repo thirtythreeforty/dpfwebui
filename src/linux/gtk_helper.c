@@ -81,12 +81,12 @@ int main(int argc, char* argv[])
     memset(&ctx, 0, sizeof(ctx));
 
     if (argc < 3) {
-        HIPHOP_LOG_STDERR("Invalid argument count");
+        DBG("Invalid argument count");
         return -1;
     }
 
     if ((sscanf(argv[1], "%d", &conf.fd_r) == 0) || (sscanf(argv[2], "%d", &conf.fd_w) == 0)) {
-        HIPHOP_LOG_STDERR("Invalid file descriptor");
+        DBG("Invalid file descriptor");
         return -1;
     }
 
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     ctx.display = XOpenDisplay(NULL);
 
     if (ctx.display == NULL) {
-        HIPHOP_LOG_STDERR("Cannot open display");
+        DBG("Cannot open display");
         return -1;
     }
 
@@ -402,7 +402,7 @@ static gboolean ipc_read_cb(GIOChannel *source, GIOCondition condition, gpointer
     }
 
     if (ipc_read(ctx->ipc, &packet) == -1) {
-        HIPHOP_LOG_STDERR_ERRNO("Could not read from IPC channel");
+        DBG_ERRNO("Could not read from IPC channel");
         return TRUE;
     }
 
@@ -448,7 +448,7 @@ static int ipc_write_simple(const context_t *ctx, msg_opcode_t opcode, const voi
     packet.v = payload;
 
     if ((retval = ipc_write(ctx->ipc, &packet)) == -1) {
-        HIPHOP_LOG_STDERR_ERRNO("Could not write to IPC channel");
+        DBG_ERRNO("Could not write to IPC channel");
     }
 
     return retval;
