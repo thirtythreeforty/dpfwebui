@@ -24,6 +24,15 @@
 
 USE_NAMESPACE_DISTRHO
 
+// On Linux some calls from JavaScript must run during next uiIdle() iteration
+#ifdef DISTRHO_OS_LINUX
+# define OPT_QUEUE_JS_CALL_START queue([this, args]() {
+# define OPT_QUEUE_JS_CALL_END   });
+#else
+# define OPT_QUEUE_JS_CALL_START
+# define OPT_QUEUE_JS_CALL_END
+#endif
+
 // DPF implementation of VST3 on macOS needs the DISTRHO::UI constructor to be
 // called with already scaled dimensions because the later setSize() request in
 // setWebView() is ignored; see https://github.com/DISTRHO/DPF/issues/359. Since
@@ -59,32 +68,25 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
         webViewPostMessage({"UI", "isResizable", isResizable()});
     });
 
-    // Some calls need to be run on next uiIdle() iteration to ensure they work
-    // as expected on all platform/host combinations. This is specifically
-    // needed for REAPER on Linux. Queuing adds a slight latency but that is
-    // preferrable to giving special treatment to a certain host on a certain
-    // platform. Special cases based on the host type are discouraged, in fact
-    // DPF does not have a method to query the host type.
-
     fHandler["setWidth"] = std::make_pair(1, [this](const JsValueVector& args) {
-        queue([this, args]() {
-            setWidth(static_cast<uint>(args[0].getDouble()));
-        });
+        OPT_QUEUE_JS_CALL_START
+        setWidth(static_cast<uint>(args[0].getDouble()));
+        OPT_QUEUE_JS_CALL_END
     });
 
     fHandler["setHeight"] = std::make_pair(1, [this](const JsValueVector& args) {
-        queue([this, args]() {
-            setHeight(static_cast<uint>(args[0].getDouble()));
-        });
+        OPT_QUEUE_JS_CALL_START
+        setHeight(static_cast<uint>(args[0].getDouble()));
+        OPT_QUEUE_JS_CALL_END
     });
 
     fHandler["setSize"] = std::make_pair(2, [this](const JsValueVector& args) {
-        queue([this, args]() {
-            setSize(
-                static_cast<uint>(args[0].getDouble()), // width
-                static_cast<uint>(args[1].getDouble())  // height
-            );
-        });
+        OPT_QUEUE_JS_CALL_START
+        setSize(
+            static_cast<uint>(args[0].getDouble()), // width
+            static_cast<uint>(args[1].getDouble())  // height
+        );
+        OPT_QUEUE_JS_CALL_END
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
