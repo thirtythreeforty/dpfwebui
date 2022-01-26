@@ -77,6 +77,11 @@ void LinuxWebHostUI::openSystemWebBrowser(String& url)
     }
 }
 
+void LinuxWebHostUI::sizeRequest(const UiBlock& block)
+{
+    queue(block);   // queue for next uiIdle() call
+}
+
 uintptr_t LinuxWebHostUI::createStandaloneWindow()
 {
     // TODO - standalone support

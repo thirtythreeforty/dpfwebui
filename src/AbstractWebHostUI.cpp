@@ -24,15 +24,6 @@
 
 USE_NAMESPACE_DISTRHO
 
-// On Linux some calls from JavaScript must run during next uiIdle() iteration
-#ifdef DISTRHO_OS_LINUX
-# define OPT_QUEUE_JS_CALL_START queue([this, args]() {
-# define OPT_QUEUE_JS_CALL_END   });
-#else
-# define OPT_QUEUE_JS_CALL_START
-# define OPT_QUEUE_JS_CALL_END
-#endif
-
 // DPF implementation of VST3 on macOS needs the DISTRHO::UI constructor to be
 // called with already scaled dimensions because the later setSize() request in
 // setWebView() is ignored; see https://github.com/DISTRHO/DPF/issues/359. Since
@@ -69,24 +60,24 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
     });
 
     fHandler["setWidth"] = std::make_pair(1, [this](const JsValueVector& args) {
-        OPT_QUEUE_JS_CALL_START
-        setWidth(static_cast<uint>(args[0].getDouble()));
-        OPT_QUEUE_JS_CALL_END
+        sizeRequest([this, args]() {
+            setWidth(static_cast<uint>(args[0].getDouble()));
+        });
     });
 
     fHandler["setHeight"] = std::make_pair(1, [this](const JsValueVector& args) {
-        OPT_QUEUE_JS_CALL_START
-        setHeight(static_cast<uint>(args[0].getDouble()));
-        OPT_QUEUE_JS_CALL_END
+        sizeRequest([this, args]() {
+            setHeight(static_cast<uint>(args[0].getDouble()));
+        });
     });
 
     fHandler["setSize"] = std::make_pair(2, [this](const JsValueVector& args) {
-        OPT_QUEUE_JS_CALL_START
-        setSize(
-            static_cast<uint>(args[0].getDouble()), // width
-            static_cast<uint>(args[1].getDouble())  // height
-        );
-        OPT_QUEUE_JS_CALL_END
+        sizeRequest([this, args]() {
+            setSize(
+                static_cast<uint>(args[0].getDouble()), // width
+                static_cast<uint>(args[1].getDouble())  // height
+            );
+        });
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
@@ -298,6 +289,11 @@ void AbstractWebHostUI::stateChanged(const char* key, const char* value)
     webViewPostMessage({"UI", "stateChanged", key, value});
 }
 #endif // DISTRHO_PLUGIN_WANT_STATE
+
+void AbstractWebHostUI::sizeRequest(const UiBlock& block)
+{
+    block();    // on Linux block execution is queued
+}
 
 void AbstractWebHostUI::handleWebViewLoadFinished()
 {

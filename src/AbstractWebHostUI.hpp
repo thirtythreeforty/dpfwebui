@@ -81,6 +81,8 @@ protected:
     virtual void onWebContentReady() {}
     virtual void onWebMessageReceived(const JsValueVector& args) { (void)args; }
 
+    virtual void sizeRequest(const UiBlock& block);
+
     virtual uintptr_t createStandaloneWindow() = 0;
     virtual void      processStandaloneEvents() = 0;
 
