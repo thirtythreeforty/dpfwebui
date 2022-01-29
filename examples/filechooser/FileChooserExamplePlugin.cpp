@@ -18,18 +18,17 @@
 
 #include "DistrhoPlugin.hpp"
 
-#define PARAMETER_COUNT 0
-#define PROGRAM_COUNT   0
-#define STATE_COUNT     1
+START_NAMESPACE_DISTRHO
 
-#define STATE_INDEX_FILE 0
-
-USE_NAMESPACE_DISTRHO
+constexpr int kStateIndexFile = 0;
 
 class FileChooserExamplePlugin : public Plugin
 {
 public:
-    FileChooserExamplePlugin() : Plugin(PARAMETER_COUNT, PROGRAM_COUNT, STATE_COUNT) {}
+    FileChooserExamplePlugin()
+        : Plugin(0 /*parameters*/, 0 /*programs*/, 1 /*states*/)
+    {}
+
     ~FileChooserExamplePlugin() {}
 
     const char* getLabel() const override
@@ -61,7 +60,7 @@ public:
     {
         switch (index)
         {
-        case STATE_INDEX_FILE:
+        case kStateIndexFile:
             stateKey = "file";
             break;
         }
@@ -76,7 +75,7 @@ public:
 
     bool isStateFile(uint32_t index) override
     {
-        return index == STATE_INDEX_FILE;
+        return index == kStateIndexFile;
     }
 
     void run(const float** inputs, float** outputs, uint32_t frames) override
@@ -91,7 +90,9 @@ private:
 
 };
 
-Plugin* DISTRHO::createPlugin()
+Plugin* createPlugin()
 {
     return new FileChooserExamplePlugin;
 }
+
+END_NAMESPACE_DISTRHO

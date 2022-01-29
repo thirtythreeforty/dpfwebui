@@ -15,12 +15,12 @@ NAME = d_jitdrum
 HIPHOP_PROJECT_VERSION = 1
 
 # --------------------------------------------------------------
-# AssemblyScript DSP files location
+# Enable AssemblyScript by setting DSP files location
 
 HIPHOP_AS_DSP_PATH = dsp
 
 # --------------------------------------------------------------
-# Web UI files location
+# Enable Web UI by setting web files location
 
 HIPHOP_WEB_UI_PATH = ui
 

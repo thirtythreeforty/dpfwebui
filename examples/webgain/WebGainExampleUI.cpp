@@ -16,55 +16,63 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "WebGainExampleUI.hpp"
+#include "WebHostUI.hpp"
 
-// These dimensions are scaled up according to the system display scale factor
-#define BASE_WIDTH_PX  600
-#define BASE_HEIGHT_PX 300
+START_NAMESPACE_DISTRHO
 
-// Color for painting the window background before the web content is ready.
-// Matching it to <html> background color ensures a smooth transition.
-#define INIT_BACKGROUND_RGBA 0xD4B6EFFF
+class WebGainExampleUI : public WebHostUI
+{
+public:
+    // The color argument is for painting the native window background before
+    // the web content becomes ready. Matching it to the <html> background color
+    // helps eliminating flicker when opening the plugin user interface.
 
-USE_NAMESPACE_DISTRHO
+    WebGainExampleUI()
+        : WebHostUI(600 /*width*/, 300 /*width*/, 0xD4B6EFFF /*background*/, false /*load*/)
+    {
+        // Web view not ready yet. Calls to runScript() or any DPF methods mapped
+        // by WebHostUI are forbidden. Mapped methods are those that have their
+        // counterparts in JavaScript; they rely on message passing and ultimately
+        // runScript(). Setting the parent class constructor parameter startLoading
+        // to false gives a chance to inject any needed scripts here, for example:
 
-UI* DISTRHO::createUI()
+        String js = String(
+            "window.testInjectedFunction = () => {"
+            "   console.log(`The device pixel ratio is ${window.devicePixelRatio}`);"
+            "};"
+        );
+        injectScript(js);
+
+        // Injected scripts are queued to run immediately after the web content
+        // finishes loading and before any referenced <script> starts executing.
+        // It is not possible to inject scripts after calling load(). If
+        // startLoading==false do not forget to call load() before returning:
+
+        load();
+    }
+
+    ~WebGainExampleUI() {}
+
+protected:
+    void onWebContentReady() override
+    {
+        // Called when the main document finished loading and DOM is ready.
+        // It is now safe to call runScript() and mapped DPF methods.
+    }
+
+    void onWebMessageReceived(const JsValueVector& args) override
+    {
+        // Web view and DOM are guaranteed to be ready here.
+        (void)args;
+    }
+
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebGainExampleUI)
+
+};
+
+UI* createUI()
 {
     return new WebGainExampleUI;
 }
 
-WebGainExampleUI::WebGainExampleUI()
-    : WebHostUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA, false)
-{
-    // Web view not ready yet. Calls to runScript() or any DPF methods mapped by
-    // WebHostUI are forbidden. Mapped methods are those that have their
-    // counterparts in JavaScript; they rely on message passing and ultimately
-    // runScript(). Setting the parent class constructor parameter startLoading
-    // to false gives a chance to inject any needed scripts here, for example:
-
-    String js = String(
-        "window.testInjectedFunction = () => {"
-        "   console.log(`The device pixel ratio is ${window.devicePixelRatio}`);"
-        "};"
-    );
-    injectScript(js);
-
-    // Injected scripts are queued to run immediately after the web content
-    // finishes loading and before any referenced <script> starts executing.
-    // It is not possible to inject scripts after calling load(). If
-    // startLoading==false do not forget to call load() before returning:
-
-    load();
-}
-
-void WebGainExampleUI::onWebContentReady()
-{
-    // Called when the main document finished loading and DOM is ready. It is
-    // now safe to call runScript() and mapped DPF methods.
-}
-
-void WebGainExampleUI::onWebMessageReceived(const JsValueVector& args)
-{
-    // Web view and DOM are guaranteed to be ready here.
-    (void)args;
-}
+END_NAMESPACE_DISTRHO

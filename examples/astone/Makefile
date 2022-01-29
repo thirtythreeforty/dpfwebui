@@ -15,7 +15,7 @@ NAME = d_astone
 HIPHOP_PROJECT_VERSION = 1
 
 # --------------------------------------------------------------
-# AssemblyScript DSP files location
+# Enable AssemblyScript by setting DSP files location
 
 HIPHOP_AS_DSP_PATH = dsp
 
@@ -27,7 +27,7 @@ FILES_DSP = \
 
 FILES_UI  = \
     AsToneExampleUI.cpp \
-    Blendish.cpp
+    ui/Blendish.cpp
 
 # --------------------------------------------------------------
 # Do some magic

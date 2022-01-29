@@ -16,11 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "JitDrumExampleUI.hpp"
-
-USE_NAMESPACE_DISTRHO
+#include "WebHostUI.hpp"
 
 UI* DISTRHO::createUI()
 {
-    return new JitDrumExampleUI;
+    return new WebHostUI(480 /*width*/, 200 /*height*/, 0x202020FF /*background*/);
 }

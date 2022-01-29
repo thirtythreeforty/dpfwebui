@@ -16,11 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "AsToneExamplePlugin.hpp"
-
-USE_NAMESPACE_DISTRHO
+#include "WasmHostPlugin.hpp"
 
 Plugin* DISTRHO::createPlugin()
 {
-    return new AsToneExamplePlugin;
+    return new WasmHostPlugin(1 /*parameters*/, 0 /*programs*/, 0 /*states*/);
 }

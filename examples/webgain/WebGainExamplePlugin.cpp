@@ -16,104 +16,135 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "WebGainExamplePlugin.hpp"
+#include "DistrhoPlugin.hpp"
 
-USE_NAMESPACE_DISTRHO
+START_NAMESPACE_DISTRHO
 
-Plugin* DISTRHO::createPlugin()
+class WebGainExamplePlugin : public Plugin
+{
+public:
+    WebGainExamplePlugin()
+        : Plugin(1 /*parameters*/, 0 /*programs*/, 0 /*states*/)
+        , fGain(1.f)
+    {}
+
+    ~WebGainExamplePlugin() {}
+
+    const char* getLabel() const override
+    {
+        return "WebGain";
+    }
+
+    const char* getMaker() const override
+    {
+        return "Luciano Iam";
+    }
+
+    const char* getLicense() const override
+    {
+        return "GPLv3";
+    }
+
+    uint32_t getVersion() const override
+    {
+        return d_version(1, 0, 0);
+    }
+
+    int64_t getUniqueId() const override
+    {
+        return d_cconst('H', 'H', 'w', 'g');
+    }
+
+    void initParameter(uint32_t index, Parameter& parameter) override
+    {
+        parameter.hints = kParameterIsAutomatable;
+
+        switch (index)
+        {
+        case 0:
+            parameter.name = "Gain";
+            parameter.ranges.min = 0;
+            parameter.ranges.max = 1.f;
+            parameter.ranges.def = 1.f;
+            break;
+        default:
+            break;
+        }
+    }
+
+    float getParameterValue(uint32_t index) const override
+    {
+        switch (index)
+        {
+        case 0:
+            return fGain;
+        default:
+            break;
+        }
+        return 0;
+    }
+
+    void setParameterValue(uint32_t index, float value) override
+    {
+        switch (index)
+        {
+        case 0:
+            fGain = value;
+            break;
+        default:
+            break;
+        }
+    }
+
+#if DISTRHO_PLUGIN_WANT_STATE
+    void initState(uint32_t index, String& stateKey, String& defaultStateValue) override
+    {
+        // unused
+        (void)index;
+        (void)stateKey;
+        (void)defaultStateValue;
+    }
+
+    void setState(const char* key, const char* value) override
+    {
+        // unused
+        (void)key;
+        (void)value;
+    }
+
+#if DISTRHO_PLUGIN_WANT_FULL_STATE
+    String getState(const char* key) const override
+    {
+        // unused
+        (void)key;
+        return String();
+    }
+#endif // DISTRHO_PLUGIN_WANT_FULL_STATE
+#endif // DISTRHO_PLUGIN_WANT_STATE
+
+    void run(const float** inputs, float** outputs, uint32_t frames) override
+    {
+        const float* inpL = inputs[0];
+        const float* inpR = inputs[1];
+        float* outL = outputs[0];
+        float* outR = outputs[1];
+
+        for (uint32_t frame = 0; frame < frames; frame++) {
+            outL[frame] = fGain * inpL[frame];
+            outR[frame] = fGain * inpR[frame];
+        }
+    }
+
+private:
+    float fGain;
+
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebGainExamplePlugin)
+
+};
+
+Plugin* createPlugin()
 {
     return new WebGainExamplePlugin;
 }
 
-#define PARAMETER_COUNT 1
-#define PROGRAM_COUNT   0
-#define STATE_COUNT     0
-
-WebGainExamplePlugin::WebGainExamplePlugin()
-    : Plugin(PARAMETER_COUNT, PROGRAM_COUNT, STATE_COUNT)
-    , fGain(1.f)
-{}
-
-void WebGainExamplePlugin::initParameter(uint32_t index, Parameter& parameter)
-{
-    parameter.hints = kParameterIsAutomatable;
-
-    switch (index)
-    {
-    case 0:
-        parameter.name = "Gain";
-        parameter.ranges.min = 0;
-        parameter.ranges.max = 1.f;
-        parameter.ranges.def = 1.f;
-        break;
-    default:
-        break;
-    }
-}
-
-float WebGainExamplePlugin::getParameterValue(uint32_t index) const
-{
-    switch (index)
-    {
-    case 0:
-        return fGain;
-    default:
-        break;
-    }
-    return 0;
-}
-
-void WebGainExamplePlugin::setParameterValue(uint32_t index, float value)
-{
-    switch (index)
-    {
-    case 0:
-        fGain = value;
-        break;
-    default:
-        break;
-    }
-}
-
-#if DISTRHO_PLUGIN_WANT_STATE
-
-void WebGainExamplePlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
-{
-    // unused
-    (void)index;
-    (void)stateKey;
-    (void)defaultStateValue;
-}
-
-void WebGainExamplePlugin::setState(const char* key, const char* value)
-{
-    // unused
-    (void)key;
-    (void)value;
-}
-
-#if DISTRHO_PLUGIN_WANT_FULL_STATE
-
-String WebGainExamplePlugin::getState(const char* key) const
-{
-    // unused
-    (void)key;
-    return String();
-}
-
-#endif // DISTRHO_PLUGIN_WANT_FULL_STATE
-
-#endif // DISTRHO_PLUGIN_WANT_STATE
-
-void WebGainExamplePlugin::run(const float** inputs, float** outputs, uint32_t frames)
-{
-    const float* inpL = inputs[0];
-    const float* inpR = inputs[1];
-    float* outL = outputs[0];
-    float* outR = outputs[1];
-
-    for (uint32_t frame = 0; frame < frames; frame++) {
-        outL[frame] = fGain * inpL[frame];
-        outR[frame] = fGain * inpR[frame];
-    }
-}
+END_NAMESPACE_DISTRHO

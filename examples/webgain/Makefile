@@ -15,7 +15,7 @@ NAME = d_webgain
 HIPHOP_PROJECT_VERSION = 1
 
 # --------------------------------------------------------------
-# Web UI files location
+# Enable Web UI by setting web files location
 
 HIPHOP_WEB_UI_PATH = ui
 

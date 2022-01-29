@@ -16,11 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "JitDrumExamplePlugin.hpp"
-
-USE_NAMESPACE_DISTRHO
+#include "WasmHostPlugin.hpp"
 
 Plugin* DISTRHO::createPlugin()
 {
-    return new JitDrumExamplePlugin;
+    return new WasmHostPlugin(0 /*parameters*/, 0 /*programs*/, 0 /*states*/);
 }

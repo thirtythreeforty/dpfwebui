@@ -18,14 +18,7 @@
 
 #include "WebHostUI.hpp"
 
-#define BASE_WIDTH_PX        500
-#define BASE_HEIGHT_PX       100
-
-#define INIT_BACKGROUND_RGBA 0xEFBDB6FF
-
-USE_NAMESPACE_DISTRHO
-
 UI* DISTRHO::createUI()
 {
-    return new WebHostUI(BASE_WIDTH_PX, BASE_HEIGHT_PX, INIT_BACKGROUND_RGBA);
+    return new WebHostUI(500 /*width*/, 100 /*height*/, 0xEFBDB6FF /*background*/);
 }
