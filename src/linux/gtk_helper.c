@@ -33,9 +33,9 @@
 // explanation in realize(). Plugins that do not change their UI size during
 // runtime might want to set these values in DistrhoPluginInfo.h to ensure CSS
 // viewport dimensions (vw/vw/vmin/vmax) are relative to some known fixed values.
-#if !defined(HIPHOP_MAX_BASE_WIDTH) || !defined(HIPHOP_MAX_BASE_HEIGHT)
-#define HIPHOP_MAX_BASE_WIDTH 1536
-#define HIPHOP_MAX_BASE_HEIGHT 1536
+#if !defined(HIPHOP_MAX_GTK_WEBVIEW_WIDTH) || !defined(HIPHOP_MAX_GTK_WEBVIEW_HEIGHT)
+#define HIPHOP_MAX_GTK_WEBVIEW_WIDTH 1536
+#define HIPHOP_MAX_GTK_WEBVIEW_HEIGHT 1536
 #endif
 
 // CSS touch-action based approach seems to be failing for WebKitGTK. Looks like a bug.
@@ -150,8 +150,8 @@ static float get_gtk_scale_factor()
 static void realize(context_t *ctx, const msg_win_cfg_t *config)
 {
     // Create a native container window of arbitrary maximum size
-    int max_width = ctx->scaleFactor * HIPHOP_MAX_BASE_WIDTH;
-    int max_height = ctx->scaleFactor * HIPHOP_MAX_BASE_HEIGHT;
+    int max_width = ctx->scaleFactor * HIPHOP_MAX_GTK_WEBVIEW_WIDTH;
+    int max_height = ctx->scaleFactor * HIPHOP_MAX_GTK_WEBVIEW_HEIGHT;
 
     ctx->container = XCreateSimpleWindow(ctx->display, (Window)config->parent, 0, 0,
                                         max_width, max_height, 0, 0, 0);
