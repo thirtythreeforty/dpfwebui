@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'wasi'
 import DISTRHO from './distrho-plugin'
 
 const PI_2: f32 = Mathf.PI * 2

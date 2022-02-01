@@ -24,9 +24,11 @@
 #include <unordered_map>
 #include <vector>
 
-#define WASM_API_EXTERN // link to static lib on win32
-#include "wasm.h"
-#include "wasmer.h"
+//#define WASM_API_EXTERN // link to static lib on win32
+//#include "wasm.h"
+//#include "wasmer.h"
+// FIXME - WAMR conditionally include headers
+#include "wasm_c_api.h"
 
 #include "src/DistrhoDefines.h"
 #include "extra/LeakDetector.hpp"
@@ -83,7 +85,7 @@ public:
 private:
     static wasm_trap_t* callHostFunction(void *env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec);
     
-    static void throwWasmerLastError();
+    static void throwWasmLastError();
 
     static void toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types);
        

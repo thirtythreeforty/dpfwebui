@@ -17,8 +17,8 @@ LINUX
 WINDOWS
 -------
 
-- WINWASMBUG : WASM plugins crash on Carla and Live. Work as expected on REAPER,
-  Renoise and Ardour 7. See WasmEngine.cpp
+- WINWASMERBUG : WASM plugins crash on Carla and Live when running on the Wasmer
+  based engine. Work as expected on REAPER, Renoise and Ardour 7.
 
   Instructions on how to build libwasmer.a with debug symbols can be found here:
   https://github.com/wasmerio/wasmer/issues/2571

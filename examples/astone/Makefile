@@ -7,6 +7,8 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
+# FIXME - WAMR enable debug symbols
+SKIP_STRIPPING = true
 NAME = d_astone
 
 # --------------------------------------------------------------

@@ -23,6 +23,9 @@
 #define MAX_MODULE_NAME    128
 #define MAX_HOST_FUNCTIONS 128
 
+// FIXME - WAMR and Wasmer check for correct usage of the C API
+//         emphasis on memory leaks
+
 USE_NAMESPACE_DISTRHO
 
 WasmEngine::WasmEngine()
@@ -46,6 +49,12 @@ WasmEngine::~WasmEngine()
 
 void WasmEngine::load(const char* modulePath)
 {
+    fEngine = wasm_engine_new();
+
+    if (fEngine == nullptr) {
+        throwWasmLastError();
+    }
+
     FILE* file = fopen(modulePath, "rb");
 
     if (file == nullptr) {
@@ -67,27 +76,20 @@ void WasmEngine::load(const char* modulePath)
 
     fclose(file);
 
-    fEngine = wasm_engine_new();
-
-    if (fEngine == nullptr) {
-        wasm_byte_vec_delete(&fileBytes);
-        throwWasmerLastError();
-    }
-
     fStore = wasm_store_new(fEngine); 
 
     if (fStore == nullptr) {
         wasm_byte_vec_delete(&fileBytes);
-        throwWasmerLastError();
+        throwWasmLastError();
     }
 
-    // WINWASMBUG : following call crashes some hosts on Windows, see bugs.txt
+    // WINWASMERBUG : following call crashes some hosts on Windows, see bugs.txt
     fModule = wasm_module_new(fStore, &fileBytes);
     
     wasm_byte_vec_delete(&fileBytes);
 
     if (fModule == nullptr) {
-        throwWasmerLastError();
+        throwWasmLastError();
     }
 }
 
@@ -104,7 +106,8 @@ void WasmEngine::unload()
     }
 
     if (fEngine != nullptr) {
-        wasm_engine_delete(fEngine);
+        // FIXME - WAMR crash
+        //wasm_engine_delete(fEngine);
         fEngine = nullptr;
     }
 }
@@ -119,17 +122,17 @@ void WasmEngine::start(WasmFunctionMap hostFunctions)
     // Call to wasi_get_imports() fails because of missing host imports, use
     // wasi_get_unordered_imports() https://github.com/wasmerio/wasmer/issues/2450
 
-    wasi_config_t* config = wasi_config_new("DPF");
+    wasi_config_t* config = wasi_config_new("dpf");
     fWasiEnv = wasi_env_new(config);
 
     if (fWasiEnv == nullptr) {
-        throwWasmerLastError();
+        throwWasmLastError();
     }
 
     wasmer_named_extern_vec_t wasiImports;
 
     if (!wasi_get_unordered_imports(fStore, fModule, fWasiEnv, &wasiImports)) {
-        throwWasmerLastError();
+        throwWasmLastError();
     }
 
     std::unordered_map<std::string, int> wasiImportIndex;
@@ -195,8 +198,9 @@ void WasmEngine::start(WasmFunctionMap hostFunctions)
     fHostFunctions.reserve(MAX_HOST_FUNCTIONS);
 
 #ifndef HIPHOP_ENABLE_WASI
-    hostFunctions["abort"] = { { WASM_I32, WASM_I32, WASM_I32, WASM_I32 }, {}, 
-        std::bind(&WasmEngine::nonWasiAssemblyScriptAbort, this, std::placeholders::_1) };
+    // FIXME - WAMR (and Wasmer) study this and "asc --use abort="
+    //hostFunctions["abort"] = { { WASM_I32, WASM_I32, WASM_I32, WASM_I32 }, {}, 
+    //    std::bind(&WasmEngine::nonWasiAssemblyScriptAbort, this, std::placeholders::_1) };
 #endif // HIPHOP_ENABLE_WASI
 
     for (WasmFunctionMap::const_iterator it = hostFunctions.begin(); it != hostFunctions.end(); ++it) {
@@ -224,13 +228,14 @@ void WasmEngine::start(WasmFunctionMap hostFunctions)
     wasm_extern_vec_delete(&imports);
 
     if (fInstance == nullptr) {
-        throwWasmerLastError();
+        throwWasmLastError();
     }
+    
 #ifdef HIPHOP_ENABLE_WASI
     wasm_func_t* wasiStart = wasi_get_start_function(fInstance);
     
     if (wasiStart == nullptr) {
-        throwWasmerLastError();
+        throwWasmLastError();
     }
 
     wasm_val_vec_t empty_val_vec = WASM_EMPTY_VEC;
@@ -330,7 +335,7 @@ WasmValueVector WasmEngine::callFunction(const char* name, WasmValueVector param
     const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
 
     if (trap != nullptr) {
-        throwWasmerLastError();
+        throwWasmLastError();
     }
 
     return WasmValueVector(resultVec.data, resultVec.data + resultVec.size);
@@ -359,9 +364,12 @@ wasm_trap_t* WasmEngine::callHostFunction(void* env, const wasm_val_vec_t* param
     return nullptr;
 }
 
-void WasmEngine::throwWasmerLastError()
+void WasmEngine::throwWasmLastError()
 {
-    const int len = wasmer_last_error_length();
+    // FIXME - WAMR find equivalent function for getting last error
+    //         or throw a generic exception
+
+    /*const int len = wasmer_last_error_length();
     
     if (len == 0) {
         throw std::runtime_error("Wasmer unknown error");
@@ -370,7 +378,7 @@ void WasmEngine::throwWasmerLastError()
     char msg[len];
     wasmer_last_error_message(msg, len);
 
-    throw std::runtime_error(std::string("Wasmer error - ") + msg);
+    throw std::runtime_error(std::string("Wasmer error - ") + msg);*/
 }
 
 void WasmEngine::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types)

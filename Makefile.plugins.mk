@@ -19,7 +19,7 @@ endif
 
 ifneq ($(HIPHOP_AS_DSP_PATH),)
 AS_DSP = true
-HIPHOP_ENABLE_WASI ?= true
+HIPHOP_ENABLE_WASI ?= false
 endif
 
 ifneq ($(HIPHOP_WEB_UI_PATH),)
@@ -127,7 +127,7 @@ endif
 # ------------------------------------------------------------------------------
 # Optional support for macOS universal binaries, keep this before DPF include.
 ifeq ($(MACOS),true)
-HIPHOP_MACOS_UNIVERSAL ?= true
+HIPHOP_MACOS_UNIVERSAL ?= false
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
 # Non CPU-specific optimization flags, see DPF Makefile.base.mk
 NOOPT = true
@@ -173,12 +173,15 @@ endif
 # ------------------------------------------------------------------------------
 # Add build flags for AssemblyScript DSP dependencies
 
+# FIXME - WAMR conditional flags
 ifeq ($(AS_DSP),true)
-BASE_FLAGS += -I$(WASMER_PATH)/include
+#BASE_FLAGS += -I$(WASMER_PATH)/include
+BASE_FLAGS += -I$(HIPHOP_LIB_PATH)/wasm-micro-runtime/core/iwasm/include
 ifeq ($(HIPHOP_ENABLE_WASI),true)
 BASE_FLAGS += -DHIPHOP_ENABLE_WASI
 endif
-LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
+#LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
+LINK_FLAGS += -L$(HIPHOP_LIB_PATH)/wasm-micro-runtime/build -lvmlib
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread -ldl
 endif
