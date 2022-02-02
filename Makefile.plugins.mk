@@ -181,6 +181,9 @@ $(error WAMR is not available on Windows/MinGW)
 endif
 BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include -DHIPHOP_WASM_RUNTIME_WAMR
 LINK_FLAGS += -L$(WAMR_PATH)/build -lvmlib
+ifeq ($(LINUX),true)
+LINK_FLAGS += -lpthread
+endif
 endif # HIPHOP_WASM_RUNTIME wamr
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
 BASE_FLAGS += -I$(WASMER_PATH)/include -DHIPHOP_WASM_RUNTIME_WASMER
