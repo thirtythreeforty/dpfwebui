@@ -31,7 +31,7 @@ class WasmHostPlugin : public Plugin
 {
 public:
     WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
-                    std::shared_ptr<WasmRuntime> engine = nullptr);
+                    std::shared_ptr<WasmRuntime> runtime = nullptr);
     ~WasmHostPlugin() {}
 
     const char* getLabel() const override;
@@ -72,9 +72,9 @@ public:
     WasmValueVector writeMidiEvent(WasmValueVector params);
 
 private:
-    inline void throwIfEngineStopped() const;
+    inline void checkRuntime() const;
 
-    std::shared_ptr<WasmRuntime> fEngine;
+    std::shared_ptr<WasmRuntime> fRuntime;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmHostPlugin)
 
