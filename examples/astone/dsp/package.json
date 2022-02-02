@@ -1,6 +1,5 @@
 {
   "scripts": {
-    "__dummy__": "FIXME WAMR - test --exportRuntime and --use abort= flags on Wasmer",
     "asbuild:untouched": "asc assembly/index.ts --target debug --exportRuntime --use abort=",
     "asbuild:optimized": "asc assembly/index.ts --target release --exportRuntime --use abort=",
     "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized",

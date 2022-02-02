@@ -19,6 +19,7 @@ endif
 
 ifneq ($(HIPHOP_AS_DSP_PATH),)
 AS_DSP = true
+HIPHOP_WASM_RUNTIME ?= wasmer
 HIPHOP_ENABLE_WASI ?= false
 endif
 
@@ -80,7 +81,7 @@ LIB_DIR_NOBUNDLE = $(TARGET_DIR)/$(NAME)-lib
 
 ifeq ($(AS_DSP),true)
 HIPHOP_FILES_DSP  = WasmHostPlugin.cpp \
-                    WasmEngine.cpp
+                    WasmRuntime.cpp
 ifeq ($(LINUX),true)
 HIPHOP_FILES_DSP += linux/LinuxPath.cpp
 endif
@@ -173,15 +174,17 @@ endif
 # ------------------------------------------------------------------------------
 # Add build flags for AssemblyScript DSP dependencies
 
-# FIXME - WAMR conditional flags
 ifeq ($(AS_DSP),true)
-#BASE_FLAGS += -I$(WASMER_PATH)/include
-BASE_FLAGS += -I$(HIPHOP_LIB_PATH)/wasm-micro-runtime/core/iwasm/include
-ifeq ($(HIPHOP_ENABLE_WASI),true)
-BASE_FLAGS += -DHIPHOP_ENABLE_WASI
+ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+ifeq ($(WINDOWS),true)
+$(error WAMR is not available on Windows/MinGW)
 endif
-#LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
-LINK_FLAGS += -L$(HIPHOP_LIB_PATH)/wasm-micro-runtime/build -lvmlib
+BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include -DHIPHOP_WASM_RUNTIME_WAMR
+LINK_FLAGS += -L$(WAMR_PATH)/build -lvmlib
+endif # HIPHOP_WASM_RUNTIME wamr
+ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
+BASE_FLAGS += -I$(WASMER_PATH)/include -DHIPHOP_WASM_RUNTIME_WASMER
+LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread -ldl
 endif
@@ -191,7 +194,11 @@ endif
 ifeq ($(WINDOWS),true)
 LINK_FLAGS += -Wl,-Bstatic -lWs2_32 -lBcrypt -lUserenv -lShlwapi
 endif
+ifeq ($(HIPHOP_ENABLE_WASI),true)
+BASE_FLAGS += -DHIPHOP_ENABLE_WASI
 endif
+endif # HIPHOP_WASM_RUNTIME wasmer
+endif # AS_DSP
 
 # ------------------------------------------------------------------------------
 # Add build flags for web UI dependencies
@@ -230,20 +237,44 @@ info:
 # Dependency - Build DPF Graphics Library
 
 ifneq ($(WEB_UI),true)
-TARGETS += $(DPF_PATH)/build/libdgl.a
+LIBDGL_PATH = $(DPF_PATH)/build/libdgl.a
+TARGETS += $(LIBDGL_PATH)
 
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
-	DGL_MAKE_FLAGS = dgl NOOPT=true DGL_FLAGS="$(MACOS_UNIVERSAL_FLAGS)" DGL_LIBS="$(MACOS_UNIVERSAL_FLAGS)"
+	DGL_MAKE_FLAGS = dgl NOOPT=true DGL_FLAGS="$(MACOS_UNIVERSAL_FLAGS)" \
+					 DGL_LIBS="$(MACOS_UNIVERSAL_FLAGS)"
 endif
 
-$(DPF_PATH)/build/libdgl.a:
+$(LIBDGL_PATH):
 	make -C $(DPF_PATH) $(DGL_MAKE_FLAGS)
 endif
 
 # ------------------------------------------------------------------------------
-# Dependency - Download Wasmer
+# Dependency - Clone and build WAMR
 
 ifeq ($(AS_DSP),true)
+ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+WAMR_PATH = $(HIPHOP_LIB_PATH)/wasm-micro-runtime
+WAMR_LIB_PATH = $(WAMR_PATH)/build/libvmlib.a
+WAMR_GITHUB_URL = https://github.com/bytecodealliance/wasm-micro-runtime
+
+TARGETS += $(WAMR_LIB_PATH)
+
+$(WAMR_LIB_PATH): $(WAMR_PATH)
+	@echo "Building WAMR static library"
+	@cd $(WAMR_PATH) && mkdir -p build && cd build && cmake .. && make
+
+$(WAMR_PATH):
+	@mkdir -p $(HIPHOP_LIB_PATH)
+	@git -C $(HIPHOP_LIB_PATH) clone $(WAMR_GITHUB_URL)
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Dependency - Download Wasmer static library
+
+ifeq ($(AS_DSP),true)
+ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
 WASMER_PATH = $(HIPHOP_LIB_PATH)/wasmer
 WASMER_VERSION = 2.1.1
 
@@ -290,12 +321,14 @@ ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
 	@wget -4 -O /tmp/$(WASMER_PKG_FILE_2) $(WASMER_URL)/$(WASMER_VERSION)/$(WASMER_PKG_FILE_2)
 	@mkdir -p /tmp/wasmer-2
 	@tar xzf /tmp/$(WASMER_PKG_FILE_2) -C /tmp/wasmer-2
-	@lipo -create $(WASMER_PATH)/lib/libwasmer.a /tmp/wasmer-2/lib/libwasmer.a -o $(WASMER_PATH)/lib/libwasmer-universal.a
+	@lipo -create $(WASMER_PATH)/lib/libwasmer.a /tmp/wasmer-2/lib/libwasmer.a \
+		-o $(WASMER_PATH)/lib/libwasmer-universal.a
 	@rm $(WASMER_PATH)/lib/libwasmer.a
 	@mv $(WASMER_PATH)/lib/libwasmer-universal.a $(WASMER_PATH)/lib/libwasmer.a
 	@rm /tmp/$(WASMER_PKG_FILE_2)
 	@rm -rf /tmp/wasmer-2
 else
+endif
 endif
 endif
 

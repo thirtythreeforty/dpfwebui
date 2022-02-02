@@ -16,19 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WASM_ENGINE_HPP
-#define WASM_ENGINE_HPP
+#ifndef WASM_RUNTIME_HPP
+#define WASM_RUNTIME_HPP
 
 #include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-//#define WASM_API_EXTERN // link to static lib on win32
-//#include "wasm.h"
-//#include "wasmer.h"
-// FIXME - WAMR conditionally include headers
-#include "wasm_c_api.h"
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+# include "wasm_c_api.h"
+#elif HIPHOP_WASM_RUNTIME_WASMER
+# define WASM_API_EXTERN // link to static lib on win32
+# include "wasm.h"
+# include "wasmer.h"
+#else
+# error "Unknown WebAssembly runtime specified"
+#endif
 
 #include "src/DistrhoDefines.h"
 #include "extra/LeakDetector.hpp"
@@ -57,11 +61,11 @@ struct WasmFunctionDescriptor
     WasmFunction        function;
 };
 
-class WasmEngine
+class WasmRuntime
 {
 public:
-    WasmEngine();
-    ~WasmEngine();
+    WasmRuntime();
+    ~WasmRuntime();
 
     void load(const char* modulePath);
     void unload();
@@ -92,10 +96,6 @@ private:
     const char* WTF16ToCString(const WasmValue& wPtr);
     WasmValue   CToWTF16String(const char* s);
 
-#ifndef HIPHOP_ENABLE_WASI
-    WasmValueVector nonWasiAssemblyScriptAbort(WasmValueVector params);
-#endif // HIPHOP_ENABLE_WASI
-
     bool               fStarted;
     wasm_engine_t*     fEngine;
     wasm_store_t*      fStore;
@@ -108,10 +108,10 @@ private:
     WasmFunctionVector fHostFunctions;
     WasmExternMap      fModuleExports;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmEngine)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmRuntime)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // WASM_ENGINE_HPP
+#endif  // WASM_RUNTIME_HPP

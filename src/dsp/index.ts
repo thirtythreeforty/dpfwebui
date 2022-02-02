@@ -241,9 +241,7 @@ const MAX_STRING_BYTES = 1024
 export let _rw_string_1 = new ArrayBuffer(MAX_STRING_BYTES)
 export let _rw_string_2 = new ArrayBuffer(MAX_STRING_BYTES)
 
-// Functions for converting between AssemblyScript and C strings. These are
-// exported to handle a few special cases like supporting non-WASI abort().
-// String conversions should be only performed by AssemblyScript code.
+// Functions for converting between AssemblyScript and C strings
 
 export function _wtf16_to_c_string(s: string): ArrayBuffer {
     return String.UTF8.encode(s, /* null terminated */ true)

@@ -18,17 +18,16 @@
 
 #include <iostream>
 
-#include "WasmEngine.hpp"
+#include "WasmRuntime.hpp"
 
 #define MAX_MODULE_NAME    128
 #define MAX_HOST_FUNCTIONS 128
 
-// FIXME - WAMR and Wasmer check for correct usage of the C API
-//         emphasis on memory leaks
+// TODO - check for correct usage of the Wasm C API focusing on memory leaks
 
 USE_NAMESPACE_DISTRHO
 
-WasmEngine::WasmEngine()
+WasmRuntime::WasmRuntime()
     : fStarted(false)
     , fEngine(nullptr)
     , fStore(nullptr)
@@ -41,13 +40,13 @@ WasmEngine::WasmEngine()
     memset(&fExportsVec, 0, sizeof(fExportsVec));
 }
 
-WasmEngine::~WasmEngine()
+WasmRuntime::~WasmRuntime()
 {
     stop();
     unload();
 }
 
-void WasmEngine::load(const char* modulePath)
+void WasmRuntime::load(const char* modulePath)
 {
     fEngine = wasm_engine_new();
 
@@ -93,7 +92,7 @@ void WasmEngine::load(const char* modulePath)
     }
 }
 
-void WasmEngine::unload()
+void WasmRuntime::unload()
 {
     if (fModule != nullptr) {
         wasm_module_delete(fModule);
@@ -105,14 +104,16 @@ void WasmEngine::unload()
         fStore = nullptr;
     }
 
+// FIXME - this is crashing for WAMR
+#ifndef HIPHOP_WASM_RUNTIME_WAMR
     if (fEngine != nullptr) {
-        // FIXME - WAMR crash
-        //wasm_engine_delete(fEngine);
+        wasm_engine_delete(fEngine);
         fEngine = nullptr;
     }
+#endif
 }
 
-void WasmEngine::start(WasmFunctionMap hostFunctions)
+void WasmRuntime::start(WasmFunctionMap hostFunctions)
 {
     char name[MAX_MODULE_NAME];
 
@@ -197,12 +198,6 @@ void WasmEngine::start(WasmFunctionMap hostFunctions)
     // Avoid reallocation to ensure pointers to elements remain valid through engine lifetime
     fHostFunctions.reserve(MAX_HOST_FUNCTIONS);
 
-#ifndef HIPHOP_ENABLE_WASI
-    // FIXME - WAMR (and Wasmer) study this and "asc --use abort="
-    //hostFunctions["abort"] = { { WASM_I32, WASM_I32, WASM_I32, WASM_I32 }, {}, 
-    //    std::bind(&WasmEngine::nonWasiAssemblyScriptAbort, this, std::placeholders::_1) };
-#endif // HIPHOP_ENABLE_WASI
-
     for (WasmFunctionMap::const_iterator it = hostFunctions.begin(); it != hostFunctions.end(); ++it) {
         fHostFunctions.push_back(it->second.function);
 
@@ -212,7 +207,7 @@ void WasmEngine::start(WasmFunctionMap hostFunctions)
         toCValueTypeVector(it->second.result, &result);
 
         const wasm_functype_t* funcType = wasm_functype_new(&params, &result);
-        wasm_func_t* func = wasm_func_new_with_env(fStore, funcType, WasmEngine::callHostFunction,
+        wasm_func_t* func = wasm_func_new_with_env(fStore, funcType, WasmRuntime::callHostFunction,
                                                     &fHostFunctions.back(), nullptr);
         imports.data[importIndex[it->first]] = wasm_func_as_extern(func);
 
@@ -265,7 +260,7 @@ void WasmEngine::start(WasmFunctionMap hostFunctions)
     fStarted = true;
 }
 
-void WasmEngine::stop()
+void WasmRuntime::stop()
 {
 #ifdef HIPHOP_ENABLE_WASI
     if (fWasiEnv != nullptr) {
@@ -289,39 +284,39 @@ void WasmEngine::stop()
     fStarted = false;
 }
 
-byte_t* WasmEngine::getMemory(const WasmValue& wPtr)
+byte_t* WasmRuntime::getMemory(const WasmValue& wPtr)
 {
     return wasm_memory_data(wasm_extern_as_memory(fModuleExports["memory"])) + wPtr.of.i32;
 }
 
-char* WasmEngine::getMemoryAsCString(const WasmValue& wPtr)
+char* WasmRuntime::getMemoryAsCString(const WasmValue& wPtr)
 {
     return static_cast<char *>(getMemory(wPtr));
 }
 
-void WasmEngine::copyCStringToMemory(const WasmValue& wPtr, const char* s)
+void WasmRuntime::copyCStringToMemory(const WasmValue& wPtr, const char* s)
 {
     strcpy(getMemoryAsCString(wPtr), s);
 }
 
-WasmValue WasmEngine::getGlobal(const char* name)
+WasmValue WasmRuntime::getGlobal(const char* name)
 {
     WasmValue value;
     wasm_global_get(wasm_extern_as_global(fModuleExports[name]), &value);
     return value;
 }
 
-void WasmEngine::setGlobal(const char* name, const WasmValue& value)
+void WasmRuntime::setGlobal(const char* name, const WasmValue& value)
 {
     wasm_global_set(wasm_extern_as_global(fModuleExports[name]), &value);
 }
 
-char* WasmEngine::getGlobalAsCString(const char* name)
+char* WasmRuntime::getGlobalAsCString(const char* name)
 {
     return getMemoryAsCString(getGlobal(name));
 }
 
-WasmValueVector WasmEngine::callFunction(const char* name, WasmValueVector params)
+WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector params)
 {
     const wasm_func_t* func = wasm_extern_as_func(fModuleExports[name]);
 
@@ -341,17 +336,17 @@ WasmValueVector WasmEngine::callFunction(const char* name, WasmValueVector param
     return WasmValueVector(resultVec.data, resultVec.data + resultVec.size);
 }
 
-WasmValue WasmEngine::callFunctionReturnSingleValue(const char* name, WasmValueVector params)
+WasmValue WasmRuntime::callFunctionReturnSingleValue(const char* name, WasmValueVector params)
 {
     return callFunction(name, params)[0];
 }
 
-const char* WasmEngine::callFunctionReturnCString(const char* name, WasmValueVector params)
+const char* WasmRuntime::callFunctionReturnCString(const char* name, WasmValueVector params)
 {
     return getMemoryAsCString(callFunctionReturnSingleValue(name, params));
 }
 
-wasm_trap_t* WasmEngine::callHostFunction(void* env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec)
+wasm_trap_t* WasmRuntime::callHostFunction(void* env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec)
 {
     const WasmFunction* func = static_cast<WasmFunction *>(env);
     const WasmValueVector params (paramsVec->data, paramsVec->data + paramsVec->size);
@@ -364,12 +359,14 @@ wasm_trap_t* WasmEngine::callHostFunction(void* env, const wasm_val_vec_t* param
     return nullptr;
 }
 
-void WasmEngine::throwWasmLastError()
+void WasmRuntime::throwWasmLastError()
 {
-    // FIXME - WAMR find equivalent function for getting last error
-    //         or throw a generic exception
-
-    /*const int len = wasmer_last_error_length();
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    // TODO - wasmer_last_error_message() equivalent for WAMR?
+    throw std::runtime_error("WAMR unknown error");
+#endif
+#ifdef HIPHOP_WASM_RUNTIME_WASMER
+    const int len = wasmer_last_error_length();
     
     if (len == 0) {
         throw std::runtime_error("Wasmer unknown error");
@@ -378,10 +375,11 @@ void WasmEngine::throwWasmLastError()
     char msg[len];
     wasmer_last_error_message(msg, len);
 
-    throw std::runtime_error(std::string("Wasmer error - ") + msg);*/
+    throw std::runtime_error(std::string("Wasmer error - ") + msg);
+#endif
 }
 
-void WasmEngine::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types)
+void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types)
 {
     int i = 0;
     const size_t size = kinds.size();
@@ -394,7 +392,7 @@ void WasmEngine::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_
     wasm_valtype_vec_new(types, size, typesArray);
 }
 
-const char* WasmEngine::WTF16ToCString(const WasmValue& wPtr)
+const char* WasmRuntime::WTF16ToCString(const WasmValue& wPtr)
 {
     if (fModuleExports.find("_wtf16_to_c_string") == fModuleExports.end()) {
         throw std::runtime_error("Wasm module does not export function _wtf16_to_c_string");
@@ -403,7 +401,7 @@ const char* WasmEngine::WTF16ToCString(const WasmValue& wPtr)
     return callFunctionReturnCString("_wtf16_to_c_string", { wPtr });
 }
 
-WasmValue WasmEngine::CToWTF16String(const char* s)
+WasmValue WasmRuntime::CToWTF16String(const char* s)
 {
     if (fModuleExports.find("_c_to_wtf16_string") == fModuleExports.end()) {
         throw std::runtime_error("Wasm module does not export function _c_to_wtf16_string");
@@ -415,23 +413,3 @@ WasmValue WasmEngine::CToWTF16String(const char* s)
 
     return callFunctionReturnSingleValue("_c_to_wtf16_string", { wPtr });
 }
-
-#ifndef HIPHOP_ENABLE_WASI
-
-WasmValueVector WasmEngine::nonWasiAssemblyScriptAbort(WasmValueVector params)
-{
-    const char *msg = WTF16ToCString(params[0]);
-    const char *filename = WTF16ToCString(params[1]);
-    const int32_t lineNumber = params[2].of.i32;
-    const int32_t columnNumber = params[3].of.i32;
-
-    // Copy format from WASI abort()
-    std::cerr << "abort: " << msg << " in " << filename << "(" << lineNumber
-        << ":" << columnNumber << ") - WASI is disabled" << std::endl;
-
-    fStarted = false;
-
-    return {};
-}
-
-#endif // HIPHOP_ENABLE_WASI

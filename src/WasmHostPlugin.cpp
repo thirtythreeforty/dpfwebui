@@ -27,7 +27,7 @@
 USE_NAMESPACE_DISTRHO
 
 WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
-                                std::shared_ptr<WasmEngine> engine)
+                                std::shared_ptr<WasmRuntime> engine)
     : Plugin(parameterCount, programCount, stateCount)
 {   
     if (engine != nullptr) {
@@ -35,7 +35,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
         return; // caller initializes engine
     }
 
-    fEngine.reset(new WasmEngine());
+    fEngine.reset(new WasmRuntime());
 
     try {
         const String path = path::getLibraryPath() + "/dsp/main.wasm";

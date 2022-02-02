@@ -23,7 +23,7 @@
 
 #include "DistrhoPlugin.hpp"
 
-#include "WasmEngine.hpp"
+#include "WasmRuntime.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -31,7 +31,7 @@ class WasmHostPlugin : public Plugin
 {
 public:
     WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
-                    std::shared_ptr<WasmEngine> engine = nullptr);
+                    std::shared_ptr<WasmRuntime> engine = nullptr);
     ~WasmHostPlugin() {}
 
     const char* getLabel() const override;
@@ -74,7 +74,7 @@ public:
 private:
     inline void throwIfEngineStopped() const;
 
-    std::shared_ptr<WasmEngine> fEngine;
+    std::shared_ptr<WasmRuntime> fEngine;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmHostPlugin)
 

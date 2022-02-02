@@ -5,7 +5,7 @@ possible to write plugins in the AssemblyScript language. While not strictly a
 subset it is highly similar in syntax to [TypeScript](https://www.typescriptlang.org)
 and specifically designed for targeting [WebAssembly](https://webassembly.org),
 roughly described as the "assembler of the web". Plugins leveraging this feature
-embed the [Wasmer](https://github.com/wasmerio/wasmer) JIT engine for running
+embed the [Wasmer](https://github.com/wasmerio/wasmer) JIT runtime for running
 precompiled AssemblyScript code at a close-to-native performance.
 
 It is worth noting that the Wasm VM and the web view are completely separated
@@ -58,7 +58,7 @@ code can do the job.
 ### Integration with the underlying C++ framework (DPF)
 
 The project provides a basic C++ wrapper around the Wasm standardized C API,
-implemented in `WasmEngine.cpp`. It provides some methods to read and write
+implemented in `WasmRuntime.cpp`. It provides some methods to read and write
 global variables, and for enabling cross-language function calls. This can be
 useful for creating new hybrid features.
 
