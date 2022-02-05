@@ -19,8 +19,6 @@ endif
 
 ifneq ($(HIPHOP_AS_DSP_PATH),)
 AS_DSP = true
-HIPHOP_WASM_RUNTIME ?= wamr
-HIPHOP_ENABLE_WASI ?= false
 endif
 
 ifneq ($(HIPHOP_WEB_UI_PATH),)
@@ -175,6 +173,15 @@ endif
 # Add build flags for AssemblyScript DSP dependencies
 
 ifeq ($(AS_DSP),true)
+HIPHOP_ENABLE_WASI ?= false
+ifeq ($(LINUX_OR_MACOS),true)
+# WAMR uses global data for the C API causing problems on these platforms
+HIPHOP_WASM_RUNTIME ?= wasmer
+endif
+ifeq ($(WINDOWS),true)
+# Wasmer does not work on some Windows DAWs and no problem with globals in DLLs
+HIPHOP_WASM_RUNTIME ?= wamr
+endif
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include -DHIPHOP_WASM_RUNTIME_WAMR
 LINK_FLAGS += -L$(WAMR_BUILD_DIR) -lvmlib
