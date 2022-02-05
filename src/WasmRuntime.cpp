@@ -82,7 +82,8 @@ void WasmRuntime::load(const char* modulePath)
         throwWasmLastError();
     }
 
-    // WINWASMERBUG : following call crashes some hosts on Windows, see bugs.txt
+    // WINWASMERBUG : Following call crashes some hosts on Windows when using
+    //                the Wasmer runtime, does not affect WAMR. See bugs.txt.
     fModule = wasm_module_new(fStore, &fileBytes);
     
     wasm_byte_vec_delete(&fileBytes);
@@ -104,13 +105,10 @@ void WasmRuntime::unload()
         fStore = nullptr;
     }
 
-// FIXME - this is crashing for WAMR
-#ifndef HIPHOP_WASM_RUNTIME_WAMR
     if (fEngine != nullptr) {
         wasm_engine_delete(fEngine);
         fEngine = nullptr;
     }
-#endif
 }
 
 void WasmRuntime::start(WasmFunctionMap hostFunctions)

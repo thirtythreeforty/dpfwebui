@@ -19,7 +19,7 @@ endif
 
 ifneq ($(HIPHOP_AS_DSP_PATH),)
 AS_DSP = true
-HIPHOP_WASM_RUNTIME ?= wasmer
+HIPHOP_WASM_RUNTIME ?= wamr
 HIPHOP_ENABLE_WASI ?= false
 endif
 

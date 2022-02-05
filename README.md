@@ -22,7 +22,7 @@ from the DSP core. The latter can be implemented in C++ or optionally [AssemblyS
 * Linux / Mac / Windows
 * Just the powerful basics
 
-See [bugs](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
+VST3 support is almost complete, check DPF's GitHub page for further details.
 
 The following language combinations are possible:
 
@@ -34,6 +34,9 @@ AS |C++|DPF Graphics Library (DGL), see example [astone](https://github.com/luci
 C++|C++|Do not use this project, just use DPF instead.
 
 For information on the implementation go [here](https://github.com/lucianoiam/hiphop/blob/master/doc/internals.md).
+
+There are no known stopper bugs, however there is a [list](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt) of smaller details that would be nice to
+address at some point.
 
 ### Example JavaScript UI code
 
