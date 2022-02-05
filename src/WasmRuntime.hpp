@@ -27,7 +27,9 @@
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
 # include "wasm_c_api.h"
 #elif HIPHOP_WASM_RUNTIME_WASMER
-# define WASM_API_EXTERN // link to static lib on win32
+# ifdef DISTRHO_OS_WINDOWS
+#  define WASM_API_EXTERN // link to static lib on win32
+# endif
 # include "wasm.h"
 # include "wasmer.h"
 #else
@@ -107,6 +109,10 @@ private:
 #endif // HIPHOP_ENABLE_WASI
     WasmFunctionVector fHostFunctions;
     WasmExternMap      fModuleExports;
+
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    static int wamrEngineInstanceCount;
+#endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmRuntime)
 

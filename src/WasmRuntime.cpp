@@ -54,6 +54,12 @@ void WasmRuntime::load(const char* modulePath)
         throwWasmLastError();
     }
 
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    // WAMR C API implements a singleton engine and calling wasm_engine_delete()
+    // will destroy it. This is far from ideal in a plugin environment...
+    wamrEngineInstanceCount++;
+#endif
+
     FILE* file = fopen(modulePath, "rb");
 
     if (file == nullptr) {
@@ -106,7 +112,13 @@ void WasmRuntime::unload()
     }
 
     if (fEngine != nullptr) {
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+        if (--wamrEngineInstanceCount == 0) {
+            wasm_engine_delete(fEngine);
+        }
+#else
         wasm_engine_delete(fEngine);
+#endif
         fEngine = nullptr;
     }
 }
@@ -411,3 +423,7 @@ WasmValue WasmRuntime::CToWTF16String(const char* s)
 
     return callFunctionReturnSingleValue("_c_to_wtf16_string", { wPtr });
 }
+
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+int WasmRuntime::wamrEngineInstanceCount = 0;
+#endif
