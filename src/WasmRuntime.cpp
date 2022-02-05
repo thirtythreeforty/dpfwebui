@@ -56,7 +56,10 @@ void WasmRuntime::load(const char* modulePath)
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
     // WAMR C API implements a singleton engine and calling wasm_engine_delete()
-    // will destroy it. This is far from ideal in a plugin environment...
+    // will destroy it. Since there can be more than a single plugin instance
+    // created from the same DLL copy at a given time, wasm_engine_delete() must
+    // be handled with care. This is far from ideal in a plugin environment but
+    // so far the only working solution on Win where Wasmer crashes in some DAWs. 
     wamrEngineInstanceCount++;
 #endif
 
