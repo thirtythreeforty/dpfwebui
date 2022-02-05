@@ -20,8 +20,8 @@ import DISTRHO from './distrho-plugin'
 import PluginImpl from './plugin'
 
 // The interface defined in this file is private to the framework and optimized
-// for Wasmer integration. Do not use it for creating plugins, use the public
-// interface provided by distrho-plugin.ts instead.
+// for integration with the WebAssembly runtime. Do not use it for creating
+// plugins, use the public interface provided by distrho-plugin.ts instead.
 // As of Jul '21 AssemblyScript strings format has not completely settled down.
 // https://github.com/AssemblyScript/assemblyscript/issues/1653. Use C-style
 // strings (UTF-8, null terminated) for all interfaces exposed by this module
