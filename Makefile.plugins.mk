@@ -176,13 +176,13 @@ endif
 
 ifeq ($(AS_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-ifeq ($(WINDOWS),true)
-$(error WAMR is not available on Windows/MinGW)
-endif
 BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include -DHIPHOP_WASM_RUNTIME_WAMR
-LINK_FLAGS += -L$(WAMR_PATH)/build -lvmlib
+LINK_FLAGS += -L$(WAMR_BUILD_DIR) -lvmlib
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread
+endif
+ifeq ($(WINDOWS),true)
+LINK_FLAGS += -lWs2_32 -lShlwapi
 endif
 endif # HIPHOP_WASM_RUNTIME wamr
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
@@ -258,14 +258,38 @@ endif
 ifeq ($(AS_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_PATH = $(HIPHOP_LIB_PATH)/wasm-micro-runtime
-WAMR_LIB_PATH = $(WAMR_PATH)/build/libvmlib.a
+
+ifeq ($(LINUX),true)
+WAMR_PLATFORM_DIR = linux
+else ifeq ($(MACOS),true)
+WAMR_PLATFORM_DIR = darwin
+else ifeq ($(WINDOWS),true)
+WAMR_PLATFORM_DIR = windows
+endif
+
+WAMR_BUILD_DIR = ${WAMR_PATH}/product-mini/platforms/$(WAMR_PLATFORM_DIR)/build
+WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
+
+ifeq ($(WINDOWS),true)
+WAMR_GITHUB_URL = https://github.com/lucianoiam/wasm-micro-runtime
+WAMR_CMAKE_ARGS = -G"Unix Makefiles" -DWAMR_BUILD_LIBC_UVWASI=0 \
+				  -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1 -DWAMR_DISABLE_HW_BOUND_CHECK=1
+else
 WAMR_GITHUB_URL = https://github.com/bytecodealliance/wasm-micro-runtime
+endif
+
+ifeq ($(SKIP_STRIPPING),true)
+WAMR_BUILD_CONFIG = Debug
+else
+WAMR_BUILD_CONFIG = Release
+endif
 
 TARGETS += $(WAMR_LIB_PATH)
 
 $(WAMR_LIB_PATH): $(WAMR_PATH)
 	@echo "Building WAMR static library"
-	@cd $(WAMR_PATH) && mkdir -p build && cd build && cmake .. && make
+	@mkdir -p $(WAMR_BUILD_DIR) && cd $(WAMR_BUILD_DIR) \
+		&& cmake .. $(WAMR_CMAKE_ARGS) && cmake --build . --config $(WAMR_BUILD_CONFIG)
 
 $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_LIB_PATH)
