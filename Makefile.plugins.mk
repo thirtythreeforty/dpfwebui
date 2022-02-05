@@ -265,21 +265,13 @@ endif
 ifeq ($(AS_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_PATH = $(HIPHOP_LIB_PATH)/wasm-micro-runtime
-
-ifeq ($(LINUX),true)
-WAMR_PLATFORM_DIR = linux
-else ifeq ($(MACOS),true)
-WAMR_PLATFORM_DIR = darwin
-else ifeq ($(WINDOWS),true)
-WAMR_PLATFORM_DIR = windows
-endif
-
-WAMR_BUILD_DIR = ${WAMR_PATH}/product-mini/platforms/$(WAMR_PLATFORM_DIR)/build
+WAMR_BUILD_DIR = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
 
 ifeq ($(WINDOWS),true)
 WAMR_GITHUB_URL = https://github.com/lucianoiam/wasm-micro-runtime
-WAMR_CMAKE_ARGS = -G"Unix Makefiles" -DWAMR_BUILD_LIBC_UVWASI=0 \
+WAMR_CMAKE_ARGS = -G"Unix Makefiles" \
+				  -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_UVWASI=0 \
 				  -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1 -DWAMR_DISABLE_HW_BOUND_CHECK=1
 else
 WAMR_GITHUB_URL = https://github.com/bytecodealliance/wasm-micro-runtime
