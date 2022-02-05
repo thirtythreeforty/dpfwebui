@@ -105,7 +105,7 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 
 The framework sports an accurate motto: "DPF is designed to make development of
 new plugins an easy and enjoyable task". It is a low footprint yet powerful tool
-that allows developers to focus on productivity by already solving many not
+that allows developers to focus on productivity by already solving many non
 trivial issues commonly found in the audio plugins domain.
 
 What makes it great?
