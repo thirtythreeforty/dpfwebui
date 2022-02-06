@@ -19,6 +19,8 @@ endif
 
 ifneq ($(HIPHOP_AS_DSP_PATH),)
 AS_DSP = true
+HIPHOP_WASM_RUNTIME ?= wamr
+HIPHOP_ENABLE_WASI ?= false
 endif
 
 ifneq ($(HIPHOP_WEB_UI_PATH),)
@@ -173,15 +175,6 @@ endif
 # Add build flags for AssemblyScript DSP dependencies
 
 ifeq ($(AS_DSP),true)
-HIPHOP_ENABLE_WASI ?= false
-ifeq ($(LINUX_OR_MACOS),true)
-# WAMR uses global data for the C API causing problems on these platforms
-HIPHOP_WASM_RUNTIME ?= wasmer
-endif
-ifeq ($(WINDOWS),true)
-# Wasmer does not work on some Windows DAWs and no problem with globals in DLLs
-HIPHOP_WASM_RUNTIME ?= wamr
-endif
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include -DHIPHOP_WASM_RUNTIME_WAMR
 LINK_FLAGS += -L$(WAMR_BUILD_DIR) -lvmlib
@@ -269,10 +262,16 @@ WAMR_BUILD_DIR = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 
+# Disable feature because it does not compile on MinGW. On Linux and macOS the
+# feature must be also disabled to prevent crashes during initialization of
+# additional plugin instances, ie. after the first plugin instance has been
+# successfully created. WAMR was not designed to run in plugin environments.
+WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1
+
 ifeq ($(WINDOWS),true)
-WAMR_CMAKE_ARGS = -G"Unix Makefiles" \
-				  -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_UVWASI=0 \
-				  -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1 -DWAMR_DISABLE_HW_BOUND_CHECK=1
+WAMR_CMAKE_ARGS += -G"Unix Makefiles" \
+				   -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_UVWASI=0 \
+				   -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
 endif
 
 ifeq ($(SKIP_STRIPPING),true)
@@ -288,9 +287,15 @@ $(WAMR_LIB_PATH): $(WAMR_PATH)
 	@mkdir -p $(WAMR_BUILD_DIR) && cd $(WAMR_BUILD_DIR) \
 		&& cmake .. $(WAMR_CMAKE_ARGS) && cmake --build . --config $(WAMR_BUILD_CONFIG)
 
+WAMR_C_API_PATH = $(WAMR_PATH)/core/iwasm/common
+
 $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_LIB_PATH)
 	@git -C $(HIPHOP_LIB_PATH) clone $(WAMR_GIT_URL)
+	@mv $(WAMR_C_API_PATH)/wasm_c_api.c $(WAMR_C_API_PATH)/wasm_c_api.c.bak
+	@cp $(HIPHOP_ROOT_PATH)/patch/wamr/wasm_c_api.c $(WAMR_C_API_PATH)
+	@mv $(WAMR_C_API_PATH)/wasm_c_api_internal.h $(WAMR_C_API_PATH)/wasm_c_api_internal.h.bak
+	@cp $(HIPHOP_ROOT_PATH)/patch/wamr/wasm_c_api_internal.h $(WAMR_C_API_PATH)
 endif
 endif
 
