@@ -267,14 +267,12 @@ ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_PATH = $(HIPHOP_LIB_PATH)/wasm-micro-runtime
 WAMR_BUILD_DIR = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
+WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 
 ifeq ($(WINDOWS),true)
-WAMR_GITHUB_URL = https://github.com/lucianoiam/wasm-micro-runtime
 WAMR_CMAKE_ARGS = -G"Unix Makefiles" \
 				  -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_UVWASI=0 \
 				  -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1 -DWAMR_DISABLE_HW_BOUND_CHECK=1
-else
-WAMR_GITHUB_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 endif
 
 ifeq ($(SKIP_STRIPPING),true)
@@ -292,7 +290,7 @@ $(WAMR_LIB_PATH): $(WAMR_PATH)
 
 $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_LIB_PATH)
-	@git -C $(HIPHOP_LIB_PATH) clone $(WAMR_GITHUB_URL)
+	@git -C $(HIPHOP_LIB_PATH) clone $(WAMR_GIT_URL)
 endif
 endif
 
