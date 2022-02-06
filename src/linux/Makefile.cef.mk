@@ -7,7 +7,7 @@
 
 CEF_DISTRO = cef_binary_93.1.12+ga8ffe4b+chromium-93.0.4577.82_linux64_minimal
 CEF_DISTRO_FILE = $(CEF_DISTRO).tar.bz2
-CEF_PATH = $(HIPHOP_LIB_PATH)/cef
+CEF_PATH = $(HIPHOP_VENDOR_PATH)/cef
 CEF_BIN_PATH = $(CEF_PATH)/Release
 CEF_RES_PATH = $(CEF_PATH)/Resources
 CEF_URL = https://cef-builds.spotifycdn.com/$(CEF_DISTRO_FILE)
@@ -18,15 +18,15 @@ CEF_URL = https://cef-builds.spotifycdn.com/$(CEF_DISTRO_FILE)
 $(CEF_PATH):
 	@echo Downloading CEF
 	@wget -4 -O /tmp/$(CEF_DISTRO_FILE) $(CEF_URL)
-	@mkdir -p $(HIPHOP_LIB_PATH)
+	@mkdir -p $(HIPHOP_VENDOR_PATH)
 	@echo Decompressing CEF, this takes a while!
-	@tar xjf /tmp/$(CEF_DISTRO_FILE) -C $(HIPHOP_LIB_PATH)
+	@tar xjf /tmp/$(CEF_DISTRO_FILE) -C $(HIPHOP_VENDOR_PATH)
 	@ln -s $(CEF_DISTRO) $(CEF_PATH)
 	@rm /tmp/$(CEF_DISTRO_FILE)
 
 # ------------------------------------------------------------------------------
 # CEF C++ wrapper static library. Based on libcef_dll/CMakeLists.txt
-# Library saved to framework HIPHOP_LIB_PATH not plugin BUILD_DIR
+# Library saved to framework HIPHOP_VENDOR_PATH not plugin BUILD_DIR
 
 CEF_FILES_WRAPPER = \
 	cpptoc/frame_handler_cpptoc.cc \
@@ -217,7 +217,7 @@ CEF_CXXFLAGS = -I$(CEF_PATH) -DNDEBUG -DWRAPPING_CEF_SHARED -D_FILE_OFFSET_BITS=
 
 CEF_WRAPPER_OBJ = $(CEF_FILES_WRAPPER:%.cc=$(BUILD_DIR)/libcef_dll_wrapper/%.o)
 
-CEF_WRAPPER_LIB = $(HIPHOP_LIB_PATH)/libcef_dll_wrapper.a
+CEF_WRAPPER_LIB = $(HIPHOP_VENDOR_PATH)/libcef_dll_wrapper.a
 
 $(CEF_WRAPPER_LIB): $(CEF_WRAPPER_OBJ)
 	@ar qc $(CEF_WRAPPER_LIB) $(CEF_WRAPPER_OBJ)
@@ -245,7 +245,7 @@ LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/%.o)
 LXHELPER_CFLAGS = -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) \
                   -DCEF_HELPER_BINARY -DPLUGIN_BIN_BASENAME=$(NAME)
 
-LXHELPER_LDFLAGS = -ldl -lXi -lcef_dll_wrapper -L$(HIPHOP_LIB_PATH) -lcef -L$(CEF_BIN_PATH) \
+LXHELPER_LDFLAGS = -ldl -lXi -lcef_dll_wrapper -L$(HIPHOP_VENDOR_PATH) -lcef -L$(CEF_BIN_PATH) \
 				   -lX11 -O3 -DNDEBUG -rdynamic -fPIC -pthread -Wl,--disable-new-dtags \
 				   -Wl,--fatal-warnings -Wl,-rpath,. -Wl,-z,noexecstack \
 				   -Wl,-z,now -Wl,-z,relro -m64 -Wl,-O1 -Wl,--as-needed \
