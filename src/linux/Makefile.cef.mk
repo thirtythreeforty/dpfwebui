@@ -217,7 +217,7 @@ CEF_CXXFLAGS = -I$(CEF_PATH) -DNDEBUG -DWRAPPING_CEF_SHARED -D_FILE_OFFSET_BITS=
 
 CEF_WRAPPER_OBJ = $(CEF_FILES_WRAPPER:%.cc=$(BUILD_DIR)/libcef_dll_wrapper/%.o)
 
-CEF_WRAPPER_LIB = $(HIPHOP_VENDOR_PATH)/libcef_dll_wrapper.a
+CEF_WRAPPER_LIB = $(CEF_PATH)/libcef_dll_wrapper.a
 
 $(CEF_WRAPPER_LIB): $(CEF_WRAPPER_OBJ)
 	@ar qc $(CEF_WRAPPER_LIB) $(CEF_WRAPPER_OBJ)
@@ -245,7 +245,7 @@ LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/%.o)
 LXHELPER_CFLAGS = -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) \
                   -DCEF_HELPER_BINARY -DPLUGIN_BIN_BASENAME=$(NAME)
 
-LXHELPER_LDFLAGS = -ldl -lXi -lcef_dll_wrapper -L$(HIPHOP_VENDOR_PATH) -lcef -L$(CEF_BIN_PATH) \
+LXHELPER_LDFLAGS = -ldl -lXi -lcef_dll_wrapper -L$(CEF_PATH) -lcef -L$(CEF_BIN_PATH) \
 				   -lX11 -O3 -DNDEBUG -rdynamic -fPIC -pthread -Wl,--disable-new-dtags \
 				   -Wl,--fatal-warnings -Wl,-rpath,. -Wl,-z,noexecstack \
 				   -Wl,-z,now -Wl,-z,relro -m64 -Wl,-O1 -Wl,--as-needed \
