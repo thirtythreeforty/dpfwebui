@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  */
 
+// Patched to avoid engine singleton
+
 #include "wasm_c_api_internal.h"
 #include "wasm_memory.h"
 #include "wasm_runtime_common.h"
