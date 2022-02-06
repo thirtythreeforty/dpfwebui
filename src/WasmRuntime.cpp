@@ -20,6 +20,7 @@
 
 #include "WasmRuntime.hpp"
 
+#define MAX_MODULE_NAME    128
 #define MAX_HOST_FUNCTIONS 128
 
 // TODO - check for correct usage of the Wasm C API focusing on memory leaks
@@ -47,8 +48,6 @@ WasmRuntime::~WasmRuntime()
 
 void WasmRuntime::load(const char* modulePath)
 {
-    // WAMR implementation of wasm_engine_new() initializes the runtime so it
-    // must be called before any other call to wasm_* functions.
     fEngine = wasm_engine_new();
 
     if (fEngine == nullptr) {
@@ -114,6 +113,8 @@ void WasmRuntime::unload()
 
 void WasmRuntime::start(WasmFunctionMap hostFunctions)
 {
+    char name[MAX_MODULE_NAME];
+
 #ifdef HIPHOP_ENABLE_WASI
     // -------------------------------------------------------------------------
     // Build a map of WASI imports
@@ -138,7 +139,9 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     for (size_t i = 0; i < wasiImports.size; i++) {
         const wasmer_named_extern_t *ne = wasiImports.data[i];
         const wasm_name_t *wn = wasmer_named_extern_name(ne);
-        wasiImportIndex[wn->data] = i;
+        memcpy(name, wn->data, wn->size);
+        name[wn->size] = '\0';
+        wasiImportIndex[name] = i;
     }
 #endif // HIPHOP_ENABLE_WASI
 
@@ -155,7 +158,9 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 
     for (size_t i = 0; i < importTypes.size; i++) {
         const wasm_name_t *wn = wasm_importtype_name(importTypes.data[i]);
-        importIndex[wn->data] = i;
+        memcpy(name, wn->data, wn->size);
+        name[wn->size] = '\0';
+        importIndex[name] = i;
 
 #ifdef HIPHOP_ENABLE_WASI
         if (wasiImportIndex.find(name) != wasiImportIndex.end()) {
@@ -165,7 +170,9 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 #endif // HIPHOP_ENABLE_WASI
         if (!moduleNeedsWasi) {
             wn = wasm_importtype_module(importTypes.data[i]);
-            if (strstr(wn->data, "wasi_") == wn->data) { // eg, wasi_snapshot_preview1
+            memcpy(name, wn->data, wn->size);
+            name[wn->size] = '\0';
+            if (strstr(name, "wasi_") == name) { // eg, wasi_snapshot_preview1
                 moduleNeedsWasi = true;
             }
         }
@@ -238,7 +245,9 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 
     for (size_t i = 0; i < fExportsVec.size; i++) {
         const wasm_name_t *wn = wasm_exporttype_name(exportTypes.data[i]);
-        fModuleExports[wn->data] = fExportsVec.data[i];
+        memcpy(name, wn->data, wn->size);
+        name[wn->size] = '\0';
+        fModuleExports[name] = fExportsVec.data[i];
     }
 
     wasm_exporttype_vec_delete(&exportTypes);
@@ -323,7 +332,7 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
         wasm_trap_message(trap, wm);
         std::string s = std::string("Call to wasm function failed") + " [" + name + "]";
         if (wm != nullptr) {
-            s += std::string(" - ") + wm->data;
+            s += std::string(" - ") + wm->data /*null terminated*/;
         }
         throw std::runtime_error(s);
     }
