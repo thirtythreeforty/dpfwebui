@@ -20,25 +20,9 @@
 #define SPIN_LOCK_HPP
 
 #include <atomic>
+#include <unistd.h>
 
 #include "src/DistrhoDefines.h"
-
-#ifdef DISTRHO_OS_WINDOWS
-void usleep(unsigned int usec)
-{
-    HANDLE timer;
-    LARGE_INTEGER ft;
-
-    ft.QuadPart = -(10 * (__int64)usec);
-
-    timer = CreateWaitableTimer(NULL, TRUE, NULL);
-    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
-    WaitForSingleObject(timer, INFINITE);
-    CloseHandle(timer);
-}
-#else
-# include <unistd.h>
-#endif
 
 START_NAMESPACE_DISTRHO
 
