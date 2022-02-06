@@ -261,6 +261,7 @@ WAMR_PATH = $(HIPHOP_VENDOR_PATH)/wasm-micro-runtime
 WAMR_BUILD_DIR = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
+WAMR_GIT_COMMIT = 4bdeb90
 
 # Disable HW_BOUND_CHECK feature because it does not compile on MinGW. On Linux
 # and macOS it must be also disabled to prevent crashes during initialization of
@@ -291,7 +292,8 @@ WAMR_C_API_PATH = $(WAMR_PATH)/core/iwasm/common
 
 $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_VENDOR_PATH)
-	@git -C $(HIPHOP_VENDOR_PATH) clone $(WAMR_GIT_URL)
+	@git -C $(HIPHOP_VENDOR_PATH) clone $(WAMR_GIT_URL) \
+		&& git -C $(WAMR_PATH) reset --hard $(WAMR_GIT_COMMIT)
 	@cp $(HIPHOP_VENDOR_PATH)/wamr-patch/wasm_c_api.c $(WAMR_C_API_PATH)
 	@cp $(HIPHOP_VENDOR_PATH)/wamr-patch/wasm_c_api_internal.h $(WAMR_C_API_PATH)
 endif
