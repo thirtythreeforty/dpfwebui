@@ -36,7 +36,7 @@ public:
     {
         while (fFlag.test_and_set(std::memory_order_acquire)) {
             if (usec > 0) {
-                usleep(usec);
+                usleep(static_cast<useconds_t>(usec));
             }
         }
     }
@@ -54,18 +54,19 @@ private:
 class ScopedSpinLock
 {
 public:
-    ScopedSpinLock(int usec)
+    ScopedSpinLock(SpinLock& lock, int usec)
+        : fLock(&lock)
     {
-        fLock.lock(usec);
+        fLock->lock(usec);
     }
 
     ~ScopedSpinLock()
     {
-        fLock.unlock();
+        fLock->unlock();
     }
 
 private:
-    SpinLock fLock;
+    SpinLock* fLock;
 
 };
 
