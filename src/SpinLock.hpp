@@ -32,7 +32,7 @@ public:
     SpinLock() noexcept : fFlag(false)
     {}
 
-    void lock(int usec = 0) noexcept
+    void lock(int usec) noexcept
     {
         while (fFlag.test_and_set(std::memory_order_acquire)) {
             if (usec > 0) {
@@ -48,6 +48,24 @@ public:
 
 private:
     std::atomic_flag fFlag;
+
+};
+
+class ScopedSpinLock
+{
+public:
+    ScopedSpinLock(int usec)
+    {
+        fLock.lock(usec);
+    }
+
+    ~ScopedSpinLock()
+    {
+        fLock.unlock();
+    }
+
+private:
+    SpinLock fLock;
 
 };
 

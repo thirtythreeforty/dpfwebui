@@ -73,11 +73,9 @@ public:
     WasmValueVector writeMidiEvent(WasmValueVector params);
 
 private:
-    inline bool lockRuntime(bool wait = true) const;
-    inline void unlockRuntime() const;
+    inline void checkRuntime() const;
 
     std::shared_ptr<WasmRuntime> fRuntime;
-    mutable SpinLock             fRuntimeLock;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmHostPlugin)
 
