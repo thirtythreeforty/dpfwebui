@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,165 +64,168 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
 
 const char* WasmHostPlugin::getLabel() const
 {
-    try {
-        checkRuntime();
-        return fRuntime->callFunctionReturnCString("_get_label");
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return ERROR_STR;
     }
 
-    return ERROR_STR;
+    const char *res = fRuntime->callFunctionReturnCString("_get_label");
+    unlockRuntime();
+    
+    return res;
 }
 
 const char* WasmHostPlugin::getMaker() const
 {
-    try {
-        checkRuntime();
-        return fRuntime->callFunctionReturnCString("_get_maker");
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return ERROR_STR;
     }
 
-    return ERROR_STR;
+    const char* res = fRuntime->callFunctionReturnCString("_get_maker");
+    unlockRuntime();
+    
+    return res;
 }
 
 const char* WasmHostPlugin::getLicense() const
 {
-    try {
-        checkRuntime();
-        return fRuntime->callFunctionReturnCString("_get_license");
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return ERROR_STR;
     }
 
-    return ERROR_STR;
+    const char* res = fRuntime->callFunctionReturnCString("_get_license");
+    unlockRuntime();
+    
+    return res;
 }
 
 uint32_t WasmHostPlugin::getVersion() const
 {
-    try {
-        checkRuntime();
-        return fRuntime->callFunctionReturnSingleValue("_get_version").of.i32;
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return 0;
     }
 
-    return 0;
+    uint32_t res = fRuntime->callFunctionReturnSingleValue("_get_version").of.i32;
+    unlockRuntime();
+    
+    return res;
 }
 
 int64_t WasmHostPlugin::getUniqueId() const
 {
-    try {
-        checkRuntime();
-        return fRuntime->callFunctionReturnSingleValue("_get_unique_id").of.i64;
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return 0;
     }
 
-    return 0;
+    int64_t res = fRuntime->callFunctionReturnSingleValue("_get_unique_id").of.i64;
+    unlockRuntime();
+    
+    return res;
 }
 
 void WasmHostPlugin::initParameter(uint32_t index, Parameter& parameter)
 {
-    try {
-        checkRuntime();
-        fRuntime->callFunction("_init_parameter", { MakeI32(index) });
-        parameter.hints      = fRuntime->getGlobal("_rw_int32_1").of.i32;
-        parameter.name       = fRuntime->getGlobalAsCString("_ro_string_1");
-        parameter.ranges.def = fRuntime->getGlobal("_rw_float32_1").of.f32;
-        parameter.ranges.min = fRuntime->getGlobal("_rw_float32_2").of.f32;
-        parameter.ranges.max = fRuntime->getGlobal("_rw_float32_3").of.f32;
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return;
     }
+
+    fRuntime->callFunction("_init_parameter", { MakeI32(index) });
+    parameter.hints      = fRuntime->getGlobal("_rw_int32_1").of.i32;
+    parameter.name       = fRuntime->getGlobalAsCString("_ro_string_1");
+    parameter.ranges.def = fRuntime->getGlobal("_rw_float32_1").of.f32;
+    parameter.ranges.min = fRuntime->getGlobal("_rw_float32_2").of.f32;
+    parameter.ranges.max = fRuntime->getGlobal("_rw_float32_3").of.f32;
+
+    unlockRuntime();
 }
 
 float WasmHostPlugin::getParameterValue(uint32_t index) const
 {
-    try {
-        checkRuntime();
-        return fRuntime->callFunctionReturnSingleValue("_get_parameter_value",
-            { MakeI32(index) }).of.f32;
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return 0;
     }
 
-    return 0;
+    float res = fRuntime->callFunctionReturnSingleValue("_get_parameter_value",
+        { MakeI32(index) }).of.f32;
+    unlockRuntime();
+    
+    return res;
 }
 
 void WasmHostPlugin::setParameterValue(uint32_t index, float value)
 {
-    try {
-        checkRuntime();
-        fRuntime->callFunction("_set_parameter_value", { MakeI32(index), MakeF32(value) });
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return;
     }
+
+    fRuntime->callFunction("_set_parameter_value", { MakeI32(index), MakeF32(value) });
+    unlockRuntime();
 }
 
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
 void WasmHostPlugin::initProgramName(uint32_t index, String& programName)
 {
-    try {
-        checkRuntime();
-        programName = fRuntime->callFunctionReturnCString("_init_program_name", { MakeI32(index) });
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return;
     }
+
+    programName = fRuntime->callFunctionReturnCString("_init_program_name", { MakeI32(index) });
+    unlockRuntime();
 }
 
 void WasmHostPlugin::loadProgram(uint32_t index)
 {
-    try {
-        checkRuntime();
-        fRuntime->callFunction("_load_program", { MakeI32(index) });
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return;
     }
+
+    fRuntime->callFunction("_load_program", { MakeI32(index) });
+    unlockRuntime();
 }
 #endif // DISTRHO_PLUGIN_WANT_PROGRAMS
 
 #if DISTRHO_PLUGIN_WANT_STATE
 void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
 {
-    try {
-        checkRuntime();
-        fRuntime->callFunction("_init_state", { MakeI32(index) });
-        stateKey = fRuntime->getGlobalAsCString("_ro_string_1");
-        defaultStateValue = fRuntime->getGlobalAsCString("_ro_string_2");
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return;
     }
+
+    fRuntime->callFunction("_init_state", { MakeI32(index) });
+    stateKey = fRuntime->getGlobalAsCString("_ro_string_1");
+    defaultStateValue = fRuntime->getGlobalAsCString("_ro_string_2");
+
+    unlockRuntime();
 }
 
 void WasmHostPlugin::setState(const char* key, const char* value)
 {
-    try {
-        checkRuntime();
-        const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
-        fRuntime->copyCStringToMemory(wkey, key);
-        const WasmValue wval = fRuntime->getGlobal("_rw_string_2");
-        fRuntime->copyCStringToMemory(wval, value);
-        fRuntime->callFunction("_set_state", { wkey, wval });
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return;
     }
+
+    const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
+    fRuntime->copyCStringToMemory(wkey, key);
+    const WasmValue wval = fRuntime->getGlobal("_rw_string_2");
+    fRuntime->copyCStringToMemory(wval, value);
+    fRuntime->callFunction("_set_state", { wkey, wval });
+
+    unlockRuntime();
 }
 
 #if DISTRHO_PLUGIN_WANT_FULL_STATE
 String WasmHostPlugin::getState(const char* key) const
 {
-    try {
-        checkRuntime();
-        const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
-        fRuntime->copyCStringToMemory(wkey, key);
-        const char* val = fRuntime->callFunctionReturnCString("_get_state", { wkey });
-        return String(val);
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return String();
     }
 
-    return String();
+    const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
+    fRuntime->copyCStringToMemory(wkey, key);
+    const char* val = fRuntime->callFunctionReturnCString("_get_state", { wkey });
+
+    unlockRuntime();
+
+    return String(val);
 }
 #endif // DISTRHO_PLUGIN_WANT_FULL_STATE
 
@@ -230,22 +233,22 @@ String WasmHostPlugin::getState(const char* key) const
 
 void WasmHostPlugin::activate()
 {
-    try {
-        checkRuntime();
-        fRuntime->callFunction("_activate");
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return;
     }
+
+    fRuntime->callFunction("_activate");
+    unlockRuntime();
 }
 
 void WasmHostPlugin::deactivate()
 {
-    try {
-        checkRuntime();
-        fRuntime->callFunction("_deactivate");
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime()) {
+        return;
     }
+
+    fRuntime->callFunction("_deactivate");
+    unlockRuntime();
 }
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
@@ -258,53 +261,57 @@ void WasmHostPlugin::deactivate()
     const MidiEvent* midiEvents = 0;
     uint32_t midiEventCount = 0;
 #endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
-    try {
-        checkRuntime();
-
-        float32_t* audioBlock;
-
-        audioBlock = reinterpret_cast<float32_t *>(fRuntime->getMemory(
-            fRuntime->getGlobal("_rw_input_block")));
-
-        for (int i = 0; i < DISTRHO_PLUGIN_NUM_INPUTS; i++) {
-            memcpy(audioBlock + i * frames, inputs[i], frames * 4);
-        }
-
-        byte_t* midiBlock = fRuntime->getMemory(fRuntime->getGlobal("_rw_midi_block"));
-
-        for (uint32_t i = 0; i < midiEventCount; i++) {
-            *reinterpret_cast<uint32_t *>(midiBlock) = midiEvents[i].frame;
-            midiBlock += 4;
-            *reinterpret_cast<uint32_t *>(midiBlock) = midiEvents[i].size;
-            midiBlock += 4;
-            if (midiEvents[i].size > MidiEvent::kDataSize) {
-                memcpy(midiBlock, midiEvents[i].dataExt, midiEvents[i].size);
-            } else {
-                memcpy(midiBlock, midiEvents[i].data, midiEvents[i].size);
-            }
-            midiBlock += midiEvents[i].size;
-        }
-
-        fRuntime->callFunction("_run", { MakeI32(frames), MakeI32(midiEventCount) });
-
-        audioBlock = reinterpret_cast<float32_t *>(fRuntime->getMemory(
-            fRuntime->getGlobal("_rw_output_block")));
-
-        for (int i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; i++) {
-            memcpy(outputs[i], audioBlock + i * frames, frames * 4);
-        }
-    } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+    if (! lockRuntime(false)) {
+        return;
     }
+
+    float32_t* audioBlock;
+
+    audioBlock = reinterpret_cast<float32_t *>(fRuntime->getMemory(
+        fRuntime->getGlobal("_rw_input_block")));
+
+    for (int i = 0; i < DISTRHO_PLUGIN_NUM_INPUTS; i++) {
+        memcpy(audioBlock + i * frames, inputs[i], frames * 4);
+    }
+
+    byte_t* midiBlock = fRuntime->getMemory(fRuntime->getGlobal("_rw_midi_block"));
+
+    for (uint32_t i = 0; i < midiEventCount; i++) {
+        *reinterpret_cast<uint32_t *>(midiBlock) = midiEvents[i].frame;
+        midiBlock += 4;
+        *reinterpret_cast<uint32_t *>(midiBlock) = midiEvents[i].size;
+        midiBlock += 4;
+        if (midiEvents[i].size > MidiEvent::kDataSize) {
+            memcpy(midiBlock, midiEvents[i].dataExt, midiEvents[i].size);
+        } else {
+            memcpy(midiBlock, midiEvents[i].data, midiEvents[i].size);
+        }
+        midiBlock += midiEvents[i].size;
+    }
+
+    fRuntime->callFunction("_run", { MakeI32(frames), MakeI32(midiEventCount) });
+
+    audioBlock = reinterpret_cast<float32_t *>(fRuntime->getMemory(
+        fRuntime->getGlobal("_rw_output_block")));
+
+    for (int i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; i++) {
+        memcpy(outputs[i], audioBlock + i * frames, frames * 4);
+    }
+
+    unlockRuntime();
 }
 
 WasmValueVector WasmHostPlugin::getTimePosition(WasmValueVector params)
 {
     (void)params;
 #if DISTRHO_PLUGIN_WANT_TIMEPOS
+    if (! lockRuntime()) {
+        return {};
+    }
     const TimePosition& pos = Plugin::getTimePosition();
     fRuntime->setGlobal("_rw_int32_1", MakeI32(pos.playing));
     fRuntime->setGlobal("_rw_int64_1", MakeI64(pos.frame));
+    unlockRuntime();
     return {};
 #else
     throw std::runtime_error("Called getTimePosition() without DISTRHO_PLUGIN_WANT_TIMEPOS");
@@ -314,6 +321,9 @@ WasmValueVector WasmHostPlugin::getTimePosition(WasmValueVector params)
 WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
 {
     (void)params;
+    if (! lockRuntime()) {
+        return { MakeI32(0) };
+    }
 #if DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
     MidiEvent event;
     byte_t* midiBlock = fRuntime->getMemory(fRuntime->getGlobal("_rw_midi_block"));
@@ -330,15 +340,34 @@ WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
         event.dataExt = 0;
     }
 
-    return { MakeI32(writeMidiEvent(event)) };
+    WasmValueVector res = { MakeI32(writeMidiEvent(event)) };
+    unlockRuntime();
+    return res;
 #else
     throw std::runtime_error("Called writeMidiEvent() without DISTRHO_PLUGIN_WANT_MIDI_OUTPUT");
 #endif // DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
 }
 
-void WasmHostPlugin::checkRuntime() const
+bool WasmHostPlugin::lockRuntime(bool wait) const
 {
     if (!fRuntime->isStarted()) {
-        throw std::runtime_error("Wasm runtime is not running");
+        d_stderr2("WebAssembly runtime is not running");
+        return false;
     }
+
+    // When wait is false the lock spins tightly around an atomic flag without
+    // making any syscalls while spinning. This is safe for the audio thread,
+    // all plugin calls except run() should take negligible time to complete.
+    // When wait is true some wait time is introduced on each spin iteration,
+    // this is acceptable for non-audio threads and also desired because run()
+    // can take non-negligible time to complete.
+
+    fRuntimeLock.lock(wait ? 100 /*usec*/: 0);
+
+    return true;
+}
+
+void WasmHostPlugin::unlockRuntime() const
+{
+    fRuntimeLock.unlock();
 }

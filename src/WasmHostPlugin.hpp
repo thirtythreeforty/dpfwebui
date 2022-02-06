@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "DistrhoPlugin.hpp"
 
 #include "WasmRuntime.hpp"
+#include "SpinLock.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -72,9 +73,11 @@ public:
     WasmValueVector writeMidiEvent(WasmValueVector params);
 
 private:
-    inline void checkRuntime() const;
+    inline bool lockRuntime(bool wait = true) const;
+    inline void unlockRuntime() const;
 
     std::shared_ptr<WasmRuntime> fRuntime;
+    mutable SpinLock             fRuntimeLock;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmHostPlugin)
 

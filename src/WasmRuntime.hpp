@@ -27,9 +27,6 @@
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
 # include "wasm_c_api.h"
 #elif HIPHOP_WASM_RUNTIME_WASMER
-# ifdef DISTRHO_OS_WINDOWS
-#  define WASM_API_EXTERN // link to static lib on win32
-# endif
 # include "wasm.h"
 # include "wasmer.h"
 #else

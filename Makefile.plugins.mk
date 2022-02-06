@@ -266,8 +266,7 @@ WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 # and macOS it must be also disabled to prevent crashes during initialization of
 # additional plugin instances, ie. after the first plugin instance has been
 # successfully created. WAMR was not designed to run in plugin environments.
-WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1 -DWAMR_BUILD_INTERP=1 \
-				  -DWAMR_BUILD_AOT=0
+WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1
 
 ifeq ($(WINDOWS),true)
 WAMR_CMAKE_ARGS += -G"Unix Makefiles" \
