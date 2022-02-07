@@ -48,12 +48,15 @@ WasmRuntime::~WasmRuntime()
 
 void WasmRuntime::load(const char* modulePath)
 {
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    // wasm_engine_new() also initializes the WAMR runtime, this call needs to
+    // appear before any other call to wasm_* functions.
     fEngine = wasm_engine_new();
 
     if (fEngine == nullptr) {
-        throwWasmLastError();
+        throw std::runtime_error("Error initializing WAMR engine");
     }
-
+#endif
     FILE* file = fopen(modulePath, "rb");
 
     if (file == nullptr) {
@@ -74,6 +77,15 @@ void WasmRuntime::load(const char* modulePath)
     }
 
     fclose(file);
+
+#ifndef HIPHOP_WASM_RUNTIME_WAMR
+    // Initialize the engine here for other runtimes like Wasmer
+    fEngine = wasm_engine_new();
+
+    if (fEngine == nullptr) {
+        throwWasmLastError();
+    }
+#endif
 
     fStore = wasm_store_new(fEngine); 
 
