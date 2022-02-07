@@ -20,6 +20,7 @@
 #define WASM_RUNTIME_HPP
 
 #include <functional>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
