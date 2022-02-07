@@ -73,7 +73,7 @@ public:
     WasmValueVector writeMidiEvent(WasmValueVector params);
 
 private:
-    inline void checkRuntime() const;
+    inline void checkRuntime(const char* caller) const;
 
     std::shared_ptr<WasmRuntime> fRuntime;
     mutable SpinLock             fRuntimeLock;

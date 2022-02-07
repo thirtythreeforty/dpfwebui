@@ -21,17 +21,7 @@
 #include "WasmHostPlugin.hpp"
 #include "Path.hpp"
 
-#define ERROR_STR "Error"
-
 USE_NAMESPACE_DISTRHO
-
-// Spins tightly around an atomic flag with no-syscalls guarantee. Audio thread
-// safe, all plugin calls [ except run() ] should complete in negligible time.
-#define NON_RT_SCOPED_LOCK() ScopedSpinLock lock(fRuntimeLock, 0)
-
-// Wait time introduced on each spin iteration. Better for non-audio threads 
-// because AssemblyScript run() can take non-negligible time to complete.
-#define RT_SCOPED_LOCK() ScopedSpinLock lock(fRuntimeLock, 100 /*usec*/)
 
 WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
                                 std::shared_ptr<WasmRuntime> runtime)
@@ -69,10 +59,22 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
     }
 }
 
+#define ERROR_STR "Error"
+
+#define CHECK_RUNTIME() checkRuntime(__FUNCTION__);
+
+// Spins tightly around an atomic flag with no-syscalls guarantee. Audio thread
+// safe, all plugin calls [ except run() ] should complete in negligible time.
+#define NON_RT_SCOPED_LOCK() ScopedSpinLock lock(fRuntimeLock, 0)
+
+// Wait time introduced on each spin iteration. Better for non-audio threads 
+// because AssemblyScript run() can take non-negligible time to complete.
+#define RT_SCOPED_LOCK() ScopedSpinLock lock(fRuntimeLock, 100 /*usec*/)
+
 const char* WasmHostPlugin::getLabel() const
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         return fRuntime->callFunctionReturnCString("_get_label");
@@ -86,7 +88,7 @@ const char* WasmHostPlugin::getLabel() const
 const char* WasmHostPlugin::getMaker() const
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         return fRuntime->callFunctionReturnCString("_get_maker");
@@ -100,7 +102,7 @@ const char* WasmHostPlugin::getMaker() const
 const char* WasmHostPlugin::getLicense() const
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         return fRuntime->callFunctionReturnCString("_get_license");
@@ -114,7 +116,7 @@ const char* WasmHostPlugin::getLicense() const
 uint32_t WasmHostPlugin::getVersion() const
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         return fRuntime->callFunctionReturnSingleValue("_get_version").of.i32;
@@ -128,7 +130,7 @@ uint32_t WasmHostPlugin::getVersion() const
 int64_t WasmHostPlugin::getUniqueId() const
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         return fRuntime->callFunctionReturnSingleValue("_get_unique_id").of.i64;
@@ -142,7 +144,7 @@ int64_t WasmHostPlugin::getUniqueId() const
 void WasmHostPlugin::initParameter(uint32_t index, Parameter& parameter)
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         fRuntime->callFunction("_init_parameter", { MakeI32(index) });
@@ -159,7 +161,7 @@ void WasmHostPlugin::initParameter(uint32_t index, Parameter& parameter)
 float WasmHostPlugin::getParameterValue(uint32_t index) const
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         return fRuntime->callFunctionReturnSingleValue("_get_parameter_value",
@@ -174,7 +176,7 @@ float WasmHostPlugin::getParameterValue(uint32_t index) const
 void WasmHostPlugin::setParameterValue(uint32_t index, float value)
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         fRuntime->callFunction("_set_parameter_value", { MakeI32(index), MakeF32(value) });
@@ -187,7 +189,7 @@ void WasmHostPlugin::setParameterValue(uint32_t index, float value)
 void WasmHostPlugin::initProgramName(uint32_t index, String& programName)
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         programName = fRuntime->callFunctionReturnCString("_init_program_name", { MakeI32(index) });
@@ -199,7 +201,7 @@ void WasmHostPlugin::initProgramName(uint32_t index, String& programName)
 void WasmHostPlugin::loadProgram(uint32_t index)
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         fRuntime->callFunction("_load_program", { MakeI32(index) });
@@ -213,7 +215,7 @@ void WasmHostPlugin::loadProgram(uint32_t index)
 void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         fRuntime->callFunction("_init_state", { MakeI32(index) });
@@ -227,7 +229,7 @@ void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& default
 void WasmHostPlugin::setState(const char* key, const char* value)
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
@@ -244,7 +246,7 @@ void WasmHostPlugin::setState(const char* key, const char* value)
 String WasmHostPlugin::getState(const char* key) const
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
@@ -265,7 +267,7 @@ String WasmHostPlugin::getState(const char* key) const
 void WasmHostPlugin::activate()
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         fRuntime->callFunction("_activate");
@@ -277,7 +279,7 @@ void WasmHostPlugin::activate()
 void WasmHostPlugin::deactivate()
 {
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         fRuntime->callFunction("_deactivate");
@@ -297,7 +299,7 @@ void WasmHostPlugin::deactivate()
     uint32_t midiEventCount = 0;
 #endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         RT_SCOPED_LOCK();
 
         float32_t* audioBlock;
@@ -333,7 +335,7 @@ void WasmHostPlugin::deactivate()
             memcpy(outputs[i], audioBlock + i * frames, frames * 4);
         }
     } catch (const std::exception& ex) {
-        d_stderr2(ex.what());
+        //d_stderr2(ex.what());
     }
 }
 
@@ -342,7 +344,7 @@ WasmValueVector WasmHostPlugin::getTimePosition(WasmValueVector params)
     (void)params;
 #if DISTRHO_PLUGIN_WANT_TIMEPOS
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         const TimePosition& pos = Plugin::getTimePosition();
@@ -365,7 +367,7 @@ WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
     (void)params;
 #if DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
     try {
-        checkRuntime();
+        CHECK_RUNTIME();
         NON_RT_SCOPED_LOCK();
 
         MidiEvent event;
@@ -394,9 +396,10 @@ WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
 #endif // DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
 }
 
-void WasmHostPlugin::checkRuntime() const
+void WasmHostPlugin::checkRuntime(const char* caller) const
 {
     if (!fRuntime->isStarted()) {
-        throw std::runtime_error("WebAssembly runtime is not running");
+        throw std::runtime_error(std::string(caller) + "()"
+                                " : WebAssembly runtime is not running");
     }
 }
