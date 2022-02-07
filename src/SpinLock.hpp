@@ -29,7 +29,8 @@ START_NAMESPACE_DISTRHO
 class SpinLock
 {
 public:
-    SpinLock() noexcept : fFlag(false)
+    SpinLock() noexcept
+        : fFlag(false)
     {}
 
     void lock(int usec) noexcept

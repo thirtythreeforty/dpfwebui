@@ -19,7 +19,6 @@
 #include <stdexcept>
 
 #include "WasmHostPlugin.hpp"
-
 #include "Path.hpp"
 
 #define ERROR_STR "Error"
@@ -75,9 +74,11 @@ const char* WasmHostPlugin::getLabel() const
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         return fRuntime->callFunctionReturnCString("_get_label");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
+
         return ERROR_STR;
     }
 }
@@ -87,9 +88,11 @@ const char* WasmHostPlugin::getMaker() const
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         return fRuntime->callFunctionReturnCString("_get_maker");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
+
         return ERROR_STR;
     }
 }
@@ -99,9 +102,11 @@ const char* WasmHostPlugin::getLicense() const
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         return fRuntime->callFunctionReturnCString("_get_license");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
+
         return ERROR_STR;
     }
 }
@@ -111,9 +116,11 @@ uint32_t WasmHostPlugin::getVersion() const
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         return fRuntime->callFunctionReturnSingleValue("_get_version").of.i32;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
+
         return 0;
     }
 }
@@ -123,9 +130,11 @@ int64_t WasmHostPlugin::getUniqueId() const
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         return fRuntime->callFunctionReturnSingleValue("_get_unique_id").of.i64;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
+
         return 0;
     }
 }
@@ -135,6 +144,7 @@ void WasmHostPlugin::initParameter(uint32_t index, Parameter& parameter)
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         fRuntime->callFunction("_init_parameter", { MakeI32(index) });
         parameter.hints      = fRuntime->getGlobal("_rw_int32_1").of.i32;
         parameter.name       = fRuntime->getGlobalAsCString("_ro_string_1");
@@ -151,10 +161,12 @@ float WasmHostPlugin::getParameterValue(uint32_t index) const
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         return fRuntime->callFunctionReturnSingleValue("_get_parameter_value",
             { MakeI32(index) }).of.f32;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
+
         return 0;
     }
 }
@@ -164,6 +176,7 @@ void WasmHostPlugin::setParameterValue(uint32_t index, float value)
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         fRuntime->callFunction("_set_parameter_value", { MakeI32(index), MakeF32(value) });
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
@@ -176,6 +189,7 @@ void WasmHostPlugin::initProgramName(uint32_t index, String& programName)
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         programName = fRuntime->callFunctionReturnCString("_init_program_name", { MakeI32(index) });
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
@@ -187,6 +201,7 @@ void WasmHostPlugin::loadProgram(uint32_t index)
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         fRuntime->callFunction("_load_program", { MakeI32(index) });
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
@@ -200,6 +215,7 @@ void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& default
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         fRuntime->callFunction("_init_state", { MakeI32(index) });
         stateKey = fRuntime->getGlobalAsCString("_ro_string_1");
         defaultStateValue = fRuntime->getGlobalAsCString("_ro_string_2");
@@ -213,6 +229,7 @@ void WasmHostPlugin::setState(const char* key, const char* value)
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
         fRuntime->copyCStringToMemory(wkey, key);
         const WasmValue wval = fRuntime->getGlobal("_rw_string_2");
@@ -229,12 +246,15 @@ String WasmHostPlugin::getState(const char* key) const
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
         fRuntime->copyCStringToMemory(wkey, key);
         const char* val = fRuntime->callFunctionReturnCString("_get_state", { wkey });
+
         return String(val);
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
+
         return String();
     }
 }
@@ -247,6 +267,7 @@ void WasmHostPlugin::activate()
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         fRuntime->callFunction("_activate");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
@@ -258,6 +279,7 @@ void WasmHostPlugin::deactivate()
     try {
         checkRuntime();
         NON_RT_SCOPED_LOCK();
+
         fRuntime->callFunction("_deactivate");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
@@ -364,6 +386,7 @@ WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
         return { MakeI32(writeMidiEvent(event)) };
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
+
         return { MakeI32(0) };
     }
 #else
