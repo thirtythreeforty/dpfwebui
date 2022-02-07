@@ -88,7 +88,7 @@ public:
 private:
     static wasm_trap_t* callHostFunction(void *env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec);
     
-    static void throwWasmLastError();
+    static void throwRuntimeException(const char* message);
 
     static void toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types);
        

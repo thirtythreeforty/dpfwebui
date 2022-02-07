@@ -83,7 +83,7 @@ void WasmRuntime::load(const char* modulePath)
     fEngine = wasm_engine_new();
 
     if (fEngine == nullptr) {
-        throwWasmLastError();
+        throwRuntimeException("wasm_engine_new() failed");
     }
 #endif
 
@@ -91,7 +91,7 @@ void WasmRuntime::load(const char* modulePath)
 
     if (fStore == nullptr) {
         wasm_byte_vec_delete(&fileBytes);
-        throwWasmLastError();
+        throwRuntimeException("wasm_store_new() failed");
     }
 
     // WINWASMERBUG : Following call crashes some hosts on Windows when using
@@ -101,7 +101,7 @@ void WasmRuntime::load(const char* modulePath)
     wasm_byte_vec_delete(&fileBytes);
 
     if (fModule == nullptr) {
-        throwWasmLastError();
+        throwRuntimeException("wasm_module_new() failed");
     }
 }
 
@@ -137,13 +137,13 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     fWasiEnv = wasi_env_new(config);
 
     if (fWasiEnv == nullptr) {
-        throwWasmLastError();
+        throwRuntimeException("wasi_env_new() failed");
     }
 
     wasmer_named_extern_vec_t wasiImports;
 
     if (!wasi_get_unordered_imports(fStore, fModule, fWasiEnv, &wasiImports)) {
-        throwWasmLastError();
+        throwRuntimeException("wasi_get_unordered_imports() failed");
     }
 
     std::unordered_map<std::string, int> wasiImportIndex;
@@ -233,14 +233,14 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     wasm_extern_vec_delete(&imports);
 
     if (fInstance == nullptr) {
-        throwWasmLastError();
+        throwRuntimeException("wasm_instance_new() failed");
     }
     
 #ifdef HIPHOP_ENABLE_WASI
     wasm_func_t* wasiStart = wasi_get_start_function(fInstance);
     
     if (wasiStart == nullptr) {
-        throwWasmLastError();
+        throwRuntimeException("wasi_get_start_function() failed");
     }
 
     wasm_val_vec_t empty_val_vec = WASM_EMPTY_VEC;
@@ -375,24 +375,18 @@ wasm_trap_t* WasmRuntime::callHostFunction(void* env, const wasm_val_vec_t* para
     return nullptr;
 }
 
-void WasmRuntime::throwWasmLastError()
+void WasmRuntime::throwRuntimeException(const char* message)
 {
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
-    // TODO - wasmer_last_error_message() equivalent for WAMR?
-    throw std::runtime_error("WAMR unknown error");
-#endif
+    std::string msg = message;
 #ifdef HIPHOP_WASM_RUNTIME_WASMER
     const int len = wasmer_last_error_length();
-    
-    if (len == 0) {
-        throw std::runtime_error("Wasmer unknown error");
+    if (len > 0) {
+        char s[len];
+        wasmer_last_error_message(s, len);
+        msg += std::string(" - ") + s;
     }
-
-    char msg[len];
-    wasmer_last_error_message(msg, len);
-
-    throw std::runtime_error(std::string("Wasmer error - ") + msg);
 #endif
+    throw std::runtime_error(msg);
 }
 
 void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types)
