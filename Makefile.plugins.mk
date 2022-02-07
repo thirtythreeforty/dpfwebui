@@ -175,6 +175,14 @@ endif
 # Add build flags for AssemblyScript DSP dependencies
 
 ifeq ($(AS_DSP),true)
+
+ifeq ($(HIPHOP_ENABLE_WASI),true)
+ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+$(error WAMR does not support WASI through the C API)
+endif
+BASE_FLAGS += -DHIPHOP_ENABLE_WASI
+endif
+
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include -DHIPHOP_WASM_RUNTIME_WAMR
 LINK_FLAGS += -L$(WAMR_BUILD_DIR) -lvmlib
@@ -184,7 +192,8 @@ endif
 ifeq ($(WINDOWS),true)
 LINK_FLAGS += -lWs2_32 -lShlwapi
 endif
-endif # HIPHOP_WASM_RUNTIME wamr
+endif
+
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
 BASE_FLAGS += -I$(WASMER_PATH)/include -DHIPHOP_WASM_RUNTIME_WASMER
 LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
@@ -197,11 +206,9 @@ endif
 ifeq ($(WINDOWS),true)
 LINK_FLAGS += -Wl,-Bstatic -lWs2_32 -lBcrypt -lUserenv -lShlwapi
 endif
-ifeq ($(HIPHOP_ENABLE_WASI),true)
-BASE_FLAGS += -DHIPHOP_ENABLE_WASI
 endif
-endif # HIPHOP_WASM_RUNTIME wasmer
-endif # AS_DSP
+
+endif
 
 # ------------------------------------------------------------------------------
 # Add build flags for web UI dependencies
@@ -267,12 +274,12 @@ WAMR_GIT_COMMIT = 4bdeb90
 # and macOS it must be also disabled to prevent crashes during initialization of
 # additional plugin instances, ie. after the first plugin instance has been
 # successfully created. WAMR was not designed to run in plugin environments.
-WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1
+# Disable WASI because it is not available through the C API.
+WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1 -DWAMR_BUILD_LIBC_WASI=0
 
 ifeq ($(WINDOWS),true)
-WAMR_CMAKE_ARGS += -G"Unix Makefiles" \
-				   -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_LIBC_UVWASI=0 \
-				   -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
+# Use the C version of invokeNative() instead of assembler until build is fixed
+WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
 endif
 
 ifeq ($(SKIP_STRIPPING),true)
