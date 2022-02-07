@@ -87,8 +87,6 @@ public:
 
 private:
     static wasm_trap_t* callHostFunction(void *env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec);
-    
-    static void throwRuntimeException(const char* message);
 
     static void toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types);
        
@@ -109,6 +107,38 @@ private:
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmRuntime)
 
+};
+
+struct wasm_module_exception : public virtual std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+
+struct wasm_runtime_exception : public virtual std::runtime_error
+{
+#ifdef HIPHOP_WASM_RUNTIME_WASMER
+    wasm_runtime_exception(std::string what)
+        : std::runtime_error("")
+        , fWhat(what)
+    {
+        const int len = wasmer_last_error_length();
+        if (len > 0) {
+            char s[len];
+            wasmer_last_error_message(s, len);
+            fWhat += std::string(" - wasmer error: ") + s;
+        }
+    }
+
+    virtual const char* what() const noexcept override
+    {
+        return fWhat.c_str();
+    }
+
+private:
+    std::string fWhat;
+#else
+    using std::runtime_error::runtime_error;
+#endif
 };
 
 END_NAMESPACE_DISTRHO

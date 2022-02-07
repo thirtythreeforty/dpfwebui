@@ -25,8 +25,6 @@
 
 // TODO - check for correct usage of the Wasm C API focusing on memory leaks
 
-USE_NAMESPACE_DISTRHO
-
 WasmRuntime::WasmRuntime()
     : fStarted(false)
     , fEngine(nullptr)
@@ -54,13 +52,13 @@ void WasmRuntime::load(const char* modulePath)
     fEngine = wasm_engine_new();
 
     if (fEngine == nullptr) {
-        throw std::runtime_error("Error initializing WAMR engine");
+        throw wasm_runtime_exception("Error initializing WAMR engine");
     }
 #endif
     FILE* file = fopen(modulePath, "rb");
 
     if (file == nullptr) {
-        throw std::runtime_error("Error opening Wasm module file");
+        throw wasm_module_exception("Error opening Wasm module file");
     }
 
     fseek(file, 0L, SEEK_END);
@@ -73,7 +71,7 @@ void WasmRuntime::load(const char* modulePath)
     if (fread(fileBytes.data, fileSize, 1, file) != 1) {
         wasm_byte_vec_delete(&fileBytes);
         fclose(file);
-        throw std::runtime_error("Error reading Wasm module file");
+        throw wasm_module_exception("Error reading Wasm module file");
     }
 
     fclose(file);
@@ -83,7 +81,7 @@ void WasmRuntime::load(const char* modulePath)
     fEngine = wasm_engine_new();
 
     if (fEngine == nullptr) {
-        throwRuntimeException("wasm_engine_new() failed");
+        throw wasm_runtime_exception("wasm_engine_new() failed");
     }
 #endif
 
@@ -91,7 +89,7 @@ void WasmRuntime::load(const char* modulePath)
 
     if (fStore == nullptr) {
         wasm_byte_vec_delete(&fileBytes);
-        throwRuntimeException("wasm_store_new() failed");
+        throw wasm_runtime_exception("wasm_store_new() failed");
     }
 
     // WINWASMERBUG : Following call crashes some hosts on Windows when using
@@ -101,7 +99,7 @@ void WasmRuntime::load(const char* modulePath)
     wasm_byte_vec_delete(&fileBytes);
 
     if (fModule == nullptr) {
-        throwRuntimeException("wasm_module_new() failed");
+        throw wasm_runtime_exception("wasm_module_new() failed");
     }
 }
 
@@ -137,13 +135,13 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     fWasiEnv = wasi_env_new(config);
 
     if (fWasiEnv == nullptr) {
-        throwRuntimeException("wasi_env_new() failed");
+        throw wasm_runtime_exception("wasi_env_new() failed");
     }
 
     wasmer_named_extern_vec_t wasiImports;
 
     if (!wasi_get_unordered_imports(fStore, fModule, fWasiEnv, &wasiImports)) {
-        throwRuntimeException("wasi_get_unordered_imports() failed");
+        throw wasm_runtime_exception("wasi_get_unordered_imports() failed");
     }
 
     std::unordered_map<std::string, int> wasiImportIndex;
@@ -194,11 +192,11 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 
 #ifdef HIPHOP_ENABLE_WASI
     if (!moduleNeedsWasi) {
-        throw std::runtime_error("WASI is enabled but module is not WASI compliant");
+        throw wasm_module_exception("WASI is enabled but module is not WASI compliant");
     }
 #else
     if (moduleNeedsWasi) {
-        throw std::runtime_error("WASI is not enabled but module requires WASI");
+        throw wasm_module_exception("WASI is not enabled but module requires WASI");
     }
 #endif // HIPHOP_ENABLE_WASI
 
@@ -233,14 +231,14 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     wasm_extern_vec_delete(&imports);
 
     if (fInstance == nullptr) {
-        throwRuntimeException("wasm_instance_new() failed");
+        throw wasm_runtime_exception("wasm_instance_new() failed");
     }
     
 #ifdef HIPHOP_ENABLE_WASI
     wasm_func_t* wasiStart = wasi_get_start_function(fInstance);
     
     if (wasiStart == nullptr) {
-        throwRuntimeException("wasi_get_start_function() failed");
+        throw wasm_runtime_exception("wasi_get_start_function() failed");
     }
 
     wasm_val_vec_t empty_val_vec = WASM_EMPTY_VEC;
@@ -342,11 +340,12 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     if (trap != nullptr) {
         wasm_message_t* wm = nullptr;
         wasm_trap_message(trap, wm);
-        std::string s = std::string("Call to wasm function failed") + " [" + name + "]";
+        std::string s = std::string("Call to function [") + name + "] failed";
         if (wm != nullptr) {
-            s += std::string(" - ") + wm->data /*null terminated*/;
+            s += std::string(", trap: ") + wm->data /*null terminated*/;
         }
-        throw std::runtime_error(s);
+
+        throw wasm_runtime_exception(s);
     }
 
     return WasmValueVector(resultVec.data, resultVec.data + resultVec.size);
@@ -375,20 +374,6 @@ wasm_trap_t* WasmRuntime::callHostFunction(void* env, const wasm_val_vec_t* para
     return nullptr;
 }
 
-void WasmRuntime::throwRuntimeException(const char* message)
-{
-    std::string msg = message;
-#ifdef HIPHOP_WASM_RUNTIME_WASMER
-    const int len = wasmer_last_error_length();
-    if (len > 0) {
-        char s[len];
-        wasmer_last_error_message(s, len);
-        msg += std::string(" - ") + s;
-    }
-#endif
-    throw std::runtime_error(msg);
-}
-
 void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types)
 {
     int i = 0;
@@ -405,7 +390,7 @@ void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec
 const char* WasmRuntime::WTF16ToCString(const WasmValue& wPtr)
 {
     if (fModuleExports.find("_wtf16_to_c_string") == fModuleExports.end()) {
-        throw std::runtime_error("Wasm module does not export function _wtf16_to_c_string");
+        throw wasm_module_exception("Wasm module does not export function _wtf16_to_c_string");
     }
 
     return callFunctionReturnCString("_wtf16_to_c_string", { wPtr });
@@ -414,7 +399,7 @@ const char* WasmRuntime::WTF16ToCString(const WasmValue& wPtr)
 WasmValue WasmRuntime::CToWTF16String(const char* s)
 {
     if (fModuleExports.find("_c_to_wtf16_string") == fModuleExports.end()) {
-        throw std::runtime_error("Wasm module does not export function _c_to_wtf16_string");
+        throw wasm_module_exception("Wasm module does not export function _c_to_wtf16_string");
     }
 
     const WasmValue wPtr = getGlobal("_rw_string_1");
