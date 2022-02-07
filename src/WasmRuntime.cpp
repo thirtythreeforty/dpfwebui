@@ -20,7 +20,7 @@
 
 #include "WasmRuntime.hpp"
 
-#define MAX_MODULE_NAME    128
+#define MAX_STRING_SIZE    128
 #define MAX_HOST_FUNCTIONS 128
 
 // TODO - check for correct usage of the Wasm C API focusing on memory leaks
@@ -123,7 +123,7 @@ void WasmRuntime::unload()
 
 void WasmRuntime::start(WasmFunctionMap hostFunctions)
 {
-    char name[MAX_MODULE_NAME];
+    char name[MAX_STRING_SIZE];
 
 #ifdef HIPHOP_ENABLE_WASI
     // -------------------------------------------------------------------------
@@ -337,16 +337,22 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
 
     const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
 
-    if (trap != nullptr) {
+    // FIXME : This is causing trouble on Linux, some wasm_func_call() are
+    //         returning non-nullptr values even when the calls succeeded?
+    (void)trap;
+    /*if (trap != nullptr) {
+        std::string s = std::string("Call to function [") + std::string(name) + "] failed";
+
         wasm_message_t* wm = nullptr;
         wasm_trap_message(trap, wm);
-        std::string s = std::string("Call to function [") + name + "] failed";
+
         if (wm != nullptr) {
-            s += std::string(", trap: ") + wm->data /*null terminated*/;
+            // wm->data is null terminated
+            s += std::string(" - trap message: ") + std::string(wm->data);
         }
 
         throw wasm_runtime_exception(s);
-    }
+    }*/
 
     return WasmValueVector(resultVec.data, resultVec.data + resultVec.size);
 }

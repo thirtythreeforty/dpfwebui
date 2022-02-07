@@ -399,7 +399,6 @@ WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
 void WasmHostPlugin::checkRuntime(const char* caller) const
 {
     if (!fRuntime->isStarted()) {
-        throw std::runtime_error(std::string(caller) + "()"
-                                " : WebAssembly runtime is not running");
+        throw std::runtime_error(std::string(caller) + "() : WebAssembly runtime is not running");
     }
 }
