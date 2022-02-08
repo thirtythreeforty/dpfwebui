@@ -137,13 +137,13 @@ struct wasm_runtime_exception : public virtual std::exception
 
 private:
     std::string fWhat;
+};
 #else
 struct wasm_runtime_exception : public virtual std::runtime_error
 {
     using std::runtime_error::runtime_error;
 };
 #endif
-};
 
 END_NAMESPACE_DISTRHO
 
