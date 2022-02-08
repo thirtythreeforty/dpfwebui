@@ -337,10 +337,11 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
 
     const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
 
-    // FIXME : This is causing trouble on Linux, some wasm_func_call() are
-    //         returning non-nullptr values even when the calls succeeded?
+    // FIXME
+#if defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_MAC)
     (void)trap;
-    /*if (trap != nullptr) {
+#else
+    if (trap != nullptr) {
         std::string s = std::string("Call to function [") + std::string(name) + "] failed";
 
         wasm_message_t* wm = nullptr;
@@ -352,7 +353,8 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
         }
 
         throw wasm_runtime_exception(s);
-    }*/
+    }
+#endif
 
     return WasmValueVector(resultVec.data, resultVec.data + resultVec.size);
 }
