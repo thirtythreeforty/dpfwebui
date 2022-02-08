@@ -1,4 +1,4 @@
-Hip-Hop / HIgh Performance Hybrid audiO Plugins
+Hip-Hop / High Performance Hybrid Audio Plugins
 -----------------------------------------------
 
 This project provides [DPF](http://github.com/DISTRHO/DPF) compatible classes
