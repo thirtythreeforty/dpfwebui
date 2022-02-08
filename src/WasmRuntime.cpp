@@ -337,9 +337,8 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
 
     const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
 
-    // FIXME
-#if defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_MAC)
-    (void)trap;
+#if defined(HIPHOP_WASM_RUNTIME_WAMR) && (defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_MAC))
+    (void)trap; // FIXME
 #else
     if (trap != nullptr) {
         std::string s = std::string("Call to function [") + std::string(name) + "] failed";
