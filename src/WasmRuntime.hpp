@@ -115,14 +115,14 @@ struct wasm_module_exception : public virtual std::runtime_error
     using std::runtime_error::runtime_error;
 };
 
-struct wasm_runtime_exception : public virtual std::runtime_error
-{
 #ifdef HIPHOP_WASM_RUNTIME_WASMER
+struct wasm_runtime_exception : public virtual std::exception
+{
     wasm_runtime_exception(std::string what)
-        : std::runtime_error("")
-        , fWhat(what)
+        : fWhat(what)
     {
         const int len = wasmer_last_error_length();
+        
         if (len > 0) {
             char s[len];
             wasmer_last_error_message(s, len);
@@ -138,7 +138,10 @@ struct wasm_runtime_exception : public virtual std::runtime_error
 private:
     std::string fWhat;
 #else
+struct wasm_runtime_exception : public virtual std::runtime_error
+{
     using std::runtime_error::runtime_error;
+};
 #endif
 };
 

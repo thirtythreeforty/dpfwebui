@@ -19,8 +19,6 @@ endif
 
 ifneq ($(HIPHOP_AS_DSP_PATH),)
 AS_DSP = true
-HIPHOP_WASM_RUNTIME ?= wamr
-HIPHOP_ENABLE_WASI ?= false
 endif
 
 ifneq ($(HIPHOP_WEB_UI_PATH),)
@@ -176,9 +174,17 @@ endif
 
 ifeq ($(AS_DSP),true)
 
+ifeq ($(WINDOWS),true)
+HIPHOP_WASM_RUNTIME ?= wamr
+else
+HIPHOP_WASM_RUNTIME ?= wasmer
+endif
+
+HIPHOP_ENABLE_WASI ?= false
+
 ifeq ($(HIPHOP_ENABLE_WASI),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-$(error WAMR does not support WASI through the C API)
+$(error WAMR C API does not support WASI)
 endif
 BASE_FLAGS += -DHIPHOP_ENABLE_WASI
 endif
