@@ -20,8 +20,8 @@
 
 #include "WasmRuntime.hpp"
 
-#define MAX_STRING_SIZE    128
-#define MAX_HOST_FUNCTIONS 128
+#define MAX_STRING_SIZE    1024
+#define MAX_HOST_FUNCTIONS 1024
 
 // TODO - check for correct usage of the Wasm C API focusing on memory leaks
 
@@ -337,23 +337,27 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
 
     const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
 
-#if defined(HIPHOP_WASM_RUNTIME_WAMR) && (defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_MAC))
-    (void)trap; // FIXME
-#else
     if (trap != nullptr) {
-        std::string s = std::string("Call to function [") + std::string(name) + "] failed";
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+        // FIXME - on Linux/Mac allocating std::strings here in callFunction()
+        //         leads too all sorts of weird behavior unless the strings are
+        //         destroyed before throwing. Memory issue?
+        //         { std::string s("Short lived"); } // ok
+        //         std::string s("Longer lived");    // bad
+        throw wasm_runtime_exception("Failed call to function");
+#else
+        std::string s = std::string("Failed call to function") + name;
 
         wasm_message_t* wm = nullptr;
         wasm_trap_message(trap, wm);
 
         if (wm != nullptr) {
-            // wm->data is null terminated
-            s += std::string(" - trap message: ") + std::string(wm->data);
+            s += std::string(" - trap message: ") + std::string(wm->data /*null terminated*/);
         }
 
         throw wasm_runtime_exception(s);
-    }
 #endif
+    }
 
     return WasmValueVector(resultVec.data, resultVec.data + resultVec.size);
 }
