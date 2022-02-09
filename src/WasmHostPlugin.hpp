@@ -21,19 +21,18 @@
 
 #include <memory>
 
-#include "DistrhoPlugin.hpp"
-
+#include "PluginEx.hpp"
 #include "WasmRuntime.hpp"
 #include "util/SpinLock.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class WasmHostPlugin : public Plugin
+class WasmHostPlugin : public PluginEx
 {
 public:
     WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
                     std::shared_ptr<WasmRuntime> runtime = nullptr);
-    ~WasmHostPlugin() {}
+    virtual ~WasmHostPlugin() {}
 
     const char* getLabel() const override;
     const char* getMaker() const override;

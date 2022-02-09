@@ -25,7 +25,7 @@ USE_NAMESPACE_DISTRHO
 
 WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
                                 std::shared_ptr<WasmRuntime> runtime)
-    : Plugin(parameterCount, programCount, stateCount)
+    : PluginEx(parameterCount, programCount, stateCount)
 {   
     if (runtime != nullptr) {
         fRuntime = runtime;

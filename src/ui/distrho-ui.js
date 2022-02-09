@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,34 +127,52 @@ class UI {
         return this._callAndExpectReply('isStandalone');
     }
 
-    // void WebHostUI::setKeyboardFocus()
+    // Non-DPF method for grabbing or releasing the keyboard focus
+    // void AbstractWebHostUI::setKeyboardFocus()
     setKeyboardFocus(focus) {
         this._call('setKeyboardFocus', focus);
     }
 
-    // void WebHostUI::openSystemWebBrowser(String& url)
+    // Non-DPF method for opening the default system browser
+    // void AbstractWebHostUI::openSystemWebBrowser(String& url)
     openSystemWebBrowser(url) {
         this._call('openSystemWebBrowser', url);
     }
 
-    // uint WebHostUI::getInitialWidth()
+    // Non-DPF method that returns the UI width at initialization time
+    // uint AbstractWebHostUI::getInitialWidth()
     async getInitialWidth() {
         return this._callAndExpectReply('getInitialWidth');
     }
 
-    // uint WebHostUI::getInitialHeight()
+    // Non-DPF method that returns the UI height at initialization time
+    // uint AbstractWebHostUI::getInitialHeight()
     async getInitialHeight() {
         return this._callAndExpectReply('getInitialHeight');
     }
 
-    // void WebHostUI::webViewPostMessage(const JsValueVector& args)
+    // Non-DPF method for sending a message to the web host
+    // void AbstractWebHostUI::webViewPostMessage(const JsValueVector& args)
     postMessage(...args) {
         window.webviewHost.postMessage(args);
     }
 
-    // void WebHostUI::webMessageReceived(const JsValueVector& args)
+    // Non-DPF callback method for receiving messages from the web host
+    // void AbstractWebHostUI::webMessageReceived(const JsValueVector& args)
     messageReceived(args) {
         // default empty implementation
+    }
+
+    // Non-DPF method that writes memory shared with DISTRHO::PluginEx instance
+    // void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
+    writeSharedMemory(metadata /*string*/, data /*Uint8Array*/) {
+        const td = new TextDecoder('utf8');
+        this._call('writeSharedMemory', metadata, btoa(td.decode(data)));
+    }
+
+    // Non-DPF method that loads binary into DISTRHO::WasmHostPlugin instance
+    replaceWasmBinary(data /*Uint8Array*/) {
+        this.writeSharedMemory('_wasm', data);
     }
 
     // Helper for calling UI methods

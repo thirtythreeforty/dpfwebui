@@ -78,7 +78,8 @@ LIB_DIR_NOBUNDLE = $(TARGET_DIR)/$(NAME)-lib
 # Add optional support for AssemblyScript DSP
 
 ifeq ($(AS_DSP),true)
-HIPHOP_FILES_DSP  = WasmHostPlugin.cpp \
+HIPHOP_FILES_DSP  = PluginEx.cpp \
+                    WasmHostPlugin.cpp \
                     WasmRuntime.cpp
 ifeq ($(LINUX),true)
 HIPHOP_FILES_DSP += linux/LinuxPath.cpp
@@ -97,7 +98,8 @@ endif
 # Add optional support for web UI
 
 ifeq ($(WEB_UI),true)
-HIPHOP_FILES_UI  = AbstractWebHostUI.cpp \
+HIPHOP_FILES_UI  = UIEx.cpp \
+                   AbstractWebHostUI.cpp \
                    AbstractWebView.cpp \
                    JsValue.cpp
 ifeq ($(LINUX),true)

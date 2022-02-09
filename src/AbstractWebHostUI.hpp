@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "DistrhoUI.hpp"
-
+#include "UIEx.hpp"
 #include "AbstractWebView.hpp"
 
 START_NAMESPACE_DISTRHO
@@ -32,7 +31,7 @@ START_NAMESPACE_DISTRHO
 class AbstractWebHostUI;
 float getDisplayScaleFactor(AbstractWebHostUI* ui);
 
-class AbstractWebHostUI : public UI, private WebViewEventHandler
+class AbstractWebHostUI : public UIEx, private WebViewEventHandler
 {
 public:
     AbstractWebHostUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 

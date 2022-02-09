@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "util/Path.hpp"
+#include "extra/Base64.hpp"
 
 USE_NAMESPACE_DISTRHO
 
@@ -34,7 +35,7 @@ USE_NAMESPACE_DISTRHO
 
 AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
         uint32_t backgroundColor, bool /*startLoading*/)
-    : UI(MAIN_DISPLAY_SCALE_FACTOR() * widthCssPx, MAIN_DISPLAY_SCALE_FACTOR() * heightCssPx)
+    : UIEx(MAIN_DISPLAY_SCALE_FACTOR() * widthCssPx, MAIN_DISPLAY_SCALE_FACTOR() * heightCssPx)
     , fInitialWidth(widthCssPx)
     , fInitialHeight(heightCssPx)
     , fBackgroundColor(backgroundColor)
@@ -115,7 +116,7 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
 
 #if DISTRHO_PLUGIN_WANT_STATEFILES
     fHandler["requestStateFile"] = std::make_pair(1, [this](const JsValueVector& args) {
-        requestStateFile(args[0].getString());
+        requestStateFile(args[0].getString() /*key*/);
     });
 #endif // DISTRHO_PLUGIN_WANT_STATEFILES
 
@@ -142,6 +143,19 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
 
     fHandler["flushInitMessageQueue"] = std::make_pair(0, [this](const JsValueVector&) {
         flushInitMessageQueue();
+    });
+
+    fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JsValueVector& args) {
+#if DISTRHO_PLUGIN_WANT_STATE
+        std::vector<uint8_t> data = d_getChunkFromBase64String(args[1].getString());
+        writeSharedMemory(
+            args[0].getString(), // metadata
+            static_cast<const unsigned char*>(data.data()),
+            static_cast<size_t>(data.size())
+        );
+#else
+        d_stderr2("Shared memory support requires DISTRHO_PLUGIN_WANT_STATE");
+#endif
     });
 }
 
