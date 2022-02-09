@@ -157,6 +157,18 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
         d_stderr2("Shared memory support requires DISTRHO_PLUGIN_WANT_STATE");
 #endif
     });
+
+    fHandler["replaceWasmBinary"] = std::make_pair(1, [this](const JsValueVector& args) {
+#if DISTRHO_PLUGIN_WANT_STATE
+        std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
+        replaceWasmBinary(
+            static_cast<const unsigned char*>(data.data()),
+            static_cast<size_t>(data.size())
+        );
+#else
+        d_stderr2("Wasm binary hot swap requires DISTRHO_PLUGIN_WANT_STATE");
+#endif
+    });
 }
 
 AbstractWebHostUI::~AbstractWebHostUI()

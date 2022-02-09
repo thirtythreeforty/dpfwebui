@@ -166,13 +166,15 @@ class UI {
     // Non-DPF method that writes memory shared with DISTRHO::PluginEx instance
     // void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
     writeSharedMemory(metadata /*string*/, data /*Uint8Array*/) {
-        const td = new TextDecoder('utf8');
-        this._call('writeSharedMemory', metadata, btoa(td.decode(data)));
+        const b64Data = btoa(new TextDecoder('utf8').decode(data));
+        this._call('writeSharedMemory', metadata, b64Data);
     }
 
     // Non-DPF method that loads binary into DISTRHO::WasmHostPlugin instance
+    // void UIEx::replaceWasmBinary(const unsigned char* data, size_t size)
     replaceWasmBinary(data /*Uint8Array*/) {
-        this.writeSharedMemory('_wasm', data);
+        const b64Data = btoa(new TextDecoder('utf8').decode(data));
+        this._call('replaceWasmBinary', b64Data);
     }
 
     // Helper for calling UI methods

@@ -43,4 +43,9 @@ void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, si
 
     d_stderr("writeSharedMemory() metadata=%s size=%d", metadata, size);
 }
+
+void UIEx::replaceWasmBinary(const unsigned char* data, size_t size)
+{
+    writeSharedMemory("_wasm_bin", data, size);
+}
 #endif // DISTRHO_PLUGIN_WANT_STATE

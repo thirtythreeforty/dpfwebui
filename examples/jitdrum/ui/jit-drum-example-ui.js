@@ -28,10 +28,10 @@ class JitDrumExampleUI extends DISTRHO.UI {
         document.body.style.visibility = 'visible';
 
 
-        /*this.addTapListener('note-1', () => {
-            this.uploadWasmBinary(Uint8Array.from([0, 1, 2, 3, 4, 5]));
+        this.addTapListener('note-1', () => {
+            this.replaceWasmBinary(Uint8Array.from([0, 1, 2, 3, 4, 5]));
             this.writeSharedMemory('dummy', Uint8Array.from([0, 1, 2]));
-        });*/
+        });
     }
 
     addTapListener(id, listener) {

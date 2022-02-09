@@ -25,7 +25,7 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
 }
 
 #if DISTRHO_PLUGIN_WANT_STATE
-void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
+void PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
     // TODO
 }

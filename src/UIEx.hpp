@@ -34,6 +34,7 @@ public:
 
 #if DISTRHO_PLUGIN_WANT_STATE
     void writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
+    void replaceWasmBinary(const unsigned char* data, size_t size);
 #endif
 
 private:
