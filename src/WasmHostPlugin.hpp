@@ -24,7 +24,7 @@
 #include "DistrhoPlugin.hpp"
 
 #include "WasmRuntime.hpp"
-#include "SpinLock.hpp"
+#include "util/SpinLock.hpp"
 
 START_NAMESPACE_DISTRHO
 

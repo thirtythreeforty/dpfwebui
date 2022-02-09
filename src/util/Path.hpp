@@ -21,7 +21,7 @@
 
 #include "distrho/extra/String.hpp"
 
-#include "macro.h"
+#include "util/macro.h"
 
 START_NAMESPACE_DISTRHO
 

@@ -19,7 +19,7 @@
 #include <stdexcept>
 
 #include "WasmHostPlugin.hpp"
-#include "Path.hpp"
+#include "util/Path.hpp"
 
 USE_NAMESPACE_DISTRHO
 

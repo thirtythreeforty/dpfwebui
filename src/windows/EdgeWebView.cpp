@@ -25,8 +25,8 @@
 #include <shellapi.h>
 #include <winuser.h>
 
-#include "macro.h"
-#include "Path.hpp"
+#include "util/macro.h"
+#include "util/Path.hpp"
 #include "cJSON.h"
 
 #include "DistrhoPluginInfo.h"

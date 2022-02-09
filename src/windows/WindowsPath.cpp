@@ -24,8 +24,8 @@
 
 #include "DistrhoPluginUtils.hpp"
 
-#include "Path.hpp"
-#include "macro.h"
+#include "util/Path.hpp"
+#include "util/macro.h"
 
 USE_NAMESPACE_DISTRHO
 

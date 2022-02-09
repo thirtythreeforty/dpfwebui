@@ -20,7 +20,7 @@
 
 #include <iostream>
 
-#include "Path.hpp"
+#include "util/Path.hpp"
 
 USE_NAMESPACE_DISTRHO
 

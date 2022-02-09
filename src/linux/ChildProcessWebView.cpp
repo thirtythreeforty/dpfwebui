@@ -27,8 +27,8 @@
 #include <linux/limits.h>
 #include <sys/wait.h>
 
-#include "Path.hpp"
-#include "macro.h"
+#include "util/Path.hpp"
+#include "util/macro.h"
 
 extern char **environ;
 
