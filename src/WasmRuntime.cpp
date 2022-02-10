@@ -329,8 +329,10 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     const wasm_func_t* func = wasm_extern_as_func(fModuleExports[name]);
 
     wasm_val_vec_t paramsVec;
-    paramsVec.size = params.size();
+    paramsVec.size = sizeof(WasmValue) * params.size();
     paramsVec.data = params.data();
+    paramsVec.num_elems = params.size();
+    paramsVec.size_of_elem = sizeof(WasmValue);
 
     wasm_val_t resultArray[1] = { WASM_INIT_VAL };
     wasm_val_vec_t resultVec = WASM_ARRAY_VEC(resultArray);
