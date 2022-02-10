@@ -17,8 +17,6 @@ ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
 endif
 
-HIPHOP_ENABLE_SHARED_MEMORY ?= true
-
 ifneq ($(HIPHOP_AS_DSP_PATH),)
 AS_DSP = true
 endif
@@ -166,10 +164,6 @@ include $(DPF_PATH)/Makefile.plugins.mk
 BASE_FLAGS += -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -DPLUGIN_BIN_BASENAME=$(NAME) \
               -DHIPHOP_PROJECT_ID_HASH=$(shell echo $(NAME):$(HIPHOP_PROJECT_VERSION) \
               	| shasum -a 256 | head -c 8)
-
-ifeq ($(HIPHOP_ENABLE_SHARED_MEMORY),true)
-BASE_FLAGS += -DHIPHOP_ENABLE_SHARED_MEMORY=1
-endif
 
 ifeq ($(MACOS),true)
 # This is needed otherwise expect crashes on older macOS when compiling on newer

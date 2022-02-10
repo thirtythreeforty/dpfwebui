@@ -275,6 +275,8 @@ void AbstractWebHostUI::setKeyboardFocus(bool focus)
 
 void AbstractWebHostUI::uiIdle()
 {
+    UIEx::uiIdle();
+    
     if (fUiBlockQueued) {
         fUiBlockQueued = false;
         fUiBlock();

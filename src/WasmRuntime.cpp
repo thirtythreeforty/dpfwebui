@@ -328,7 +328,7 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
 {
     const wasm_func_t* func = wasm_extern_as_func(fModuleExports[name]);
 
-    // wasm_val_vec_t is implemented differently on each runtime type.
+    // wasm_val_vec_t is implemented differently for each runtime type.
     // Is there a generic way to create a variable-sized instance?
     wasm_val_vec_t paramsVec;
 #ifdef HIPHOP_WASM_RUNTIME_WASMER

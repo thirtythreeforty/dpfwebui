@@ -220,6 +220,8 @@ void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& default
 
 void WasmHostPlugin::setState(const char* key, const char* value)
 {
+    PluginEx::setState(key, value);
+
     try {
         CHECK_RUNTIME();
         SCOPED_RUNTIME_LOCK();

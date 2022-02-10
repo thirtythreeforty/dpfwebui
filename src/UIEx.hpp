@@ -20,7 +20,13 @@
 #define UI_EX_HPP
 
 #include "DistrhoUI.hpp"
-#include "util/SharedMemory.hpp"
+#include "util/SharedMemoryEx.hpp"
+
+#if HIPHOP_ENABLE_SHARED_MEMORY
+# if ! DISTRHO_PLUGIN_WANT_STATE
+#  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
+# endif
+#endif 
 
 START_NAMESPACE_DISTRHO
 
@@ -30,21 +36,25 @@ class UIEx : public UI
 {
 public:
     UIEx(uint width = 0, uint height = 0, bool automaticallyScaleAndSetAsMinimumSize = false);
-    virtual ~UIEx() {}
+    virtual ~UIEx();
 
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_ENABLE_SHARED_MEMORY
     void writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
 
 #if HIPHOP_ENABLE_WASM_PLUGIN
     void replaceWasmBinary(const unsigned char* data, size_t size);
 #endif // HIPHOP_ENABLE_WASM_PLUGIN
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
+
+#if HIPHOP_ENABLE_SHARED_MEMORY
+protected:
+    void uiIdle() override;
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
 
 private:
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
-    SharedMemory<unsigned char> fMemoryIn;
-    SharedMemory<unsigned char> fMemoryOut;
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_ENABLE_SHARED_MEMORY
+    DuplexSharedMemory<unsigned char> fMemory;
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIEx)
 

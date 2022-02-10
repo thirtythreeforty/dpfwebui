@@ -23,32 +23,47 @@
 UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
     : UI(width, height, automaticallyScaleAndSetAsMinimumSize)
 {
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
-    // UI can be created and destroyed multiple times during Plugin lifecycle.
-    // Letting the UI manage shared memory ensures this resource will exist only
-    // when it is necessary. Create it here and let the Plugin instance know
-    // via DPF state interface. UI--state-->Host--state-->Plugin. 
-    fMemoryIn.create();
-    setState("_shmem_init_p2ui", fMemoryIn.getDataFilename());
-    fMemoryOut.create();
-    setState("_shmem_init_ui2p", fMemoryOut.getDataFilename());
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_ENABLE_SHARED_MEMORY
+    // Asynchronous state updates are only possible from the UI to the Plugin
+    // instance and not the other way around. So the UI creates the shared
+    // memory and lets the Plugin know how to locate it with filenames and when
+    // to destroy it. DPF state updates flow: UI--state-->Host--state-->Plugin.
+
+    if (fMemory.create()) {
+        String val;
+        val = "init_p2ui:";
+        val += fMemory.in.getDataFilename();
+        setState("_shmem", val);
+        val = "init_ui2p:";
+        val += fMemory.out.getDataFilename();
+        setState("_shmem", val);
+    } else {
+        d_stderr2("Could not create shared memory");
+    }
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
 }
 
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+UIEx::~UIEx()
+{
+#if HIPHOP_ENABLE_SHARED_MEMORY
+    fMemory.close();
+    setState("_shmem", "deinit");
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
+}
+
+#if HIPHOP_ENABLE_SHARED_MEMORY
 void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
-    char* p = reinterpret_cast<char*>(fMemoryOut.getDataPointer());
+    // TODO - finish write implementation
 
-    std::strcpy(p, metadata);
+    unsigned char* out = fMemory.out.getDataPointer();
 
-    char temp[1024];
-    std::strcpy(temp, p);
+    if (out != nullptr) {
+        std::memcpy(out, data, size);
 
-    d_stderr("writeSharedMemory() metadata=%s size=%d", metadata, size);
-
-    // Notify Plugin instance there is new data available for reading
-    setState("_shmem_data_ui2p", metadata);
+        // Notify Plugin instance there is new data available for reading
+        setState("_shmem", "data_ui2p");
+    }
 }
 
 #if HIPHOP_ENABLE_WASM_PLUGIN
@@ -59,4 +74,17 @@ void UIEx::replaceWasmBinary(const unsigned char* data, size_t size)
     writeSharedMemory("_wasm_bin", data, size);
 }
 #endif // HIPHOP_ENABLE_WASM_PLUGIN
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
+
+#if HIPHOP_ENABLE_SHARED_MEMORY
+void UIEx::uiIdle()
+{
+    // ExternalWindow does not implement the IdleCallback methods. If uiIdle()
+    // is not fast enough for visualizations a custom timer solution needs to be
+    // implemented, or DPF modified so the uiIdle() frequency can be configured.
+
+    // TODO - read implementation
+    //        first step: check shared memory read flag
+
+}
+#endif // HIPHOP_ENABLE_SHARED_MEMORY

@@ -20,7 +20,13 @@
 #define PLUGIN_EX_HPP
 
 #include "DistrhoPlugin.hpp"
-#include "util/SharedMemory.hpp"
+#include "util/SharedMemoryEx.hpp"
+
+#if HIPHOP_ENABLE_SHARED_MEMORY
+# if ! DISTRHO_PLUGIN_WANT_STATE
+#  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
+# endif
+#endif 
 
 START_NAMESPACE_DISTRHO
 
@@ -30,17 +36,18 @@ class PluginEx : public Plugin
 {
 public:
     PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount);
-    virtual ~PluginEx() {}
+    virtual ~PluginEx();
 
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_ENABLE_SHARED_MEMORY
     void writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+
+    void setState(const char* key, const char* value) override;
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
 
 private:
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
-    SharedMemory<unsigned char> fMemoryIn;
-    SharedMemory<unsigned char> fMemoryOut;
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_ENABLE_SHARED_MEMORY
+    DuplexSharedMemory<unsigned char> fMemory;
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEx)
 

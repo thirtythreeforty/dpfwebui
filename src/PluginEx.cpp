@@ -18,13 +18,48 @@
 
 #include "PluginEx.hpp"
 
+#if HIPHOP_ENABLE_SHARED_MEMORY
+# define DUMMY __COUNTER__
+#endif
+
+#define STATE_COUNT __COUNTER__
+
 PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount)
-    : Plugin(parameterCount, programCount, stateCount)
+    : Plugin(parameterCount, programCount, stateCount + STATE_COUNT /*internal state*/)
 {}
 
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+PluginEx::~PluginEx()
+{
+#if HIPHOP_ENABLE_SHARED_MEMORY
+    fMemory.close();
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
+}
+
+#if  HIPHOP_ENABLE_SHARED_MEMORY
 void PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
-    // TODO
+    // TODO - write implementation
 }
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+
+void PluginEx::setState(const char* key, const char* value)
+{
+    if (std::strcmp(key, "_shmem") == 0) {
+        if (std::strstr(value, "init_p2ui:") == value) {
+            if (fMemory.out.connect(value + 10) == nullptr) {
+                d_stderr2("Could not connect to shared memory (plugin->ui)");
+            }
+        } else if (std::strstr(value, "init_ui2p:") == value) {
+            if (fMemory.in.connect(value + 10) == nullptr) {
+                d_stderr2("Could not connect to shared memory (ui->plugin)");
+            }
+        } else if (std::strstr(value, "data_ui2p") == value) {
+            
+            printf("FIXME : New data available from UI\n");
+
+            // TODO - read implementation
+        } else if (std::strstr(value, "deinit") == value) {
+            fMemory.close();
+        }
+    }
+}
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
