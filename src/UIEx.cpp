@@ -54,15 +54,11 @@ UIEx::~UIEx()
 #if HIPHOP_ENABLE_SHARED_MEMORY
 void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
-    // TODO - finish write implementation
-
-    unsigned char* out = fMemory.out.getDataPointer();
-
-    if (out != nullptr) {
-        std::memcpy(out, data, size);
-
+    if (fMemory.out.write(metadata, data, size)) {
         // Notify Plugin instance there is new data available for reading
         setState("_shmem", "data_ui2p");
+    } else {
+        d_stderr2("Could not write shared memory (ui->plugin)");
     }
 }
 
@@ -83,8 +79,16 @@ void UIEx::uiIdle()
     // is not fast enough for visualizations a custom timer solution needs to be
     // implemented, or DPF modified so the uiIdle() frequency can be configured.
 
-    // TODO - read implementation
-    //        first step: check shared memory read flag
+    if (! fMemory.in.isRead()) {
+        const char* metadata = fMemory.in.getMetadata();
+        const uint32_t dataSize = fMemory.in.getDataSize();
 
+        d_stderr("FIXME : New data available from Plugin, metadata=%s, data size=%u",
+            metadata, dataSize);
+
+        fMemory.in.setRead();
+
+        // TODO - callback method
+    }
 }
 #endif // HIPHOP_ENABLE_SHARED_MEMORY

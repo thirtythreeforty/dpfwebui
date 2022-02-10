@@ -24,6 +24,14 @@
 
 START_NAMESPACE_DISTRHO
 
+// Total size 1KiB
+struct SharedMemoryHeader
+{
+    unsigned char readFlag;
+    uint32_t      dataSize;
+    char          metadata[1005];
+};
+
 // This class wraps SharedMemory and adds a read state flag and metadata
 template<class S>
 class TaggedSharedMemory
@@ -34,7 +42,13 @@ public:
 
     bool create()
     {
-        return fImpl.create();
+        if (! fImpl.create()) {
+            return false;
+        }
+
+        getHeaderPointer()->readFlag = 1;
+
+        return true;
     }
 
     S* connect(const char* const filename2)
@@ -52,16 +66,60 @@ public:
         return fImpl.isCreatedOrConnected();
     }
 
-    S* getDataPointer() const noexcept
+    bool isRead() const noexcept
     {
-        return fImpl.getDataPointer();
+        return getHeaderPointer()->readFlag != 0;
     }
 
+    void setRead() noexcept
+    {
+        getHeaderPointer()->readFlag = 1;
+    }
+
+    const char* getMetadata() const noexcept
+    {
+        return getHeaderPointer()->metadata;
+    }
+
+    uint32_t getDataSize() const noexcept
+    {
+        return getHeaderPointer()->dataSize;
+    }
+
+    S* getDataPointer() const noexcept
+    {
+        return fImpl.getDataPointer() + sizeof(SharedMemoryHeader);
+    }
+
+    // creator-side only
     const char* getDataFilename() const noexcept
     {
         return fImpl.getDataFilename();
     }
+
+    bool write(const char* metadata, const S* data, int32_t size)
+    {
+        SharedMemoryHeader *hdr = getHeaderPointer();
+
+        if (hdr == nullptr) {
+            return false;
+        }
+
+        std::strcpy(hdr->metadata, metadata);
+
+        std::memcpy(getDataPointer(), data, sizeof(S) * size);
+        hdr->dataSize = size;
+        
+        hdr->readFlag = 0; // do it last
+
+        return true;
+    }
 private:
+    SharedMemoryHeader* getHeaderPointer() const noexcept
+    {
+        return reinterpret_cast<SharedMemoryHeader*>(fImpl.getDataPointer());
+    }
+
     SharedMemory<S> fImpl;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TaggedSharedMemory)

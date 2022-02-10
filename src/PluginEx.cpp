@@ -38,7 +38,11 @@ PluginEx::~PluginEx()
 #if  HIPHOP_ENABLE_SHARED_MEMORY
 void PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
-    // TODO - write implementation
+    if (fMemory.out.write(metadata, data, size)) {
+        // UI picks up data periodically
+    } else {
+        d_stderr2("Could not write shared memory (plugin->ui)");
+    }
 }
 
 void PluginEx::setState(const char* key, const char* value)
@@ -53,10 +57,14 @@ void PluginEx::setState(const char* key, const char* value)
                 d_stderr2("Could not connect to shared memory (ui->plugin)");
             }
         } else if (std::strstr(value, "data_ui2p") == value) {
-            
-            printf("FIXME : New data available from UI\n");
 
-            // TODO - read implementation
+            const char* metadata = fMemory.in.getMetadata();
+            const uint32_t dataSize = fMemory.in.getDataSize();
+
+            d_stderr("FIXME : New data available from UI, metadata=%s, data size=%u",
+                metadata, dataSize);
+
+            // TODO - callback method
         } else if (std::strstr(value, "deinit") == value) {
             fMemory.close();
         }
