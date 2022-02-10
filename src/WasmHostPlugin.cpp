@@ -336,6 +336,9 @@ void WasmHostPlugin::deactivate()
 #if DISTRHO_PLUGIN_WANT_STATE
 void WasmHostPlugin::replaceWasmBinary(const unsigned char* data, size_t size)
 {
+    (void)data;
+    (void)size;
+    
     // TODO
 }
 #endif // DISTRHO_PLUGIN_WANT_STATE

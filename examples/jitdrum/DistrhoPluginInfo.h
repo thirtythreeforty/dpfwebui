@@ -13,7 +13,7 @@
  * IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#define HIPHOP_ENABLE_SHARED_MEMORY 1
+
 /**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.

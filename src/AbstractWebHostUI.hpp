@@ -67,6 +67,10 @@ protected:
 
     void uiIdle() override;
 
+#if HIPHOP_ENABLE_SHARED_MEMORY
+    void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) override;
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
+
     void sizeChanged(uint width, uint height) override;
 
     void parameterChanged(uint32_t index, float value) override;

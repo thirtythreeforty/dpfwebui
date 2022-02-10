@@ -287,6 +287,15 @@ void AbstractWebHostUI::uiIdle()
     }
 }
 
+#if HIPHOP_ENABLE_SHARED_MEMORY
+void AbstractWebHostUI::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+{
+    (void)size;
+    String b64Data = String::asBase64(data, size);
+    webViewPostMessage({"UI", "_sharedMemoryChanged", metadata, b64Data});
+}
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
+
 void AbstractWebHostUI::sizeChanged(uint width, uint height)
 {
     UI::sizeChanged(width, height);
