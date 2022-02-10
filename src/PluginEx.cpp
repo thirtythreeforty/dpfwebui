@@ -57,14 +57,11 @@ void PluginEx::setState(const char* key, const char* value)
                 d_stderr2("Could not connect to shared memory (ui->plugin)");
             }
         } else if (std::strstr(value, "data_ui2p") == value) {
-
-            const char* metadata = fMemory.in.getMetadata();
-            const uint32_t dataSize = fMemory.in.getDataSize();
-
-            d_stderr("FIXME : New data available from UI, metadata=%s, data size=%u",
-                metadata, dataSize);
-
-            // TODO - callback method
+            if (! fMemory.in.isRead()) { // check not needed, do it for correctness
+                sharedMemoryChanged(fMemory.in.getMetadata(), fMemory.in.getDataPointer(),
+                                    fMemory.in.getDataSize());
+                fMemory.in.setRead();
+            }
         } else if (std::strstr(value, "deinit") == value) {
             fMemory.close();
         }

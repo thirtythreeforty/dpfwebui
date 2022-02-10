@@ -44,6 +44,11 @@ public:
     void setState(const char* key, const char* value) override;
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
+#if HIPHOP_ENABLE_SHARED_MEMORY
+protected:
+    virtual void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) {}
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
+
 private:
 #if HIPHOP_ENABLE_SHARED_MEMORY
     DuplexSharedMemory<unsigned char> fMemory;

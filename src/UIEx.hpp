@@ -48,6 +48,8 @@ public:
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
 protected:
+    virtual void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) {}
+
     void uiIdle() override;
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 

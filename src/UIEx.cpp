@@ -80,15 +80,9 @@ void UIEx::uiIdle()
     // implemented, or DPF modified so the uiIdle() frequency can be configured.
 
     if (! fMemory.in.isRead()) {
-        const char* metadata = fMemory.in.getMetadata();
-        const uint32_t dataSize = fMemory.in.getDataSize();
-
-        d_stderr("FIXME : New data available from Plugin, metadata=%s, data size=%u",
-            metadata, dataSize);
-
+        sharedMemoryChanged(fMemory.in.getMetadata(), fMemory.in.getDataPointer(),
+                            fMemory.in.getDataSize());
         fMemory.in.setRead();
-
-        // TODO - callback method
     }
 }
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
