@@ -22,10 +22,6 @@
 #include <atomic>
 #include <unistd.h>
 
-#ifdef DISTRHO_OS_WINDOWS
-#include <synchapi.h>
-#endif
-
 #include "src/DistrhoDefines.h"
 
 START_NAMESPACE_DISTRHO
