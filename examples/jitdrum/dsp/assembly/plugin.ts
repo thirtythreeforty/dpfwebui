@@ -19,7 +19,7 @@
 import DISTRHO from './distrho-plugin'
 
 const PUNCH: f32 = 4.0
-const DECAY: f32 = 1.0
+const DECAY: f32 = 10.0
 
 export default class JitDrumExamplePlugin extends DISTRHO.Plugin implements DISTRHO.PluginInterface {
 
@@ -57,7 +57,7 @@ export default class JitDrumExamplePlugin extends DISTRHO.Plugin implements DIST
         
         if ((midiEvents.length > 0) && (midiEvents[0].data[0] & 0xf0) == 0x90) {
             this.t = 0
-            this.f = 440 * Mathf.pow(2, (<f32>midiEvents[0].data[1] - 69) / 12)
+            this.f = 2 * 440 * Mathf.pow(2, (<f32>midiEvents[0].data[1] - 69) / 12)
             this.a = <f32>midiEvents[0].data[2] / 0xff
         }
 
