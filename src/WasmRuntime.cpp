@@ -329,11 +329,16 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     const wasm_func_t* func = wasm_extern_as_func(fModuleExports[name]);
 
     wasm_val_vec_t paramsVec;
+#ifdef HIPHOP_WASM_RUNTIME_WASMER
+    paramsVec.size = params.size();
+    paramsVec.data = params.data();
+#endif
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
     paramsVec.size = sizeof(WasmValue) * params.size();
     paramsVec.data = params.data();
     paramsVec.num_elems = params.size();
     paramsVec.size_of_elem = sizeof(WasmValue);
-
+#endif
     wasm_val_t resultArray[1] = { WASM_INIT_VAL };
     wasm_val_vec_t resultVec = WASM_ARRAY_VEC(resultArray);
 
