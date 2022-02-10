@@ -22,6 +22,10 @@
 #include <atomic>
 #include <unistd.h>
 
+#ifdef DISTRHO_OS_WINDOWS
+#include <synchapi.h>
+#endif
+
 #include "src/DistrhoDefines.h"
 
 START_NAMESPACE_DISTRHO
@@ -33,13 +37,9 @@ public:
         : fFlag(false)
     {}
 
-    void lock(int usec) noexcept
+    void lock() noexcept
     {
-        while (fFlag.test_and_set(std::memory_order_acquire)) {
-            if (usec > 0) {
-                usleep(static_cast<useconds_t>(usec));
-            }
-        }
+        while (fFlag.test_and_set(std::memory_order_acquire));
     }
 
     void unlock() noexcept
@@ -55,10 +55,10 @@ private:
 class ScopedSpinLock
 {
 public:
-    ScopedSpinLock(SpinLock& lock, int usec)
+    ScopedSpinLock(SpinLock& lock)
         : fLock(&lock)
     {
-        fLock->lock(usec);
+        fLock->lock();
     }
 
     ~ScopedSpinLock()

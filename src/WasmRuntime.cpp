@@ -329,23 +329,22 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     const wasm_func_t* func = wasm_extern_as_func(fModuleExports[name]);
 
     wasm_val_vec_t paramsVec;
+#ifdef HIPHOP_WASM_RUNTIME_WASMER
     paramsVec.size = params.size();
     paramsVec.data = params.data();
-
+#endif
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    paramsVec.size = sizeof(WasmValue) * params.size();
+    paramsVec.data = params.data();
+    paramsVec.num_elems = params.size();
+    paramsVec.size_of_elem = sizeof(WasmValue);
+#endif
     wasm_val_t resultArray[1] = { WASM_INIT_VAL };
     wasm_val_vec_t resultVec = WASM_ARRAY_VEC(resultArray);
 
     const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
 
     if (trap != nullptr) {
-#if defined(HIPHOP_WASM_RUNTIME_WAMR) && (defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_MAC))
-        // FIXME - on Linux/Mac allocating std::strings here in callFunction()
-        //         can make future calls to wasm_func_call() randomly fail
-        //         unless destroying strings before throwing. Memory corruption?
-        //         { std::string s("Short lived"); } // ok
-        //         std::string s("Longer lived");    // bad
-        throw wasm_runtime_exception("Failed call to function");
-#else
         std::string s = std::string("Failed call to function") + name;
 
         wasm_message_t* wm = nullptr;
@@ -356,7 +355,6 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
         }
 
         throw wasm_runtime_exception(s);
-#endif
     }
 
     return WasmValueVector(resultVec.data, resultVec.data + resultVec.size);
