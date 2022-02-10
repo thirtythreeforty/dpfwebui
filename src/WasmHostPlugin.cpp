@@ -64,12 +64,12 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
 #define CHECK_RUNTIME() checkRuntime(__FUNCTION__);
 
 // Spins tightly around an atomic flag with no-syscalls guarantee. Audio thread
-// safe, all plugin calls [ except run() ] should complete in negligible time.
-#define NON_RT_SCOPED_LOCK() ScopedSpinLock lock(fRuntimeLock, 0)
+// safe, all plugin calls [ except run() ] must complete in negligible time.
+#define RT_SCOPED_LOCK() ScopedSpinLock lock(fRuntimeLock, 0)
 
 // Wait time introduced on each spin iteration. Better for non-audio threads 
 // because AssemblyScript run() can take non-negligible time to complete.
-#define RT_SCOPED_LOCK() ScopedSpinLock lock(fRuntimeLock, 100 /*usec*/)
+#define NON_RT_SCOPED_LOCK() ScopedSpinLock lock(fRuntimeLock, 100 /*usec*/)
 
 const char* WasmHostPlugin::getLabel() const
 {
