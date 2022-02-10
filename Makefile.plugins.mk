@@ -249,10 +249,7 @@ endif
 TARGETS += info
 
 info:
-	@echo "hiphop : $(HIPHOP_ROOT_PATH)"
-	@echo "DPF    : $(DPF_PATH) @ $(DPF_GIT_BRANCH)"
-	@echo "Build  : $(DPF_BUILD_DIR)"
-	@echo "Target : $(DPF_TARGET_DIR)"
+	@echo "Building $(NAME)"
 
 # ------------------------------------------------------------------------------
 # Dependency - Build DPF Graphics Library
