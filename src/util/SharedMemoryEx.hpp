@@ -131,7 +131,8 @@ struct DuplexSharedMemory
 {
     DuplexSharedMemory() {}
     
-    // Convenience method
+    // Convenience methods
+    
     bool create()
     {
         if (! in.create()) {
