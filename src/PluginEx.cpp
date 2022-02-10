@@ -20,13 +20,11 @@
 
 PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount)
     : Plugin(parameterCount, programCount, stateCount)
-{
-    // TODO
-}
+{}
 
-#if DISTRHO_PLUGIN_WANT_STATE
+#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 void PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
     // TODO
 }
-#endif // DISTRHO_PLUGIN_WANT_STATE
+#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY

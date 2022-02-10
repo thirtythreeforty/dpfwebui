@@ -32,13 +32,15 @@ public:
     PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount);
     virtual ~PluginEx() {}
 
-#if DISTRHO_PLUGIN_WANT_STATE
+#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
     void writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
-#endif
+#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 
 private:
+#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
     SharedMemory<unsigned char> fMemoryIn;
     SharedMemory<unsigned char> fMemoryOut;
+#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEx)
 

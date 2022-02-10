@@ -339,6 +339,13 @@ void WasmHostPlugin::deactivate()
     }
 }
 
+#if DISTRHO_PLUGIN_WANT_STATE
+void WasmHostPlugin::replaceWasmBinary(const unsigned char* data, size_t size)
+{
+    // TODO
+}
+#endif // DISTRHO_PLUGIN_WANT_STATE
+
 WasmValueVector WasmHostPlugin::getTimePosition(WasmValueVector params)
 {
     (void)params;

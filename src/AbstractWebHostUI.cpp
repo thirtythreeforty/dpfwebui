@@ -145,30 +145,26 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
         flushInitMessageQueue();
     });
 
+#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
     fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JsValueVector& args) {
-#if DISTRHO_PLUGIN_WANT_STATE
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[1].getString());
         writeSharedMemory(
             args[0].getString(), // metadata
             static_cast<const unsigned char*>(data.data()),
             static_cast<size_t>(data.size())
         );
-#else
-        d_stderr2("Shared memory support requires DISTRHO_PLUGIN_WANT_STATE");
-#endif
     });
 
+#if HIPHOP_ENABLE_WASM_PLUGIN
     fHandler["replaceWasmBinary"] = std::make_pair(1, [this](const JsValueVector& args) {
-#if DISTRHO_PLUGIN_WANT_STATE
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         replaceWasmBinary(
             static_cast<const unsigned char*>(data.data()),
             static_cast<size_t>(data.size())
         );
-#else
-        d_stderr2("Wasm binary hot swap requires DISTRHO_PLUGIN_WANT_STATE");
-#endif
     });
+#endif // HIPHOP_ENABLE_WASM_PLUGIN
+#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 }
 
 AbstractWebHostUI::~AbstractWebHostUI()

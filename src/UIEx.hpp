@@ -32,14 +32,19 @@ public:
     UIEx(uint width = 0, uint height = 0, bool automaticallyScaleAndSetAsMinimumSize = false);
     virtual ~UIEx() {}
 
-#if DISTRHO_PLUGIN_WANT_STATE
+#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
     void writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
+
+#if HIPHOP_ENABLE_WASM_PLUGIN
     void replaceWasmBinary(const unsigned char* data, size_t size);
-#endif
+#endif // HIPHOP_ENABLE_WASM_PLUGIN
+#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 
 private:
+#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
     SharedMemory<unsigned char> fMemoryIn;
     SharedMemory<unsigned char> fMemoryOut;
+#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIEx)
 

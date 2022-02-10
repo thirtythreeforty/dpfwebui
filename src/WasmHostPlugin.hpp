@@ -68,6 +68,10 @@ public:
     void run(const float** inputs, float** outputs, uint32_t frames) override;
 #endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
+#if DISTRHO_PLUGIN_WANT_STATE
+    void replaceWasmBinary(const unsigned char* data, size_t size);
+#endif // DISTRHO_PLUGIN_WANT_STATE
+
     WasmValueVector getTimePosition(WasmValueVector params);
     WasmValueVector writeMidiEvent(WasmValueVector params);
 
