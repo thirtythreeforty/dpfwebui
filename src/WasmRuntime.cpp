@@ -345,14 +345,6 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
 
     if (trap != nullptr) {
-#if defined(HIPHOP_WASM_RUNTIME_WAMR) && (defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_MAC))
-        // FIXME - on Linux/Mac allocating std::strings here in callFunction()
-        //         can make future calls to wasm_func_call() randomly fail
-        //         unless destroying strings before throwing. Memory corruption?
-        //         { std::string s("Short lived"); } // ok
-        //         std::string s("Longer lived");    // bad
-        throw wasm_runtime_exception("Failed call to function");
-#else
         std::string s = std::string("Failed call to function") + name;
 
         wasm_message_t* wm = nullptr;
@@ -363,7 +355,6 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
         }
 
         throw wasm_runtime_exception(s);
-#endif
     }
 
     return WasmValueVector(resultVec.data, resultVec.data + resultVec.size);
