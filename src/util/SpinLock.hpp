@@ -20,7 +20,6 @@
 #define SPIN_LOCK_HPP
 
 #include <atomic>
-#include <unistd.h>
 
 #include "src/DistrhoDefines.h"
 
