@@ -25,17 +25,20 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/DistrhoDefines.h"
+#include "extra/LeakDetector.hpp"
+
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
 # include "wasm_c_api.h"
 #elif HIPHOP_WASM_RUNTIME_WASMER
+# ifdef DISTRHO_OS_WINDOWS
+#  define WASM_API_EXTERN // allow to link against static lib
+# endif
 # include "wasm.h"
 # include "wasmer.h"
 #else
 # error "Unknown WebAssembly runtime specified"
 #endif
-
-#include "src/DistrhoDefines.h"
-#include "extra/LeakDetector.hpp"
 
 #define MakeI32(x) WASM_I32_VAL(static_cast<int32_t>(x))
 #define MakeI64(x) WASM_I64_VAL(static_cast<int64_t>(x))
