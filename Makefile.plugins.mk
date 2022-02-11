@@ -276,7 +276,7 @@ WAMR_PATH = $(HIPHOP_VENDOR_PATH)/wasm-micro-runtime
 WAMR_BUILD_DIR = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
-WAMR_GIT_COMMIT = 4bdeb90
+#WAMR_GIT_TAG = set this after PR #1000 gets included in a new release
 
 # Disable HW_BOUND_CHECK feature because it does not compile on MinGW. On Linux
 # and macOS it must be also disabled to prevent crashes during initialization of
@@ -286,7 +286,7 @@ WAMR_GIT_COMMIT = 4bdeb90
 WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1 -DWAMR_BUILD_LIBC_WASI=0
 
 ifeq ($(WINDOWS),true)
-# Use the C version of invokeNative() instead of assembler until build is fixed
+# Use the C version of invokeNative() instead of ASM until MinGW build is fixed
 WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
 endif
 
@@ -308,7 +308,8 @@ WAMR_C_API_PATH = $(WAMR_PATH)/core/iwasm/common
 $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_VENDOR_PATH)
 	@git -C $(HIPHOP_VENDOR_PATH) clone $(WAMR_GIT_URL) \
-		&& git -C $(WAMR_PATH) reset --hard $(WAMR_GIT_COMMIT)
+		&& git -C $(WAMR_PATH) reset --hard 4bdeb90
+	#@git -C $(HIPHOP_VENDOR_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
 endif
 endif
 

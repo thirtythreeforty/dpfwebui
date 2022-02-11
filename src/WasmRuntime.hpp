@@ -72,11 +72,9 @@ public:
 
     void load(const char* modulePath);
     void load(const unsigned char* moduleData, size_t size);
-    void unload();
 
     bool isStarted() { return fStarted; }
     void start(WasmFunctionMap hostFunctions);
-    void stop();
 
     byte_t* getMemory(const WasmValue& wPtr = MakeI32(0));
     char*   getMemoryAsCString(const WasmValue& wPtr);
@@ -91,6 +89,9 @@ public:
     const char*     callFunctionReturnCString(const char* name, WasmValueVector params = {});
 
 private:
+    void stop();
+    void unload();
+
     static wasm_trap_t* callHostFunction(void *env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec);
 
     static void toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types);

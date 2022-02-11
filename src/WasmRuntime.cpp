@@ -56,7 +56,6 @@ WasmRuntime::WasmRuntime()
 
 WasmRuntime::~WasmRuntime()
 {
-    stop();
     unload();
 
     if (fStore != nullptr) {
@@ -130,6 +129,8 @@ void WasmRuntime::load(const unsigned char* moduleData, size_t size)
 
 void WasmRuntime::unload()
 {
+    stop();
+
     if (fModule != nullptr) {
         wasm_module_delete(fModule);
         fModule = nullptr;
@@ -138,10 +139,13 @@ void WasmRuntime::unload()
 
 void WasmRuntime::start(WasmFunctionMap hostFunctions)
 {
+    if (fStarted) {
+        return;
+    }
+
     char name[MAX_STRING_SIZE];
 
 #ifdef HIPHOP_ENABLE_WASI
-    // -------------------------------------------------------------------------
     // Build a map of WASI imports
     // Call to wasi_get_imports() fails because of missing host imports, use
     // wasi_get_unordered_imports() https://github.com/wasmerio/wasmer/issues/2450
@@ -170,7 +174,6 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     }
 #endif // HIPHOP_ENABLE_WASI
 
-    // -------------------------------------------------------------------------
     // Build module imports vector
 
     wasm_importtype_vec_t importTypes;
@@ -215,7 +218,6 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     }
 #endif // HIPHOP_ENABLE_WASI
 
-    // -------------------------------------------------------------------------
     // Insert host functions into imports vector
 
     // Avoid reallocation to ensure pointers to elements remain valid through engine lifetime
@@ -238,8 +240,7 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
         wasm_valtype_vec_delete(&params);
     }
 
-    // -------------------------------------------------------------------------
-    // Create Wasm instance and start WASI
+    // Create instance and start WASI
 
     fInstance = wasm_instance_new(fStore, fModule, &imports, nullptr);
 
@@ -260,7 +261,7 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     wasm_func_call(wasiStart, &empty_val_vec, &empty_val_vec);
     wasm_func_delete(wasiStart);
 #endif // HIPHOP_ENABLE_WASI
-    // -------------------------------------------------------------------------
+
     // Build a map of externs indexed by name
 
     fExportsVec.size = 0;
@@ -277,7 +278,6 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 
     wasm_exporttype_vec_delete(&exportTypes);
 
-    // -------------------------------------------------------------------------
     // Startup complete
 
     fStarted = true;

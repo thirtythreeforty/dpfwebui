@@ -338,8 +338,6 @@ void WasmHostPlugin::replaceWasmBinary(const unsigned char* data, size_t size)
     // No need to check if the runtime is running
     SCOPED_RUNTIME_LOCK();
 
-    fRuntime->stop();
-    fRuntime->unload();
     fRuntime->load(data, size);
 
     prepareAndStartRuntime();
