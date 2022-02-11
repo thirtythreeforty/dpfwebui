@@ -26,6 +26,7 @@ USE_NAMESPACE_DISTRHO
 WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
                                 std::shared_ptr<WasmRuntime> runtime)
     : PluginEx(parameterCount, programCount, stateCount)
+    , fActive(false)
 {   
     if (runtime != nullptr) {
         fRuntime = runtime;
@@ -38,22 +39,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
         const String path = path::getLibraryPath() + "/dsp/main.wasm";
         fRuntime->load(path);
 
-        WasmFunctionMap hf; // host functions
-
-        hf["_get_samplerate"] = { {}, { WASM_F32 }, [this](WasmValueVector) -> WasmValueVector {
-            return { MakeF32(getSampleRate()) };
-        }};
-
-        hf["_get_time_position"] = { {}, {}, 
-            std::bind(&WasmHostPlugin::getTimePosition, this, std::placeholders::_1) };
-
-        hf["_write_midi_event"] = { {}, { WASM_I32 }, 
-            std::bind(&WasmHostPlugin::writeMidiEvent, this, std::placeholders::_1) };
-
-        fRuntime->start(hf);
-
-        fRuntime->setGlobal("_rw_num_inputs", MakeI32(DISTRHO_PLUGIN_NUM_INPUTS));
-        fRuntime->setGlobal("_rw_num_outputs", MakeI32(DISTRHO_PLUGIN_NUM_OUTPUTS));
+        prepareAndStartRuntime();
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -265,6 +251,7 @@ void WasmHostPlugin::activate()
         SCOPED_RUNTIME_LOCK();
 
         fRuntime->callFunction("_activate");
+        fActive = true;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -277,6 +264,7 @@ void WasmHostPlugin::deactivate()
         SCOPED_RUNTIME_LOCK();
 
         fRuntime->callFunction("_deactivate");
+        fActive = false;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -333,15 +321,40 @@ void WasmHostPlugin::deactivate()
     }
 }
 
-#if DISTRHO_PLUGIN_WANT_STATE
+#if HIPHOP_ENABLE_SHARED_MEMORY
+void WasmHostPlugin::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+{
+    if (std::strcmp(metadata, "_wasm_bin") == 0) {
+        try {
+            replaceWasmBinary(data, size);
+        } catch (const std::exception& ex) {
+            d_stderr2(ex.what());
+        }
+    }
+}
+
 void WasmHostPlugin::replaceWasmBinary(const unsigned char* data, size_t size)
 {
-    (void)data;
-    (void)size;
-    
-    // TODO
+    // No need to check if the runtime is running
+    SCOPED_RUNTIME_LOCK();
+
+    fRuntime->stop();
+    fRuntime->unload();
+    fRuntime->load(data, size);
+
+    prepareAndStartRuntime();
+
+    // This has no effect on the host parameters but might be needed by the
+    // plugin code to properly initialize.
+    for (uint32_t i = 0; i < 128; ++i) {
+        fRuntime->callFunction("_init_parameter", { MakeI32(i) });
+    }
+
+    if (fActive) {
+        fRuntime->callFunction("_activate");
+    }
 }
-#endif // DISTRHO_PLUGIN_WANT_STATE
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
 
 WasmValueVector WasmHostPlugin::getTimePosition(WasmValueVector params)
 {
@@ -398,6 +411,26 @@ WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
 #else
     throw std::runtime_error("Called writeMidiEvent() without DISTRHO_PLUGIN_WANT_MIDI_OUTPUT");
 #endif // DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
+}
+
+void WasmHostPlugin::prepareAndStartRuntime()
+{
+    WasmFunctionMap hf; // host functions
+
+    hf["_get_samplerate"] = { {}, { WASM_F32 }, [this](WasmValueVector) -> WasmValueVector {
+        return { MakeF32(getSampleRate()) };
+    }};
+
+    hf["_get_time_position"] = { {}, {}, 
+        std::bind(&WasmHostPlugin::getTimePosition, this, std::placeholders::_1) };
+
+    hf["_write_midi_event"] = { {}, { WASM_I32 }, 
+        std::bind(&WasmHostPlugin::writeMidiEvent, this, std::placeholders::_1) };
+
+    fRuntime->start(hf);
+
+    fRuntime->setGlobal("_rw_num_inputs", MakeI32(DISTRHO_PLUGIN_NUM_INPUTS));
+    fRuntime->setGlobal("_rw_num_outputs", MakeI32(DISTRHO_PLUGIN_NUM_OUTPUTS));
 }
 
 void WasmHostPlugin::checkRuntime(const char* caller) const

@@ -39,7 +39,7 @@ START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------
 
-template<class S>
+template<class S, size_t N>
 class SharedMemory
 {
 public:
@@ -137,7 +137,7 @@ public:
         sa.bInheritHandle = TRUE;
 
         void* const map2 = ::CreateFileMappingA(INVALID_HANDLE_VALUE, &sa, PAGE_READWRITE|SEC_COMMIT, 0,
-                                                sizeof(S), filename2);
+                                                N * sizeof(S), filename2);
 
         if (map2 == nullptr || map2 == INVALID_HANDLE_VALUE)
         {
@@ -147,7 +147,7 @@ public:
             return false;
         }
 
-        void* const ptr2 = ::MapViewOfFile(map2, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(S));
+        void* const ptr2 = ::MapViewOfFile(map2, FILE_MAP_ALL_ACCESS, 0, 0, N * sizeof(S));
 
         if (ptr2 == nullptr)
         {
@@ -164,7 +164,7 @@ public:
         int ret;
 
         try {
-            ret = ::ftruncate(fd2, sizeof(S));
+            ret = ::ftruncate(fd2, N * sizeof(S));
         } DISTRHO_SAFE_EXCEPTION("SharedMemory::create");
 
         if (ret != 0)
@@ -175,7 +175,7 @@ public:
             return false;
         }
 
-        void* const ptr2 = ::mmap(nullptr, sizeof(S), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fd2, 0);
+        void* const ptr2 = ::mmap(nullptr, N * sizeof(S), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fd2, 0);
 
         if (ptr2 == nullptr || ptr2 == MAP_FAILED)
         {
@@ -203,7 +203,7 @@ public:
         DISTRHO_SAFE_ASSERT_RETURN(map2 != nullptr, nullptr);
         DISTRHO_SAFE_ASSERT_RETURN(map2 != INVALID_HANDLE_VALUE, nullptr);
 
-        void* const ptr2 = ::MapViewOfFile(map2, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(S));
+        void* const ptr2 = ::MapViewOfFile(map2, FILE_MAP_ALL_ACCESS, 0, 0, N * sizeof(S));
 
         if (ptr2 == nullptr)
         {
@@ -229,7 +229,7 @@ public:
             return nullptr;
         }
 
-        void* const ptr2 = ::mmap(nullptr, sizeof(S), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fd2, 0);
+        void* const ptr2 = ::mmap(nullptr, N * sizeof(S), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fd2, 0);
 
         if (ptr2 == nullptr || ptr2 == MAP_FAILED)
         {
@@ -255,7 +255,7 @@ public:
             map = INVALID_HANDLE_VALUE;
 #else
             try {
-                ::munmap(ptr, sizeof(S));
+                ::munmap(ptr, N * sizeof(S));
             } DISTRHO_SAFE_EXCEPTION("SharedMemory::close");
 
             try {

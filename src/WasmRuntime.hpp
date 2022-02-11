@@ -71,6 +71,7 @@ public:
     ~WasmRuntime();
 
     void load(const char* modulePath);
+    void load(const unsigned char* moduleData, size_t size);
     void unload();
 
     bool isStarted() { return fStarted; }

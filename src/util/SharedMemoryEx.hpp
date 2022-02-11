@@ -33,7 +33,7 @@ struct SharedMemoryHeader
 };
 
 // This class wraps SharedMemory and adds a read state flag and metadata
-template<class S>
+template<class S, size_t N>
 class TaggedSharedMemory
 {
 public:
@@ -81,9 +81,9 @@ public:
         return getHeaderPointer()->metadata;
     }
 
-    uint32_t getDataSize() const noexcept
+    size_t getDataSize() const noexcept
     {
-        return getHeaderPointer()->dataSize;
+        return static_cast<size_t>(getHeaderPointer()->dataSize);
     }
 
     S* getDataPointer() const noexcept
@@ -120,13 +120,13 @@ private:
         return reinterpret_cast<SharedMemoryHeader*>(fImpl.getDataPointer());
     }
 
-    SharedMemory<S> fImpl;
+    SharedMemory<S,N> fImpl;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TaggedSharedMemory)
 };
 
 // This struct wraps two instances of TaggedSharedMemory
-template<class S>
+template<class S, size_t N>
 struct DuplexSharedMemory
 {
     DuplexSharedMemory() {}
@@ -158,8 +158,8 @@ struct DuplexSharedMemory
         }
     }
 
-    TaggedSharedMemory<S> in;
-    TaggedSharedMemory<S> out;
+    TaggedSharedMemory<S,N> in;
+    TaggedSharedMemory<S,N> out;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DuplexSharedMemory)
 };

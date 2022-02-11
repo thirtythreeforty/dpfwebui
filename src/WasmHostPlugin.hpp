@@ -68,16 +68,20 @@ public:
     void run(const float** inputs, float** outputs, uint32_t frames) override;
 #endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
-#if DISTRHO_PLUGIN_WANT_STATE
+#if HIPHOP_ENABLE_SHARED_MEMORY
+    void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) override;
     void replaceWasmBinary(const unsigned char* data, size_t size);
-#endif // DISTRHO_PLUGIN_WANT_STATE
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
 
     WasmValueVector getTimePosition(WasmValueVector params);
     WasmValueVector writeMidiEvent(WasmValueVector params);
 
 private:
+    void prepareAndStartRuntime();
+
     inline void checkRuntime(const char* caller) const;
 
+    bool fActive;
     std::shared_ptr<WasmRuntime> fRuntime;
     mutable SpinLock             fRuntimeLock;
 

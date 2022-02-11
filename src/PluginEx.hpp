@@ -56,7 +56,7 @@ protected:
 
 private:
 #if HIPHOP_ENABLE_SHARED_MEMORY
-    DuplexSharedMemory<unsigned char> fMemory;
+    DuplexSharedMemory<unsigned char,1048576/*1 MiB*/> fMemory;
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEx)

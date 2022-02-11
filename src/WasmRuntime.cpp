@@ -65,11 +65,11 @@ void WasmRuntime::load(const char* modulePath)
     const size_t fileSize = ftell(file);
     fseek(file, 0L, SEEK_SET);
 
-    wasm_byte_vec_t fileBytes;
-    wasm_byte_vec_new_uninitialized(&fileBytes, fileSize);
+    wasm_byte_vec_t moduleBytes;
+    wasm_byte_vec_new_uninitialized(&moduleBytes, fileSize);
     
-    if (fread(fileBytes.data, fileSize, 1, file) != 1) {
-        wasm_byte_vec_delete(&fileBytes);
+    if (fread(moduleBytes.data, fileSize, 1, file) != 1) {
+        wasm_byte_vec_delete(&moduleBytes);
         fclose(file);
         throw wasm_module_exception("Error reading Wasm module file");
     }
@@ -88,15 +88,44 @@ void WasmRuntime::load(const char* modulePath)
     fStore = wasm_store_new(fEngine); 
 
     if (fStore == nullptr) {
-        wasm_byte_vec_delete(&fileBytes);
+        wasm_byte_vec_delete(&moduleBytes);
         throw wasm_runtime_exception("wasm_store_new() failed");
     }
 
     // WINWASMERBUG : Following call crashes some hosts on Windows when using
     //                the Wasmer runtime, does not affect WAMR. See bugs.txt.
-    fModule = wasm_module_new(fStore, &fileBytes);
+    fModule = wasm_module_new(fStore, &moduleBytes);
     
-    wasm_byte_vec_delete(&fileBytes);
+    wasm_byte_vec_delete(&moduleBytes);
+
+    if (fModule == nullptr) {
+        throw wasm_runtime_exception("wasm_module_new() failed");
+    }
+}
+
+void WasmRuntime::load(const unsigned char* moduleData, size_t size)
+{
+    fEngine = wasm_engine_new();
+
+    if (fEngine == nullptr) {
+        throw wasm_runtime_exception("Error initializing WAMR engine");
+    }
+
+    wasm_byte_vec_t moduleBytes;
+    wasm_byte_vec_new_uninitialized(&moduleBytes, size);
+
+    std::memcpy(moduleBytes.data, moduleData, size);
+
+    fStore = wasm_store_new(fEngine); 
+
+    if (fStore == nullptr) {
+        wasm_byte_vec_delete(&moduleBytes);
+        throw wasm_runtime_exception("wasm_store_new() failed");
+    }
+
+    fModule = wasm_module_new(fStore, &moduleBytes);
+    
+    wasm_byte_vec_delete(&moduleBytes);
 
     if (fModule == nullptr) {
         throw wasm_runtime_exception("wasm_module_new() failed");
