@@ -7,8 +7,7 @@ GENERAL
 LINUX
 -----
 
-- Web view drag and drop does not work (GTK and CEF). Example hotswap is non
-  functional until this is resolved or a Select File... button is added to it.
+- LXDRAGDROPBUG : Drag and drop not working on both GTK and CEF web views.
 
 - WKGTKRESIZEBUG : Broken CSS viewport units (vw/vh/vmin/vmax) in WebKitGTK 
   web view due to workaround for https://bugs.webkit.org/show_bug.cgi?id=229227
@@ -16,6 +15,13 @@ LINUX
 - CEFKBDFOCUSBUG : Toggling keyboard focus works for the CEF based web view but
   Xlib errors are generated when calling setKeyboardFocus(true). XIGrabDevice()
   is probably called with incorrect arguments, see CefHelper.cpp.
+
+
+MACOS
+-----
+
+- MACFILEINPUTBUG : Web view <input type="file"> not working. Need to implement
+  native file chooser as a DPF method for ExternalWindow anyways.
 
 
 WINDOWS

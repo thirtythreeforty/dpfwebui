@@ -23,54 +23,68 @@ class HotSwapExampleUI extends DISTRHO.UI {
 
         document.body.style.visibility = 'visible';
 
-        const sendNote = document.getElementById('send-note');
-
-        sendNote.addEventListener('click', (_) => {
+        document.getElementById('send-note').addEventListener('click', (_) => {
             this.sendNote(1, getRandomInt(69 - 12, 69 + 12), 127);
         });
 
-        const target = document.getElementById('target');
-        
-        target.addEventListener('dragover', (ev) => ev.preventDefault());
-        
-        target.addEventListener('dragenter', (_) => {
-            target.classList.add('hover');
-            sendNote.style.pointerEvents = 'none';
-        });
+        const sendFile = document.getElementById('select-file');
 
-        target.addEventListener('dragleave', (_) => {
-            target.classList.remove('hover');
-            sendNote.style.pointerEvents = '';
-        });
+        if (navigator.platform.indexOf('Mac') == -1) {
+            sendFile.addEventListener('change', (_) => {
+                if (sendFile.files.length > 0) {
+                    this.sideload(sendFile.files[0]);
+                }
+            });
+        } else {
+            // MACFILEINPUTBUG
+            sendFile.style.display = 'none';
+        }
 
-        target.addEventListener('drop', (ev) => {
-            target.classList.remove('hover');
-            sendNote.style.pointerEvents = '';
-            ev.preventDefault();
-            this.dropHandler(ev);
-        });
+        if (navigator.platform.indexOf('Linux') == -1) {
+            const buttons = document.getElementById('buttons');
+            const target = document.getElementById('target');
+            
+            target.addEventListener('dragover', (ev) => ev.preventDefault());
+            
+            target.addEventListener('dragenter', (_) => {
+                target.classList.add('hover');
+                buttons.style.pointerEvents = 'none';
+            });
+
+            target.addEventListener('dragleave', (_) => {
+                target.classList.remove('hover');
+                buttons.style.pointerEvents = '';
+            });
+
+            target.addEventListener('drop', (ev) => {
+                target.classList.remove('hover');
+                buttons.style.pointerEvents = '';
+
+                ev.preventDefault();
+
+                if (ev.dataTransfer.items.length > 0) {
+                    const item = ev.dataTransfer.items[0];
+                    if (item.kind == 'file') {
+                        this.sideload(item.getAsFile());
+                    }
+                }
+            });
+        } else {
+            // LXDRAGDROPBUG
+            document.getElementById('hint').style.display = 'none';
+        }
     }
 
-    dropHandler(ev) {
-        if (ev.dataTransfer.items.length == 0) {
-            return;
-        }
-
-        const item = ev.dataTransfer.items[0];
-
-        if (item.kind !== 'file') {
-            return;
-        }
-
+    sideload(file) {
         const reader = new FileReader;
 
-        reader.onload = (ev) => {
-            const data = new Uint8Array(event.target.result);
-            console.log(`Read file with size ${data.length}`);
+        reader.onload = (_) => {
+            const data = new Uint8Array(reader.result);
             this.sideloadWasmBinary(data);
+            console.log(`Sent file with size ${data.length} to Plugin instance`);
         };
 
-        reader.readAsArrayBuffer(item.getAsFile());
+        reader.readAsArrayBuffer(file);
     }
 
 }

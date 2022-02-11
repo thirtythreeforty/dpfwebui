@@ -8,8 +8,14 @@
   </head>
   <body style="visibility: hidden;" onload="new HotSwapExampleUI">
     <div id="target">
-        <label id="hint">Drag and drop .wasm file</label>
-        <button id="send-note">Send random MIDI note</button>
+        <label id="hint">
+            Drag and drop<br>
+            .wasm file here
+        </label>
+        <div id="buttons">
+            <input id="select-file" type="file"><br>
+            <button id="send-note">Send random MIDI note</button>
+        </div>
     </div>
     <script src="hot-swap-example-ui.js"></script>
   </body>

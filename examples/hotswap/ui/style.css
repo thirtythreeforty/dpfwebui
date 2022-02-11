@@ -27,8 +27,12 @@ body {
     font-family: sans-serif;
     font-weight: bold;
     font-size: 1.25em;
-    margin: 50px;
+    margin: 30px;
     pointer-events: none;
+}
+
+#buttons {
+    text-align: left;
 }
 
 .hover {
