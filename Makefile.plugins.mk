@@ -164,7 +164,9 @@ include $(DPF_PATH)/Makefile.plugins.mk
 BASE_FLAGS += -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -DPLUGIN_BIN_BASENAME=$(NAME) \
               -DHIPHOP_PROJECT_ID_HASH=$(shell echo $(NAME):$(HIPHOP_PROJECT_VERSION) \
               	| shasum -a 256 | head -c 8)
-
+ifeq ($(LINUX),true)
+BASE_FLAGS += -lrt
+endif
 ifeq ($(MACOS),true)
 # This is needed otherwise expect crashes on older macOS when compiling on newer
 # systems. Minimum supported target is High Sierra when WKWebView was introduced.
