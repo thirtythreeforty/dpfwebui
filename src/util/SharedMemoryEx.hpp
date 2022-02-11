@@ -66,6 +66,14 @@ public:
         return fImpl.isCreatedOrConnected();
     }
 
+    size_t getSize() const noexcept {
+        return N;
+    }
+
+    size_t getSizeBytes() const noexcept {
+        return N * sizeof(S);
+    }
+
     bool isRead() const noexcept
     {
         return getHeaderPointer()->readFlag != 0;
@@ -99,6 +107,10 @@ public:
 
     bool write(const char* metadata, const S* data, int32_t size)
     {
+        if (size > getSize()) {
+            return false;
+        }
+        
         SharedMemoryHeader *hdr = getHeaderPointer();
 
         if (hdr == nullptr) {
