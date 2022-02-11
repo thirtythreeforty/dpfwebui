@@ -7,6 +7,9 @@ GENERAL
 LINUX
 -----
 
+- Web view drag and drop does not work (GTK and CEF). Example hotswap is non
+  functional until this is resolved or a Select File... button is added to it.
+
 - WKGTKRESIZEBUG : Broken CSS viewport units (vw/vh/vmin/vmax) in WebKitGTK 
   web view due to workaround for https://bugs.webkit.org/show_bug.cgi?id=229227
 
