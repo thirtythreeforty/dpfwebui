@@ -46,6 +46,10 @@ WasmRuntime::WasmRuntime()
     if (fStore == nullptr) {
         throw wasm_runtime_exception("wasm_store_new() failed");
     }
+
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    sWamrRefCount++;
+#endif // HIPHOP_WASM_RUNTIME_WAMR
 }
 
 WasmRuntime::~WasmRuntime()
@@ -57,6 +61,13 @@ WasmRuntime::~WasmRuntime()
         wasm_store_delete(fStore);
         fStore = nullptr;
     }
+
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    if (--sWamrRefCount > 0) {
+        // Calling wasm_engine_delete() also tears down the WAMR runtime
+        return;
+    }
+#endif
 
     if (fEngine != nullptr) {
         wasm_engine_delete(fEngine);
@@ -422,3 +433,7 @@ WasmValue WasmRuntime::CToWTF16String(const char* s)
 
     return callFunctionReturnSingleValue("_c_to_wtf16_string", { wPtr });
 }
+
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+int WasmRuntime::sWamrRefCount = 0;
+#endif // HIPHOP_WASM_RUNTIME_WAMR

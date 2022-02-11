@@ -309,8 +309,6 @@ $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_VENDOR_PATH)
 	@git -C $(HIPHOP_VENDOR_PATH) clone $(WAMR_GIT_URL) \
 		&& git -C $(WAMR_PATH) reset --hard $(WAMR_GIT_COMMIT)
-	@cp $(HIPHOP_VENDOR_PATH)/wamr-patch/wasm_c_api.c $(WAMR_C_API_PATH)
-	@cp $(HIPHOP_VENDOR_PATH)/wamr-patch/wasm_c_api_internal.h $(WAMR_C_API_PATH)
 endif
 endif
 

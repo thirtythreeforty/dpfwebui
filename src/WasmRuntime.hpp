@@ -110,6 +110,10 @@ private:
     WasmFunctionVector fHostFunctions;
     WasmExternMap      fModuleExports;
 
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    static int sWamrRefCount;
+#endif // HIPHOP_WASM_RUNTIME_WAMR
+
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmRuntime)
 
 };
