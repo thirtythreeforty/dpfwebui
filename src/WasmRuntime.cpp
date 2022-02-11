@@ -36,27 +36,39 @@ WasmRuntime::WasmRuntime()
 #endif // HIPHOP_ENABLE_WASI
 {
     memset(&fExportsVec, 0, sizeof(fExportsVec));
+
+    fEngine = wasm_engine_new();
+    if (fEngine == nullptr) {
+        throw wasm_runtime_exception("wasm_engine_new() failed");
+    }
+
+    fStore = wasm_store_new(fEngine); 
+    if (fStore == nullptr) {
+        throw wasm_runtime_exception("wasm_store_new() failed");
+    }
 }
 
 WasmRuntime::~WasmRuntime()
 {
     stop();
     unload();
+
+    if (fStore != nullptr) {
+        wasm_store_delete(fStore);
+        fStore = nullptr;
+    }
+
+    if (fEngine != nullptr) {
+        wasm_engine_delete(fEngine);
+        fEngine = nullptr;
+    }
 }
 
 void WasmRuntime::load(const char* modulePath)
 {
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
-    // wasm_engine_new() also initializes the WAMR runtime, this call needs to
-    // appear before any other call to wasm_* functions.
-    fEngine = wasm_engine_new();
+    unload();
 
-    if (fEngine == nullptr) {
-        throw wasm_runtime_exception("Error initializing WAMR engine");
-    }
-#endif
     FILE* file = fopen(modulePath, "rb");
-
     if (file == nullptr) {
         throw wasm_module_exception("Error opening Wasm module file");
     }
@@ -68,34 +80,17 @@ void WasmRuntime::load(const char* modulePath)
     wasm_byte_vec_t moduleBytes;
     wasm_byte_vec_new_uninitialized(&moduleBytes, fileSize);
     
-    if (fread(moduleBytes.data, fileSize, 1, file) != 1) {
-        wasm_byte_vec_delete(&moduleBytes);
-        fclose(file);
-        throw wasm_module_exception("Error reading Wasm module file");
-    }
-
+    size_t bytesRead = fread(moduleBytes.data, 1, fileSize, file);
     fclose(file);
 
-#ifndef HIPHOP_WASM_RUNTIME_WAMR
-    // Initialize the engine here for other runtimes like Wasmer
-    fEngine = wasm_engine_new();
-
-    if (fEngine == nullptr) {
-        throw wasm_runtime_exception("wasm_engine_new() failed");
-    }
-#endif
-
-    fStore = wasm_store_new(fEngine); 
-
-    if (fStore == nullptr) {
+    if (bytesRead != fileSize) {
         wasm_byte_vec_delete(&moduleBytes);
-        throw wasm_runtime_exception("wasm_store_new() failed");
+        throw wasm_module_exception("Error reading Wasm module file");
     }
 
     // WINWASMERBUG : Following call crashes some hosts on Windows when using
     //                the Wasmer runtime, does not affect WAMR. See bugs.txt.
     fModule = wasm_module_new(fStore, &moduleBytes);
-    
     wasm_byte_vec_delete(&moduleBytes);
 
     if (fModule == nullptr) {
@@ -105,26 +100,14 @@ void WasmRuntime::load(const char* modulePath)
 
 void WasmRuntime::load(const unsigned char* moduleData, size_t size)
 {
-    fEngine = wasm_engine_new();
-
-    if (fEngine == nullptr) {
-        throw wasm_runtime_exception("Error initializing WAMR engine");
-    }
+    unload();
 
     wasm_byte_vec_t moduleBytes;
     wasm_byte_vec_new_uninitialized(&moduleBytes, size);
 
     std::memcpy(moduleBytes.data, moduleData, size);
 
-    fStore = wasm_store_new(fEngine); 
-
-    if (fStore == nullptr) {
-        wasm_byte_vec_delete(&moduleBytes);
-        throw wasm_runtime_exception("wasm_store_new() failed");
-    }
-
     fModule = wasm_module_new(fStore, &moduleBytes);
-    
     wasm_byte_vec_delete(&moduleBytes);
 
     if (fModule == nullptr) {
@@ -137,16 +120,6 @@ void WasmRuntime::unload()
     if (fModule != nullptr) {
         wasm_module_delete(fModule);
         fModule = nullptr;
-    }
-    
-    if (fStore != nullptr) {
-        wasm_store_delete(fStore);
-        fStore = nullptr;
-    }
-
-    if (fEngine != nullptr) {
-        wasm_engine_delete(fEngine);
-        fEngine = nullptr;
     }
 }
 
@@ -299,12 +272,15 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 
 void WasmRuntime::stop()
 {
+    fStarted = false;
+
 #ifdef HIPHOP_ENABLE_WASI
     if (fWasiEnv != nullptr) {
         wasi_env_delete(fWasiEnv);
         fWasiEnv = nullptr;
     }
 #endif // HIPHOP_ENABLE_WASI
+
     if (fExportsVec.size != 0) {
         wasm_extern_vec_delete(&fExportsVec);
         fExportsVec.size = 0;
@@ -317,8 +293,6 @@ void WasmRuntime::stop()
 
     fHostFunctions.clear();
     fModuleExports.clear();
-
-    fStarted = false;
 }
 
 byte_t* WasmRuntime::getMemory(const WasmValue& wPtr)
