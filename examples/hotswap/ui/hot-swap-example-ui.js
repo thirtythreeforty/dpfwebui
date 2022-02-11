@@ -23,24 +23,27 @@ class HotSwapExampleUI extends DISTRHO.UI {
 
         document.body.style.visibility = 'visible';
 
-        document.getElementById('send-note').addEventListener('click', (_) => {
+        document.getElementById('play-note').addEventListener('click', (_) => {
             this.sendNote(1, getRandomInt(69 - 12, 69 + 12), 127);
         });
 
-        const sendFile = document.getElementById('select-file');
+        const selectFile = document.getElementById('select-file');
 
-        if (navigator.platform.indexOf('Mac') == -1) {
-            sendFile.addEventListener('change', (_) => {
-                if (sendFile.files.length > 0) {
-                    this.sideload(sendFile.files[0]);
+        if (navigator.platform.indexOf('Mac') != -1) {
+            // MACFILEINPUTBUG
+            selectFile.style.display = 'none';
+        } else {
+            selectFile.addEventListener('change', (_) => {
+                if (selectFile.files.length > 0) {
+                    this.sideload(selectFile.files[0]);
                 }
             });
-        } else {
-            // MACFILEINPUTBUG
-            sendFile.style.display = 'none';
         }
 
-        if (navigator.platform.indexOf('Linux') == -1) {
+        if (navigator.platform.indexOf('Linux') != -1) {
+            // LXDRAGDROPBUG
+            document.getElementById('hint').style.display = 'none';
+        } else {
             const buttons = document.getElementById('buttons');
             const target = document.getElementById('target');
             
@@ -69,9 +72,6 @@ class HotSwapExampleUI extends DISTRHO.UI {
                     }
                 }
             });
-        } else {
-            // LXDRAGDROPBUG
-            document.getElementById('hint').style.display = 'none';
         }
     }
 
