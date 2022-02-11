@@ -42,7 +42,7 @@ public:
     void writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
 
 #if HIPHOP_ENABLE_WASM_PLUGIN
-    void replaceWasmBinary(const unsigned char* data, size_t size);
+    void sideloadWasmBinary(const unsigned char* data, size_t size);
 #endif // HIPHOP_ENABLE_WASM_PLUGIN
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 

@@ -176,9 +176,9 @@ class UI {
     }
 
     // Non-DPF method that loads binary into DISTRHO::WasmHostPlugin instance
-    // void UIEx::replaceWasmBinary(const unsigned char* data, size_t size)
-    replaceWasmBinary(data /*Uint8Array*/) {
-        this._call('replaceWasmBinary', base64EncArr(data));
+    // void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
+    sideloadWasmBinary(data /*Uint8Array*/) {
+        this._call('sideloadWasmBinary', base64EncArr(data));
     }
 
     // Helper for decoding received shared memory data

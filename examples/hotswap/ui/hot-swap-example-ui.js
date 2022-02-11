@@ -67,7 +67,7 @@ class HotSwapExampleUI extends DISTRHO.UI {
         reader.onload = (ev) => {
             const data = new Uint8Array(event.target.result);
             console.log(`Read file with size ${data.length}`);
-            this.replaceWasmBinary(data);
+            this.sideloadWasmBinary(data);
         };
 
         reader.readAsArrayBuffer(item.getAsFile());

@@ -63,7 +63,7 @@ void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, si
 }
 
 #if HIPHOP_ENABLE_WASM_PLUGIN
-void UIEx::replaceWasmBinary(const unsigned char* data, size_t size)
+void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
 {
     // Send binary to the Plugin instance. This could be also achieved using the
     // state interface by first encoding data into something like Base64.

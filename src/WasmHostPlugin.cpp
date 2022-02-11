@@ -326,14 +326,14 @@ void WasmHostPlugin::sharedMemoryChanged(const char* metadata, const unsigned ch
 {
     if (std::strcmp(metadata, "_wasm_bin") == 0) {
         try {
-            replaceWasmBinary(data, size);
+            loadWasmBinary(data, size);
         } catch (const std::exception& ex) {
             d_stderr2(ex.what());
         }
     }
 }
 
-void WasmHostPlugin::replaceWasmBinary(const unsigned char* data, size_t size)
+void WasmHostPlugin::loadWasmBinary(const unsigned char* data, size_t size)
 {
     // No need to check if the runtime is running
     SCOPED_RUNTIME_LOCK();

@@ -156,9 +156,9 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
     });
 
 #if HIPHOP_ENABLE_WASM_PLUGIN
-    fHandler["replaceWasmBinary"] = std::make_pair(1, [this](const JsValueVector& args) {
+    fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JsValueVector& args) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
-        replaceWasmBinary(
+        sideloadWasmBinary(
             static_cast<const unsigned char*>(data.data()),
             static_cast<size_t>(data.size())
         );
