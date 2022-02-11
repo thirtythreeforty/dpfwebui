@@ -53,8 +53,7 @@ export default class JitDrumExamplePlugin extends DISTRHO.Plugin implements DIST
     }
 
     run(inputs: Float32Array[], outputs: Float32Array[], midiEvents: DISTRHO.MidiEvent[]): void {
-        // TODO: avoid clicks
-        
+        // Compute frequency and amplitude from MIDI data
         if ((midiEvents.length > 0) && (midiEvents[0].data[0] & 0xf0) == 0x90) {
             this.t = 0
             this.f = 2 * 440 * Mathf.pow(2, (<f32>midiEvents[0].data[1] - 69) / 12)
@@ -65,8 +64,11 @@ export default class JitDrumExamplePlugin extends DISTRHO.Plugin implements DIST
         let k: f32
 
         for (let i = 0; i < outputs[0].length; ++i) {
+            // Compute sample; make sure k=0 when t=0 to avoid attack click.
             t = <f32>this.t / this.sr
-            k = this.a * Mathf.sin(this.f * Mathf.exp(PUNCH * -t)) * Mathf.exp(DECAY * -t)
+            k = this.a * Mathf.sin(this.f * (Mathf.exp(PUNCH * -t) - 1)) * Mathf.exp(DECAY * -t)
+
+            // Write sample
             outputs[0][i] = outputs[1][i] = k
             this.t += 1
         }
