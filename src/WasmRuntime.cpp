@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstdio>
+#include <cstring>
 #include <iostream>
 
 #include "WasmRuntime.hpp"
@@ -35,7 +37,7 @@ WasmRuntime::WasmRuntime()
     , fWasiEnv(nullptr)
 #endif // HIPHOP_ENABLE_WASI
 {
-    memset(&fExportsVec, 0, sizeof(fExportsVec));
+    std::memset(&fExportsVec, 0, sizeof(fExportsVec));
 
     fEngine = wasm_engine_new();
     if (fEngine == nullptr) {
@@ -79,24 +81,24 @@ void WasmRuntime::load(const char* modulePath)
 {
     unload();
 
-    FILE* file = fopen(modulePath, "rb");
+    std::FILE* file = std::fopen(modulePath, "rb");
     if (file == nullptr) {
-        throw wasm_module_exception("Error opening Wasm module file");
+        throw wasm_module_exception("Error opening module file");
     }
 
-    fseek(file, 0L, SEEK_END);
-    const size_t fileSize = ftell(file);
-    fseek(file, 0L, SEEK_SET);
+    std::fseek(file, 0L, SEEK_END);
+    const size_t fileSize = std::ftell(file);
+    std::fseek(file, 0L, SEEK_SET);
 
     wasm_byte_vec_t moduleBytes;
     wasm_byte_vec_new_uninitialized(&moduleBytes, fileSize);
     
-    size_t bytesRead = fread(moduleBytes.data, 1, fileSize, file);
-    fclose(file);
+    size_t bytesRead = std::fread(moduleBytes.data, 1, fileSize, file);
+    std::fclose(file);
 
     if (bytesRead != fileSize) {
         wasm_byte_vec_delete(&moduleBytes);
-        throw wasm_module_exception("Error reading Wasm module file");
+        throw wasm_module_exception("Error reading module file");
     }
 
     // WINWASMERBUG : Following call crashes some hosts on Windows when using
@@ -162,7 +164,7 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     for (size_t i = 0; i < wasiImports.size; i++) {
         const wasmer_named_extern_t *ne = wasiImports.data[i];
         const wasm_name_t *wn = wasmer_named_extern_name(ne);
-        memcpy(name, wn->data, wn->size);
+        std::memcpy(name, wn->data, wn->size);
         name[wn->size] = '\0';
         wasiImportIndex[name] = i;
     }
@@ -181,7 +183,7 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 
     for (size_t i = 0; i < importTypes.size; i++) {
         const wasm_name_t *wn = wasm_importtype_name(importTypes.data[i]);
-        memcpy(name, wn->data, wn->size);
+        std::memcpy(name, wn->data, wn->size);
         name[wn->size] = '\0';
         importIndex[name] = i;
 
@@ -193,9 +195,9 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 #endif // HIPHOP_ENABLE_WASI
         if (!moduleNeedsWasi) {
             wn = wasm_importtype_module(importTypes.data[i]);
-            memcpy(name, wn->data, wn->size);
+            std::memcpy(name, wn->data, wn->size);
             name[wn->size] = '\0';
-            if (strstr(name, "wasi_") == name) { // eg, wasi_snapshot_preview1
+            if (std::strstr(name, "wasi_") == name) { // eg, wasi_snapshot_preview1
                 moduleNeedsWasi = true;
             }
         }
@@ -268,7 +270,7 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
 
     for (size_t i = 0; i < fExportsVec.size; i++) {
         const wasm_name_t *wn = wasm_exporttype_name(exportTypes.data[i]);
-        memcpy(name, wn->data, wn->size);
+        std::memcpy(name, wn->data, wn->size);
         name[wn->size] = '\0';
         fModuleExports[name] = fExportsVec.data[i];
     }
@@ -318,7 +320,7 @@ char* WasmRuntime::getMemoryAsCString(const WasmValue& wPtr)
 
 void WasmRuntime::copyCStringToMemory(const WasmValue& wPtr, const char* s)
 {
-    strcpy(getMemoryAsCString(wPtr), s);
+    std::strcpy(getMemoryAsCString(wPtr), s);
 }
 
 WasmValue WasmRuntime::getGlobal(const char* name)
