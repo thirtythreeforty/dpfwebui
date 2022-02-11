@@ -5,6 +5,7 @@ examples:
 	@make -C examples/jitdrum
 	@make -C examples/webgain
 	@make -C examples/astone
+	@make -C examples/hotswap
 
 clean:
 	rm -rf bin

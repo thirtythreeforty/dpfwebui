@@ -1,0 +1,36 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #B6D4EFFF;
+}
+
+#target {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border: dashed 2px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    text-align: center;
+}
+
+#hint {
+    color: rgba(0, 0, 0, 0.33);
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 1.25em;
+    margin: 50px;
+    pointer-events: none;
+}
+
+.hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
