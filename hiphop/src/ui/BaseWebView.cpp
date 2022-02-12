@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "AbstractWebView.hpp"
+#include "BaseWebView.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -40,12 +40,12 @@
 #define CSS_DISABLE_OVERFLOW     "body { overflow: hidden; }"
 
 /**
- * Keep this class generic; specific plugin features belong to AbstractWebHostUI.
+ * Keep this class generic; specific plugin features belong to BaseWebHostUI.
  */
 
 USE_NAMESPACE_DISTRHO
 
-AbstractWebView::AbstractWebView()
+BaseWebView::BaseWebView()
     : fWidth(0)
     , fHeight(0)
     , fBackgroundColor(0)
@@ -55,65 +55,65 @@ AbstractWebView::AbstractWebView()
     , fHandler(nullptr)
 {}
 
-uint AbstractWebView::getWidth()
+uint BaseWebView::getWidth()
 {
     return fWidth;
 }
 
-uint AbstractWebView::getHeight()
+uint BaseWebView::getHeight()
 {
     return fHeight;
 }
 
-void AbstractWebView::setSize(uint width, uint height)
+void BaseWebView::setSize(uint width, uint height)
 {
     fWidth = width;
     fHeight = height;
     onSize(width, height);
 }
 
-uint32_t AbstractWebView::getBackgroundColor()
+uint32_t BaseWebView::getBackgroundColor()
 {
     return fBackgroundColor;
 }
 
-void AbstractWebView::setBackgroundColor(uint32_t rgba)
+void BaseWebView::setBackgroundColor(uint32_t rgba)
 {
     fBackgroundColor = rgba;
 }
 
-uintptr_t AbstractWebView::getParent()
+uintptr_t BaseWebView::getParent()
 {
     return fParent;
 }
 
-void AbstractWebView::setParent(uintptr_t parent)
+void BaseWebView::setParent(uintptr_t parent)
 {
     fParent = parent;
 }
 
-bool AbstractWebView::getKeyboardFocus()
+bool BaseWebView::getKeyboardFocus()
 {
     return fKeyboardFocus;
 }    
 
-void AbstractWebView::setKeyboardFocus(bool focus)
+void BaseWebView::setKeyboardFocus(bool focus)
 {
     fKeyboardFocus = focus;
     onKeyboardFocus(focus);
 }
 
-void AbstractWebView::setPrintTraffic(bool printTraffic)
+void BaseWebView::setPrintTraffic(bool printTraffic)
 {
     fPrintTraffic = printTraffic;
 }
 
-void AbstractWebView::setEventHandler(WebViewEventHandler* handler)
+void BaseWebView::setEventHandler(WebViewEventHandler* handler)
 {
     fHandler = handler;
 }
 
-void AbstractWebView::postMessage(const JsValueVector& args)
+void BaseWebView::postMessage(const JsValueVector& args)
 {
     // This method implements something like a "reverse postMessage()" aiming to keep the bridge
     // symmetrical. Global window.webviewHost is an EventTarget that can be listened for messages.
@@ -127,7 +127,7 @@ void AbstractWebView::postMessage(const JsValueVector& args)
     runScript(js);
 }
 
-void AbstractWebView::injectDefaultScripts()
+void BaseWebView::injectDefaultScripts()
 {
     String js = String(JS_DISABLE_CONTEXT_MENU)
               + String(JS_DISABLE_PRINT)
@@ -136,7 +136,7 @@ void AbstractWebView::injectDefaultScripts()
     injectScript(js);
 }
 
-void AbstractWebView::handleLoadFinished()
+void BaseWebView::handleLoadFinished()
 {
     String css = String(CSS_DISABLE_IMAGE_DRAG)
                + String(CSS_DISABLE_SELECTION)
@@ -149,7 +149,7 @@ void AbstractWebView::handleLoadFinished()
     }
 }
 
-void AbstractWebView::handleScriptMessage(const JsValueVector& args)
+void BaseWebView::handleScriptMessage(const JsValueVector& args)
 {
     if ((args.size() == 3) && (args[0].getString() == "console")) {
         if (fHandler != nullptr) {
@@ -167,7 +167,7 @@ void AbstractWebView::handleScriptMessage(const JsValueVector& args)
     }
 }
 
-String AbstractWebView::serializeJsValues(const JsValueVector& args)
+String BaseWebView::serializeJsValues(const JsValueVector& args)
 {
     std::stringstream ss;
     ss << '[';
@@ -184,7 +184,7 @@ String AbstractWebView::serializeJsValues(const JsValueVector& args)
     return String(ss.str().c_str());
 }
 
-void AbstractWebView::addStylesheet(String& source)
+void BaseWebView::addStylesheet(String& source)
 {
     String js = "document.head.insertAdjacentHTML('beforeend', '<style>" + source + "</style>');";
     runScript(js);

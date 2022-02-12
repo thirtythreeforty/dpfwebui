@@ -19,12 +19,12 @@
 #ifndef MAC_WEB_HOST_UI_HPP
 #define MAC_WEB_HOST_UI_HPP
 
-#include "../AbstractWebHostUI.hpp"
+#include "../BaseWebHostUI.hpp"
 #include "CocoaWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class MacWebHostUI : public AbstractWebHostUI
+class MacWebHostUI : public BaseWebHostUI
 {
 public:
     MacWebHostUI(uint baseWidth = 0, uint baseHeight = 0,

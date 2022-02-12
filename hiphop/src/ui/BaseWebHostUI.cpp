@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "AbstractWebHostUI.hpp"
+#include "BaseWebHostUI.hpp"
 
 #include <iostream>
 
@@ -33,7 +33,7 @@ USE_NAMESPACE_DISTRHO
 // VST3/Mac plugins on secondary displays might open with wrong dimensions.
 #define MAIN_DISPLAY_SCALE_FACTOR() getDisplayScaleFactor(0)
 
-AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
+BaseWebHostUI::BaseWebHostUI(uint widthCssPx, uint heightCssPx,
         uint32_t backgroundColor, bool /*startLoading*/)
     : UIEx(MAIN_DISPLAY_SCALE_FACTOR() * widthCssPx, MAIN_DISPLAY_SCALE_FACTOR() * heightCssPx)
     , fInitialWidth(widthCssPx)
@@ -43,6 +43,172 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
     , fUiBlockQueued(false)
     , fPlatformWindow(0)
     , fWebView(nullptr)
+{
+    initHandlers();
+}
+
+BaseWebHostUI::~BaseWebHostUI()
+{
+    if (fWebView != nullptr) {
+        delete fWebView;
+    }
+}
+
+void BaseWebHostUI::queue(const UiBlock& block)
+{
+    fUiBlock = block;
+    fUiBlockQueued = true;
+}
+
+bool BaseWebHostUI::shouldCreateWebView()
+{
+    // When running as a plugin the UI ctor/dtor can be repeatedly called with
+    // no parent window available, do not create the web view in such cases.
+    return isStandalone() || (getParentWindowHandle() != 0);
+}
+
+void BaseWebHostUI::setWebView(BaseWebView* webView)
+{
+    fWebView = webView;
+
+    fWebView->setEventHandler(this);
+#ifdef HIPHOP_PRINT_TRAFFIC
+    fWebView->setPrintTraffic(true);
+#endif // HIPHOP_PRINT_TRAFFIC
+    
+    String js = String(
+#include "ui/client/distrho-ui.js.inc"
+    );
+    js += "window.DISTRHO = {UI: UI, quirks: {}};"
+          "UI = null;";
+    fWebView->injectScript(js);
+
+    // Cannot call virtual method createStandaloneWindow() from constructor.
+    fPlatformWindow = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
+
+    // Convert CSS pixels to native pixels following the system display scale
+    // factor. Then adjust window size so it correctly wraps web content on
+    // high density displays, known as Retina or HiDPI.
+    const float k = getDisplayScaleFactor(this);
+    const uint width = static_cast<uint>(k * static_cast<float>(fInitialWidth));
+    const uint height = static_cast<uint>(k * static_cast<float>(fInitialHeight));
+
+    fWebView->setParent(fPlatformWindow);
+    fWebView->setBackgroundColor(fBackgroundColor);
+    fWebView->setSize(width, height);
+    fWebView->realize();
+
+    setSize(width, height);
+}
+
+void BaseWebHostUI::load()
+{
+    if (fWebView != nullptr) {
+        String url = "file://" + path::getLibraryPath() + "/ui/index.html";
+        fWebView->navigate(url);
+    }
+}
+
+void BaseWebHostUI::runScript(String& source)
+{
+    if (fWebView != nullptr) {
+        fWebView->runScript(source);
+    }
+}
+
+void BaseWebHostUI::injectScript(String& source)
+{
+    // Cannot inject scripts after navigation has started
+    if (fWebView != nullptr) {
+        fWebView->injectScript(source);
+    }
+}
+
+void BaseWebHostUI::webViewPostMessage(const JsValueVector& args)
+{
+    if (fMessageQueueReady) {
+        fWebView->postMessage(args);
+    } else {
+        fInitMessageQueue.push_back(args);
+    }
+}
+
+void BaseWebHostUI::flushInitMessageQueue()
+{
+    if (fMessageQueueReady) {
+        return;
+    }
+
+    fMessageQueueReady = true;
+
+    for (InitMessageQueue::iterator it = fInitMessageQueue.begin(); it != fInitMessageQueue.end(); ++it) {
+        fWebView->postMessage(*it);
+    }
+    
+    fInitMessageQueue.clear();
+}
+
+void BaseWebHostUI::setKeyboardFocus(bool focus)
+{
+    fWebView->setKeyboardFocus(focus);
+}
+
+void BaseWebHostUI::uiIdle()
+{
+    UIEx::uiIdle();
+    
+    if (fUiBlockQueued) {
+        fUiBlockQueued = false;
+        fUiBlock();
+    }
+
+    if (isStandalone()) {
+        processStandaloneEvents();
+    }
+}
+
+#if HIPHOP_ENABLE_SHARED_MEMORY
+void BaseWebHostUI::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+{
+    (void)size;
+    String b64Data = String::asBase64(data, size);
+    webViewPostMessage({"UI", "_sharedMemoryChanged", metadata, b64Data});
+}
+#endif // HIPHOP_ENABLE_SHARED_MEMORY
+
+void BaseWebHostUI::sizeChanged(uint width, uint height)
+{
+    UI::sizeChanged(width, height);
+    
+    fWebView->setSize(width, height);
+    webViewPostMessage({"UI", "sizeChanged", width, height});
+}
+
+void BaseWebHostUI::parameterChanged(uint32_t index, float value)
+{
+    webViewPostMessage({"UI", "parameterChanged", index, value});
+}
+
+#if DISTRHO_PLUGIN_WANT_PROGRAMS
+void BaseWebHostUI::programLoaded(uint32_t index)
+{
+    webViewPostMessage({"UI", "programLoaded", index});
+}
+#endif // DISTRHO_PLUGIN_WANT_PROGRAMS
+
+#if DISTRHO_PLUGIN_WANT_STATE
+void BaseWebHostUI::stateChanged(const char* key, const char* value)
+{
+    webViewPostMessage({"UI", "stateChanged", key, value});
+}
+#endif // DISTRHO_PLUGIN_WANT_STATE
+
+void BaseWebHostUI::sizeRequest(const UiBlock& block)
+{
+    block();    // on Linux block execution is queued
+}
+
+void BaseWebHostUI::initHandlers()
 {
     // It is not possible to implement JS synchronous calls that return values
     // without resorting to dirty hacks. Use JS async functions instead, and
@@ -167,173 +333,12 @@ AbstractWebHostUI::AbstractWebHostUI(uint widthCssPx, uint heightCssPx,
 #endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 }
 
-AbstractWebHostUI::~AbstractWebHostUI()
-{
-    if (fWebView != nullptr) {
-        delete fWebView;
-    }
-}
-
-void AbstractWebHostUI::queue(const UiBlock& block)
-{
-    fUiBlock = block;
-    fUiBlockQueued = true;
-}
-
-bool AbstractWebHostUI::shouldCreateWebView()
-{
-    // When running as a plugin the UI ctor/dtor can be repeatedly called with
-    // no parent window available, do not create the web view in such cases.
-    return isStandalone() || (getParentWindowHandle() != 0);
-}
-
-void AbstractWebHostUI::setWebView(AbstractWebView* webView)
-{
-    fWebView = webView;
-
-    fWebView->setEventHandler(this);
-#ifdef HIPHOP_PRINT_TRAFFIC
-    fWebView->setPrintTraffic(true);
-#endif // HIPHOP_PRINT_TRAFFIC
-    
-    String js = String(
-#include "ui/client/distrho-ui.js.inc"
-    );
-    js += "window.DISTRHO = {UI: UI, quirks: {}};"
-          "UI = null;";
-    fWebView->injectScript(js);
-
-    // Cannot call virtual method createStandaloneWindow() from constructor.
-    fPlatformWindow = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
-
-    // Convert CSS pixels to native pixels following the system display scale
-    // factor. Then adjust window size so it correctly wraps web content on
-    // high density displays, known as Retina or HiDPI.
-    const float k = getDisplayScaleFactor(this);
-    const uint width = static_cast<uint>(k * static_cast<float>(fInitialWidth));
-    const uint height = static_cast<uint>(k * static_cast<float>(fInitialHeight));
-
-    fWebView->setParent(fPlatformWindow);
-    fWebView->setBackgroundColor(fBackgroundColor);
-    fWebView->setSize(width, height);
-    fWebView->realize();
-
-    setSize(width, height);
-}
-
-void AbstractWebHostUI::load()
-{
-    if (fWebView != nullptr) {
-        String url = "file://" + path::getLibraryPath() + "/ui/index.html";
-        fWebView->navigate(url);
-    }
-}
-
-void AbstractWebHostUI::runScript(String& source)
-{
-    if (fWebView != nullptr) {
-        fWebView->runScript(source);
-    }
-}
-
-void AbstractWebHostUI::injectScript(String& source)
-{
-    // Cannot inject scripts after navigation has started
-    if (fWebView != nullptr) {
-        fWebView->injectScript(source);
-    }
-}
-
-void AbstractWebHostUI::webViewPostMessage(const JsValueVector& args)
-{
-    if (fMessageQueueReady) {
-        fWebView->postMessage(args);
-    } else {
-        fInitMessageQueue.push_back(args);
-    }
-}
-
-void AbstractWebHostUI::flushInitMessageQueue()
-{
-    if (fMessageQueueReady) {
-        return;
-    }
-
-    fMessageQueueReady = true;
-
-    for (InitMessageQueue::iterator it = fInitMessageQueue.begin(); it != fInitMessageQueue.end(); ++it) {
-        fWebView->postMessage(*it);
-    }
-    
-    fInitMessageQueue.clear();
-}
-
-void AbstractWebHostUI::setKeyboardFocus(bool focus)
-{
-    fWebView->setKeyboardFocus(focus);
-}
-
-void AbstractWebHostUI::uiIdle()
-{
-    UIEx::uiIdle();
-    
-    if (fUiBlockQueued) {
-        fUiBlockQueued = false;
-        fUiBlock();
-    }
-
-    if (isStandalone()) {
-        processStandaloneEvents();
-    }
-}
-
-#if HIPHOP_ENABLE_SHARED_MEMORY
-void AbstractWebHostUI::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
-{
-    (void)size;
-    String b64Data = String::asBase64(data, size);
-    webViewPostMessage({"UI", "_sharedMemoryChanged", metadata, b64Data});
-}
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
-
-void AbstractWebHostUI::sizeChanged(uint width, uint height)
-{
-    UI::sizeChanged(width, height);
-    
-    fWebView->setSize(width, height);
-    webViewPostMessage({"UI", "sizeChanged", width, height});
-}
-
-void AbstractWebHostUI::parameterChanged(uint32_t index, float value)
-{
-    webViewPostMessage({"UI", "parameterChanged", index, value});
-}
-
-#if DISTRHO_PLUGIN_WANT_PROGRAMS
-void AbstractWebHostUI::programLoaded(uint32_t index)
-{
-    webViewPostMessage({"UI", "programLoaded", index});
-}
-#endif // DISTRHO_PLUGIN_WANT_PROGRAMS
-
-#if DISTRHO_PLUGIN_WANT_STATE
-void AbstractWebHostUI::stateChanged(const char* key, const char* value)
-{
-    webViewPostMessage({"UI", "stateChanged", key, value});
-}
-#endif // DISTRHO_PLUGIN_WANT_STATE
-
-void AbstractWebHostUI::sizeRequest(const UiBlock& block)
-{
-    block();    // on Linux block execution is queued
-}
-
-void AbstractWebHostUI::handleWebViewLoadFinished()
+void BaseWebHostUI::handleWebViewLoadFinished()
 {
     onWebContentReady();
 }
 
-void AbstractWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
+void BaseWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
 {
     if ((args.size() < 2) || (args[0].getString() != "UI")) {
         onWebMessageReceived(args); // passthrough
@@ -359,7 +364,7 @@ void AbstractWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
     handler.second(handlerArgs);
 }
 
-void AbstractWebHostUI::handleWebViewConsole(const String& tag, const String& text)
+void BaseWebHostUI::handleWebViewConsole(const String& tag, const String& text)
 {
     if (tag == "log") {
         std::cout << text.buffer() << std::endl;

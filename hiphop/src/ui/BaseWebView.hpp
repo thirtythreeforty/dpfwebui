@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ABSTRACT_WEBVIEW_HPP
-#define ABSTRACT_WEBVIEW_HPP
+#ifndef BASE_WEBVIEW_HPP
+#define BASE_WEBVIEW_HPP
 
 #include <cstdint>
 #include <vector>
@@ -40,11 +40,11 @@ public:
 
 };
 
-class AbstractWebView
+class BaseWebView
 {
 public:
-    AbstractWebView();
-    virtual ~AbstractWebView() {}
+    BaseWebView();
+    virtual ~BaseWebView() {}
 
     uint getWidth();
     uint getHeight();
@@ -96,4 +96,4 @@ private:
 
 END_NAMESPACE_DISTRHO
 
-#endif // ABSTRACT_WEBVIEW_HPP
+#endif // BASE_WEBVIEW_HPP

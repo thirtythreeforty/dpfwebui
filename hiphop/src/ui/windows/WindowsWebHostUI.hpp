@@ -19,12 +19,12 @@
 #ifndef WINDOWS_WEB_HOST_UI_HPP
 #define WINDOWS_WEB_HOST_UI_HPP
 
-#include "../AbstractWebHostUI.hpp"
+#include "../BaseWebHostUI.hpp"
 #include "EdgeWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class WindowsWebHostUI : public AbstractWebHostUI
+class WindowsWebHostUI : public BaseWebHostUI
 {
 public:
     WindowsWebHostUI(uint baseWidth = 0, uint baseHeight = 0,

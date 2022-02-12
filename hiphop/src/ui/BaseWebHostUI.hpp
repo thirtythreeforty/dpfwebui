@@ -16,27 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef ABSTRACT_WEB_HOST_UI_HPP
-#define ABSTRACT_WEB_HOST_UI_HPP
+#ifndef BASE_WEB_HOST_UI_HPP
+#define BASE_WEB_HOST_UI_HPP
 
 #include <functional>
 #include <unordered_map>
 #include <vector>
 
 #include "UIEx.hpp"
-#include "AbstractWebView.hpp"
+#include "BaseWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class AbstractWebHostUI;
-float getDisplayScaleFactor(AbstractWebHostUI* ui);
+class BaseWebHostUI;
+float getDisplayScaleFactor(BaseWebHostUI* ui);
 
-class AbstractWebHostUI : public UIEx, private WebViewEventHandler
+class BaseWebHostUI : public UIEx, private WebViewEventHandler
 {
 public:
-    AbstractWebHostUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
+    BaseWebHostUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
         bool startLoading = true);
-    virtual ~AbstractWebHostUI();
+    virtual ~BaseWebHostUI();
 
     typedef std::function<void()> UiBlock;
 
@@ -47,13 +47,13 @@ public:
 
     uintptr_t getPlatformWindow() const { return fPlatformWindow; }
 
-    AbstractWebView* getWebView() { return fWebView; }
+    BaseWebView* getWebView() { return fWebView; }
 
     virtual void openSystemWebBrowser(String& url) = 0;
 
 protected:
     bool shouldCreateWebView();
-    void setWebView(AbstractWebView* webView);
+    void setWebView(BaseWebView* webView);
 
     void load();
     
@@ -90,6 +90,8 @@ protected:
     virtual void      processStandaloneEvents() = 0;
 
 private:
+    void initHandlers();
+
     // WebViewEventHandler
 
     virtual void handleWebViewLoadFinished() override;
@@ -108,15 +110,15 @@ private:
     bool              fMessageQueueReady;
     bool              fUiBlockQueued;
     uintptr_t         fPlatformWindow;
-    AbstractWebView*  fWebView;
+    BaseWebView*      fWebView;
     UiBlock           fUiBlock;
     InitMessageQueue  fInitMessageQueue;
     MessageHandlerMap fHandler;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AbstractWebHostUI)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseWebHostUI)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // ABSTRACT_WEB_HOST_UI_HPP
+#endif  // BASE_WEB_HOST_UI_HPP

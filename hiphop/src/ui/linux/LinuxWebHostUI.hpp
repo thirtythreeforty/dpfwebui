@@ -19,12 +19,12 @@
 #ifndef LINUX_WEB_HOST_UI_HPP
 #define LINUX_WEB_HOST_UI_HPP
 
-#include "../AbstractWebHostUI.hpp"
+#include "../BaseWebHostUI.hpp"
 #include "ChildProcessWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class LinuxWebHostUI : public AbstractWebHostUI
+class LinuxWebHostUI : public BaseWebHostUI
 {
 public:
     LinuxWebHostUI(uint baseWidth = 0, uint baseHeight = 0,

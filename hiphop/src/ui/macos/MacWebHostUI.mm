@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
+float DISTRHO::getDisplayScaleFactor(BaseWebHostUI* ui)
 {
     if (ui == nullptr) {
         return [NSScreen mainScreen].backingScaleFactor;
@@ -37,7 +37,7 @@ float DISTRHO::getDisplayScaleFactor(AbstractWebHostUI* ui)
 
 MacWebHostUI::MacWebHostUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : AbstractWebHostUI(baseWidth, baseHeight, backgroundColor)
+    : BaseWebHostUI(baseWidth, baseHeight, backgroundColor)
     , fWindow(0)
 {
     if (shouldCreateWebView()) {

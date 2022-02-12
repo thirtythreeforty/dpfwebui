@@ -27,12 +27,12 @@
 
 #include "extra/Thread.hpp"
 
-#include "../AbstractWebView.hpp"
+#include "../BaseWebView.hpp"
 #include "IpcChannel.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class ChildProcessWebView : public AbstractWebView
+class ChildProcessWebView : public BaseWebView
 {
 public:
     ChildProcessWebView();
