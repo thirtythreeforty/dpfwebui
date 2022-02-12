@@ -22,58 +22,56 @@ class HotSwapExampleUI extends DISTRHO.UI {
         super();
 
         document.body.style.visibility = 'visible';
-
-        document.getElementById('play-note').addEventListener('click', (_) => {
-            this.sendNote(1, getRandomInt(69 - 12, 69 + 12), 127);
-        });
-
+        
+        const target = document.getElementById('target');
+        const hint = document.getElementById('hint');
         const selectFile = document.getElementById('select-file');
 
-        if (window.DISTRHO.quirks.noFileInput) {
-            selectFile.style.display = 'none';
-        } else {
-            selectFile.addEventListener('change', (_) => {
-                if (selectFile.files.length > 0) {
-                    this.sideload(selectFile.files[0]);
-                }
-            });
-        }
-
+        selectFile.addEventListener('change', (_) => {
+            if (selectFile.files.length > 0) {
+                this.sideload(selectFile.files[0]);
+            }
+        });
+        
         if (DISTRHO.quirks.noDragAndDrop) {
-            document.getElementById('hint').style.display = 'none';
-        } else {
-            const buttons = document.getElementById('buttons');
-            const target = document.getElementById('target');
-            
+            hint.style.display = 'none';
+            target.style.border = 'none';
+        } else {       
+            selectFile.style.display = 'none';
+
             target.addEventListener('dragover', (ev) => ev.preventDefault());
             
             target.addEventListener('dragenter', (_) => {
                 target.classList.add('hover');
-                buttons.style.pointerEvents = 'none';
             });
 
             target.addEventListener('dragleave', (_) => {
                 target.classList.remove('hover');
-                buttons.style.pointerEvents = '';
             });
 
             target.addEventListener('drop', (ev) => {
                 target.classList.remove('hover');
-                buttons.style.pointerEvents = '';
 
                 ev.preventDefault();
 
                 if (ev.dataTransfer.items.length > 0) {
                     const item = ev.dataTransfer.items[0];
                     if (item.kind == 'file') {
-                        this.sideload(item.getAsFile());
+                        this.onFileSelected(item.getAsFile());
                     }
                 }
             });
         }
+
+        setInterval(() => this.playRandomNote(), 500 /*120 BPM*/);
     }
 
-    sideload(file) {
+    playRandomNote() {
+        const AMinorPentatonic = [69 /*A*/, 71 /*C*/, 72 /*D*/, 73 /*E*/, 75 /*G*/];
+        this.sendNote(1, AMinorPentatonic[getRandomInt(0, 4)], 127);
+    }
+
+    onFileSelected(file) {
         const reader = new FileReader;
 
         reader.onload = (_) => {
