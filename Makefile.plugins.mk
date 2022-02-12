@@ -78,51 +78,39 @@ LIB_DIR_NOBUNDLE = $(TARGET_DIR)/$(NAME)-lib
 # Add optional support for AssemblyScript DSP
 
 ifeq ($(AS_DSP),true)
-HIPHOP_FILES_DSP  = plugin/PluginEx.cpp \
-                    plugin/WasmHostPlugin.cpp \
-                    plugin/WasmRuntime.cpp
-ifeq ($(LINUX),true)
-HIPHOP_FILES_DSP += LinuxPath.cpp
-endif
-ifeq ($(MACOS),true)
-HIPHOP_FILES_DSP += MacPath.mm
-endif
-ifeq ($(WINDOWS),true)
-HIPHOP_FILES_DSP += WindowsPath.cpp
-endif
+HIPHOP_FILES_DSP  = PluginEx.cpp \
+                    WasmHostPlugin.cpp \
+                    WasmRuntime.cpp
 
-FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/%)
+FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/plugin/%)
 endif
 
 # ------------------------------------------------------------------------------
 # Add optional support for web UI
 
 ifeq ($(WEB_UI),true)
-HIPHOP_FILES_UI  = ui/UIEx.cpp \
-                   ui/AbstractWebHostUI.cpp \
-                   ui/AbstractWebView.cpp \
-                   ui/JsValue.cpp
+HIPHOP_FILES_UI  = UIEx.cpp \
+                   AbstractWebHostUI.cpp \
+                   AbstractWebView.cpp \
+                   JsValue.cpp
 ifeq ($(LINUX),true)
-HIPHOP_FILES_UI += LinuxPath.cpp \
-                   ui/linux/LinuxWebHostUI.cpp \
-                   ui/linux/ChildProcessWebView.cpp \
-                   ui/linux/IpcChannel.cpp \
-                   ui/linux/ipc.c
+HIPHOP_FILES_UI += linux/LinuxWebHostUI.cpp \
+                   linux/ChildProcessWebView.cpp \
+                   linux/IpcChannel.cpp \
+                   linux/ipc.c
 endif
 ifeq ($(MACOS),true)
-HIPHOP_FILES_UI += MacPath.mm \
-                   ui/macos/MacWebHostUI.mm \
-                   ui/macos/CocoaWebView.mm
+HIPHOP_FILES_UI += macos/MacWebHostUI.mm \
+                   macos/CocoaWebView.mm
 endif
 ifeq ($(WINDOWS),true)
-HIPHOP_FILES_UI += WindowsPath.cpp \
-                   ui/windows/WindowsWebHostUI.cpp \
-                   ui/windows/EdgeWebView.cpp \
-                   ui/windows/WebView2EventHandler.cpp \
-                   ui/windows/cJSON.c
+HIPHOP_FILES_UI += windows/WindowsWebHostUI.cpp \
+                   windows/EdgeWebView.cpp \
+                   windows/WebView2EventHandler.cpp \
+                   windows/cJSON.c
 endif
 
-FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/%)
+FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/ui/%)
 endif
 
 # ------------------------------------------------------------------------------

@@ -37,12 +37,11 @@ $(CEF_WRAPPER_LIB):
 # ------------------------------------------------------------------------------
 # Build helper binary
 
-LXHELPER_SRC = ui/linux/CefHelper.cpp \
-			   ui/linux/IpcChannel.cpp \
-			   ui/linux/ipc.c \
-			   LinuxPath.cpp
+LXHELPER_SRC = CefHelper.cpp \
+			   IpcChannel.cpp \
+			   ipc.c
 
-LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/%.o)
+LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/ui/linux/%.o)
 
 LXHELPER_CFLAGS = -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) \
                   -DCEF_HELPER_BINARY -DPLUGIN_BIN_BASENAME=$(NAME)
