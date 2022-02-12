@@ -21,7 +21,7 @@
 
 #include <memory>
 
-#include "PluginEx.hpp"
+#include "extra/PluginEx.hpp"
 #include "plugin/WasmRuntime.hpp"
 #include "plugin/SpinLock.hpp"
 

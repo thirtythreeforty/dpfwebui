@@ -20,8 +20,8 @@
 
 #include <iostream>
 
-#include "Path.hpp"
-#include "extra/Base64.hpp"
+#include "distrho/extra/Base64.hpp"
+#include "extra/Path.hpp"
 
 USE_NAMESPACE_DISTRHO
 

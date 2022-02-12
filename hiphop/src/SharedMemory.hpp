@@ -17,7 +17,7 @@
 #ifndef DISTRHO_SHARED_MEMORY_HPP_INCLUDED
 #define DISTRHO_SHARED_MEMORY_HPP_INCLUDED
 
-#include "extra/String.hpp"
+#include "distrho/extra/String.hpp"
 
 #ifdef DISTRHO_OS_WINDOWS
 # define WIN32_LEAN_AND_MEAN

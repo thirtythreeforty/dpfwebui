@@ -25,7 +25,7 @@
 #include <sys/types.h>
 #include <X11/Xlib.h>
 
-#include "extra/Thread.hpp"
+#include "distrho/extra/Thread.hpp"
 
 #include "../BaseWebView.hpp"
 #include "IpcChannel.hpp"

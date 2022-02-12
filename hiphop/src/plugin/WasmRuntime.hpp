@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "src/DistrhoDefines.h"
-#include "extra/LeakDetector.hpp"
+#include "distrho/extra/LeakDetector.hpp"
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
 # include "wasm_c_api.h"

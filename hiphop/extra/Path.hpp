@@ -47,7 +47,7 @@
 # include <shtypes.h>
 #endif
 
-#include "macro.h"
+#include "extra/macro.h"
 
 START_NAMESPACE_DISTRHO
 

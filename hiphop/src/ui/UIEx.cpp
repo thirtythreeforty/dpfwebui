@@ -18,7 +18,7 @@
 
 #include <string.h>
 
-#include "UIEx.hpp"
+#include "extra/UIEx.hpp"
 
 UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
     : UI(width, height, automaticallyScaleAndSetAsMinimumSize)

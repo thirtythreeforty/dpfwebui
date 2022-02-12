@@ -19,7 +19,7 @@
 #ifndef SHARED_MEMORY_IMPL_HPP
 #define SHARED_MEMORY_IMPL_HPP
 
-#include "extra/String.hpp"
+#include "distrho/extra/String.hpp"
 #include "SharedMemory.hpp"
 
 #define DEFAULT_SHMEM_SIZE 1048576 //1 MiB

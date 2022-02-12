@@ -21,7 +21,7 @@
 
 #include <ostream>
 
-#include "extra/String.hpp"
+#include "distrho/extra/String.hpp"
 
 START_NAMESPACE_DISTRHO
 

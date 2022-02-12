@@ -23,7 +23,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "UIEx.hpp"
+#include "extra/UIEx.hpp"
 #include "BaseWebView.hpp"
 
 START_NAMESPACE_DISTRHO

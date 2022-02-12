@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "PluginEx.hpp"
+#include "extra/PluginEx.hpp"
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
 # define DUMMY __COUNTER__

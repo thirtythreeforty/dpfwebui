@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "extra/String.hpp"
+#include "distrho/extra/String.hpp"
 #include "Window.hpp"
 
 #include "JsValue.hpp"
