@@ -20,7 +20,7 @@
 
 #include <iostream>
 
-#include "util/Path.hpp"
+#include "Path.hpp"
 #include "extra/Base64.hpp"
 
 USE_NAMESPACE_DISTRHO
@@ -197,7 +197,7 @@ void AbstractWebHostUI::setWebView(AbstractWebView* webView)
 #endif // HIPHOP_PRINT_TRAFFIC
     
     String js = String(
-#include "ui/distrho-ui.js.inc"
+#include "ui/client/distrho-ui.js.inc"
     );
     js += "window.DISTRHO = {UI: UI, quirks: {}};"
           "UI = null;";

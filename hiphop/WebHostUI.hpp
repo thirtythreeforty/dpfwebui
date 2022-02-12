@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,17 +23,17 @@
 
 #ifdef DISTRHO_OS_LINUX
 #include <X11/Xlib.h> // avoid X11 Window and DGL::Window clashing later on
-#include "linux/LinuxWebHostUI.hpp"
+#include "ui/linux/LinuxWebHostUI.hpp"
 typedef LinuxWebHostUI WebHostUI;
 #endif // DISTRHO_OS_LINUX
 
 #ifdef DISTRHO_OS_MAC
-#include "macos/MacWebHostUI.hpp"
+#include "ui/macos/MacWebHostUI.hpp"
 typedef MacWebHostUI WebHostUI;
 #endif // DISTRHO_OS_MAC
 
 #ifdef DISTRHO_OS_WINDOWS
-#include "windows/WindowsWebHostUI.hpp"
+#include "ui/windows/WindowsWebHostUI.hpp"
 typedef WindowsWebHostUI WebHostUI;
 #endif // DISTRHO_OS_WINDOWS
 

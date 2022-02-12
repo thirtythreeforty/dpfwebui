@@ -70,7 +70,7 @@ CocoaWebView::CocoaWebView()
     // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/EventTarget
     // https://github.com/ungap/event-target
     String js = String(
-#include "ui/event-target-polyfill.js.inc"
+#include "ui/client/event-target-polyfill.js.inc"
     );
     injectScript(js);
 

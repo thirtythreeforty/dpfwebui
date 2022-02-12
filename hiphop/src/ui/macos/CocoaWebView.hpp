@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef COCOA_WEBVIEW_HPP
 #define COCOA_WEBVIEW_HPP
 
-#include "AbstractWebView.hpp"
+#include "ui/AbstractWebView.hpp"
 
 // While it is possible to #import Obj-C headers here, that would force all
 // source files importing CocoaWebView.hpp to do so before any other project

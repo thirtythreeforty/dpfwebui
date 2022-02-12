@@ -22,8 +22,8 @@
 #include <memory>
 
 #include "PluginEx.hpp"
-#include "WasmRuntime.hpp"
-#include "util/SpinLock.hpp"
+#include "plugin/WasmRuntime.hpp"
+#include "plugin/SpinLock.hpp"
 
 START_NAMESPACE_DISTRHO
 

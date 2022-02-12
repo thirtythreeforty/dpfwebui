@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UI_EX_HPP
-#define UI_EX_HPP
+#ifndef PLUGIN_EX_HPP
+#define PLUGIN_EX_HPP
 
-#include "DistrhoUI.hpp"
-#include "util/SharedMemoryEx.hpp"
+#include "DistrhoPlugin.hpp"
+#include "SharedMemoryEx.hpp"
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
 # if ! DISTRHO_PLUGIN_WANT_STATE
@@ -30,32 +30,28 @@
 
 START_NAMESPACE_DISTRHO
 
-// This class adds some goodies to DISTRHO::UI like shared memory support
+// This class adds some goodies to DISTRHO::Plugin like shared memory support
 
-class UIEx : public UI
+class PluginEx : public Plugin
 {
 public:
-    UIEx(uint width = 0, uint height = 0, bool automaticallyScaleAndSetAsMinimumSize = false);
-    virtual ~UIEx();
+    PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount);
+    virtual ~PluginEx();
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
     void writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
 
-#if HIPHOP_ENABLE_WASM_PLUGIN
-    void sideloadWasmBinary(const unsigned char* data, size_t size);
-#endif // HIPHOP_ENABLE_WASM_PLUGIN
+    void setState(const char* key, const char* value) override;
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
 protected:
-    virtual void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+    virtual void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) 
     {
         (void)metadata;
         (void)data;
         (void)size;
     }
-
-    void uiIdle() override;
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
 private:
@@ -63,10 +59,10 @@ private:
     DuplexSharedMemory<unsigned char,1048576/*1 MiB*/> fMemory;
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIEx)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEx)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // UI_EX_HPP
+#endif  // PLUGIN_EX_HPP

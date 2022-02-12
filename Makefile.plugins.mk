@@ -5,7 +5,7 @@
 # Basic setup
 
 HIPHOP_ROOT_PATH   := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
-HIPHOP_SRC_PATH    ?= $(HIPHOP_ROOT_PATH)/src
+HIPHOP_SRC_PATH    ?= $(HIPHOP_ROOT_PATH)/hiphop/src
 HIPHOP_VENDOR_PATH ?= $(HIPHOP_ROOT_PATH)/vendor
 
 DPF_PATH       ?= $(HIPHOP_ROOT_PATH)/dpf
@@ -78,17 +78,17 @@ LIB_DIR_NOBUNDLE = $(TARGET_DIR)/$(NAME)-lib
 # Add optional support for AssemblyScript DSP
 
 ifeq ($(AS_DSP),true)
-HIPHOP_FILES_DSP  = PluginEx.cpp \
-                    WasmHostPlugin.cpp \
-                    WasmRuntime.cpp
+HIPHOP_FILES_DSP  = plugin/PluginEx.cpp \
+                    plugin/WasmHostPlugin.cpp \
+                    plugin/WasmRuntime.cpp
 ifeq ($(LINUX),true)
-HIPHOP_FILES_DSP += linux/LinuxPath.cpp
+HIPHOP_FILES_DSP += LinuxPath.cpp
 endif
 ifeq ($(MACOS),true)
-HIPHOP_FILES_DSP += macos/MacPath.mm
+HIPHOP_FILES_DSP += MacPath.mm
 endif
 ifeq ($(WINDOWS),true)
-HIPHOP_FILES_DSP += windows/WindowsPath.cpp
+HIPHOP_FILES_DSP += WindowsPath.cpp
 endif
 
 FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/%)
@@ -98,28 +98,28 @@ endif
 # Add optional support for web UI
 
 ifeq ($(WEB_UI),true)
-HIPHOP_FILES_UI  = UIEx.cpp \
-                   AbstractWebHostUI.cpp \
-                   AbstractWebView.cpp \
-                   JsValue.cpp
+HIPHOP_FILES_UI  = ui/UIEx.cpp \
+                   ui/AbstractWebHostUI.cpp \
+                   ui/AbstractWebView.cpp \
+                   ui/JsValue.cpp
 ifeq ($(LINUX),true)
-HIPHOP_FILES_UI += linux/LinuxPath.cpp \
-                   linux/LinuxWebHostUI.cpp \
-                   linux/ChildProcessWebView.cpp \
-                   linux/IpcChannel.cpp \
-                   linux/ipc.c
+HIPHOP_FILES_UI += LinuxPath.cpp \
+                   ui/linux/LinuxWebHostUI.cpp \
+                   ui/linux/ChildProcessWebView.cpp \
+                   ui/linux/IpcChannel.cpp \
+                   ui/linux/ipc.c
 endif
 ifeq ($(MACOS),true)
-HIPHOP_FILES_UI += macos/MacPath.mm \
-                   macos/MacWebHostUI.mm \
-                   macos/CocoaWebView.mm
+HIPHOP_FILES_UI += MacPath.mm \
+                   ui/macos/MacWebHostUI.mm \
+                   ui/macos/CocoaWebView.mm
 endif
 ifeq ($(WINDOWS),true)
-HIPHOP_FILES_UI += windows/WindowsPath.cpp \
-                   windows/WindowsWebHostUI.cpp \
-                   windows/EdgeWebView.cpp \
-                   windows/WebView2EventHandler.cpp \
-                   windows/cJSON.c
+HIPHOP_FILES_UI += WindowsPath.cpp \
+                   ui/windows/WindowsWebHostUI.cpp \
+                   ui/windows/EdgeWebView.cpp \
+                   ui/windows/WebView2EventHandler.cpp \
+                   ui/windows/cJSON.c
 endif
 
 FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/%)
@@ -161,9 +161,10 @@ include $(DPF_PATH)/Makefile.plugins.mk
 # ------------------------------------------------------------------------------
 # Add shared build flags
 
-BASE_FLAGS += -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -DPLUGIN_BIN_BASENAME=$(NAME) \
+BASE_FLAGS += -I$(HIPHOP_ROOT_PATH)/hiphop -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) \
+              -DPLUGIN_BIN_BASENAME=$(NAME) \
               -DHIPHOP_PROJECT_ID_HASH=$(shell echo $(NAME):$(HIPHOP_PROJECT_VERSION) \
-              	| shasum -a 256 | head -c 8)
+                 | shasum -a 256 | head -c 8)
 ifeq ($(LINUX),true)
 BASE_FLAGS += -lrt
 endif
@@ -435,7 +436,7 @@ endif
 # Dependency - Built-in JavaScript library include and polyfills
 
 ifeq ($(WEB_UI),true)
-UI_JS_PATH = $(HIPHOP_SRC_PATH)/ui/distrho-ui.js
+UI_JS_PATH = $(HIPHOP_SRC_PATH)/ui/client/distrho-ui.js
 UI_JS_INCLUDE_PATH = $(UI_JS_PATH).inc
 
 TARGETS += $(UI_JS_INCLUDE_PATH)
@@ -446,7 +447,7 @@ $(UI_JS_INCLUDE_PATH): $(UI_JS_PATH)
 	@echo ')JS"' >> $(UI_JS_INCLUDE_PATH)
 
 ifeq ($(MACOS),true)
-POLYFILL_JS_PATH = $(HIPHOP_SRC_PATH)/ui/event-target-polyfill.js
+POLYFILL_JS_PATH = $(HIPHOP_SRC_PATH)/ui/client/event-target-polyfill.js
 POLYFILL_JS_INCLUDE_PATH = $(POLYFILL_JS_PATH).inc
 
 TARGETS += $(POLYFILL_JS_INCLUDE_PATH)
@@ -537,9 +538,9 @@ AS_ASSEMBLY_PATH = $(HIPHOP_AS_DSP_PATH)/assembly
 
 framework_as:
 	@test -f $(AS_ASSEMBLY_PATH)/index.ts \
-		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/dsp/index.ts) $(AS_ASSEMBLY_PATH)
+		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/plugin/client/index.ts) $(AS_ASSEMBLY_PATH)
 	@test -f $(AS_ASSEMBLY_PATH)/distrho-plugin.ts \
-		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/dsp/distrho-plugin.ts) $(AS_ASSEMBLY_PATH)
+		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/plugin/client/distrho-plugin.ts) $(AS_ASSEMBLY_PATH)
 endif
 
 WASM_SRC_PATH = $(HIPHOP_AS_DSP_PATH)/build/optimized.wasm
