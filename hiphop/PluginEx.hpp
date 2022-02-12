@@ -20,7 +20,7 @@
 #define PLUGIN_EX_HPP
 
 #include "DistrhoPlugin.hpp"
-#include "SharedMemoryEx.hpp"
+#include "SharedMemoryImpl.hpp"
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
 # if ! DISTRHO_PLUGIN_WANT_STATE
@@ -56,7 +56,7 @@ protected:
 
 private:
 #if HIPHOP_ENABLE_SHARED_MEMORY
-    DuplexSharedMemory<unsigned char,1048576/*1 MiB*/> fMemory;
+    SharedMemoryImpl fMemory;
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEx)

@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SHARED_MEMORY_EX_HPP
-#define SHARED_MEMORY_EX_HPP
+#ifndef SHARED_MEMORY_IMPL_HPP
+#define SHARED_MEMORY_IMPL_HPP
 
 #include "extra/String.hpp"
 #include "SharedMemory.hpp"
+
+#define DEFAULT_SHMEM_SIZE 1048576 //1 MiB
 
 START_NAMESPACE_DISTRHO
 
@@ -176,6 +178,8 @@ struct DuplexSharedMemory
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DuplexSharedMemory)
 };
 
+typedef DuplexSharedMemory<unsigned char,DEFAULT_SHMEM_SIZE> SharedMemoryImpl;
+
 END_NAMESPACE_DISTRHO
 
-#endif  // SHARED_MEMORY_EX_HPP
+#endif  // SHARED_MEMORY_IMPL_HPP
