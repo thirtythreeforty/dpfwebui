@@ -29,8 +29,7 @@ class HotSwapExampleUI extends DISTRHO.UI {
 
         const selectFile = document.getElementById('select-file');
 
-        if (navigator.platform.indexOf('Mac') != -1) {
-            // MACFILEINPUTBUG
+        if (navigator.platform.indexOf('Mac') != -1) { // MACFILEINPUTBUG ?
             selectFile.style.display = 'none';
         } else {
             selectFile.addEventListener('change', (_) => {
@@ -40,8 +39,7 @@ class HotSwapExampleUI extends DISTRHO.UI {
             });
         }
 
-        if (navigator.platform.indexOf('Linux') != -1) {
-            // LXDRAGDROPBUG
+        if (DISTRHO.quirks.noDragAndDrop) { // LXDRAGDROPBUG ?
             document.getElementById('hint').style.display = 'none';
         } else {
             const buttons = document.getElementById('buttons');
