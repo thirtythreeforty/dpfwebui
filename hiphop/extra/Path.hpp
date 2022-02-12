@@ -20,7 +20,7 @@
 #define PATH_HPP
 
 #include "distrho/extra/String.hpp"
-#ifndef DISABLE_GET_LIBRARY_PATH
+#ifndef DISABLE_PATH_GET_PLUGIN_LIBRARY
   // Including this file when compiling the CEF helper would involve adding
   // lots of dependencies from DPF, helper only needs to call getCachesPath().
   // The GTK-based helper does not need to call functions in LinuxPath.cpp.
@@ -51,14 +51,18 @@
 
 START_NAMESPACE_DISTRHO
 
-namespace path {
+namespace PathSubdirectory {
 
-    const String kBundleLibrarySubdirectory = String("lib");
-    const String kNoBundleLibrarySubdirectory = String(XSTR(PLUGIN_BIN_BASENAME) "-lib");
-    const String kCacheSubdirectory = String("cache");
+    const String bundleLibrary = String("lib");
+    const String nonBundleLibrary = String(XSTR(PLUGIN_BIN_BASENAME) "-lib");
+    const String cache = String("cache");
 
-#ifndef DISABLE_GET_LIBRARY_PATH
-    inline String getLibraryPath()
+}
+
+struct Path
+{
+#ifndef DISABLE_PATH_GET_PLUGIN_LIBRARY
+    static String getPluginLibrary()
     {
 #if DISTRHO_OS_LINUX
         String path = String(getBinaryFilename());
@@ -67,14 +71,14 @@ namespace path {
         const char* format = getPluginFormatName();
 
         if (strcmp(format, "LV2") == 0) {
-            return path + "/" + kBundleLibrarySubdirectory;
+            return path + "/" + PathSubdirectory::bundleLibrary;
         } else if (strcmp(format, "VST2") == 0) {
-            return path + "/" + kNoBundleLibrarySubdirectory;
+            return path + "/" + PathSubdirectory::nonBundleLibrary;
         } else if (strcmp(format, "VST3") == 0) {
             return path.truncate(path.rfind('/')) + "/Resources";
         }
 
-        return path + "/" + kNoBundleLibrarySubdirectory;
+        return path + "/" + PathSubdirectory::nonBundleLibrary;
 #endif
 #if DISTRHO_OS_MAC
         String path = String(getBinaryFilename());
@@ -83,12 +87,12 @@ namespace path {
         const char* format = getPluginFormatName();
 
         if (strcmp(format, "LV2") == 0) {
-            return path + "/" + kBundleLibrarySubdirectory;
+            return path + "/" + PathSubdirectory::bundleLibrary;
         } else if ((strcmp(format, "VST2") == 0) || (strcmp(format, "VST3") == 0)) {
             return path.truncate(path.rfind('/')) + "/Resources";
         }
 
-        return path + "/" + kNoBundleLibrarySubdirectory;
+        return path + "/" + PathSubdirectory::nonBundleLibrary;
 #endif
 #if DISTRHO_OS_WINDOWS
         String path = String(getBinaryFilename());
@@ -97,19 +101,19 @@ namespace path {
         const char* format = getPluginFormatName();
 
         if (strcmp(format, "LV2") == 0) {
-            return path + "\\" + kBundleLibrarySubdirectory;
+            return path + "\\" + PathSubdirectory::bundleLibrary;
         } else if (strcmp(format, "VST2") == 0) {
-            return path + "\\" + kNoBundleLibrarySubdirectory;
+            return path + "\\" + PathSubdirectory::nonBundleLibrary;
         } else if (strcmp(format, "VST3") == 0) {
             return path.truncate(path.rfind('\\')) + "\\Resources";
         }
 
-        return path + "\\" + kNoBundleLibrarySubdirectory;
+        return path + "\\" + PathSubdirectory::nonBundleLibrary;
 #endif
     }
-#endif // DISABLE_GET_LIBRARY_PATH
+#endif // DISABLE_PATH_GET_PLUGIN_LIBRARY
 
-    inline String getCachesPath()
+    static String getUserData()
     {
 #if DISTRHO_OS_LINUX
         String path;
@@ -117,7 +121,7 @@ namespace path {
         path += pw->pw_dir;
         path += "/.config/" XSTR(PLUGIN_BIN_BASENAME);
         mkdir(path, 0777);
-        path += "/" + kCacheSubdirectory;
+        path += "/" + PathSubdirectory::cache;
         mkdir(path, 0777);
 
         return path;
@@ -155,7 +159,7 @@ namespace path {
             return String();
         }
 
-        String path = String(dataPath) + "\\" XSTR(PLUGIN_BIN_BASENAME) "\\" + kCacheSubdirectory;
+        String path = String(dataPath) + "\\" XSTR(PLUGIN_BIN_BASENAME) "\\" + PathSubdirectory::cache;
 
         // Append host executable name to the cache path otherwise WebView2 controller initialization
         // fails with HRESULT 0x8007139f when trying to load plugin into more than a single host
@@ -181,7 +185,7 @@ namespace path {
 #endif
     }
 
-}
+}; // struct path 
 
 END_NAMESPACE_DISTRHO
 

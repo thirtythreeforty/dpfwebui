@@ -55,7 +55,7 @@ EdgeWebView::EdgeWebView()
     , fController(nullptr)
     , fView(nullptr)
 {
-    SetDllDirectory(TO_LPCWSTR(path::getLibraryPath()));
+    SetDllDirectory(TO_LPCWSTR(Path::getPluginLibrary()));
     const HMODULE hm = LoadLibrary(L"WebView2Loader.dll");
 
     if (hm == 0) {
@@ -110,7 +110,7 @@ EdgeWebView::EdgeWebView()
 #  pragma GCC diagnostic pop
 # endif
 
-    const HRESULT result = pfnCreateCoreWebView2EnvironmentWithOptions(0, TO_LPCWSTR(path::getCachesPath()),
+    const HRESULT result = pfnCreateCoreWebView2EnvironmentWithOptions(0, TO_LPCWSTR(Path::getUserData()),
         0, fHandler);
 
     if (FAILED(result)) {

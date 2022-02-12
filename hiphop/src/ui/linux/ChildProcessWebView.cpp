@@ -85,7 +85,7 @@ ChildProcessWebView::ChildProcessWebView()
     char wfd[10];
     sprintf(wfd, "%d", fPipeFd[1][1]);
     
-    String libPath = path::getLibraryPath();
+    String libPath = Path::getPluginLibrary();
     posix_spawn_file_actions_t fa;
     posix_spawn_file_actions_init(&fa);
     posix_spawn_file_actions_addchdir_np(&fa, libPath);

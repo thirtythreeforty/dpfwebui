@@ -104,7 +104,7 @@ void BaseWebHostUI::setWebView(BaseWebView* webView)
 void BaseWebHostUI::load()
 {
     if (fWebView != nullptr) {
-        String url = "file://" + path::getLibraryPath() + "/ui/index.html";
+        String url = "file://" + Path::getPluginLibrary() + "/ui/index.html";
         fWebView->navigate(url);
     }
 }

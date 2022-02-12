@@ -111,7 +111,7 @@ int CefHelper::run(const CefMainArgs& args)
     CefSettings settings;
     settings.log_severity = LOGSEVERITY_DISABLE;
     settings.chrome_runtime = false;
-    CefString(&settings.cache_path) = path::getCachesPath();
+    CefString(&settings.cache_path) = Path::getUserData();
 
     // Initialize CEF for the browser process
     CefInitialize(args, settings, this, nullptr);
