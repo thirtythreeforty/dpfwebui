@@ -35,13 +35,20 @@ PluginEx::~PluginEx()
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 }
 
-#if  HIPHOP_ENABLE_SHARED_MEMORY
-void PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
+#if HIPHOP_ENABLE_SHARED_MEMORY
+size_t PluginEx::getSharedMemorySize() const noexcept
+{
+    return fMemory.out.getSizeBytes();
+}
+
+bool PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
     if (fMemory.out.write(metadata, data, size)) {
         // UI picks up data periodically
+        return true;
     } else {
         d_stderr2("Could not write shared memory (plugin->ui)");
+        return false;
     }
 }
 

@@ -52,13 +52,20 @@ UIEx::~UIEx()
 }
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
-void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
+size_t UIEx::getSharedMemorySize() const noexcept
+{
+    return fMemory.out.getSizeBytes();
+}
+
+bool UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
     if (fMemory.out.write(metadata, data, size)) {
         // Notify Plugin instance there is new data available for reading
         setState("_shmem", "data_ui2p");
+        return true;
     } else {
         d_stderr2("Could not write shared memory (ui->plugin)");
+        return false;
     }
 }
 

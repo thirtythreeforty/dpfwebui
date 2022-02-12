@@ -39,7 +39,8 @@ public:
     virtual ~PluginEx();
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
-    void writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
+    size_t getSharedMemorySize() const noexcept;
+    bool   writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
 
     void setState(const char* key, const char* value) override;
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
