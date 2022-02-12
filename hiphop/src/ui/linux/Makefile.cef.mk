@@ -39,11 +39,12 @@ $(CEF_WRAPPER_LIB):
 
 LXHELPER_SRC = CefHelper.cpp \
 			   IpcChannel.cpp \
-			   ipc.c
+			   ipc.c \
+			   ../../../../dpf/distrho/extra/sofd/libsofd.c
 
 LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/ui/linux/%.o)
 
-LXHELPER_CFLAGS = -I$(HIPHOP_INC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) \
+LXHELPER_CFLAGS = -I$(HIPHOP_INC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) -DHAVE_X11 \
                   -DDISABLE_PATH_GET_PLUGIN_LIBRARY -DPLUGIN_BIN_BASENAME=$(NAME)
 
 # Copied from the cefsimple example

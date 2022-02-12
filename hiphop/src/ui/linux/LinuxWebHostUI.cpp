@@ -55,10 +55,6 @@ LinuxWebHostUI::LinuxWebHostUI(uint baseWidth, uint baseHeight,
         // No touch events for <input type="range"> elements
         "window.DISTRHO.quirks.noRangeInputTouch = true;"
 #endif
-#ifdef LXWEBVIEW_CEF
-        // CEFFILEINPUTBUG : Broken <input type="file"> element
-        "window.DISTRHO.quirks.noFileInput = true;"
-#endif
     );
     webview->injectScript(js);
 

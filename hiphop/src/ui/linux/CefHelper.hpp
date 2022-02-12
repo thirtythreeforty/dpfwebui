@@ -30,7 +30,8 @@
 #include "IpcChannel.hpp"
 
 class CefHelper : public CefApp, public CefClient, 
-                  public CefBrowserProcessHandler, public CefLoadHandler
+                  public CefBrowserProcessHandler, public CefLoadHandler,
+                  public CefDialogHandler
 {
 public:
     CefHelper();
@@ -50,6 +51,11 @@ public:
         return this;
     }
     
+    virtual CefRefPtr<CefDialogHandler> GetDialogHandler() override
+    {
+        return this;
+    }
+
     virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                           CefRefPtr<CefFrame> frame,
                                           CefProcessId sourceProcess,
@@ -66,6 +72,13 @@ public:
 
     virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
                            int httpStatusCode) override;
+
+    // CefDialogHandler
+
+    virtual bool OnFileDialog(CefRefPtr<CefBrowser> browser, CefDialogHandler::FileDialogMode mode,
+                              const CefString& title, const CefString& defaultFilePath,
+                              const std::vector<CefString>& accept_filters, int selectedAcceptFilter,
+                              CefRefPtr<CefFileDialogCallback> callback) override;
 
 private:
     void runMainLoop();
@@ -85,8 +98,9 @@ private:
     ::Display*  fDisplay;
     ::Window    fContainer;
     
-    CefRefPtr<CefBrowser>   fBrowser;
-    CefRefPtr<CefListValue> fInjectedScripts;
+    CefRefPtr<CefBrowser>            fBrowser;
+    CefRefPtr<CefListValue>          fInjectedScripts;
+    CefRefPtr<CefFileDialogCallback> fDialogCallback;
 
     // Include the CEF default reference counting implementation
     IMPLEMENT_REFCOUNTING(CefHelper);

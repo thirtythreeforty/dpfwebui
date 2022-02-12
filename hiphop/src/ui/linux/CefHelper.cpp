@@ -24,6 +24,7 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/XInput2.h>
 
+#include "distrho/extra/sofd/libsofd.h"
 #include "extra/Path.hpp"
 
 #define JS_POST_MESSAGE_SHIM "window.webviewHost.postMessage = (args) => window.hostPostMessage(args);"
@@ -59,6 +60,9 @@ CefHelper::CefHelper()
     , fIpc(nullptr)
     , fDisplay(nullptr)
     , fContainer(0)
+    , fBrowser(nullptr)
+    , fInjectedScripts(nullptr)
+    , fDialogCallback(nullptr)
 {
     fInjectedScripts = CefListValue::Create();
 }
@@ -132,12 +136,28 @@ int CefHelper::run(const CefMainArgs& args)
 
 void CefHelper::runMainLoop()
 {
+    XEvent event;
     tlv_t packet;
     int rc;
 
     fRunMainLoop = true;
     
     while (fRunMainLoop) {
+        // Handle libSOFD file dialog
+        if ((fDialogCallback != nullptr) && (XPending(fDisplay) > 0)) {
+            XPeekEvent(fDisplay, &event);
+
+            rc = x_fib_handle_events(fDisplay, &event);
+
+            if (rc > 0) {
+                fDialogCallback.Continue(0, { x_fib_filename() });
+                fDialogCallback = nullptr;
+            } else if (rc < 0) {
+                fDialogCallback.Cancel();
+                fDialogCallback = nullptr;
+            }
+        }
+
         // Call CefDoMessageLoopWork() on a regular basis instead of calling
         // CefRunMessageLoop(). Each call to CefDoMessageLoopWork() will perform
         // a single iteration of the CEF message loop. Caution should be used
@@ -147,6 +167,7 @@ void CefHelper::runMainLoop()
         // https://bitbucket.org/chromiumembedded/cef/wiki/GeneralUsage
         CefDoMessageLoopWork();
 
+        // Read the plugin<->helper IPC pipe
         // Use a non-zero timeout for throotling down CefDoMessageLoopWork()
         rc = fIpc->read(&packet, 5/*ms*/);
 
@@ -225,6 +246,37 @@ void CefHelper::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
     XSync(fDisplay, False);
 
     fIpc->write(OP_HANDLE_LOAD_FINISHED);
+}
+
+bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser, CefDialogHandler::FileDialogMode mode,
+                             const CefString& title, const CefString& defaultFilePath,
+                             const std::vector<CefString>& accept_filters, int selectedAcceptFilter,
+                             CefRefPtr<CefFileDialogCallback> callback)
+{
+    if (fDialogCallback != nullptr) {
+        callback.Cancel(); // only a single dialog is supported
+        return;
+    }
+    if (x_fib_configure(1 /*current dir*/, defaultFilePath.ToString().c_str()) != 0) {
+        callback.Cancel();
+        return;
+    }
+    if (x_fib_configure(1 /*set title*/, title.ToString().c_str()) != 0) {
+        callback.Cancel();
+        return;
+    }
+    if (x_fib_cfg_buttons(2 /*show places*/, 1 /*checked*/) != 0) {
+        callback.Cancel();
+        return;
+    }
+    if (x_fib_show(fDisplay, nullptr, 0, 0, static_cast<double>(fScaleFactor)) != 0) {
+        callback.Cancel();
+        return;
+    }
+
+    fDialogCallback = callback;
+
+    return true;
 }
 
 void CefHelper::realize(const msg_win_cfg_t* config)

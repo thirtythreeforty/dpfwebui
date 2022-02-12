@@ -16,8 +16,6 @@ LINUX
   Xlib errors are generated when calling setKeyboardFocus(true). XIGrabDevice()
   is probably called with incorrect arguments, see CefHelper.cpp.
 
-- CEFFILEINPUTBUG : Web view <input type="file"> not working (works in WKGTK).
-
 
 WINDOWS
 -------
