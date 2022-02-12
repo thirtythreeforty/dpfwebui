@@ -48,7 +48,7 @@ USE_NAMESPACE_DISTRHO
 @property (readonly, nonatomic) NSView* pluginRootView;
 @end
 
-@interface DistrhoWebViewDelegate: NSObject<WKNavigationDelegate, WKScriptMessageHandler>
+@interface DistrhoWebViewDelegate: NSObject<WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler>
 @property (assign, nonatomic) CocoaWebView *cppView;
 @end
 
@@ -64,6 +64,7 @@ CocoaWebView::CocoaWebView()
     fDelegate = [[DistrhoWebViewDelegate alloc] init];
     fNsDelegate.cppView = this;
     fNsWebView.navigationDelegate = fNsDelegate;
+    fNsWebView.UIDelegate = fNsDelegate;
     [fNsWebView.configuration.userContentController addScriptMessageHandler:fNsDelegate name:@"host"];
 
     // EventTarget() constructor is unavailable on Safari < 14 (2020-09-16)
@@ -217,6 +218,25 @@ void CocoaWebView::onSize(uint width, uint height)
     (void)webView;
     (void)navigation;
     self.cppView->didFinishNavigation();
+}
+
+- (void)webView:(WKWebView *)webView
+        runOpenPanelWithParameters:(WKOpenPanelParameters *)parameters 
+        initiatedByFrame:(WKFrameInfo *)frame
+        completionHandler:(void (^)(NSArray<NSURL *> *URLs))completionHandler
+{
+    NSOpenPanel* openPanel = [[NSOpenPanel alloc] init];
+    openPanel.canChooseFiles = YES;
+
+    [openPanel beginWithCompletionHandler:^(NSModalResponse result) {
+        if (result == NSModalResponseOK) {
+            completionHandler(openPanel.URLs);
+        } else if (result == NSModalResponseCancel) {
+            completionHandler(nil);
+        }
+    }];
+
+    [openPanel release];
 }
 
 - (void)userContentController:(WKUserContentController *)controller didReceiveScriptMessage:(WKScriptMessage *)message

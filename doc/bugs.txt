@@ -19,12 +19,6 @@ LINUX
 - CEFFILEINPUTBUG : Web view <input type="file"> not working (works in WKGTK).
 
 
-MACOS
------
-
-- MACFILEINPUTBUG : Web view <input type="file"> not working.
-
-
 WINDOWS
 -------
 

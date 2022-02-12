@@ -44,15 +44,7 @@ MacWebHostUI::MacWebHostUI(uint baseWidth, uint baseHeight,
         return;
     }
 
-    CocoaWebView* webview = new CocoaWebView();
-    setWebView(webview); // base class owns web view
-
-    // Allow JavaScript code to detect some unavailable features
-    String js = String(
-        // MACFILEINPUTBUG : Broken <input type="file"> element
-        "window.DISTRHO.quirks.noFileInput = true;"
-    );
-    webview->injectScript(js);
+    setWebView(new CocoaWebView()); // base class owns web view
 
     if (startLoading) {
         load();
