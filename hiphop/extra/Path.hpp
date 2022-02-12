@@ -20,7 +20,7 @@
 #define PATH_HPP
 
 #include "distrho/extra/String.hpp"
-#if ! (DISTRHO_OS_LINUX && CEF_HELPER_BINARY)
+#ifndef DISABLE_GET_LIBRARY_PATH
   // Including this file when compiling the CEF helper would involve adding
   // lots of dependencies from DPF, helper only needs to call getCachesPath().
   // The GTK-based helper does not need to call functions in LinuxPath.cpp.
@@ -57,6 +57,7 @@ namespace path {
     const String kNoBundleLibrarySubdirectory = String(XSTR(PLUGIN_BIN_BASENAME) "-lib");
     const String kCacheSubdirectory = String("cache");
 
+#ifndef DISABLE_GET_LIBRARY_PATH
     inline String getLibraryPath()
     {
 #if DISTRHO_OS_LINUX
@@ -106,6 +107,7 @@ namespace path {
         return path + "\\" + kNoBundleLibrarySubdirectory;
 #endif
     }
+#endif // DISABLE_GET_LIBRARY_PATH
 
     inline String getCachesPath()
     {

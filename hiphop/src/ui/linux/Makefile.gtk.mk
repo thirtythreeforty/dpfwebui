@@ -9,7 +9,7 @@ LXHELPER_SRC = gtk_helper.c \
 
 LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/%.o)
 
-LXHELPER_CPPFLAGS = -I. -I$(HIPHOP_SRC_PATH) \
+LXHELPER_CPPFLAGS = -I$(HIPHOP_INC_PATH) \
 					$(shell $(PKG_CONFIG) --cflags gtk+-3.0 webkit2gtk-4.0)
 
 ifneq ($(HIPHOP_MAX_GTK_WEBVIEW_WIDTH),)                                             

@@ -43,8 +43,8 @@ LXHELPER_SRC = CefHelper.cpp \
 
 LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/ui/linux/%.o)
 
-LXHELPER_CFLAGS = -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) \
-                  -DCEF_HELPER_BINARY -DPLUGIN_BIN_BASENAME=$(NAME)
+LXHELPER_CFLAGS = -I$(HIPHOP_INC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) \
+                  -DDISABLE_GET_LIBRARY_PATH -DPLUGIN_BIN_BASENAME=$(NAME)
 
 # Copied from the cefsimple example
 LXHELPER_LDFLAGS = -ldl -lXi -lcef_dll_wrapper -L$(CEF_BUILD_PATH)/libcef_dll_wrapper \

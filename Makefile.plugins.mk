@@ -5,6 +5,7 @@
 # Basic setup
 
 HIPHOP_ROOT_PATH   := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+HIPHOP_INC_PATH    ?= $(HIPHOP_ROOT_PATH)/hiphop
 HIPHOP_SRC_PATH    ?= $(HIPHOP_ROOT_PATH)/hiphop/src
 HIPHOP_VENDOR_PATH ?= $(HIPHOP_ROOT_PATH)/vendor
 
@@ -149,7 +150,7 @@ include $(DPF_PATH)/Makefile.plugins.mk
 # ------------------------------------------------------------------------------
 # Add shared build flags
 
-BASE_FLAGS += -I$(HIPHOP_ROOT_PATH)/hiphop -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) \
+BASE_FLAGS += -I$(HIPHOP_INC_PATH) -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) \
               -DPLUGIN_BIN_BASENAME=$(NAME) \
               -DHIPHOP_PROJECT_ID_HASH=$(shell echo $(NAME):$(HIPHOP_PROJECT_VERSION) \
                  | shasum -a 256 | head -c 8)
