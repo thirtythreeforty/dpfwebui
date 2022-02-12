@@ -7,7 +7,7 @@ GENERAL
 LINUX
 -----
 
-- LXDRAGDROPBUG : Drag and drop not working on both GTK and CEF web views.
+- LXDRAGDROPBUG : Drag and drop not working on both WKGTK and CEF web views.
 
 - WKGTKRESIZEBUG : Broken CSS viewport units (vw/vh/vmin/vmax) in WebKitGTK 
   web view due to workaround for https://bugs.webkit.org/show_bug.cgi?id=229227
@@ -16,19 +16,20 @@ LINUX
   Xlib errors are generated when calling setKeyboardFocus(true). XIGrabDevice()
   is probably called with incorrect arguments, see CefHelper.cpp.
 
+- CEFFILEINPUTBUG : Web view <input type="file"> not working (works in WKGTK).
+
 
 MACOS
 -----
 
-- MACFILEINPUTBUG : Web view <input type="file"> not working. Need to implement
-  native file chooser as a DPF method for ExternalWindow anyways.
+- MACFILEINPUTBUG : Web view <input type="file"> not working.
 
 
 WINDOWS
 -------
 
 - WINWASMERBUG : WASM plugins crash on Carla and Live when running the Wasmer
-  runtime. Work as expected on REAPER, Renoise and Ardour 7.
+  runtime (no issues on WAMR). Work as expected on REAPER, Renoise and Ardour 7.
 
   Instructions on how to build libwasmer.a with debug symbols can be found here:
   https://github.com/wasmerio/wasmer/issues/2571
