@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WEBHOST_UI_HPP
-#define WEBHOST_UI_HPP
+#ifndef WEB_HOST_UI_HPP
+#define WEB_HOST_UI_HPP
 
 #include "src/DistrhoDefines.h"
 
@@ -37,4 +37,4 @@ typedef MacWebHostUI WebHostUI;
 typedef WindowsWebHostUI WebHostUI;
 #endif
 
-#endif  // WEBHOST_UI_HPP
+#endif  // WEB_HOST_UI_HPP
