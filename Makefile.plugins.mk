@@ -543,8 +543,8 @@ framework_as:
 		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/plugin/client/distrho-plugin.ts) $(AS_ASSEMBLY_PATH)
 endif
 
-WASM_SRC_PATH = $(HIPHOP_AS_DSP_PATH)/build/optimized.wasm
-WASM_MODULE = main.wasm
+WASM_MODULE = optimized.wasm
+WASM_SRC_PATH = $(HIPHOP_AS_DSP_PATH)/build/$(WASM_MODULE)
 
 HIPHOP_TARGET += $(WASM_SRC_PATH)
 

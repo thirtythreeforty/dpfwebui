@@ -36,7 +36,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
     fRuntime.reset(new WasmRuntime());
 
     try {
-        const String path = path::getLibraryPath() + "/dsp/main.wasm";
+        const String path = path::getLibraryPath() + "/dsp/optimized.wasm";
         fRuntime->load(path);
 
         prepareAndStartRuntime();
