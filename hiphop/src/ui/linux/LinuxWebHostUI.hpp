@@ -19,6 +19,10 @@
 #ifndef LINUX_WEB_HOST_UI_HPP
 #define LINUX_WEB_HOST_UI_HPP
 
+// Avoid X11 Window and DGL::Window clashing during build by
+// including Xlib before any other header that includes DPF.
+#include <X11/Xlib.h>
+
 #include "../BaseWebHostUI.hpp"
 #include "ChildProcessWebView.hpp"
 

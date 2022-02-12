@@ -22,7 +22,6 @@
 #include "src/DistrhoDefines.h"
 
 #ifdef DISTRHO_OS_LINUX
-# include <X11/Xlib.h> // avoid X11 Window and DGL::Window clashing later on
 # include "ui/linux/LinuxWebHostUI.hpp"
 typedef LinuxWebHostUI WebHostUI;
 #endif
