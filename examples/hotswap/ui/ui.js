@@ -29,7 +29,7 @@ class HotSwapExampleUI extends DISTRHO.UI {
 
         selectFile.addEventListener('change', (_) => {
             if (selectFile.files.length > 0) {
-                this.sideload(selectFile.files[0]);
+                this.onFileSelected(selectFile.files[0]);
             }
         });
         
