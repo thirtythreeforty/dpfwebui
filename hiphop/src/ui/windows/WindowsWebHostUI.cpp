@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <shellscalingapi.h>
-
 #include "WindowsWebHostUI.hpp"
+
+#include <shellapi.h>
+#include <shellscalingapi.h>
 
 BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam);
 

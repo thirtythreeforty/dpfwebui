@@ -107,7 +107,7 @@ public:
         return fImpl.getDataFilename();
     }
 
-    bool write(const char* metadata, const S* data, int32_t size)
+    bool write(const char* metadata, const S* data, size_t size)
     {
         if (size > getSize()) {
             return false;
