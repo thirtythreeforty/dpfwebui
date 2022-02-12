@@ -81,16 +81,16 @@ private:
     void errorMessageBox(std::wstring message);
     void webViewLoaderErrorMessageBox(HRESULT result);
 
-    LPWSTR     fHelperClassName;
-    HWND       fHelperHwnd;
-    HHOOK      fKeyboardHook;
-    String     fUrl;
+    LPWSTR  fHelperClassName;
+    HWND    fHelperHwnd;
+    HHOOK   fKeyboardHook;
+    String  fUrl;
     
     std::vector<String> fInjectedScripts;
 
     WeakWebView2EventHandler* fHandler;
-    ICoreWebView2Controller*      fController;
-    ICoreWebView2*                fView;
+    ICoreWebView2Controller*  fController;
+    ICoreWebView2*            fView;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EdgeWebView)
 
