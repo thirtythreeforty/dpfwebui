@@ -146,7 +146,7 @@ namespace path {
 #if DISTRHO_OS_WINDOWS
         // Get path inside user files folder: C:\Users\< USERNAME >\AppData\Local\PluginName\cache
         char dataPath[MAX_PATH];
-        const HRESULT result = SHGetFolderPath(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_DEFAULT, dataPath);
+        const HRESULT result = SHGetFolderPathA(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_DEFAULT, dataPath);
         
         if (FAILED(result)) {
             d_stderr2("Could not determine user app data folder - %x", result);
@@ -160,18 +160,18 @@ namespace path {
         // simultaneously due to permissions. C:\Users\< USERNAME >\AppData\Local\PluginName\cache\< HOST_BIN >
         char exePath[MAX_PATH];
         
-        if (GetModuleFileName(0, exePath, sizeof(exePath)) == 0) {
+        if (GetModuleFileNameA(0, exePath, sizeof(exePath)) == 0) {
             d_stderr2("Could not determine host executable path - %x", GetLastError());
             return String();
         }
 
-        LPSTR exeFilename = PathFindFileName(exePath);
+        LPSTR exeFilename = PathFindFileNameA(exePath);
 
         // The following call relies on a further Windows library called Pathcch, which is implemented
         // in api-ms-win-core-path-l1-1-0.dll and requires Windows 8.
         // Since the minimum plugin target is Windows 7 it is acceptable to use a deprecated function.
         //PathCchRemoveExtension(exeFilename, sizeof(exeFilename));
-        PathRemoveExtension(exeFilename);
+        PathRemoveExtensionA(exeFilename);
         path += "\\";
         path += exeFilename;
 
