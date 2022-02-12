@@ -86,7 +86,7 @@ EdgeWebView::EdgeWebView()
     // https://github.com/MicrosoftEdge/WebView2Feedback/issues/112
     fKeyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardFilterProc, GetModuleHandle(0), 0);
 
-    fHandler = new InternalWebView2EventHandler(this);
+    fHandler = new WeakWebView2EventHandler(this);
 
     // These requests are queued until Edge WebView2 initializes itself
     injectDefaultScripts(); // non-virtual, safe to call

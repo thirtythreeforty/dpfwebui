@@ -46,9 +46,9 @@
 
 START_NAMESPACE_DISTRHO
 
-class InternalWebView2EventHandler;
+class WeakWebView2EventHandler;
 
-class EdgeWebView : public BaseWebView, edge::WebView2EventHandler
+class EdgeWebView : public BaseWebView, public edge::WebView2EventHandler
 {
 public:
     EdgeWebView();
@@ -88,7 +88,7 @@ private:
     
     std::vector<String> fInjectedScripts;
 
-    InternalWebView2EventHandler* fHandler;
+    WeakWebView2EventHandler* fHandler;
     ICoreWebView2Controller*      fController;
     ICoreWebView2*                fView;
 
@@ -98,21 +98,16 @@ private:
 
 
 // The event handler lifetime cannot be bound to its owner lifetime, otherwise
-// the Edge WebView2 could callback a deleted object. That would happen for
-// example if the widget is created and suddenly destroyed before web content
-// finishes loading, or before WebView2 has fully initialized itself.
-// In the case of WebHostUI the scenario is easily reproducible by opening the
-// plugin window on Carla and immediately closing it before the web UI shows up.
-// Note that InternalWebView2EventHandler is not fully COM compliant, it is
-// lacking the query interface method. It would also need to be registered for
-// allowing instantiation with CoCreateInstance() but we do not need all that
-// boilerplate, just the bare minimum to make Edge WebView2 happy and get
-// notified of events in return. The handler class is expected to be init'd
-// using the C++ new operator and disposed of by calling its release() method.
+// Edge WebView2 could callback a deleted object. That would happen for example
+// example if the plugin UI is created and suddenly destroyed before web content
+// finishes loading, or before WebView2 has fully initialized itself. This
+// behavior can be reproduced by opening the plugin window on Carla and
+// immediately closing it before the web UI displays. This handler class must be
+// init'd using the new operator and disposed of by calling its release() method.
 
-class InternalWebView2EventHandler : public edge::WebView2EventHandler {
+class WeakWebView2EventHandler : public edge::WebView2EventHandler {
 public:
-    InternalWebView2EventHandler(edge::WebView2EventHandler* ownerRef)
+    WeakWebView2EventHandler(edge::WebView2EventHandler* ownerRef)
         : fOwnerWeakRef(ownerRef)
     {
         incRefCount();
