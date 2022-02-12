@@ -19,7 +19,7 @@
 #ifndef MAC_WEB_HOST_UI_HPP
 #define MAC_WEB_HOST_UI_HPP
 
-#include "ui/AbstractWebHostUI.hpp"
+#include "../AbstractWebHostUI.hpp"
 #include "CocoaWebView.hpp"
 
 START_NAMESPACE_DISTRHO

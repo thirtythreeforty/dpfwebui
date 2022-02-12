@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef WINDOWS_WEB_HOST_UI_HPP
 #define WINDOWS_WEB_HOST_UI_HPP
 
-#include "AbstractWebHostUI.hpp"
+#include "../AbstractWebHostUI.hpp"
 #include "EdgeWebView.hpp"
 
 START_NAMESPACE_DISTRHO
