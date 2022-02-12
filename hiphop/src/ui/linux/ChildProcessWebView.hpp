@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 
 #include "extra/Thread.hpp"
 
-#include "AbstractWebView.hpp"
+#include "../AbstractWebView.hpp"
 #include "IpcChannel.hpp"
 
 START_NAMESPACE_DISTRHO

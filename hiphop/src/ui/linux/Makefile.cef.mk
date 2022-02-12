@@ -20,7 +20,7 @@ $(CEF_PATH):
 	@echo Downloading CEF
 	@wget -4 -O /tmp/$(CEF_DISTRO_FILE) $(CEF_URL)
 	@mkdir -p $(HIPHOP_VENDOR_PATH)
-	@echo Decompressing CEF, this takes a long while...!
+	@echo Decompressing CEF, this takes a long while!...
 	@tar xjf /tmp/$(CEF_DISTRO_FILE) -C $(HIPHOP_VENDOR_PATH)
 	@ln -s $(CEF_DISTRO) $(CEF_PATH)
 	@rm /tmp/$(CEF_DISTRO_FILE)
@@ -37,16 +37,17 @@ $(CEF_WRAPPER_LIB):
 # ------------------------------------------------------------------------------
 # Build helper binary
 
-LXHELPER_SRC += linux/CefHelper.cpp \
-				linux/IpcChannel.cpp \
-				linux/ipc.c \
-				linux/LinuxPath.cpp
+LXHELPER_SRC = ui/linux/CefHelper.cpp \
+			   ui/linux/IpcChannel.cpp \
+			   ui/linux/ipc.c \
+			   LinuxPath.cpp
 
 LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/%.o)
 
 LXHELPER_CFLAGS = -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) \
                   -DCEF_HELPER_BINARY -DPLUGIN_BIN_BASENAME=$(NAME)
 
+# Copied from the cefsimple example
 LXHELPER_LDFLAGS = -ldl -lXi -lcef_dll_wrapper -L$(CEF_BUILD_PATH)/libcef_dll_wrapper \
 				   -lcef -L$(CEF_BIN_PATH) -lX11 -O3 -DNDEBUG -rdynamic -fPIC \
 				   -pthread -Wl,--disable-new-dtags -Wl,--fatal-warnings \

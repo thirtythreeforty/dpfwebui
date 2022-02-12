@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 #include <linux/limits.h>
 #include <sys/wait.h>
 
-#include "util/Path.hpp"
-#include "util/macro.h"
+#include "Path.hpp"
+#include "macro.h"
 
 extern char **environ;
 

@@ -24,7 +24,7 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/XInput2.h>
 
-#include "util/Path.hpp"
+#include "Path.hpp"
 
 #define JS_POST_MESSAGE_SHIM "window.webviewHost.postMessage = (args) => window.hostPostMessage(args);"
 

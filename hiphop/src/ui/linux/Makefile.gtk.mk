@@ -4,8 +4,8 @@
 # ------------------------------------------------------------------------------
 # Build helper binary
 
-LXHELPER_SRC += gtk_helper.c \
-				ipc.c
+LXHELPER_SRC = gtk_helper.c \
+			   ipc.c
 
 LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/%.o)
 
@@ -28,7 +28,7 @@ $(LXHELPER_BUILD_DIR)/$(LXHELPER_NAME): $(LXHELPER_OBJ)
 	@echo "Compiling $<"
 	@$(CXX) $^ -o $@ $(LXHELPER_LDFLAGS)
 
-$(LXHELPER_BUILD_DIR)/%.c.o: $(HIPHOP_SRC_PATH)/linux/%.c
+$(LXHELPER_BUILD_DIR)/%.c.o: $(HIPHOP_SRC_PATH)/ui/linux/%.c
 	@mkdir -p $(dir $@)
 	@echo "Compiling $<"
 	@$(CC) $(LXHELPER_CPPFLAGS) -c $< -o $@

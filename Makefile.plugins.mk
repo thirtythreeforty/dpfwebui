@@ -479,7 +479,7 @@ HIPHOP_TARGET += lxhelper_bin
 LXHELPER_NAME = ui-helper
 LXHELPER_BUILD_DIR = $(BUILD_DIR)/helper
 
-include $(HIPHOP_SRC_PATH)/linux/Makefile.$(LXWEBVIEW_TYPE).mk
+include $(HIPHOP_SRC_PATH)/ui/linux/Makefile.$(LXWEBVIEW_TYPE).mk
 endif
 endif
 
