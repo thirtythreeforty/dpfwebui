@@ -46,16 +46,18 @@ LinuxWebHostUI::LinuxWebHostUI(uint baseWidth, uint baseHeight,
     ChildProcessWebView* webview = new ChildProcessWebView();
     setWebView(webview); // base class owns web view
 
-#ifdef LXWEBVIEW_GTK
-    // Allow JavaScript code to detect the GTK webview and enable some
-    // workarounds to compensate for the broken vw/vh/vmin/vmax CSS units and
-    // non-working touch events for <input type="range"> elements.
+    // Allow JavaScript code to detect some unavailable features
     String js = String(
-        "window.DISTRHO.quirks.brokenCSSViewportUnits = true;"
-        "window.DISTRHO.quirks.brokenRangeInputTouch = true;"
+        // LXDRAGDROPBUG : No drag and drop on both GTK and CEF web views
+        "window.DISTRHO.quirks.noDragAndDrop = true;"
+#ifdef LXWEBVIEW_GTK
+        // WKGTKRESIZEBUG : Broken vw/vh/vmin/vmax CSS units
+        "window.DISTRHO.quirks.noCSSViewportUnits = true;"
+        // No touch events for <input type="range"> elements
+        "window.DISTRHO.quirks.noRangeInputTouch = true;"
+#endif // LXWEBVIEW_GTK
     );
     webview->injectScript(js);
-#endif // LXWEBVIEW_GTK
 
     if (startLoading) {
         load();
