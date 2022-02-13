@@ -34,9 +34,10 @@ class HotSwapExampleUI extends DISTRHO.UI {
         });
         
         if (DISTRHO.quirks.noDragAndDrop) {
-            hint.style.display = 'none';
+            hint.innerHTML = 'optimized.wasm';
             target.style.border = 'none';
         } else {       
+            hint.innerHTML = 'Drag and drop<br>optimized.wasm';
             selectFile.style.display = 'none';
 
             target.addEventListener('dragover', (ev) => ev.preventDefault());
@@ -63,12 +64,12 @@ class HotSwapExampleUI extends DISTRHO.UI {
             });
         }
 
-        setInterval(() => this.playRandomNote(), 500 /*120 BPM*/);
-    }
-
-    playRandomNote() {
-        const AMinorPentatonic = [69 /*A*/, 71 /*C*/, 72 /*D*/, 73 /*E*/, 75 /*G*/];
-        this.sendNote(1, AMinorPentatonic[getRandomInt(0, 4)], 127);
+        // This is perfectly valid but it will play notes only while the UI is
+        // visible. See alternate alternate version in HotSwapExamplePlugin.cppn
+        //setInterval(() => {
+        //    const ampt = [69 /*A*/, 71 /*C*/, 72 /*D*/, 73 /*E*/, 75 /*G*/];
+        //    this.sendNote(1, ampt[getRandomInt(0, 4)], 127);
+        //}, 500 /*120 BPM*/);
     }
 
     onFileSelected(file) {
