@@ -16,23 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import DISTRHO from './dpf'
-import PluginImpl from './plugin'
+import DISTRHO from './dpf'       // framework code
+import PluginImpl from './plugin' // user code
 
 // The interface defined in this file is private to the framework and optimized
 // for integration with the WebAssembly runtime. Do not use it for creating
-// plugins, use the public interface provided by dpf.ts instead.
-// As of Jul '21 AssemblyScript strings format has not completely settled down.
+// plugins, use the public interface provided by dpf.ts instead. As of Jul '21
+// AssemblyScript strings format has not completely settled down.
 // https://github.com/AssemblyScript/assemblyscript/issues/1653. Use C-style
 // strings (UTF-8, null terminated) for all interfaces exposed by this module
-// to keep it future-proof and perform all string conversions in AssemblyScript.
+// and perform all string conversions in AssemblyScript.
 
 const pluginInstance = new PluginImpl
 
 // These are external functions implemented by the host. They are declared here
-// instead of the caller module (dpf.ts) to keep all interfaces to
-// the host in a single place (index.ts) and also to make sure all declared
-// functions show up in the module imports table.
+// instead of the caller module (dpf.ts) to keep all interfaces to the host in a
+// single place (index.ts) and also to make sure all declared functions show up
+// in the module imports table.
 
 declare function _get_samplerate(): f32
 declare function _get_time_position(): void
@@ -66,7 +66,7 @@ export function glue_get_time_position(): DISTRHO.TimePosition {
 // Keep _get_label(), _get_maker() and _get_license() as function exports. They
 // could be replaced with globals initialized to these function return values
 // for simpler implementation, but in the future index.ts will be automatically
-// injected into the Wasm VM (just like done with ui.js for the web view) and
+// injected into the Wasm VM (just like done with dpf.js for the web view) and
 // plugin implementations moved to "linked modules". Under such scheme the
 // guarantee that pluginInstance is already init'd at this point no longer holds.
 
