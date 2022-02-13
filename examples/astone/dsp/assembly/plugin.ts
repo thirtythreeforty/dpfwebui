@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import DISTRHO from './distrho-plugin'
+import DISTRHO from './dpf'
 
 const PI_2: f32 = Mathf.PI * 2
 
@@ -98,7 +98,7 @@ export default class AsToneExamplePlugin extends DISTRHO.Plugin implements DISTR
         this.phase = phase
     }
 
-    initProgramName(index: u32, programName: DISTRHO.StringWrapper): void {
+    initProgramName(index: u32, programName: DISTRHO.String): void {
         // empty implementation
     }
 
@@ -106,7 +106,7 @@ export default class AsToneExamplePlugin extends DISTRHO.Plugin implements DISTR
         // empty implementation
     }
 
-    initState(index: u32, stateKey: DISTRHO.StringWrapper, defaultStateValue: DISTRHO.StringWrapper): void {
+    initState(index: u32, stateKey: DISTRHO.String, defaultStateValue: DISTRHO.String): void {
         // empty implementation
     }
 

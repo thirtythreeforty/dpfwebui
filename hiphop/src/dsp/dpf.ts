@@ -55,13 +55,13 @@ export default namespace DISTRHO {
         setParameterValue(index: u32, value: f32): void
 
         // void Plugin::initProgramName(uint32_t index, String& programName)
-        initProgramName(index: u32, programName: StringWrapper): void
+        initProgramName(index: u32, programName: String): void
 
         // void Plugin::loadProgram(uint32_t index)
         loadProgram(index: u32): void
 
         // void Plugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
-        initState(index: u32, stateKey: StringWrapper, defaultStateValue: StringWrapper): void
+        initState(index: u32, stateKey: String, defaultStateValue: String): void
 
         // void Plugin::setState(const char* key, const char* value)
         setState(key: string, value: string): void
@@ -166,9 +166,9 @@ export default namespace DISTRHO {
 
     // Custom class for use as mutable string argument
 
-    export class StringWrapper {
+    export class String {
 
-        string: string = ''
+        value: string = ''
 
     }
 

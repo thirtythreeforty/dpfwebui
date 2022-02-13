@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import DISTRHO from './distrho-plugin'
+import DISTRHO from './dpf'
 
 // This plugin has no functionality other than providing metadata
 
@@ -66,7 +66,7 @@ export default class HotSwapExamplePlugin extends DISTRHO.Plugin implements DIST
         // empty implementation
     }
 
-    initProgramName(index: u32, programName: DISTRHO.StringWrapper): void {
+    initProgramName(index: u32, programName: DISTRHO.String): void {
         // empty implementation
     }
 
@@ -74,7 +74,7 @@ export default class HotSwapExamplePlugin extends DISTRHO.Plugin implements DIST
         // empty implementation
     }
 
-    initState(index: u32, stateKey: DISTRHO.StringWrapper, defaultStateValue: DISTRHO.StringWrapper): void {
+    initState(index: u32, stateKey: DISTRHO.String, defaultStateValue: DISTRHO.String): void {
         // empty implementation
     }
 

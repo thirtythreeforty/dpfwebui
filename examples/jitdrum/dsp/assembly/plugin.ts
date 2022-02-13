@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import DISTRHO from './distrho-plugin'
+import DISTRHO from './dpf'
 
 const PUNCH: f32 = 4.0
 const DECAY: f32 = 10.0
@@ -90,7 +90,7 @@ export default class JitDrumExamplePlugin extends DISTRHO.Plugin implements DIST
         // empty implementation
     }
 
-    initProgramName(index: u32, programName: DISTRHO.StringWrapper): void {
+    initProgramName(index: u32, programName: DISTRHO.String): void {
         // empty implementation
     }
 
@@ -98,7 +98,7 @@ export default class JitDrumExamplePlugin extends DISTRHO.Plugin implements DIST
         // empty implementation
     }
 
-    initState(index: u32, stateKey: DISTRHO.StringWrapper, defaultStateValue: DISTRHO.StringWrapper): void {
+    initState(index: u32, stateKey: DISTRHO.String, defaultStateValue: DISTRHO.String): void {
         // empty implementation
     }
 

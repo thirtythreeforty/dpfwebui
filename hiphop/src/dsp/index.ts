@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import DISTRHO from './distrho-plugin'
+import DISTRHO from './dpf'
 import PluginImpl from './plugin'
 
 // The interface defined in this file is private to the framework and optimized
 // for integration with the WebAssembly runtime. Do not use it for creating
-// plugins, use the public interface provided by distrho-plugin.ts instead.
+// plugins, use the public interface provided by dpf.ts instead.
 // As of Jul '21 AssemblyScript strings format has not completely settled down.
 // https://github.com/AssemblyScript/assemblyscript/issues/1653. Use C-style
 // strings (UTF-8, null terminated) for all interfaces exposed by this module
@@ -30,7 +30,7 @@ import PluginImpl from './plugin'
 const pluginInstance = new PluginImpl
 
 // These are external functions implemented by the host. They are declared here
-// instead of the caller module (distrho-plugin.ts) to keep all interfaces to
+// instead of the caller module (dpf.ts) to keep all interfaces to
 // the host in a single place (index.ts) and also to make sure all declared
 // functions show up in the module imports table.
 
@@ -38,7 +38,7 @@ declare function _get_samplerate(): f32
 declare function _get_time_position(): void
 declare function _write_midi_event(): bool
 
-// Re-export host functions including glue code to support distrho-plugin.ts
+// Re-export host functions including glue code to support dpf.ts
 
 export { _get_samplerate as glue_get_samplerate }
 
@@ -112,9 +112,9 @@ export function _set_parameter_value(index: u32, value: f32): void {
 }
 
 export function _init_program_name(index: u32): ArrayBuffer {
-    let programName = new DISTRHO.StringWrapper
+    let programName = new DISTRHO.String
     pluginInstance.initProgramName(index, programName)
-    return _wtf16_to_c_string(programName.string)
+    return _wtf16_to_c_string(programName.value)
 }
 
 export function _load_program(index: u32): void {
@@ -122,13 +122,13 @@ export function _load_program(index: u32): void {
 }
 
 export function _init_state(index: u32): void {
-    let stateKey = new DISTRHO.StringWrapper
-    let defaultStateValue = new DISTRHO.StringWrapper
+    let stateKey = new DISTRHO.String
+    let defaultStateValue = new DISTRHO.String
 
     pluginInstance.initState(index, stateKey, defaultStateValue)
 
-    _ro_string_1 = _wtf16_to_c_string(stateKey.string)
-    _ro_string_2 = _wtf16_to_c_string(defaultStateValue.string)
+    _ro_string_1 = _wtf16_to_c_string(stateKey.value)
+    _ro_string_2 = _wtf16_to_c_string(defaultStateValue.value)
 }
 
 export function _set_state(key: ArrayBuffer, value: ArrayBuffer): void {

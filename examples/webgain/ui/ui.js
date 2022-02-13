@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// See src/ui/distrho-ui.js for the UI class implementation, it shows which C++
-// methods are mapped. The class is automatically injected into the global
-// namespace and guaranteed to be available after the document load event fires
-// and before any referenced script starts running.
+// See src/ui/dpf.js for the UI class implementation, it shows which C++ methods
+// are mapped. The class is automatically injected into the global namespace and
+// guaranteed to be available after the document load event fires and before any
+// referenced script starts running.
 
 class WebGainExampleUI extends DISTRHO.UI {
 

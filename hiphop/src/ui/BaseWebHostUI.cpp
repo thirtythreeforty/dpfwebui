@@ -74,10 +74,10 @@ void BaseWebHostUI::setWebView(BaseWebView* webView)
     fWebView->setEventHandler(this);
 #ifdef HIPHOP_PRINT_TRAFFIC
     fWebView->setPrintTraffic(true);
-#endif // HIPHOP_PRINT_TRAFFIC
+#endif
     
     String js = String(
-#include "ui/client/distrho-ui.js.inc"
+#include "ui/dpf.js.inc"
     );
     js += "window.DISTRHO = {UI: UI, quirks: {}};"
           "UI = null;";

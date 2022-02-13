@@ -19,7 +19,7 @@ $(error HIPHOP_PROJECT_VERSION is not set)
 endif
 
 ifneq ($(HIPHOP_AS_DSP_PATH),)
-AS_DSP = true
+WASM_DSP = true
 endif
 
 ifneq ($(HIPHOP_WEB_UI_PATH),)
@@ -78,12 +78,12 @@ LIB_DIR_NOBUNDLE = $(TARGET_DIR)/$(NAME)-lib
 # ------------------------------------------------------------------------------
 # Add optional support for AssemblyScript DSP
 
-ifeq ($(AS_DSP),true)
+ifeq ($(WASM_DSP),true)
 HIPHOP_FILES_DSP  = PluginEx.cpp \
                     WasmHostPlugin.cpp \
                     WasmRuntime.cpp
 
-FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/plugin/%)
+FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/dsp/%)
 endif
 
 # ------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ endif
 # ------------------------------------------------------------------------------
 # Add build flags for AssemblyScript DSP dependencies
 
-ifeq ($(AS_DSP),true)
+ifeq ($(WASM_DSP),true)
 
 BASE_FLAGS += -DHIPHOP_ENABLE_WASM_PLUGIN=1
 
@@ -262,7 +262,7 @@ endif
 # ------------------------------------------------------------------------------
 # Dependency - Clone and build WAMR
 
-ifeq ($(AS_DSP),true)
+ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_PATH = $(HIPHOP_VENDOR_PATH)/wasm-micro-runtime
 WAMR_BUILD_DIR = ${WAMR_PATH}/build
@@ -308,7 +308,7 @@ endif
 # ------------------------------------------------------------------------------
 # Dependency - Download Wasmer static library
 
-ifeq ($(AS_DSP),true)
+ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
 WASMER_PATH = $(HIPHOP_VENDOR_PATH)/wasmer
 WASMER_VERSION = 2.1.1
@@ -370,7 +370,7 @@ endif
 # ------------------------------------------------------------------------------
 # Dependency - Download Node.js for MinGW
 
-ifeq ($(AS_DSP),true)
+ifeq ($(WASM_DSP),true)
 ifeq ($(MSYS_MINGW),true)
 NPM_OPT_SET_PATH = export PATH=$$PATH:/opt/node && export NODE_SKIP_PLATFORM_CHECK=1
 ifeq (,$(wildcard /opt/node))
@@ -425,18 +425,18 @@ endif
 # Dependency - Built-in JavaScript library include and polyfills
 
 ifeq ($(WEB_UI),true)
-UI_JS_PATH = $(HIPHOP_SRC_PATH)/ui/client/distrho-ui.js
-UI_JS_INCLUDE_PATH = $(UI_JS_PATH).inc
+DPF_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
+DPF_JS_INCLUDE_PATH = $(DPF_JS_PATH).inc
 
-TARGETS += $(UI_JS_INCLUDE_PATH)
+TARGETS += $(DPF_JS_INCLUDE_PATH)
 
-$(UI_JS_INCLUDE_PATH): $(UI_JS_PATH)
-	@echo 'R"JS(' > $(UI_JS_INCLUDE_PATH)
-	@cat $(UI_JS_PATH) >> $(UI_JS_INCLUDE_PATH)
-	@echo ')JS"' >> $(UI_JS_INCLUDE_PATH)
+$(DPF_JS_INCLUDE_PATH): $(DPF_JS_PATH)
+	@echo 'R"JS(' > $(DPF_JS_INCLUDE_PATH)
+	@cat $(DPF_JS_PATH) >> $(DPF_JS_INCLUDE_PATH)
+	@echo ')JS"' >> $(DPF_JS_INCLUDE_PATH)
 
 ifeq ($(MACOS),true)
-POLYFILL_JS_PATH = $(HIPHOP_SRC_PATH)/ui/client/event-target-polyfill.js
+POLYFILL_JS_PATH = $(HIPHOP_SRC_PATH)/ui/macos/polyfill.js
 POLYFILL_JS_INCLUDE_PATH = $(POLYFILL_JS_PATH).inc
 
 TARGETS += $(POLYFILL_JS_INCLUDE_PATH)
@@ -519,7 +519,7 @@ endif
 # ------------------------------------------------------------------------------
 # Post build - Compile AssemblyScript project
 
-ifneq ($(AS_DSP),)
+ifneq ($(WASM_DSP),)
 ifneq ($(HIPHOP_AS_SKIP_FRAMEWORK_FILES),true)
 HIPHOP_TARGET += framework_as
 
@@ -527,9 +527,9 @@ AS_ASSEMBLY_PATH = $(HIPHOP_AS_DSP_PATH)/assembly
 
 framework_as:
 	@test -f $(AS_ASSEMBLY_PATH)/index.ts \
-		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/plugin/client/index.ts) $(AS_ASSEMBLY_PATH)
-	@test -f $(AS_ASSEMBLY_PATH)/distrho-plugin.ts \
-		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/plugin/client/distrho-plugin.ts) $(AS_ASSEMBLY_PATH)
+		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/dsp/index.ts) $(AS_ASSEMBLY_PATH)
+	@test -f $(AS_ASSEMBLY_PATH)/dpf.ts \
+		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/dsp/dpf.ts) $(AS_ASSEMBLY_PATH)
 endif
 
 WASM_MODULE = optimized.wasm
@@ -548,7 +548,7 @@ endif
 # ------------------------------------------------------------------------------
 # Post build - Always copy AssemblyScript DSP binary
 
-ifneq ($(AS_DSP),)
+ifneq ($(WASM_DSP),)
 HIPHOP_TARGET += lib_dsp
 
 lib_dsp:

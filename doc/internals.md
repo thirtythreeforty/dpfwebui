@@ -19,10 +19,10 @@ running hidden web view or similar hacks involved.
 
 Hip-Hop provides two AssemblyScript files that must be included in user projects:
 
-File              |Description
-------------------|-------------------------------------------------------------
-distrho-plugin.ts | Public plugin interface, use this for writing plugins.
-index.ts          | Private plugin interface, basically glue code between C++ and the public interface.
+File      | Description
+----------|-------------------------------------------------------------
+dpf.ts    | Public plugin interface, use this for writing plugins.
+index.ts  | Private plugin interface, basically glue code between C++ and the public interface.
 
 User DSP code should follow the standard AssemblyScript project format described
 [here](https://www.assemblyscript.org/quick-start.html). AssemblyScript project
