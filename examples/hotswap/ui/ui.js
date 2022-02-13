@@ -34,7 +34,7 @@ class HotSwapExampleUI extends DISTRHO.UI {
         });
         
         if (DISTRHO.quirks.noDragAndDrop) {
-            hint.innerHTML = 'optimized.wasm';
+            hint.innerHTML = 'Load<br>optimized.wasm';
             target.style.border = 'none';
         } else {       
             hint.innerHTML = 'Drag and drop<br>optimized.wasm';
