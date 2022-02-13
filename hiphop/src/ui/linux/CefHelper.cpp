@@ -143,21 +143,6 @@ void CefHelper::runMainLoop()
     fRunMainLoop = true;
     
     while (fRunMainLoop) {
-        // Handle libSOFD file dialog
-        if ((fDialogCallback != nullptr) && (XPending(fDisplay) > 0)) {
-            XPeekEvent(fDisplay, &event);
-
-            rc = x_fib_handle_events(fDisplay, &event);
-
-            if (rc > 0) {
-                fDialogCallback.Continue(0, { x_fib_filename() });
-                fDialogCallback = nullptr;
-            } else if (rc < 0) {
-                fDialogCallback.Cancel();
-                fDialogCallback = nullptr;
-            }
-        }
-
         // Call CefDoMessageLoopWork() on a regular basis instead of calling
         // CefRunMessageLoop(). Each call to CefDoMessageLoopWork() will perform
         // a single iteration of the CEF message loop. Caution should be used
@@ -173,6 +158,21 @@ void CefHelper::runMainLoop()
 
         if (rc == 0) {
             dispatch(packet);
+        }
+
+        // Handle libSOFD file dialog
+        if (XPending(fDisplay) > 0) {
+            XNextEvent(fDisplay, &event);
+
+            rc = x_fib_handle_events(fDisplay, &event);
+
+            if (rc > 0) {
+                fDialogCallback->Continue(0, { x_fib_filename() });
+                fDialogCallback = nullptr;
+            } else if (rc < 0) {
+                fDialogCallback->Cancel();
+                fDialogCallback = nullptr;
+            }
         }
     }
 }
@@ -254,24 +254,25 @@ bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser, CefDialogHandler::Fi
                              CefRefPtr<CefFileDialogCallback> callback)
 {
     if (fDialogCallback != nullptr) {
-        callback.Cancel(); // only a single dialog is supported
-        return;
+        callback->Cancel(); // only a single dialog is supported
+        return true;
     }
     if (x_fib_configure(1 /*current dir*/, defaultFilePath.ToString().c_str()) != 0) {
-        callback.Cancel();
-        return;
+        callback->Cancel();
+        return true;
     }
     if (x_fib_configure(1 /*set title*/, title.ToString().c_str()) != 0) {
-        callback.Cancel();
-        return;
+        callback->Cancel();
+        return true;
     }
     if (x_fib_cfg_buttons(2 /*show places*/, 1 /*checked*/) != 0) {
-        callback.Cancel();
-        return;
+        callback->Cancel();
+        return true;
     }
-    if (x_fib_show(fDisplay, nullptr, 0, 0, static_cast<double>(fScaleFactor)) != 0) {
-        callback.Cancel();
-        return;
+
+    if (x_fib_show(fDisplay, 0 /*parent*/, 0, 0, static_cast<double>(fScaleFactor)) != 0) {
+        callback->Cancel();
+        return true;
     }
 
     fDialogCallback = callback;
