@@ -65,7 +65,7 @@ class HotSwapExampleUI extends DISTRHO.UI {
         }
 
         // This is perfectly valid but it will play notes only while the UI is
-        // visible. See alternate alternate version in HotSwapExamplePlugin.cpp.
+        // visible. See alternate version in HotSwapExamplePlugin.cpp.
         //setInterval(() => {
         //    const ampt = [69 /*A*/, 71 /*C*/, 72 /*D*/, 73 /*E*/, 75 /*G*/];
         //    this.sendNote(1, ampt[getRandomInt(0, 4)], 127);
