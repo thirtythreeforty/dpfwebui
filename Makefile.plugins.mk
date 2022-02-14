@@ -268,9 +268,8 @@ WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 # Disable HW_BOUND_CHECK feature because it does not compile on MinGW. On Linux
 # and macOS it must be also disabled to prevent crashes during initialization of
 # additional plugin instances, ie. after the first plugin instance has been
-# successfully created. WAMR was not designed to run in plugin environments.
-# Disable WASI because it is not available through the C API.
-WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=0 -DWAMR_BUILD_JIT=1 \
+# successfully created. Disable WASI because it is unavailable through the C API.
+WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=0 -DWAMR_BUILD_JIT=0 \
 				  -DWAMR_BUILD_INTERP=1 -DWAMR_DISABLE_HW_BOUND_CHECK=1
 
 ifeq ($(WINDOWS),true)
