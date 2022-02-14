@@ -19,14 +19,21 @@ $(error HIPHOP_PROJECT_VERSION is not set)
 endif
 
 ifneq ($(HIPHOP_AS_DSP_PATH),)
+HIPHOP_WASM_RUNTIME ?= wamr
+HIPHOP_ENABLE_WASI ?= false
+
+NPM_OPT_SET_PATH = true
 WASM_DSP = true
 endif
 
 ifneq ($(HIPHOP_WEB_UI_PATH),)
+# Enables the built-in websockets server and loads content over HTTPS [WIP]
+HIPHOP_REMOTE_UI ?= false
+# Automatically inject dpf.js when loading content from file:// (remote ui off)
+HIPHOP_INJECT_FRAMEWORK_JS ?= false
+
 WEB_UI = true
 endif
-
-NPM_OPT_SET_PATH = true
 
 # ------------------------------------------------------------------------------
 # Determine build environment
@@ -171,9 +178,6 @@ ifeq ($(WASM_DSP),true)
 
 BASE_FLAGS += -DHIPHOP_ENABLE_WASM_PLUGIN=1
 
-HIPHOP_WASM_RUNTIME ?= wamr
-HIPHOP_ENABLE_WASI ?= false
-
 ifeq ($(HIPHOP_ENABLE_WASI),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 $(error WAMR C API does not support WASI)
@@ -212,9 +216,21 @@ endif
 # Add build flags for web UI dependencies
 
 ifeq ($(WEB_UI),true)
+
+ifeq ($(HIPHOP_REMOTE_UI),true)
+BASE_FLAGS += -DHIPHOP_REMOTE_UI
+ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+$(warning Remote UI is enabled - disabling JavaScript framework injection)
+HIPHOP_INJECT_FRAMEWORK_JS = false
+endif
+endif
+ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
+endif
 ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
 BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
 endif
+
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread -ldl
 endif
@@ -228,6 +244,7 @@ LINK_FLAGS += -L$(EDGE_WEBVIEW2_PATH)/build/native/x64 \
               -static-libgcc -static-libstdc++ -Wl,-Bstatic \
               -lstdc++ -lpthread
 endif
+
 endif
 
 # ------------------------------------------------------------------------------
@@ -420,15 +437,17 @@ endif
 # Dependency - Built-in JavaScript library include and polyfills
 
 ifeq ($(WEB_UI),true)
-DPF_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
-DPF_JS_INCLUDE_PATH = $(DPF_JS_PATH).inc
+ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
+DPF_JS_INCLUDE_PATH = $(FRAMEWORK_JS_PATH).inc
 
 TARGETS += $(DPF_JS_INCLUDE_PATH)
 
-$(DPF_JS_INCLUDE_PATH): $(DPF_JS_PATH)
+$(DPF_JS_INCLUDE_PATH): $(FRAMEWORK_JS_PATH)
 	@echo 'R"JS(' > $(DPF_JS_INCLUDE_PATH)
-	@cat $(DPF_JS_PATH) >> $(DPF_JS_INCLUDE_PATH)
+	@cat $(FRAMEWORK_JS_PATH) >> $(DPF_JS_INCLUDE_PATH)
 	@echo ')JS"' >> $(DPF_JS_INCLUDE_PATH)
+endif
 
 ifeq ($(MACOS),true)
 POLYFILL_JS_PATH = $(HIPHOP_SRC_PATH)/ui/macos/polyfill.js
@@ -440,7 +459,6 @@ $(POLYFILL_JS_INCLUDE_PATH): $(POLYFILL_JS_PATH)
 	@echo 'R"JS(' > $(POLYFILL_JS_INCLUDE_PATH)
 	@cat $(POLYFILL_JS_PATH) >> $(POLYFILL_JS_INCLUDE_PATH)
 	@echo ')JS"' >> $(POLYFILL_JS_INCLUDE_PATH)
-
 endif
 endif
 
@@ -572,23 +590,34 @@ endif
 ifeq ($(WEB_UI),true)
 HIPHOP_TARGET += lib_ui
 
+ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+COPY_FRAMEWORK_JS = false
+else
+COPY_FRAMEWORK_JS = true
+FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
+endif
+
 lib_ui:
 	@echo "Copying web UI files"
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(FRAMEWORK_JS_PATH) $(LIB_DIR_LV2)/ui \
 		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST3)/ui \
 		) || true
 	@($(TEST_VST2_MACOS) \
 		&& mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST2_MACOS)/ui \
 		) || true
 	@($(TEST_NOBUNDLE) \
 		&& mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(FRAMEWORK_JS_PATH) $(LIB_DIR_NOBUNDLE)/ui \
 		) || true
 
 clean: clean_lib

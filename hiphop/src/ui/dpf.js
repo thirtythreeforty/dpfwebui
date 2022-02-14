@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+const DISTRHO = (() => {
+
+// TODO : remote messaging and stub (when loading html in browser for debug)
+
 class UI {
 
     constructor() {
@@ -290,3 +294,10 @@ function base64EncArr (aBytes) {
   return sB64Enc.substr(0, sB64Enc.length - 2 + nMod3) + (nMod3 === 2 ? '' : nMod3 === 1 ? '=' : '==');
 
 }
+
+return {
+    UI: UI,
+    quirks: {}
+};
+
+})();

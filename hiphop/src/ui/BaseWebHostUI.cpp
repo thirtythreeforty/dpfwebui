@@ -78,12 +78,12 @@ void BaseWebHostUI::setWebView(BaseWebView* webView)
     fWebView->setPrintTraffic(true);
 #endif
     
+#ifdef HIPHOP_INJECT_FRAMEWORK_JS
     String js = String(
 #include "ui/dpf.js.inc"
     );
-    js += "window.DISTRHO = {UI: UI, quirks: {}};"
-          "UI = null;";
     fWebView->injectScript(js);
+#endif
 
     // Cannot call virtual method createStandaloneWindow() from constructor.
     fPlatformWindow = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
@@ -106,7 +106,11 @@ void BaseWebHostUI::setWebView(BaseWebView* webView)
 void BaseWebHostUI::load()
 {
     if (fWebView != nullptr) {
+#ifdef HIPHOP_REMOTE_UI
+        // TODO
+#else
         String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
+#endif
         fWebView->navigate(url);
     }
 }
