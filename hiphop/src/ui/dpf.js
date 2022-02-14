@@ -209,6 +209,11 @@ class UI {
 
 }
 
+const env = window._webview_env || {};
+delete window._webview_env;
+
+return { UI: UI, env: env };
+
 
 /*\
 |*|
@@ -295,9 +300,4 @@ function base64EncArr (aBytes) {
 
 }
 
-return {
-    UI: UI,
-    quirks: {}
-};
-
-})();
+})(); // DISTRHO

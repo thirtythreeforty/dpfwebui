@@ -48,12 +48,13 @@ LinuxWebHostUI::LinuxWebHostUI(uint baseWidth, uint baseHeight,
     // Allow JavaScript code to detect some unavailable features
     String js = String(
         // LXDRAGDROPBUG : No drag and drop on both GTK and CEF web views
-        "window.DISTRHO.quirks.noDragAndDrop = true;"
+        "window._webview_env = {};"
+        "_webview_env.noDragAndDrop = true;"
 #ifdef LXWEBVIEW_GTK
         // WKGTKRESIZEBUG : Broken vw/vh/vmin/vmax CSS units
-        "window.DISTRHO.quirks.noCSSViewportUnits = true;"
+        "_webview_env.noCSSViewportUnits = true;"
         // No touch events for <input type="range"> elements
-        "window.DISTRHO.quirks.noRangeInputTouch = true;"
+        "_webview_env.noRangeInputTouch = true;"
 #endif
     );
     webview->injectScript(js);
