@@ -270,8 +270,8 @@ WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 # additional plugin instances, ie. after the first plugin instance has been
 # successfully created. WAMR was not designed to run in plugin environments.
 # Disable WASI because it is not available through the C API.
-WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1 -DWAMR_BUILD_LIBC_WASI=0 \
-				  -DWAMR_BUILD_INTERP=0
+WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=0 \
+				  -DWAMR_BUILD_INTERP=1 -DWAMR_DISABLE_HW_BOUND_CHECK=1
 
 ifeq ($(WINDOWS),true)
 # Use the C version of invokeNative() instead of ASM until MinGW build is fixed
