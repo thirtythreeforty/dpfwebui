@@ -68,13 +68,13 @@ class WasmRuntime
 {
 public:
     WasmRuntime();
-    ~WasmRuntime();
+    virtual ~WasmRuntime();
 
     void load(const char* modulePath);
     void load(const unsigned char* moduleData, size_t size);
 
-    bool isStarted() { return fStarted; }
-    void start(WasmFunctionMap hostFunctions);
+    bool hasInstance();
+    void createInstance(WasmFunctionMap hostFunctions);
 
     byte_t* getMemory(const WasmValue& wPtr = MakeI32(0));
     char*   getMemoryAsCString(const WasmValue& wPtr);
@@ -89,8 +89,7 @@ public:
     const char*     callFunctionReturnCString(const char* name, WasmValueVector params = {});
 
 private:
-    void stop();
-    void unload();
+    void destroyInstance();
 
     static wasm_trap_t* callHostFunction(void *env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec);
 
@@ -99,7 +98,6 @@ private:
     const char* WTF16ToCString(const WasmValue& wPtr);
     WasmValue   CToWTF16String(const char* s);
 
-    bool               fStarted;
     wasm_engine_t*     fEngine;
     wasm_store_t*      fStore;
     wasm_module_t*     fModule;

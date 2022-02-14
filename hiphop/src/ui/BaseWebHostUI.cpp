@@ -23,6 +23,8 @@
 #include "distrho/extra/Base64.hpp"
 #include "extra/Path.hpp"
 
+#define HTML_INDEX_PATH "/ui/index.html"
+
 USE_NAMESPACE_DISTRHO
 
 // DPF implementation of VST3 on macOS needs the DISTRHO::UI constructor to be
@@ -104,7 +106,7 @@ void BaseWebHostUI::setWebView(BaseWebView* webView)
 void BaseWebHostUI::load()
 {
     if (fWebView != nullptr) {
-        String url = "file://" + Path::getPluginLibrary() + "/ui/index.html";
+        String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
         fWebView->navigate(url);
     }
 }

@@ -77,9 +77,9 @@ public:
     WasmValueVector writeMidiEvent(WasmValueVector params);
 
 private:
-    void prepareAndStartRuntime();
+    void onModuleLoad();
 
-    inline void checkRuntime(const char* caller) const;
+    inline void checkInstance(const char* caller) const;
 
     bool fActive;
     std::shared_ptr<WasmRuntime> fRuntime;

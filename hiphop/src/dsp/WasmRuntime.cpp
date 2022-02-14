@@ -28,14 +28,13 @@
 // TODO - check for correct usage of the Wasm C API focusing on memory leaks
 
 WasmRuntime::WasmRuntime()
-    : fStarted(false)
-    , fEngine(nullptr)
+    : fEngine(nullptr)
     , fStore(nullptr)
     , fModule(nullptr)
     , fInstance(nullptr)
 #ifdef HIPHOP_ENABLE_WASI
     , fWasiEnv(nullptr)
-#endif // HIPHOP_ENABLE_WASI
+#endif
 {
     std::memset(&fExportsVec, 0, sizeof(fExportsVec));
 
@@ -46,17 +45,20 @@ WasmRuntime::WasmRuntime()
 
     fStore = wasm_store_new(fEngine); 
     if (fStore == nullptr) {
+        wasm_engine_delete(fEngine);
         throw wasm_runtime_exception("wasm_store_new() failed");
     }
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
     sWamrRefCount++;
-#endif // HIPHOP_WASM_RUNTIME_WAMR
+#endif
 }
 
 WasmRuntime::~WasmRuntime()
 {
-    unload();
+    if (hasInstance()) {
+        destroyInstance();
+    }
 
     if (fStore != nullptr) {
         wasm_store_delete(fStore);
@@ -65,7 +67,7 @@ WasmRuntime::~WasmRuntime()
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
     if (--sWamrRefCount > 0) {
-        // Calling wasm_engine_delete() also tears down the WAMR runtime
+        // Calling wasm_engine_delete() also tears down the full WAMR runtime
         return;
     }
 #endif
@@ -78,7 +80,9 @@ WasmRuntime::~WasmRuntime()
 
 void WasmRuntime::load(const char* modulePath)
 {
-    unload();
+    if (hasInstance()) {
+        destroyInstance();
+    }
 
     std::FILE* file = std::fopen(modulePath, "rb");
     if (file == nullptr) {
@@ -112,7 +116,9 @@ void WasmRuntime::load(const char* modulePath)
 
 void WasmRuntime::load(const unsigned char* moduleData, size_t size)
 {
-    unload();
+    if (hasInstance()) {
+        destroyInstance();
+    }
 
     wasm_byte_vec_t moduleBytes;
     wasm_byte_vec_new_uninitialized(&moduleBytes, size);
@@ -127,20 +133,15 @@ void WasmRuntime::load(const unsigned char* moduleData, size_t size)
     }
 }
 
-void WasmRuntime::unload()
+bool WasmRuntime::hasInstance()
 {
-    stop();
-
-    if (fModule != nullptr) {
-        wasm_module_delete(fModule);
-        fModule = nullptr;
-    }
+    return fInstance != nullptr;
 }
 
-void WasmRuntime::start(WasmFunctionMap hostFunctions)
+void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
 {
-    if (fStarted) {
-        return;
+    if (hasInstance()) {
+        destroyInstance();
     }
 
     char name[MAX_STRING_SIZE];
@@ -277,15 +278,14 @@ void WasmRuntime::start(WasmFunctionMap hostFunctions)
     }
 
     wasm_exporttype_vec_delete(&exportTypes);
-
-    // Startup complete
-
-    fStarted = true;
 }
 
-void WasmRuntime::stop()
+void WasmRuntime::destroyInstance()
 {
-    fStarted = false;
+    if (fModule != nullptr) {
+        wasm_module_delete(fModule);
+        fModule = nullptr;
+    }
 
 #ifdef HIPHOP_ENABLE_WASI
     if (fWasiEnv != nullptr) {
