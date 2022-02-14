@@ -171,12 +171,7 @@ ifeq ($(WASM_DSP),true)
 
 BASE_FLAGS += -DHIPHOP_ENABLE_WASM_PLUGIN=1
 
-ifeq ($(WINDOWS),true)
 HIPHOP_WASM_RUNTIME ?= wamr
-else
-HIPHOP_WASM_RUNTIME ?= wasmer
-endif
-
 HIPHOP_ENABLE_WASI ?= false
 
 ifeq ($(HIPHOP_ENABLE_WASI),true)
@@ -275,7 +270,8 @@ WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 # additional plugin instances, ie. after the first plugin instance has been
 # successfully created. WAMR was not designed to run in plugin environments.
 # Disable WASI because it is not available through the C API.
-WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1 -DWAMR_BUILD_LIBC_WASI=0
+WAMR_CMAKE_ARGS = -DWAMR_DISABLE_HW_BOUND_CHECK=1 -DWAMR_BUILD_LIBC_WASI=0 \
+				  -DWAMR_BUILD_INTERP=0
 
 ifeq ($(WINDOWS),true)
 # Use the C version of invokeNative() instead of ASM until MinGW build is fixed

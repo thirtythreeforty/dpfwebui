@@ -5,9 +5,9 @@ possible to write plugins in the AssemblyScript language. While not strictly a
 subset it is highly similar in syntax to [TypeScript](https://www.typescriptlang.org)
 and specifically designed for targeting [WebAssembly](https://webassembly.org),
 roughly described as the "assembler of the web". Plugins leveraging this feature
-embed the [Wasmer](https://github.com/wasmerio/wasmer) or
-[WAMR](https://github.com/bytecodealliance/wasm-micro-runtime)
-runtimes for running precompiled AssemblyScript code at near native performance.
+embed the [WAMR](https://github.com/bytecodealliance/wasm-micro-runtime) runtime
+or optionally [Wasmer](https://github.com/wasmerio/wasmer) for running
+precompiled AssemblyScript code at near native performance.
 
 It is worth noting that the Wasm VM and the web view are completely separated
 entities that only communicate through a minimal key/value pairs interface
