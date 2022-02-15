@@ -434,6 +434,66 @@ endif
 endif
 
 # ------------------------------------------------------------------------------
+# Dependency - Clone and build Mbed TLS
+
+ifeq ($(WEB_UI),true)
+ifeq ($(HIPHOP_REMOTE_UI),true)
+MBEDTLS_PATH = $(HIPHOP_VENDOR_PATH)/mbedtls
+MBEDTLS_BUILD_DIR = ${MBEDTLS_PATH}/library
+MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_DIR)/libmbedtls.a
+MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
+MBEDTLS_GIT_TAG = v3.0.0  # LWS build fails for 3.1.0 (Feb 2022)
+
+ifeq ($(SKIP_STRIPPING),true)
+MBEDTLS_MAKE_ARGS = DEBUG=1
+endif
+
+TARGETS += $(MBEDTLS_LIB_PATH)
+
+$(MBEDTLS_LIB_PATH): $(MBEDTLS_PATH)
+	@echo "Building Mbed TLS static library"
+	@mkdir -p $(MBEDTLS_BUILD_DIR) && cd $(MBEDTLS_BUILD_DIR) && make
+
+$(MBEDTLS_PATH):
+	@mkdir -p $(HIPHOP_VENDOR_PATH)
+	@git -C $(HIPHOP_VENDOR_PATH) clone --depth 1 --branch $(MBEDTLS_GIT_TAG) \
+			$(MBEDTLS_GIT_URL)
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Dependency - Clone and build libwebsockets
+
+ifeq ($(WEB_UI),true)
+ifeq ($(HIPHOP_REMOTE_UI),true)
+LWS_PATH = $(HIPHOP_VENDOR_PATH)/libwebsockets
+LWS_BUILD_DIR = ${LWS_PATH}/build
+LWS_LIB_PATH = $(LWS_BUILD_DIR)/lib/libwebsockets.a
+LWS_GIT_URL = https://github.com/warmcat/libwebsockets
+LWS_GIT_TAG = v4.3.1 
+
+LWS_CMAKE_ARGS = -DLWS_WITH_SHARED=0 -DLWS_WITHOUT_TESTAPPS=1 -DLWS_WITH_MBEDTLS=1 \
+                 -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
+
+ifeq ($(WINDOWS),true)
+LWS_CMAKE_ARGS += -G"MSYS Makefiles"
+endif
+
+TARGETS += $(LWS_LIB_PATH)
+
+$(LWS_LIB_PATH): $(LWS_PATH)
+	@echo "Building libwebsockets static library"
+	@mkdir -p $(LWS_BUILD_DIR) && cd $(LWS_BUILD_DIR) && cmake .. $(LWS_CMAKE_ARGS) \
+		&& make
+
+$(LWS_PATH):
+	@mkdir -p $(HIPHOP_VENDOR_PATH)
+	@git -C $(HIPHOP_VENDOR_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) \
+		$(LWS_GIT_URL)
+endif
+endif
+
+# ------------------------------------------------------------------------------
 # Dependency - Built-in JavaScript library include and polyfills
 
 ifeq ($(WEB_UI),true)
