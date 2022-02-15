@@ -28,8 +28,8 @@ endif
 
 ifneq ($(HIPHOP_WEB_UI_PATH),)
 # Enables the built-in websockets server and loads content over HTTPS [WIP]
-HIPHOP_REMOTE_UI ?= false
-# Automatically inject dpf.js when loading content from file:// (remote ui off)
+HIPHOP_NETWORK_UI ?= false
+# Automatically inject dpf.js when loading content from file:// (network ui off)
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
 
 WEB_UI = true
@@ -101,6 +101,10 @@ HIPHOP_FILES_UI  = UIEx.cpp \
                    BaseWebHostUI.cpp \
                    BaseWebView.cpp \
                    JsValue.cpp
+ifeq ($(HIPHOP_NETWORK_UI),true)
+HIPHOP_FILES_UI += NetworkWebUI.cpp \
+                   WebServer.cpp
+endif
 ifeq ($(LINUX),true)
 HIPHOP_FILES_UI += linux/LinuxWebHostUI.cpp \
                    linux/ChildProcessWebView.cpp \
@@ -217,10 +221,10 @@ endif
 
 ifeq ($(WEB_UI),true)
 
-ifeq ($(HIPHOP_REMOTE_UI),true)
-BASE_FLAGS += -DHIPHOP_REMOTE_UI
+ifeq ($(HIPHOP_NETWORK_UI),true)
+BASE_FLAGS += -DHIPHOP_NETWORK_UI
 ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-$(warning Remote UI is enabled - disabling JavaScript framework injection)
+$(warning Network UI is enabled - disabling JavaScript framework injection)
 HIPHOP_INJECT_FRAMEWORK_JS = false
 endif
 endif
@@ -437,7 +441,7 @@ endif
 # Dependency - Clone and build Mbed TLS
 
 ifeq ($(WEB_UI),true)
-ifeq ($(HIPHOP_REMOTE_UI),true)
+ifeq ($(HIPHOP_NETWORK_UI),true)
 MBEDTLS_PATH = $(HIPHOP_VENDOR_PATH)/mbedtls
 MBEDTLS_BUILD_DIR = ${MBEDTLS_PATH}/library
 MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_DIR)/libmbedtls.a
@@ -465,7 +469,7 @@ endif
 # Dependency - Clone and build libwebsockets
 
 ifeq ($(WEB_UI),true)
-ifeq ($(HIPHOP_REMOTE_UI),true)
+ifeq ($(HIPHOP_NETWORK_UI),true)
 LWS_PATH = $(HIPHOP_VENDOR_PATH)/libwebsockets
 LWS_BUILD_DIR = ${LWS_PATH}/build
 LWS_LIB_PATH = $(LWS_BUILD_DIR)/lib/libwebsockets.a

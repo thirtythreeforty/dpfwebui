@@ -37,7 +37,7 @@ USE_NAMESPACE_DISTRHO
 
 BaseWebHostUI::BaseWebHostUI(uint widthCssPx, uint heightCssPx,
         uint32_t backgroundColor, bool /*startLoading*/)
-    : UIEx(MAIN_DISPLAY_SCALE_FACTOR() * widthCssPx, MAIN_DISPLAY_SCALE_FACTOR() * heightCssPx)
+    : BaseUI(MAIN_DISPLAY_SCALE_FACTOR() * widthCssPx, MAIN_DISPLAY_SCALE_FACTOR() * heightCssPx)
     , fInitialWidth(widthCssPx)
     , fInitialHeight(heightCssPx)
     , fBackgroundColor(backgroundColor)
@@ -106,7 +106,7 @@ void BaseWebHostUI::setWebView(BaseWebView* webView)
 void BaseWebHostUI::load()
 {
     if (fWebView != nullptr) {
-#ifdef HIPHOP_REMOTE_UI
+#ifdef HIPHOP_NETWORK_UI
         // TODO
 #else
         String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
@@ -161,7 +161,7 @@ void BaseWebHostUI::setKeyboardFocus(bool focus)
 
 void BaseWebHostUI::uiIdle()
 {
-    UIEx::uiIdle();
+    BaseUI::uiIdle();
     
     if (fUiBlockQueued) {
         fUiBlockQueued = false;

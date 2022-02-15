@@ -26,12 +26,22 @@
 #include "extra/UIEx.hpp"
 #include "BaseWebView.hpp"
 
+#ifdef HIPHOP_NETWORK_UI
+# include "NetworkWebUI.hpp"
+#endif
+
 START_NAMESPACE_DISTRHO
 
-class BaseWebHostUI;
-float getDisplayScaleFactor(BaseWebHostUI* ui);
+#ifdef HIPHOP_NETWORK_UI
+typedef NetworkWebUI BaseUI; // support for https+ws clients
+#else
+typedef UIEx BaseUI; // support local webview only
+#endif
 
-class BaseWebHostUI : public UIEx, private WebViewEventHandler
+class BaseWebHostUI;
+float getDisplayScaleFactor(BaseWebHostUI* ui); // implemented for each platform
+
+class BaseWebHostUI : public BaseUI, private WebViewEventHandler
 {
 public:
     BaseWebHostUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
