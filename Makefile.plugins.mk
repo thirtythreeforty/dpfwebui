@@ -11,7 +11,7 @@ HIPHOP_DEPS_PATH ?= $(HIPHOP_ROOT_PATH)/deps
 
 DPF_PATH       ?= $(HIPHOP_ROOT_PATH)/dpf
 DPF_TARGET_DIR ?= bin
-DPF_BUILD_DIR  ?= build
+DPF_BUILD_PATH  ?= build
 DPF_GIT_BRANCH ?= develop
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
@@ -191,7 +191,7 @@ endif
 
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include -DHIPHOP_WASM_RUNTIME_WAMR
-LINK_FLAGS += -L$(WAMR_BUILD_DIR) -lvmlib
+LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread
 endif
@@ -281,10 +281,10 @@ endif
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
-WAMR_BUILD_DIR = ${WAMR_PATH}/build
-WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
+WAMR_BUILD_PATH = ${WAMR_PATH}/build
+WAMR_LIB_PATH = $(WAMR_BUILD_PATH)/libvmlib.a
 WAMRC_PATH = $(WAMR_PATH)/wamr-compiler
-WAMRC_BUILD_DIR = $(WAMRC_PATH)/build
+WAMRC_BUILD_PATH = $(WAMRC_PATH)/build
 WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 #WAMR_GIT_TAG = set this after PR #1000 gets included in a new release
@@ -309,12 +309,12 @@ TARGETS += $(WAMR_LIB_PATH) $(WAMRC_BIN_PATH)
 
 $(WAMR_LIB_PATH): $(WAMR_PATH)
 	@echo "Building WAMR static library"
-	@mkdir -p $(WAMR_BUILD_DIR) && cd $(WAMR_BUILD_DIR) \
+	@mkdir -p $(WAMR_BUILD_PATH) && cd $(WAMR_BUILD_PATH) \
 		&& cmake .. $(WAMR_CMAKE_ARGS) && cmake --build . --config $(WAMR_BUILD_CONFIG)
 
 $(WAMRC_BIN_PATH): $(WAMR_PATH)
 	@echo "Buliding WAMR compiler"
-	@mkdir -p $(WAMRC_BUILD_DIR) && cd $(WAMRC_BUILD_DIR) && cmake .. && cmake --build .
+	@mkdir -p $(WAMRC_BUILD_PATH) && cd $(WAMRC_BUILD_PATH) && cmake .. && cmake --build .
 
 $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
@@ -446,8 +446,8 @@ endif
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
 MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
-MBEDTLS_BUILD_DIR = ${MBEDTLS_PATH}/library
-MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_DIR)/libmbedtls.a
+MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
+MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
 MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
 MBEDTLS_GIT_TAG = v3.0.0  # LWS build fails for 3.1.0 (Feb 2022)
 
@@ -459,7 +459,7 @@ TARGETS += $(MBEDTLS_LIB_PATH)
 
 $(MBEDTLS_LIB_PATH): $(MBEDTLS_PATH)
 	@echo "Building Mbed TLS static library"
-	@mkdir -p $(MBEDTLS_BUILD_DIR) && cd $(MBEDTLS_BUILD_DIR) && make
+	@mkdir -p $(MBEDTLS_BUILD_PATH) && cd $(MBEDTLS_BUILD_PATH) && make
 
 $(MBEDTLS_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
@@ -474,8 +474,8 @@ endif
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
 LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
-LWS_BUILD_DIR = ${LWS_PATH}/build
-LWS_LIB_PATH = $(LWS_BUILD_DIR)/lib/libwebsockets.a
+LWS_BUILD_PATH = ${LWS_PATH}/build
+LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
 LWS_GIT_URL = https://github.com/warmcat/libwebsockets
 LWS_GIT_TAG = v4.3.1 
 
@@ -490,7 +490,7 @@ TARGETS += $(LWS_LIB_PATH)
 
 $(LWS_LIB_PATH): $(LWS_PATH)
 	@echo "Building libwebsockets static library"
-	@mkdir -p $(LWS_BUILD_DIR) && cd $(LWS_BUILD_DIR) && cmake .. $(LWS_CMAKE_ARGS) \
+	@mkdir -p $(LWS_BUILD_PATH) && cd $(LWS_BUILD_PATH) && cmake .. $(LWS_CMAKE_ARGS) \
 		&& make
 
 $(LWS_PATH):
@@ -546,7 +546,7 @@ endif
 HIPHOP_TARGET += lxhelper_bin
 
 LXHELPER_NAME = ui-helper
-LXHELPER_BUILD_DIR = $(BUILD_DIR)/helper
+LXHELPER_BUILD_PATH = $(BUILD_PATH)/helper
 
 include $(HIPHOP_SRC_PATH)/ui/linux/Makefile.$(LXWEBVIEW_TYPE).mk
 endif
@@ -556,8 +556,8 @@ endif
 # Mac only - Build Objective-C++ files
 
 ifeq ($(MACOS),true)
-$(BUILD_DIR)/%.mm.o: %.mm
-	-@mkdir -p "$(shell dirname $(BUILD_DIR)/$<)"
+$(BUILD_PATH)/%.mm.o: %.mm
+	-@mkdir -p "$(shell dirname $(BUILD_PATH)/$<)"
 	@echo "Compiling $<"
 	@$(CXX) $< $(BUILD_CXX_FLAGS) -ObjC++ -c -o $@
 endif
@@ -566,8 +566,8 @@ endif
 # Windows only - Build resource files
 
 ifeq ($(WINDOWS),true)
-$(BUILD_DIR)/%.rc.o: %.rc
-	-@mkdir -p "$(shell dirname $(BUILD_DIR)/$<)"
+$(BUILD_PATH)/%.rc.o: %.rc
+	-@mkdir -p "$(shell dirname $(BUILD_PATH)/$<)"
 	@echo "Compiling $<"
 	@windres --input $< --output $@ --output-format=coff
 endif
@@ -632,8 +632,8 @@ WASM_MODULE_PATH = $(AS_BUILD_PATH)/$(WASM_MODULE_FILE)
 HIPHOP_TARGET += $(WASM_MODULE_PATH)
 
 $(WASM_MODULE_PATH): $(WASM_BYTECODE_PATH)
-	@echo "Compiling AOT WASM module"
-	@$(WAMRC_BIN_PATH) --target=x86_64 -o $(WASM_MODULE_PATH) --disable-simd \
+	@echo "Compiling WASM AOT module"
+	@$(WAMRC_BIN_PATH) --target=x86_64 -o $(WASM_MODULE_PATH) --cpu=skylake \
 		$(WASM_BYTECODE_PATH)
 endif
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
