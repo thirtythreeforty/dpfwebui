@@ -363,7 +363,7 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
 
     if (trap != nullptr) {
-        std::string s = std::string("Failed call to function") + name;
+        std::string s = std::string("Failed call to function ") + name;
 
         wasm_message_t* wm = nullptr;
         wasm_trap_message(trap, wm);

@@ -283,18 +283,20 @@ ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
 WAMR_BUILD_DIR = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
+WAMRC_PATH = $(WAMR_PATH)/wamr-compiler
+WAMRC_BUILD_DIR = $(WAMRC_PATH)/build
+WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 #WAMR_GIT_TAG = set this after PR #1000 gets included in a new release
 
 # Disable WASI feature because it is unavailable through the C API.
-WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=0 -DWAMR_BUILD_JIT=0 \
-				  -DWAMR_BUILD_INTERP=1
+# HW_BOUND_CHECK not compiling on MinGW and crashing on Linux/Mac with AOT.
+WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=1 \
+				  -DWAMR_BUILD_INTERP=0 -DWAMR_DISABLE_HW_BOUND_CHECK=1
 
 ifeq ($(WINDOWS),true)
 # Use the C version of invokeNative() instead of ASM until MinGW build is fixed.
-# Disable HW_BOUND_CHECK feature because it does not compile on MinGW.
-WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1 \
-				   -DWAMR_DISABLE_HW_BOUND_CHECK=1
+WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
 endif
 
 ifeq ($(SKIP_STRIPPING),true)
@@ -303,14 +305,16 @@ else
 WAMR_BUILD_CONFIG = Release
 endif
 
-TARGETS += $(WAMR_LIB_PATH)
+TARGETS += $(WAMR_LIB_PATH) $(WAMRC_BIN_PATH)
 
 $(WAMR_LIB_PATH): $(WAMR_PATH)
 	@echo "Building WAMR static library"
 	@mkdir -p $(WAMR_BUILD_DIR) && cd $(WAMR_BUILD_DIR) \
 		&& cmake .. $(WAMR_CMAKE_ARGS) && cmake --build . --config $(WAMR_BUILD_CONFIG)
 
-WAMR_C_API_PATH = $(WAMR_PATH)/core/iwasm/common
+$(WAMRC_BIN_PATH): $(WAMR_PATH)
+	@echo "Buliding WAMR compiler"
+	@mkdir -p $(WAMRC_BUILD_DIR) && cd $(WAMRC_BUILD_DIR) && cmake .. && cmake --build .
 
 $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
@@ -608,17 +612,33 @@ framework_as:
 		|| ln -s $(abspath $(HIPHOP_SRC_PATH)/dsp/dpf.ts) $(AS_ASSEMBLY_PATH)
 endif
 
-WASM_MODULE = optimized.wasm
-WASM_SRC_PATH = $(HIPHOP_AS_DSP_PATH)/build/$(WASM_MODULE)
+AS_BUILD_PATH = $(HIPHOP_AS_DSP_PATH)/build
+WASM_BYTECODE_FILE = optimized.wasm
+WASM_BYTECODE_PATH = $(AS_BUILD_PATH)/$(WASM_BYTECODE_FILE)
 
-HIPHOP_TARGET += $(WASM_SRC_PATH)
+HIPHOP_TARGET += $(WASM_BYTECODE_PATH)
 
-$(WASM_SRC_PATH): $(AS_ASSEMBLY_PATH)/plugin.ts
+$(WASM_BYTECODE_PATH): $(AS_ASSEMBLY_PATH)/plugin.ts
 	@echo "Building AssemblyScript project"
 	@# npm --prefix fails on MinGW due to paths mixing \ and /
 	@test -d $(HIPHOP_AS_DSP_PATH)/node_modules \
 		|| (cd $(HIPHOP_AS_DSP_PATH) && $(NPM_OPT_SET_PATH) && npm install)
 	@cd $(HIPHOP_AS_DSP_PATH) && $(NPM_OPT_SET_PATH) && npm run asbuild
+
+ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+WASM_MODULE_FILE = x86_64.aot
+WASM_MODULE_PATH = $(AS_BUILD_PATH)/$(WASM_MODULE_FILE)
+
+HIPHOP_TARGET += $(WASM_MODULE_PATH)
+
+$(WASM_MODULE_PATH): $(WASM_BYTECODE_PATH)
+	@echo "Compiling AOT WASM module"
+	@$(WAMRC_BIN_PATH) --target=x86_64 -o $(WASM_MODULE_PATH) --disable-simd \
+		$(WASM_BYTECODE_PATH)
+endif
+ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
+WASM_MODULE_PATH = $(WASM_BYTECODE_PATH)
+endif
 endif
 
 # ------------------------------------------------------------------------------
@@ -631,19 +651,19 @@ lib_dsp:
 	@echo "Copying WebAssembly DSP binary"
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2)/dsp \
-		&& cp -r $(WASM_SRC_PATH) $(LIB_DIR_LV2)/dsp/$(WASM_MODULE) \
+		&& cp -r $(WASM_MODULE_PATH) $(LIB_DIR_LV2)/dsp/$(WASM_MODULE_FILE) \
 		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3)/dsp \
-		&& cp -r $(WASM_SRC_PATH) $(LIB_DIR_VST3)/dsp/$(WASM_MODULE) \
+		&& cp -r $(WASM_MODULE_PATH) $(LIB_DIR_VST3)/dsp/$(WASM_MODULE_FILE) \
 		) || true
 	@($(TEST_VST2_MACOS) \
 		&& mkdir -p $(LIB_DIR_VST2_MACOS)/dsp \
-		&& cp -r $(WASM_SRC_PATH) $(LIB_DIR_VST2_MACOS)/dsp/$(WASM_MODULE) \
+		&& cp -r $(WASM_MODULE_PATH) $(LIB_DIR_VST2_MACOS)/dsp/$(WASM_MODULE_FILE) \
 		) || true
 	@($(TEST_NOBUNDLE) \
 		&& mkdir -p $(LIB_DIR_NOBUNDLE)/dsp \
-		&& cp -r $(WASM_SRC_PATH) $(LIB_DIR_NOBUNDLE)/dsp/$(WASM_MODULE) \
+		&& cp -r $(WASM_MODULE_PATH) $(LIB_DIR_NOBUNDLE)/dsp/$(WASM_MODULE_FILE) \
 		) || true
 endif
 

@@ -21,7 +21,11 @@
 #include "WasmHostPlugin.hpp"
 #include "extra/Path.hpp"
 
-#define WASM_BINARY_PATH "/dsp/optimized.wasm"
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+# define WASM_MODULE_PATH "/dsp/x86_64.aot"
+#else
+# define WASM_MODULE_PATH "/dsp/optimized.wasm"
+#endif
 
 USE_NAMESPACE_DISTRHO
 
@@ -38,7 +42,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
     fRuntime.reset(new WasmRuntime());
 
     try {
-        const String path = Path::getPluginLibrary() + WASM_BINARY_PATH;
+        const String path = Path::getPluginLibrary() + WASM_MODULE_PATH;
         fRuntime->load(path);
         onModuleLoad();
     } catch (const std::exception& ex) {

@@ -179,7 +179,8 @@ export function _run(frames: u32, midiEventCount: u32): void {
 
     // Run the GC on each _run() call for more deterministic memory management.
     // This can help preventing dropouts when running at small buffer sizes.
-    __collect()
+    // FIXME : this is not compatible with AOT
+    //__collect()
 }
 
 // Number of inputs or outputs does not change during runtime so it makes sense
