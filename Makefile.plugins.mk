@@ -4,14 +4,14 @@
 # ------------------------------------------------------------------------------
 # Basic setup
 
-HIPHOP_ROOT_PATH   := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
-HIPHOP_INC_PATH    ?= $(HIPHOP_ROOT_PATH)/hiphop
-HIPHOP_SRC_PATH    ?= $(HIPHOP_ROOT_PATH)/hiphop/src
+HIPHOP_ROOT_PATH := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+HIPHOP_INC_PATH  ?= $(HIPHOP_ROOT_PATH)/hiphop
+HIPHOP_SRC_PATH  ?= $(HIPHOP_ROOT_PATH)/hiphop/src
 HIPHOP_DEPS_PATH ?= $(HIPHOP_ROOT_PATH)/deps
 
 DPF_PATH       ?= $(HIPHOP_ROOT_PATH)/dpf
 DPF_TARGET_DIR ?= bin
-DPF_BUILD_PATH  ?= build
+DPF_BUILD_PATH ?= build
 DPF_GIT_BRANCH ?= develop
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
@@ -280,14 +280,15 @@ endif
 
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
+#WAMR_GIT_TAG = set this after PR #1000 gets included in a new release
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
 WAMR_BUILD_PATH = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_PATH)/libvmlib.a
+WAMR_LLVM_PATH = ${WAMR_PATH}/core/deps/llvm/README.md
 WAMRC_PATH = $(WAMR_PATH)/wamr-compiler
 WAMRC_BUILD_PATH = $(WAMRC_PATH)/build
 WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc
-WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
-#WAMR_GIT_TAG = set this after PR #1000 gets included in a new release
 
 # Disable WASI feature because it is unavailable through the C API.
 # HW_BOUND_CHECK not compiling on MinGW and crashing on Linux/Mac with AOT.
@@ -312,9 +313,13 @@ $(WAMR_LIB_PATH): $(WAMR_PATH)
 	@mkdir -p $(WAMR_BUILD_PATH) && cd $(WAMR_BUILD_PATH) \
 		&& cmake .. $(WAMR_CMAKE_ARGS) && cmake --build . --config $(WAMR_BUILD_CONFIG)
 
-$(WAMRC_BIN_PATH): $(WAMR_PATH)
+$(WAMRC_BIN_PATH): $(WAMR_LLVM_PATH)
 	@echo "Buliding WAMR compiler"
 	@mkdir -p $(WAMRC_BUILD_PATH) && cd $(WAMRC_BUILD_PATH) && cmake .. && cmake --build .
+
+$(WAMR_LLVM_PATH): $(WAMR_PATH)
+	@echo "Building LLVM"
+	@$(WAMR_PATH)/build-scripts/build_llvm.py
 
 $(WAMR_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
@@ -445,11 +450,11 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
+MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
+MBEDTLS_GIT_TAG = v3.0.0  # LWS build fails for 3.1.0 (Feb 2022)
 MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
 MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
 MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
-MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
-MBEDTLS_GIT_TAG = v3.0.0  # LWS build fails for 3.1.0 (Feb 2022)
 
 ifeq ($(SKIP_STRIPPING),true)
 MBEDTLS_MAKE_ARGS = DEBUG=1
@@ -473,11 +478,11 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
+LWS_GIT_URL = https://github.com/warmcat/libwebsockets
+LWS_GIT_TAG = v4.3.1 
 LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
 LWS_BUILD_PATH = ${LWS_PATH}/build
 LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
-LWS_GIT_URL = https://github.com/warmcat/libwebsockets
-LWS_GIT_TAG = v4.3.1 
 
 LWS_CMAKE_ARGS = -DLWS_WITH_SHARED=0 -DLWS_WITHOUT_TESTAPPS=1 -DLWS_WITH_MBEDTLS=1 \
                  -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
