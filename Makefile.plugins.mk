@@ -11,7 +11,7 @@ HIPHOP_DEPS_PATH ?= $(HIPHOP_ROOT_PATH)/deps
 
 DPF_PATH       ?= $(HIPHOP_ROOT_PATH)/dpf
 DPF_TARGET_DIR ?= bin
-DPF_BUILD_PATH ?= build
+DPF_BUILD_DIR  ?= build
 DPF_GIT_BRANCH ?= develop
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
