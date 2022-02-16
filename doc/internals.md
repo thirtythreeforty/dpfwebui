@@ -7,7 +7,7 @@ and specifically designed for targeting [WebAssembly](https://webassembly.org),
 roughly described as the "assembler of the web". Plugins leveraging this feature
 embed the [WAMR](https://github.com/bytecodealliance/wasm-micro-runtime) runtime
 or optionally [Wasmer](https://github.com/wasmerio/wasmer) for running
-precompiled AssemblyScript code at near native performance.
+precompiled AssemblyScript code at near native performance (TODO: enable WAMR AOT)
 
 It is worth noting that the Wasm VM and the web view are completely separated
 entities that only communicate through a minimal key/value pairs interface

@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WEBSERVER_HPP
-#define WEBSERVER_HPP
+#ifndef WEB_SERVER_HPP
+#define WEB_SERVER_HPP
 
 #include "src/DistrhoDefines.h"
 #include "distrho/extra/LeakDetector.hpp"
@@ -40,4 +40,4 @@ private:
 
 END_NAMESPACE_DISTRHO
 
-#endif  // WEBSERVER_HPP
+#endif  // WEB_SERVER_HPP

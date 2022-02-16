@@ -7,7 +7,7 @@
 HIPHOP_ROOT_PATH   := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 HIPHOP_INC_PATH    ?= $(HIPHOP_ROOT_PATH)/hiphop
 HIPHOP_SRC_PATH    ?= $(HIPHOP_ROOT_PATH)/hiphop/src
-HIPHOP_VENDOR_PATH ?= $(HIPHOP_ROOT_PATH)/vendor
+HIPHOP_DEPS_PATH ?= $(HIPHOP_ROOT_PATH)/deps
 
 DPF_PATH       ?= $(HIPHOP_ROOT_PATH)/dpf
 DPF_TARGET_DIR ?= bin
@@ -280,7 +280,7 @@ endif
 
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-WAMR_PATH = $(HIPHOP_VENDOR_PATH)/wasm-micro-runtime
+WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
 WAMR_BUILD_DIR = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_DIR)/libvmlib.a
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
@@ -313,10 +313,10 @@ $(WAMR_LIB_PATH): $(WAMR_PATH)
 WAMR_C_API_PATH = $(WAMR_PATH)/core/iwasm/common
 
 $(WAMR_PATH):
-	@mkdir -p $(HIPHOP_VENDOR_PATH)
-	@git -C $(HIPHOP_VENDOR_PATH) clone $(WAMR_GIT_URL) \
+	@mkdir -p $(HIPHOP_DEPS_PATH)
+	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) \
 		&& git -C $(WAMR_PATH) reset --hard 4bdeb90
-	#@git -C $(HIPHOP_VENDOR_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
+	#@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
 endif
 endif
 
@@ -325,7 +325,7 @@ endif
 
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
-WASMER_PATH = $(HIPHOP_VENDOR_PATH)/wasmer
+WASMER_PATH = $(HIPHOP_DEPS_PATH)/wasmer
 WASMER_VERSION = 2.1.1
 
 TARGETS += $(WASMER_PATH)
@@ -410,7 +410,7 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(WINDOWS),true)
-EDGE_WEBVIEW2_PATH = $(HIPHOP_VENDOR_PATH)/Microsoft.Web.WebView2
+EDGE_WEBVIEW2_PATH = $(HIPHOP_DEPS_PATH)/Microsoft.Web.WebView2
 
 TARGETS += $(EDGE_WEBVIEW2_PATH)
 
@@ -425,9 +425,9 @@ $(error NuGet not found, try sudo apt install nuget or the equivalent for your d
 endif
 endif
 	@echo Downloading Edge WebView2 SDK
-	@mkdir -p $(HIPHOP_VENDOR_PATH)
+	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@eval $(MSYS_MINGW_SYMLINKS)
-	@nuget install Microsoft.Web.WebView2 -OutputDirectory $(HIPHOP_VENDOR_PATH)
+	@nuget install Microsoft.Web.WebView2 -OutputDirectory $(HIPHOP_DEPS_PATH)
 	@ln -rs $(EDGE_WEBVIEW2_PATH).* $(EDGE_WEBVIEW2_PATH)
 
 /usr/bin/nuget.exe:
@@ -441,7 +441,7 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
-MBEDTLS_PATH = $(HIPHOP_VENDOR_PATH)/mbedtls
+MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
 MBEDTLS_BUILD_DIR = ${MBEDTLS_PATH}/library
 MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_DIR)/libmbedtls.a
 MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
@@ -458,8 +458,8 @@ $(MBEDTLS_LIB_PATH): $(MBEDTLS_PATH)
 	@mkdir -p $(MBEDTLS_BUILD_DIR) && cd $(MBEDTLS_BUILD_DIR) && make
 
 $(MBEDTLS_PATH):
-	@mkdir -p $(HIPHOP_VENDOR_PATH)
-	@git -C $(HIPHOP_VENDOR_PATH) clone --depth 1 --branch $(MBEDTLS_GIT_TAG) \
+	@mkdir -p $(HIPHOP_DEPS_PATH)
+	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(MBEDTLS_GIT_TAG) \
 			$(MBEDTLS_GIT_URL)
 endif
 endif
@@ -469,7 +469,7 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
-LWS_PATH = $(HIPHOP_VENDOR_PATH)/libwebsockets
+LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
 LWS_BUILD_DIR = ${LWS_PATH}/build
 LWS_LIB_PATH = $(LWS_BUILD_DIR)/lib/libwebsockets.a
 LWS_GIT_URL = https://github.com/warmcat/libwebsockets
@@ -490,8 +490,8 @@ $(LWS_LIB_PATH): $(LWS_PATH)
 		&& make
 
 $(LWS_PATH):
-	@mkdir -p $(HIPHOP_VENDOR_PATH)
-	@git -C $(HIPHOP_VENDOR_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) \
+	@mkdir -p $(HIPHOP_DEPS_PATH)
+	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) \
 		$(LWS_GIT_URL)
 endif
 endif

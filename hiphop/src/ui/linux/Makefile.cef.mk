@@ -7,7 +7,7 @@
 
 CEF_DISTRO = cef_binary_93.1.12+ga8ffe4b+chromium-93.0.4577.82_linux64_minimal
 CEF_DISTRO_FILE = $(CEF_DISTRO).tar.bz2
-CEF_PATH = $(HIPHOP_VENDOR_PATH)/cef
+CEF_PATH = $(HIPHOP_DEPS_PATH)/cef
 CEF_BUILD_PATH = $(CEF_PATH)/build
 CEF_BIN_PATH = $(CEF_PATH)/Release
 CEF_RES_PATH = $(CEF_PATH)/Resources
@@ -19,9 +19,9 @@ CEF_URL = https://cef-builds.spotifycdn.com/$(CEF_DISTRO_FILE)
 $(CEF_PATH):
 	@echo Downloading CEF
 	@wget -4 -O /tmp/$(CEF_DISTRO_FILE) $(CEF_URL)
-	@mkdir -p $(HIPHOP_VENDOR_PATH)
+	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@echo Decompressing CEF, this takes a long while!...
-	@tar xjf /tmp/$(CEF_DISTRO_FILE) -C $(HIPHOP_VENDOR_PATH)
+	@tar xjf /tmp/$(CEF_DISTRO_FILE) -C $(HIPHOP_DEPS_PATH)
 	@ln -s $(CEF_DISTRO) $(CEF_PATH)
 	@rm /tmp/$(CEF_DISTRO_FILE)
 

@@ -16,10 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef NETWORK_UI_HPP
-#define NETWORK_UI_HPP
+#ifndef NETWORK_WEB_UI_HPP
+#define NETWORK_WEB_UI_HPP
 
 #include "extra/UIEx.hpp"
+#include "WebServer.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -39,4 +40,4 @@ private:
 
 END_NAMESPACE_DISTRHO
 
-#endif  // NETWORK_UI_HPP
+#endif  // NETWORK_WEB_UI_HPP
