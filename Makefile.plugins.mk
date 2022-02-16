@@ -551,7 +551,7 @@ endif
 HIPHOP_TARGET += lxhelper_bin
 
 LXHELPER_NAME = ui-helper
-LXHELPER_BUILD_PATH = $(BUILD_PATH)/helper
+LXHELPER_BUILD_PATH = $(BUILD_DIR)/helper
 
 include $(HIPHOP_SRC_PATH)/ui/linux/Makefile.$(LXWEBVIEW_TYPE).mk
 endif
@@ -561,8 +561,8 @@ endif
 # Mac only - Build Objective-C++ files
 
 ifeq ($(MACOS),true)
-$(BUILD_PATH)/%.mm.o: %.mm
-	-@mkdir -p "$(shell dirname $(BUILD_PATH)/$<)"
+$(BUILD_DIR)/%.mm.o: %.mm
+	-@mkdir -p "$(shell dirname $(BUILD_DIR)/$<)"
 	@echo "Compiling $<"
 	@$(CXX) $< $(BUILD_CXX_FLAGS) -ObjC++ -c -o $@
 endif
@@ -571,8 +571,8 @@ endif
 # Windows only - Build resource files
 
 ifeq ($(WINDOWS),true)
-$(BUILD_PATH)/%.rc.o: %.rc
-	-@mkdir -p "$(shell dirname $(BUILD_PATH)/$<)"
+$(BUILD_DIR)/%.rc.o: %.rc
+	-@mkdir -p "$(shell dirname $(BUILD_DIR)/$<)"
 	@echo "Compiling $<"
 	@windres --input $< --output $@ --output-format=coff
 endif

@@ -42,7 +42,7 @@ LXHELPER_SRC = CefHelper.cpp \
 			   ipc.c \
 			   ../../../../dpf/distrho/extra/sofd/libsofd.c
 
-LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_DIR)/ui/linux/%.o)
+LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_PATH)/ui/linux/%.o)
 
 LXHELPER_CFLAGS = -I$(HIPHOP_INC_PATH) -I$(DPF_PATH) -I$(CEF_PATH) -DHAVE_X11 \
                   -DDISABLE_PATH_GET_PLUGIN_LIBRARY -DPLUGIN_BIN_BASENAME=$(NAME)
@@ -55,18 +55,18 @@ LXHELPER_LDFLAGS = -ldl -lXi -lcef_dll_wrapper -L$(CEF_BUILD_PATH)/libcef_dll_wr
 				   -Wl,-O1 -Wl,--as-needed -Wl,--gc-sections
 
 lxhelper_bin: $(CEF_PATH) $(CEF_WRAPPER_LIB) $(CEF_WRAPPER_LIB) \
-			  $(LXHELPER_BUILD_DIR)/$(LXHELPER_NAME)
+			  $(LXHELPER_BUILD_PATH)/$(LXHELPER_NAME)
 
-$(LXHELPER_BUILD_DIR)/$(LXHELPER_NAME): $(LXHELPER_OBJ)
+$(LXHELPER_BUILD_PATH)/$(LXHELPER_NAME): $(LXHELPER_OBJ)
 	@echo "Compiling $<"
 	@$(CXX) $^ -o $@ $(LXHELPER_LDFLAGS)
 
-$(LXHELPER_BUILD_DIR)/%.cpp.o: $(HIPHOP_SRC_PATH)/%.cpp
+$(LXHELPER_BUILD_PATH)/%.cpp.o: $(HIPHOP_SRC_PATH)/%.cpp
 	@mkdir -p $(dir $@)
 	@echo "Compiling $<"
 	@$(CXX) $(LXHELPER_CFLAGS) -c $< -o $@
 
-$(LXHELPER_BUILD_DIR)/%.c.o: $(HIPHOP_SRC_PATH)/%.c
+$(LXHELPER_BUILD_PATH)/%.c.o: $(HIPHOP_SRC_PATH)/%.c
 	@mkdir -p $(dir $@)
 	@echo "Compiling $<"
 	@$(CC) $(LXHELPER_CFLAGS) -c $< -o $@
@@ -90,6 +90,6 @@ CEF_FILES_RES = \
 	icudtl.dat \
 	locales
 
-LXHELPER_FILES =  $(LXHELPER_BUILD_DIR)/$(LXHELPER_NAME)
+LXHELPER_FILES =  $(LXHELPER_BUILD_PATH)/$(LXHELPER_NAME)
 LXHELPER_FILES += $(CEF_FILES_BIN:%=$(CEF_BIN_PATH)/%)
 LXHELPER_FILES += $(CEF_FILES_RES:%=$(CEF_RES_PATH)/%)
