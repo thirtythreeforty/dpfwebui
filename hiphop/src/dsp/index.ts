@@ -165,9 +165,9 @@ export function _run(frames: u32, midiEventCount: u32): void {
     
     for (let i: u32 = 0; i < midiEventCount; ++i) {
         let event = new DISTRHO.MidiEvent
-        event.frame = raw_midi_events.getUint32(midiOffset, /* LE */ true)
+        event.frame = raw_midi_events.getUint32(midiOffset, /*LE*/ true)
         midiOffset += 4
-        let size = raw_midi_events.getUint32(midiOffset, /* LE */ true)
+        let size = raw_midi_events.getUint32(midiOffset, /*LE*/ true)
         midiOffset += 4
         event.data = Uint8Array.wrap(_rw_midi_block, midiOffset, size)
         midiOffset += size
@@ -176,11 +176,6 @@ export function _run(frames: u32, midiEventCount: u32): void {
 
     // Count arguments are redundant, they can be inferred from arrays length.
     pluginInstance.run(inputs, outputs, midiEvents)
-
-    // Run the GC on each _run() call for more deterministic memory management.
-    // This can help preventing dropouts when running at small buffer sizes.
-    // FIXME : this is not compatible with AOT
-    //__collect()
 }
 
 // Number of inputs or outputs does not change during runtime so it makes sense
