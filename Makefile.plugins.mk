@@ -278,7 +278,7 @@ WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
 WAMR_BUILD_PATH = ${WAMR_PATH}/build
 WAMR_LIB_PATH = $(WAMR_BUILD_PATH)/libvmlib.a
-WAMR_LLVM_PATH = ${WAMR_PATH}/core/deps/llvm/README.md
+WAMR_LLVM_LIB_PATH = ${WAMR_PATH}/core/deps/llvm/build/lib/libLLVMCore.a
 WAMRC_PATH = $(WAMR_PATH)/wamr-compiler
 WAMRC_BUILD_PATH = $(WAMRC_PATH)/build
 WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc
@@ -307,12 +307,12 @@ $(WAMR_LIB_PATH): $(WAMR_PATH)
 	@mkdir -p $(WAMR_BUILD_PATH) && cd $(WAMR_BUILD_PATH) \
 		&& cmake .. $(WAMR_CMAKE_ARGS) && cmake --build . --config $(WAMR_BUILD_CONFIG)
 
-$(WAMRC_BIN_PATH): $(WAMR_LLVM_PATH)
+$(WAMRC_BIN_PATH): $(WAMR_LLVM_LIB_PATH)
 	@echo "Buliding WAMR compiler"
 	@mkdir -p $(WAMRC_BUILD_PATH) && cd $(WAMRC_BUILD_PATH) \
 		&& cmake .. $(WAMRC_CMAKE_ARGS) && cmake --build .
 
-$(WAMR_LLVM_PATH): $(WAMR_PATH)
+$(WAMR_LLVM_LIB_PATH): $(WAMR_PATH)
 	@echo "Building LLVM"
 	@$(WAMR_PATH)/build-scripts/build_llvm.py
 
