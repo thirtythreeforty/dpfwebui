@@ -334,16 +334,16 @@ void WasmHostPlugin::deactivate()
 #if HIPHOP_ENABLE_SHARED_MEMORY
 void WasmHostPlugin::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
 {
-    if (std::strcmp(metadata, "_wasm_bin") == 0) {
+    if (std::strcmp(metadata, "_wasm_mod") == 0) {
         try {
-            loadWasmBinary(data, size);
+            loadWasmModule(data, size);
         } catch (const std::exception& ex) {
             d_stderr2(ex.what());
         }
     }
 }
 
-void WasmHostPlugin::loadWasmBinary(const unsigned char* data, size_t size)
+void WasmHostPlugin::loadWasmModule(const unsigned char* data, size_t size)
 {
     // No need to check if the runtime is running
     SCOPED_RUNTIME_LOCK();

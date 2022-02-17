@@ -328,9 +328,9 @@ void BaseWebHostUI::initHandlers()
     });
 
 #if HIPHOP_ENABLE_WASM_PLUGIN
-    fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JsValueVector& args) {
+    fHandler["sideloadWasmModule"] = std::make_pair(1, [this](const JsValueVector& args) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
-        sideloadWasmBinary(
+        sideloadWasmModule(
             static_cast<const unsigned char*>(data.data()),
             static_cast<size_t>(data.size())
         );
