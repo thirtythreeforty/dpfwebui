@@ -10,15 +10,15 @@ DPF_TARGET_DIR             ?= bin
 DPF_BUILD_DIR              ?= build
 # WebAssembly runtime library <wamr|wasmer>
 HIPHOP_WASM_RUNTIME        ?= wamr
-# WebAssembly execution mode - WAMR <aot|interp>, Wasmer <jit>   [WIP]
+# WebAssembly execution mode - WAMR <aot|interp>, Wasmer <jit>
 HIPHOP_WASM_MODE           ?= aot
 # WebAssembly System Interface only available for Wasmer
 HIPHOP_WASM_WASI           ?= false
-# Enable built-in websockets server and load content over HTTPS  [WIP]
+# Enable built-in websockets server and load content over HTTPS   [WIP]
 HIPHOP_NETWORK_UI          ?= false
 # Automatically inject dpf.js when loading content from file://
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
-# Web view implementation on Linux [ gtk | cef ]
+# Web view implementation on Linux <gtk|cef>
 HIPHOP_LINUX_WEBVIEW       ?= gtk
 # Set to false for building current architecture only
 HIPHOP_MACOS_UNIVERSAL     ?= false
