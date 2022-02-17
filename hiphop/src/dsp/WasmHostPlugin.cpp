@@ -323,10 +323,9 @@ void WasmHostPlugin::deactivate()
             memcpy(outputs[i], audioBlock + i * frames, frames * 4);
         }
 
-        // For WASM interpreter mode: run the GC on each _run() call for more
-        // deterministic memory management. This can help preventing dropouts
-        // when running at small buffer sizes. TODO : call from C++ ?
-        //__collect()
+        // Run the GC on each _run() call for more deterministic memory mgmt.
+        // This can help preventing dropouts when running at small buffer sizes.
+        fRuntime->callFunction("__collect");
     } catch (const std::exception& ex) {
         //d_stderr2(ex.what());
     }

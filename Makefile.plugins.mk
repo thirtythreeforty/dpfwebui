@@ -347,7 +347,7 @@ endif
 
 TARGETS += $(WAMR_LIB_PATH) $(WAMRC_BIN_PATH)
 
-$(WAMR_LIB_PATH): $(WAMR_PATH)
+$(WAMR_LIB_PATH): $(WAMR_PATH)/README.md
 	@echo "Building WAMR static library"
 	@mkdir -p $(WAMR_BUILD_PATH) && cd $(WAMR_BUILD_PATH) \
 		&& cmake .. $(WAMR_CMAKE_ARGS) && cmake --build . --config $(WAMR_BUILD_CONFIG)
@@ -361,7 +361,7 @@ $(WAMR_LLVM_LIB_PATH):
 	@echo "Building LLVM"
 	@$(WAMR_PATH)/build-scripts/build_llvm.py
 
-$(WAMR_PATH):
+$(WAMR_PATH)/README.md:
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) \
 		&& git -C $(WAMR_PATH) reset --hard 4bdeb90
