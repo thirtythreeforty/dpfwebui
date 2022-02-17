@@ -297,8 +297,9 @@ WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=1 \
 
 ifeq ($(WINDOWS),true)
 # Use the C version of invokeNative() instead of ASM until MinGW build is fixed.
+WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc.exe
 WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
-WAMRC_CMAKE_ARGS += -G"Unix Makefiles"
+WAMRC_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
 endif
 
 ifeq ($(SKIP_STRIPPING),true)
