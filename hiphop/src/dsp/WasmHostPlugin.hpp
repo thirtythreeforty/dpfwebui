@@ -70,7 +70,7 @@ public:
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
     void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) override;
-    void loadWasmModule(const unsigned char* data, size_t size);
+    void loadWasmBinary(const unsigned char* data, size_t size);
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
     WasmValueVector getTimePosition(WasmValueVector params);

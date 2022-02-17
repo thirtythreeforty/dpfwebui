@@ -78,7 +78,7 @@ class HotSwapExampleUI extends DISTRHO.UI {
         reader.onload = (_) => {
             const data = new Uint8Array(reader.result);
             console.log(`Send file of ${data.length} bytes to Plugin instance`);
-            this.sideloadWasmModule(data);
+            this.sideloadWasmBinary(data);
         };
 
         reader.readAsArrayBuffer(file);
