@@ -18,6 +18,7 @@ HIPHOP_PROJECT_VERSION = 1
 # Enable AssemblyScript by setting DSP files location
 
 HIPHOP_AS_DSP_PATH = dsp
+HIPHOP_WASM_MODE = interp
 
 # --------------------------------------------------------------
 # Enable Web UI by setting web files location

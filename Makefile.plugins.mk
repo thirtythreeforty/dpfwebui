@@ -188,7 +188,7 @@ ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
 ifeq ($(WINDOWS),true)
 ifeq ($(HIPHOP_WASM_MODE),aot)
-$(warning FIXME : AOT mode is crashing on windows, switching to interp mode)
+$(warning FIXME : WAMR AOT mode is crashing on Windows, switching to interp mode)
 HIPHOP_WASM_MODE = interp
 endif
 endif
