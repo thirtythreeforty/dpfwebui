@@ -297,9 +297,9 @@ WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=1 \
 
 ifeq ($(WINDOWS),true)
 # Use the C version of invokeNative() instead of ASM until MinGW build is fixed.
-WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc.exe
 WAMR_LLVM_LIB_PATH = ${WAMR_PATH}/core/deps/llvm/win32build/lib/libLLVMCore.a
 WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
+WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc.exe
 WAMRC_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
 endif
 
@@ -321,7 +321,7 @@ $(WAMRC_BIN_PATH): $(WAMR_LLVM_LIB_PATH)
 	@mkdir -p $(WAMRC_BUILD_PATH) && cd $(WAMRC_BUILD_PATH) \
 		&& cmake .. $(WAMRC_CMAKE_ARGS) && cmake --build .
 
-$(WAMR_LLVM_LIB_PATH): $(WAMR_PATH)
+$(WAMR_LLVM_LIB_PATH):
 	@echo "Building LLVM"
 	@$(WAMR_PATH)/build-scripts/build_llvm.py
 

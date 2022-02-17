@@ -325,7 +325,7 @@ void WasmRuntime::copyCStringToMemory(const WasmValue& wPtr, const char* s)
 
 WasmValue WasmRuntime::getGlobal(const char* name)
 {
-    WasmValue value;
+    wasm_val_t value;
     wasm_global_get(wasm_extern_as_global(fModuleExports[name]), &value);
     return value;
 }
@@ -347,15 +347,11 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     // wasm_val_vec_t is implemented differently for each runtime type.
     // Is there a generic way to create an arbitrary sized instance?
     wasm_val_vec_t paramsVec;
-#ifdef HIPHOP_WASM_RUNTIME_WASMER
     paramsVec.size = params.size();
     paramsVec.data = params.data();
-#endif
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
-    paramsVec.size = sizeof(WasmValue) * params.size();
-    paramsVec.data = params.data();
     paramsVec.num_elems = params.size();
-    paramsVec.size_of_elem = sizeof(WasmValue);
+    paramsVec.size_of_elem = sizeof(wasm_val_t);
 #endif
     wasm_val_t resultArray[1] = { WASM_INIT_VAL };
     wasm_val_vec_t resultVec = WASM_ARRAY_VEC(resultArray);
