@@ -321,6 +321,11 @@ void WasmHostPlugin::deactivate()
         for (int i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; i++) {
             memcpy(outputs[i], audioBlock + i * frames, frames * 4);
         }
+
+        // For WASM interpreter mode: run the GC on each _run() call for more
+        // deterministic memory management. This can help preventing dropouts
+        // when running at small buffer sizes. TODO : call from C++ ?
+        //__collect()
     } catch (const std::exception& ex) {
         //d_stderr2(ex.what());
     }

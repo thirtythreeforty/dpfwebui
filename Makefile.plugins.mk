@@ -11,8 +11,7 @@ HIPHOP_DEPS_PATH ?= $(HIPHOP_ROOT_PATH)/deps
 
 DPF_PATH       ?= $(HIPHOP_ROOT_PATH)/dpf
 DPF_TARGET_DIR ?= bin
-DPF_BUILD_PATH ?= build
-DPF_GIT_BRANCH ?= develop
+DPF_BUILD_DIR  ?= build
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
@@ -144,12 +143,6 @@ endif
 
 ifeq (,$(wildcard $(DPF_PATH)/Makefile))
 _ := $(shell git submodule update --init --recursive)
-endif
-
-ifneq (,$(DPF_GIT_BRANCH))
-ifeq (,$(findstring $(DPF_GIT_BRANCH),$(shell git -C $(DPF_PATH) branch --show-current)))
-_ := $(shell git -C $(DPF_PATH) checkout $(DPF_GIT_BRANCH))
-endif
 endif
 
 ifeq ($(WEB_UI),true)
