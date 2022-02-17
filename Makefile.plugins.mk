@@ -2,40 +2,48 @@
 # Author:   oss@lucianoiam.com
 
 # ------------------------------------------------------------------------------
-# Basic setup
+# Configuration defaults
 
-HIPHOP_ROOT_PATH := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
-HIPHOP_INC_PATH  ?= $(HIPHOP_ROOT_PATH)/hiphop
-HIPHOP_SRC_PATH  ?= $(HIPHOP_ROOT_PATH)/hiphop/src
-HIPHOP_DEPS_PATH ?= $(HIPHOP_ROOT_PATH)/deps
-
-DPF_PATH       ?= $(HIPHOP_ROOT_PATH)/dpf
-DPF_TARGET_DIR ?= bin
-DPF_BUILD_DIR  ?= build
+# Location for binaries
+DPF_TARGET_DIR             ?= bin
+# Location for object files
+DPF_BUILD_DIR              ?= build
+# WebAssembly runtime library <wamr|wasmer>
+HIPHOP_WASM_RUNTIME        ?= wamr
+# WebAssembly execution mode - WAMR <aot|interp>, Wasmer <jit>   [WIP]
+HIPHOP_WASM_MODE           ?= aot
+# WebAssembly System Interface only available for Wasmer
+HIPHOP_WASM_WASI           ?= false
+# Enable built-in websockets server and load content over HTTPS  [WIP]
+HIPHOP_NETWORK_UI          ?= false
+# Automatically inject dpf.js when loading content from file://
+HIPHOP_INJECT_FRAMEWORK_JS ?= false
+# Web view implementation on Linux [ gtk | cef ]
+HIPHOP_LINUX_WEBVIEW       ?= gtk
+# Set to false for building current architecture only
+HIPHOP_MACOS_UNIVERSAL     ?= false
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
 endif
 
-ifneq ($(HIPHOP_AS_DSP_PATH),)
-HIPHOP_WASM_RUNTIME ?= wamr
-HIPHOP_ENABLE_WASI ?= false
+# ------------------------------------------------------------------------------
+# Determine build environment
 
+HIPHOP_ROOT_PATH := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+HIPHOP_INC_PATH  = $(HIPHOP_ROOT_PATH)/hiphop
+HIPHOP_SRC_PATH  = $(HIPHOP_ROOT_PATH)/hiphop/src
+HIPHOP_DEPS_PATH = $(HIPHOP_ROOT_PATH)/deps
+DPF_PATH         = $(HIPHOP_ROOT_PATH)/dpf
+
+ifneq ($(HIPHOP_AS_DSP_PATH),)
 NPM_OPT_SET_PATH = true
 WASM_DSP = true
 endif
 
 ifneq ($(HIPHOP_WEB_UI_PATH),)
-# Enables the built-in websockets server and loads content over HTTPS [WIP]
-HIPHOP_NETWORK_UI ?= false
-# Automatically inject dpf.js when loading content from file:// (network ui off)
-HIPHOP_INJECT_FRAMEWORK_JS ?= false
-
 WEB_UI = true
 endif
-
-# ------------------------------------------------------------------------------
-# Determine build environment
 
 TARGET_MACHINE := $(shell gcc -dumpmachine)
 
@@ -66,20 +74,20 @@ endif
 # path when available. User defined TARGETS variable becomes available only
 # *after* inclusion of this Makefile hence the usage of the 'test' command.
 
-TEST_LV2 = test -d $(TARGET_DIR)/$(NAME).lv2
-TEST_VST3 = test -d $(TARGET_DIR)/$(NAME).vst3
-TEST_VST2_LINUX = test -f $(TARGET_DIR)/$(NAME)-vst.so
-TEST_VST2_MACOS = test -d $(TARGET_DIR)/$(NAME).vst
-TEST_VST2_WINDOWS = test -f $(TARGET_DIR)/$(NAME)-vst.dll
-TEST_JACK_LINUX_OR_MACOS = test -f $(TARGET_DIR)/$(NAME)
-TEST_JACK_WINDOWS = test -f $(TARGET_DIR)/$(NAME).exe
+TEST_LV2 = test -d $(DPF_TARGET_DIR)/$(NAME).lv2
+TEST_VST3 = test -d $(DPF_TARGET_DIR)/$(NAME).vst3
+TEST_VST2_LINUX = test -f $(DPF_TARGET_DIR)/$(NAME)-vst.so
+TEST_VST2_MACOS = test -d $(DPF_TARGET_DIR)/$(NAME).vst
+TEST_VST2_WINDOWS = test -f $(DPF_TARGET_DIR)/$(NAME)-vst.dll
+TEST_JACK_LINUX_OR_MACOS = test -f $(DPF_TARGET_DIR)/$(NAME)
+TEST_JACK_WINDOWS = test -f $(DPF_TARGET_DIR)/$(NAME).exe
 TEST_NOBUNDLE = $(TEST_VST2_WINDOWS) || $(TEST_VST2_LINUX) \
                 || $(TEST_JACK_LINUX_OR_MACOS) || $(TEST_JACK_WINDOWS)
 
-LIB_DIR_LV2 = $(TARGET_DIR)/$(NAME).lv2/lib
-LIB_DIR_VST3 = $(TARGET_DIR)/$(NAME).vst3/Contents/Resources
-LIB_DIR_VST2_MACOS = $(TARGET_DIR)/$(NAME).vst/Contents/Resources
-LIB_DIR_NOBUNDLE = $(TARGET_DIR)/$(NAME)-lib
+LIB_DIR_LV2 = $(DPF_TARGET_DIR)/$(NAME).lv2/lib
+LIB_DIR_VST3 = $(DPF_TARGET_DIR)/$(NAME).vst3/Contents/Resources
+LIB_DIR_VST2_MACOS = $(DPF_TARGET_DIR)/$(NAME).vst/Contents/Resources
+LIB_DIR_NOBUNDLE = $(DPF_TARGET_DIR)/$(NAME)-lib
 
 # ------------------------------------------------------------------------------
 # Add optional support for AssemblyScript DSP
@@ -126,8 +134,8 @@ endif
 
 # ------------------------------------------------------------------------------
 # Optional support for macOS universal binaries, keep this before DPF include.
+
 ifeq ($(MACOS),true)
-HIPHOP_MACOS_UNIVERSAL ?= false
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
 # Non CPU-specific optimization flags, see DPF Makefile.base.mk
 NOOPT = true
@@ -164,7 +172,7 @@ endif
 ifeq ($(MACOS),true)
 # This is needed otherwise expect crashes on older macOS when compiling on newer
 # systems. Minimum supported target is High Sierra when WKWebView was introduced.
-# Warn: ... was built for newer macOS version (11.0) than being linked (10.13)
+# Warn: ...was built for newer macOS version (11.0) than being linked (10.13)
 BASE_FLAGS += -mmacosx-version-min=10.13
 endif
 
@@ -175,11 +183,11 @@ ifeq ($(WASM_DSP),true)
 
 BASE_FLAGS += -DHIPHOP_ENABLE_WASM_PLUGIN=1
 
-ifeq ($(HIPHOP_ENABLE_WASI),true)
+ifeq ($(HIPHOP_WASM_WASI),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 $(error WAMR C API does not support WASI)
 endif
-BASE_FLAGS += -DHIPHOP_ENABLE_WASI
+BASE_FLAGS += -DHIPHOP_WASM_WASI
 endif
 
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
@@ -241,7 +249,6 @@ LINK_FLAGS += -L$(EDGE_WEBVIEW2_PATH)/build/native/x64 \
               -static-libgcc -static-libstdc++ -Wl,-Bstatic \
               -lstdc++ -lpthread
 endif
-
 endif
 
 # ------------------------------------------------------------------------------
@@ -534,12 +541,11 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(LINUX),true)
-LXWEBVIEW_TYPE ?= gtk
 
-ifeq ($(LXWEBVIEW_TYPE),gtk)
+ifeq ($(HIPHOP_LINUX_WEBVIEW),gtk)
 BASE_FLAGS += -DLXWEBVIEW_GTK
 endif
-ifeq ($(LXWEBVIEW_TYPE),cef)
+ifeq ($(HIPHOP_LINUX_WEBVIEW),cef)
 BASE_FLAGS += -DLXWEBVIEW_CEF
 endif
 
@@ -548,7 +554,7 @@ HIPHOP_TARGET += lxhelper_bin
 LXHELPER_NAME = ui-helper
 LXHELPER_BUILD_PATH = $(BUILD_DIR)/helper
 
-include $(HIPHOP_SRC_PATH)/ui/linux/Makefile.$(LXWEBVIEW_TYPE).mk
+include $(HIPHOP_SRC_PATH)/ui/linux/Makefile.$(HIPHOP_LINUX_WEBVIEW).mk
 endif
 endif
 
