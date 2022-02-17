@@ -54,7 +54,7 @@ START_NAMESPACE_DISTRHO
 namespace PathSubdirectory {
 
     const String bundleLibrary = String("lib");
-    const String nonBundleLibrary = String(XSTR(PLUGIN_BIN_BASENAME) "-lib");
+    const String nonBundleLibrary = String(XSTR(HIPHOP_PLUGIN_BIN_BASENAME) "-lib");
     const String cache = String("cache");
 
 }
@@ -119,7 +119,7 @@ struct Path
         String path;
         struct passwd *pw = getpwuid(getuid());
         path += pw->pw_dir;
-        path += "/.config/" XSTR(PLUGIN_BIN_BASENAME);
+        path += "/.config/" XSTR(HIPHOP_PLUGIN_BIN_BASENAME);
         mkdir(path, 0777);
         path += "/" + PathSubdirectory::cache;
         mkdir(path, 0777);
@@ -142,7 +142,7 @@ struct Path
 
         wordexp_t exp_result;
         wordexp(cachesPath, &exp_result, 0); // tilde expansion
-        String path = String(exp_result.we_wordv[0]) + "/" XSTR(PLUGIN_BIN_BASENAME);
+        String path = String(exp_result.we_wordv[0]) + "/" XSTR(HIPHOP_PLUGIN_BIN_BASENAME);
         wordfree(&exp_result);
 
         mkdir(path, 0777);
@@ -159,7 +159,7 @@ struct Path
             return String();
         }
 
-        String path = String(dataPath) + "\\" XSTR(PLUGIN_BIN_BASENAME) "\\" + PathSubdirectory::cache;
+        String path = String(dataPath) + "\\" XSTR(HIPHOP_PLUGIN_BIN_BASENAME) "\\" + PathSubdirectory::cache;
 
         // Append host executable name to the cache path otherwise WebView2 controller initialization
         // fails with HRESULT 0x8007139f when trying to load plugin into more than a single host

@@ -1,6 +1,7 @@
 GENERAL
 -------
 
+- Compile AOT files for Mac ARM
 - Incomplete and broken VST3 compatibility (DPF)
 - Map alert(), confirm(), prompt() to native dialogs
 - Profile everything for memory leaks

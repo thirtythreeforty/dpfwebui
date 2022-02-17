@@ -118,9 +118,9 @@ ChildProcessWebView::~ChildProcessWebView()
 {
     if (fPid != -1) {
         fIpc->write(OP_TERMINATE);
-#ifdef LXWEBVIEW_CEF
+#ifdef HIPHOP_LINUX_WEBVIEW_CEF
         kill(fPid, SIGTERM); // terminate as soon as possible
-#endif // LXWEBVIEW_CEF
+#endif
         int stat;
         waitpid(fPid, &stat, 0);
 

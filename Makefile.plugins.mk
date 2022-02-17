@@ -163,7 +163,7 @@ include $(DPF_PATH)/Makefile.plugins.mk
 # Add shared build flags
 
 BASE_FLAGS += -I$(HIPHOP_INC_PATH) -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) \
-              -DPLUGIN_BIN_BASENAME=$(NAME) \
+              -DHIPHOP_PLUGIN_BIN_BASENAME=$(NAME) \
               -DHIPHOP_PROJECT_ID_HASH=$(shell echo $(NAME):$(HIPHOP_PROJECT_VERSION) \
                  | shasum -a 256 | head -c 8)
 ifeq ($(LINUX),true)
@@ -543,10 +543,10 @@ ifeq ($(WEB_UI),true)
 ifeq ($(LINUX),true)
 
 ifeq ($(HIPHOP_LINUX_WEBVIEW),gtk)
-BASE_FLAGS += -DLXWEBVIEW_GTK
+BASE_FLAGS += -DHIPHOP_LINUX_WEBVIEW_GTK
 endif
 ifeq ($(HIPHOP_LINUX_WEBVIEW),cef)
-BASE_FLAGS += -DLXWEBVIEW_CEF
+BASE_FLAGS += -DHIPHOP_LINUX_WEBVIEW_CEF
 endif
 
 HIPHOP_TARGET += lxhelper_bin
