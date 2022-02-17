@@ -182,6 +182,37 @@ endif
 ifeq ($(WASM_DSP),true)
 
 BASE_FLAGS += -DHIPHOP_ENABLE_WASM_PLUGIN=1
+WASM_BYTECODE_FILE = optimized.wasm
+
+ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
+ifeq ($(WINDOWS),true)
+ifeq ($(HIPHOP_WASM_MODE),aot)
+$(warning FIXME : AOT mode is crashing on windows, switching to interp mode)
+HIPHOP_WASM_MODE = interp
+endif
+endif
+ifeq ($(HIPHOP_WASM_MODE),aot)
+# TODO - ARM version
+WASM_BINARY_FILE = x86_64.aot
+BASE_FLAGS += -DHIPHOP_WASM_BINARY_AOT
+endif
+ifeq ($(HIPHOP_WASM_MODE),interp)
+WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
+endif
+ifeq ($(HIPHOP_WASM_MODE),jit)
+$(error JIT mode is not supported for WAMR)
+endif
+endif
+
+ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
+BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WASMER
+ifeq ($(HIPHOP_WASM_MODE),jit)
+WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
+else
+$(error Only JIT mode is supported for Wasmer)
+endif
+endif
 
 ifeq ($(HIPHOP_WASM_WASI),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
@@ -191,7 +222,7 @@ BASE_FLAGS += -DHIPHOP_WASM_WASI
 endif
 
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include -DHIPHOP_WASM_RUNTIME_WAMR
+BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include
 LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread
@@ -202,7 +233,7 @@ endif
 endif
 
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
-BASE_FLAGS += -I$(WASMER_PATH)/include -DHIPHOP_WASM_RUNTIME_WASMER
+BASE_FLAGS += -I$(WASMER_PATH)/include
 LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread -ldl
@@ -283,7 +314,7 @@ ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
 #WAMR_GIT_TAG = set this after PR #1000 gets included in a new release
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
-WAMR_BUILD_PATH = ${WAMR_PATH}/build
+WAMR_BUILD_PATH = ${WAMR_PATH}/build-$(HIPHOP_WASM_MODE)
 WAMR_LIB_PATH = $(WAMR_BUILD_PATH)/libvmlib.a
 WAMR_LLVM_LIB_PATH = ${WAMR_PATH}/core/deps/llvm/build/lib/libLLVMCore.a
 WAMRC_PATH = $(WAMR_PATH)/wamr-compiler
@@ -292,8 +323,13 @@ WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc
 
 # Disable WASI feature because it is unavailable through the C API.
 # HW_BOUND_CHECK not compiling on MinGW and crashing on Linux/Mac with AOT.
-WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=1 \
-				  -DWAMR_BUILD_INTERP=0 -DWAMR_DISABLE_HW_BOUND_CHECK=1
+WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_DISABLE_HW_BOUND_CHECK=1
+ifeq ($(HIPHOP_WASM_MODE),aot)
+WAMR_CMAKE_ARGS += -DWAMR_BUILD_AOT=1 -DWAMR_BUILD_INTERP=0
+endif
+ifeq ($(HIPHOP_WASM_MODE),interp)
+WAMR_CMAKE_ARGS += -DWAMR_BUILD_AOT=0 -DWAMR_BUILD_INTERP=1
+endif
 
 ifeq ($(WINDOWS),true)
 # Use the C version of invokeNative() instead of ASM until MinGW build is fixed.
@@ -621,8 +657,8 @@ framework_as:
 endif
 
 AS_BUILD_PATH = $(HIPHOP_AS_DSP_PATH)/build
-WASM_BYTECODE_FILE = optimized.wasm
 WASM_BYTECODE_PATH = $(AS_BUILD_PATH)/$(WASM_BYTECODE_FILE)
+WASM_BINARY_PATH = $(AS_BUILD_PATH)/$(WASM_BINARY_FILE)
 
 HIPHOP_TARGET += $(WASM_BYTECODE_PATH)
 
@@ -634,18 +670,14 @@ $(WASM_BYTECODE_PATH): $(AS_ASSEMBLY_PATH)/plugin.ts
 	@cd $(HIPHOP_AS_DSP_PATH) && $(NPM_OPT_SET_PATH) && npm run asbuild
 
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-WASM_MODULE_FILE = x86_64.aot
-WASM_MODULE_PATH = $(AS_BUILD_PATH)/$(WASM_MODULE_FILE)
+ifeq ($(HIPHOP_WASM_MODE),aot)
+HIPHOP_TARGET += $(WASM_BINARY_PATH)
 
-HIPHOP_TARGET += $(WASM_MODULE_PATH)
-
-$(WASM_MODULE_PATH): $(WASM_BYTECODE_PATH)
+$(WASM_BINARY_PATH): $(WASM_BYTECODE_PATH)
 	@echo "Compiling WASM AOT module"
-	@$(WAMRC_BIN_PATH) --target=x86_64 -o $(WASM_MODULE_PATH) --cpu=skylake \
+	@$(WAMRC_BIN_PATH) --target=x86_64 -o $(WASM_BINARY_PATH) --cpu=skylake \
 		$(WASM_BYTECODE_PATH)
 endif
-ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
-WASM_MODULE_PATH = $(WASM_BYTECODE_PATH)
 endif
 endif
 
@@ -659,19 +691,19 @@ lib_dsp:
 	@echo "Copying WebAssembly DSP binary"
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2)/dsp \
-		&& cp -r $(WASM_MODULE_PATH) $(LIB_DIR_LV2)/dsp/$(WASM_MODULE_FILE) \
+		&& cp -r $(WASM_BINARY_PATH) $(LIB_DIR_LV2)/dsp/$(WASM_BINARY_FILE) \
 		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3)/dsp \
-		&& cp -r $(WASM_MODULE_PATH) $(LIB_DIR_VST3)/dsp/$(WASM_MODULE_FILE) \
+		&& cp -r $(WASM_BINARY_PATH) $(LIB_DIR_VST3)/dsp/$(WASM_BINARY_FILE) \
 		) || true
 	@($(TEST_VST2_MACOS) \
 		&& mkdir -p $(LIB_DIR_VST2_MACOS)/dsp \
-		&& cp -r $(WASM_MODULE_PATH) $(LIB_DIR_VST2_MACOS)/dsp/$(WASM_MODULE_FILE) \
+		&& cp -r $(WASM_BINARY_PATH) $(LIB_DIR_VST2_MACOS)/dsp/$(WASM_BINARY_FILE) \
 		) || true
 	@($(TEST_NOBUNDLE) \
 		&& mkdir -p $(LIB_DIR_NOBUNDLE)/dsp \
-		&& cp -r $(WASM_MODULE_PATH) $(LIB_DIR_NOBUNDLE)/dsp/$(WASM_MODULE_FILE) \
+		&& cp -r $(WASM_BINARY_PATH) $(LIB_DIR_NOBUNDLE)/dsp/$(WASM_BINARY_FILE) \
 		) || true
 endif
 

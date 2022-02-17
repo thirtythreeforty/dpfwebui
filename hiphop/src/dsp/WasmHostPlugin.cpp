@@ -21,7 +21,8 @@
 #include "WasmHostPlugin.hpp"
 #include "extra/Path.hpp"
 
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
+#ifdef HIPHOP_WASM_BINARY_AOT
+// TODO - ARM version
 # define WASM_MODULE_PATH "/dsp/x86_64.aot"
 #else
 # define WASM_MODULE_PATH "/dsp/optimized.wasm"
