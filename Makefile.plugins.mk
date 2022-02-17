@@ -298,6 +298,7 @@ WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_BUILD_AOT=1 \
 ifeq ($(WINDOWS),true)
 # Use the C version of invokeNative() instead of ASM until MinGW build is fixed.
 WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
+WAMRC_CMAKE_ARGS += -G"Unix Makefiles"
 endif
 
 ifeq ($(SKIP_STRIPPING),true)
@@ -315,7 +316,8 @@ $(WAMR_LIB_PATH): $(WAMR_PATH)
 
 $(WAMRC_BIN_PATH): $(WAMR_LLVM_PATH)
 	@echo "Buliding WAMR compiler"
-	@mkdir -p $(WAMRC_BUILD_PATH) && cd $(WAMRC_BUILD_PATH) && cmake .. && cmake --build .
+	@mkdir -p $(WAMRC_BUILD_PATH) && cd $(WAMRC_BUILD_PATH) \
+		&& cmake .. $(WAMRC_CMAKE_ARGS) && cmake --build .
 
 $(WAMR_LLVM_PATH): $(WAMR_PATH)
 	@echo "Building LLVM"
