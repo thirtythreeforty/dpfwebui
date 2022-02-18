@@ -459,30 +459,31 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(WINDOWS),true)
-EDGE_WEBVIEW2_PATH = $(HIPHOP_DEPS_PATH)/Microsoft.Web.WebView2
-
-TARGETS += $(EDGE_WEBVIEW2_PATH)
-
-NUGET_URL = https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-
-# TODO : this looks terrible, rework
 ifeq ($(MSYS_MINGW),true)
-$(EDGE_WEBVIEW2_PATH): /usr/bin/nuget.exe
+NUGET_URL = https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+NUGET_BIN = /usr/bin/nuget.exe
+
+TARGETS += $(NUGET_BIN)
+
+$(NUGET_BIN):
+	@echo Downloading NuGet
+	@wget -4 -P /usr/bin $(NUGET_URL)
 else
-$(EDGE_WEBVIEW2_PATH):
 ifeq (,$(shell which nuget 2>/dev/null))
 $(error NuGet not found, try sudo apt install nuget or the equivalent for your distro)
 endif
 endif
+
+EDGE_WEBVIEW2_PATH = $(HIPHOP_DEPS_PATH)/Microsoft.Web.WebView2
+
+TARGETS += $(EDGE_WEBVIEW2_PATH)
+
+$(EDGE_WEBVIEW2_PATH):
 	@echo Downloading Edge WebView2 SDK
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@eval $(MSYS_MINGW_SYMLINKS)
 	@nuget install Microsoft.Web.WebView2 -OutputDirectory $(HIPHOP_DEPS_PATH)
 	@ln -rs $(EDGE_WEBVIEW2_PATH).* $(EDGE_WEBVIEW2_PATH)
-
-/usr/bin/nuget.exe:
-	@echo Downloading NuGet
-	@wget -4 -P /usr/bin $(NUGET_URL)
 endif
 endif
 
