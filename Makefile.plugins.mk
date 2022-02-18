@@ -441,10 +441,11 @@ ifeq (,$(wildcard /opt/node))
 NPM_VERSION = 16.6.0
 NPM_FILENAME = node-v$(NPM_VERSION)-win-x64.zip
 NPM_URL = https://nodejs.org/dist/v$(NPM_VERSION)/$(NPM_FILENAME)
+NPM_BIN = /opt/node/npm
 
-TARGETS += /opt/node/npm
+TARGETS += $(NPM_BIN)
 
-/opt/node/npm:
+$(NPM_BIN):
 	@echo Downloading Node.js
 	@wget -4 -P /tmp $(NPM_URL)
 	@unzip -o /tmp/$(NPM_FILENAME) -d /opt
