@@ -62,7 +62,7 @@ endif
 
 ifeq ($(MSYS_MINGW),true)
 ifeq ($(shell cmd /c "net.exe session 1>NUL 2>NUL || exit /b 1"; echo $$?),1)
-#$(info Run MSYS as administrator for real symlink support)
+# Run MSYS as administrator for real symlink support
 MSYS_MINGW_SYMLINKS = :
 else
 MSYS_MINGW_SYMLINKS = export MSYS=winsymlinks:nativestrict
@@ -172,7 +172,7 @@ endif
 ifeq ($(MACOS),true)
 # This is needed otherwise expect crashes on older macOS when compiling on newer
 # systems. Minimum supported target is High Sierra when WKWebView was introduced.
-# Warn: ...was built for newer macOS version (11.0) than being linked (10.13)
+# Warning: ...was built for newer macOS version (11.0) than being linked (10.13)
 BASE_FLAGS += -mmacosx-version-min=10.13
 endif
 
@@ -465,6 +465,7 @@ TARGETS += $(EDGE_WEBVIEW2_PATH)
 
 NUGET_URL = https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
 
+# TODO : this looks terrible, rework
 ifeq ($(MSYS_MINGW),true)
 $(EDGE_WEBVIEW2_PATH): /usr/bin/nuget.exe
 else
@@ -791,4 +792,14 @@ lv2ttl: $(DPF_PATH)/utils/lv2_ttl_generator
 
 $(DPF_PATH)/utils/lv2_ttl_generator:
 	$(MAKE) -C $(DPF_PATH)/utils/lv2-ttl-generator
+endif
+
+# ------------------------------------------------------------------------------
+# Extend DPF clean target
+
+ifeq ($(WASM_DSP),true)
+clean: clean_wasm
+
+clean_wasm:
+	rm -rf $(HIPHOP_AS_DSP_PATH)/build
 endif

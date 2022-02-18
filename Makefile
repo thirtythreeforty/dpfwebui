@@ -8,11 +8,11 @@ examples:
 	@make -C examples/hotswap
 
 clean:
-	rm -rf bin
-	rm -rf build
-	rm -rf examples/jitdrum/dsp/build
-	rm -rf examples/astone/dsp/build
-	rm -rf examples/hotswap/dsp/build
+	@make clean -C examples/webgain
+	@make clean -C examples/jitdrum
+	@make clean -C examples/astone
+	@make clean -C examples/hotswap
+	rm -rf build/*
 
 all: examples
 
