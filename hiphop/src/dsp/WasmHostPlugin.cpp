@@ -323,7 +323,7 @@ void WasmHostPlugin::deactivate()
             memcpy(outputs[i], audioBlock + i * frames, frames * 4);
         }
 
-        // Run the GC on each _run() call for more deterministic memory mgmt.
+        // Run AS GC on each _run() call for more deterministic memory mgmt.
         // This can help preventing dropouts when running at small buffer sizes.
         fRuntime->callFunction("__collect");
     } catch (const std::exception& ex) {
