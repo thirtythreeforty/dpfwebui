@@ -5,6 +5,12 @@
 # pragma GCC diagnostic ignored "-Wcast-function-type"
 #endif
 
+// These stub methods take precedence over the global functions defined in WAMR
+// wasm_c_api.h header. All platforms link to a static lib except Windows + AOT.
+
+//
+// DLL
+//
 void wamr_load_dll()
 {
     String dllPath = Path::getPluginLibrary() + "\\" + "libiwasm.dll";
@@ -19,6 +25,9 @@ void wamr_free_dll()
     }
 }
 
+//
+// Engine
+//
 own wasm_engine_t* wasm_engine_new(void)
 {
     if (fWamrDll != nullptr) {
@@ -39,6 +48,9 @@ void wasm_engine_delete(own wasm_engine_t* a0)
     }
 }
 
+//
+// Store
+//
 own wasm_store_t* wasm_store_new(wasm_engine_t* a0)
 {
     if (fWamrDll != nullptr) {
@@ -59,6 +71,9 @@ void wasm_store_delete(own wasm_store_t* a0)
     }
 }
 
+//
+// Instance
+//
 own wasm_instance_t* wasm_instance_new(wasm_store_t* a0, const wasm_module_t* a1,
     const wasm_extern_vec_t * a2, own wasm_trap_t** a3)
 {
@@ -90,6 +105,9 @@ void wasm_instance_exports(const wasm_instance_t* a0, own wasm_extern_vec_t* a1)
     }
 }
 
+//
+// Byte vector
+//
 void wasm_byte_vec_new_uninitialized(own wasm_byte_vec_t* a0, size_t a1)
 {
     if (fWamrDll != nullptr) {
@@ -108,6 +126,9 @@ void wasm_byte_vec_delete(own wasm_byte_vec_t* a0)
     }
 }
 
+//
+// Module
+//
 own wasm_module_t* wasm_module_new(wasm_store_t* a0, const wasm_byte_vec_t* a1)
 {
     if (fWamrDll != nullptr) {
@@ -146,6 +167,9 @@ void wasm_module_exports(const wasm_module_t* a0, own wasm_exporttype_vec_t* a1)
     }
 }
 
+//
+// Import
+//
 const wasm_name_t* wasm_importtype_module(const wasm_importtype_t* a0)
 {
     if (fWamrDll != nullptr) {
@@ -177,6 +201,32 @@ void wasm_importtype_vec_delete(own wasm_importtype_vec_t* a0)
     }
 }
 
+//
+// Export
+//
+const wasm_name_t* wasm_exporttype_name(const wasm_exporttype_t* a0)
+{
+    if (fWamrDll != nullptr) {
+        typedef const wasm_name_t* (*FuncPtr)(const wasm_exporttype_t*);
+        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_exporttype_name");
+        return fp(a0);
+    } else {
+        return nullptr;
+    }
+}
+
+void wasm_exporttype_vec_delete(own wasm_exporttype_vec_t* a0)
+{
+    if (fWamrDll != nullptr) {
+        typedef void (*FuncPtr)(own wasm_exporttype_vec_t*);
+        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_exporttype_vec_delete");
+        return fp(a0);
+    }
+}
+
+//
+// Extern
+//
 void wasm_extern_vec_new_uninitialized(own wasm_extern_vec_t* a0, size_t a1)
 {
     if (fWamrDll != nullptr) {
@@ -195,6 +245,43 @@ void wasm_extern_vec_delete(own wasm_extern_vec_t* a0)
     }
 }
 
+
+wasm_func_t* wasm_extern_as_func(wasm_extern_t* a0)
+{
+    if (fWamrDll != nullptr) {
+        typedef wasm_func_t* (*FuncPtr)(wasm_extern_t*);
+        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_extern_as_func");
+        return fp(a0);
+    } else {
+        return nullptr;
+    }
+}
+
+wasm_global_t* wasm_extern_as_global(wasm_extern_t* a0)
+{
+    if (fWamrDll != nullptr) {
+        typedef wasm_global_t* (*FuncPtr)(wasm_extern_t*);
+        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_extern_as_global");
+        return fp(a0);
+    } else {
+        return nullptr;
+    }
+}
+
+wasm_memory_t* wasm_extern_as_memory(wasm_extern_t* a0)
+{
+    if (fWamrDll != nullptr) {
+        typedef wasm_memory_t* (*FuncPtr)(wasm_extern_t*);
+        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_extern_as_memory");
+        return fp(a0);
+    } else {
+        return nullptr;
+    }
+}
+
+//
+// Function
+//
 own wasm_functype_t* wasm_functype_new(own wasm_valtype_vec_t* a0, own wasm_valtype_vec_t* a1)
 {
     if (fWamrDll != nullptr) {
@@ -243,6 +330,9 @@ own wasm_trap_t* wasm_func_call(const wasm_func_t* a0, const wasm_val_vec_t* a1,
     }
 }
 
+//
+// Value
+//
 own wasm_valtype_t* wasm_valtype_new(wasm_valkind_t a0)
 {
     if (fWamrDll != nullptr) {
@@ -272,26 +362,9 @@ void wasm_valtype_vec_delete(own wasm_valtype_vec_t* a0)
     }
 }
 
-const wasm_name_t* wasm_exporttype_name(const wasm_exporttype_t* a0)
-{
-    if (fWamrDll != nullptr) {
-        typedef const wasm_name_t* (*FuncPtr)(const wasm_exporttype_t*);
-        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_exporttype_name");
-        return fp(a0);
-    } else {
-        return nullptr;
-    }
-}
-
-void wasm_exporttype_vec_delete(own wasm_exporttype_vec_t* a0)
-{
-    if (fWamrDll != nullptr) {
-        typedef void (*FuncPtr)(own wasm_exporttype_vec_t*);
-        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_exporttype_vec_delete");
-        return fp(a0);
-    }
-}
-
+//
+// Memory
+//
 byte_t* wasm_memory_data(wasm_memory_t* a0)
 {
     if (fWamrDll != nullptr) {
@@ -303,6 +376,9 @@ byte_t* wasm_memory_data(wasm_memory_t* a0)
     }
 }
 
+//
+// Global
+//
 void wasm_global_get(const wasm_global_t* a0, own wasm_val_t* a1)
 {
     if (fWamrDll != nullptr) {
@@ -321,39 +397,9 @@ void wasm_global_set(wasm_global_t* a0, const wasm_val_t* a1)
     }
 }
 
-wasm_func_t* wasm_extern_as_func(wasm_extern_t* a0)
-{
-    if (fWamrDll != nullptr) {
-        typedef wasm_func_t* (*FuncPtr)(wasm_extern_t*);
-        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_extern_as_func");
-        return fp(a0);
-    } else {
-        return nullptr;
-    }
-}
-
-wasm_global_t* wasm_extern_as_global(wasm_extern_t* a0)
-{
-    if (fWamrDll != nullptr) {
-        typedef wasm_global_t* (*FuncPtr)(wasm_extern_t*);
-        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_extern_as_global");
-        return fp(a0);
-    } else {
-        return nullptr;
-    }
-}
-
-wasm_memory_t* wasm_extern_as_memory(wasm_extern_t* a0)
-{
-    if (fWamrDll != nullptr) {
-        typedef wasm_memory_t* (*FuncPtr)(wasm_extern_t*);
-        FuncPtr fp = (FuncPtr)GetProcAddress(fWamrDll, "wasm_extern_as_memory");
-        return fp(a0);
-    } else {
-        return nullptr;
-    }
-}
-
+//
+// Trap
+//
 void wasm_trap_message(const wasm_trap_t* a0, own wasm_message_t* a1)
 {
     if (fWamrDll != nullptr) {

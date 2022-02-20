@@ -41,7 +41,7 @@
 # include "wasm.h"
 # include "wasmer.h"
 #else
-# error "Unknown WebAssembly runtime specified"
+# error "Invalid WebAssembly runtime specified"
 #endif
 
 #define MakeI32(x) WASM_I32_VAL(static_cast<int32_t>(x))
@@ -117,7 +117,7 @@ private:
 #endif
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
-    static int sWamrRefCount;
+    static int sWamrEngineRefCount;
 #endif
 
 #ifdef HIPHOP_USE_WAMR_DLL

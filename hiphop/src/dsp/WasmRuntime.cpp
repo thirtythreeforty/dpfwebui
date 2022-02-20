@@ -54,7 +54,7 @@ WasmRuntime::WasmRuntime()
     }
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
-    sWamrRefCount++;
+    sWamrEngineRefCount++;
 #endif
 }
 
@@ -70,8 +70,10 @@ WasmRuntime::~WasmRuntime()
     }
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
-    if (--sWamrRefCount > 0) {
-        // Calling wasm_engine_delete() also tears down the full WAMR runtime
+    if (--sWamrEngineRefCount > 0) {
+        // Calling wasm_engine_delete() also tears down the full WAMR runtime.
+        // There is ongoing discussion on how to fix in the library:
+        // https://github.com/bytecodealliance/wasm-micro-runtime/pull/1001
 #ifdef HIPHOP_USE_WAMR_DLL
         wamr_free_dll();
 #endif
@@ -444,5 +446,5 @@ WasmValue WasmRuntime::CToWTF16String(const char* s)
 }
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
-int WasmRuntime::sWamrRefCount = 0;
+int WasmRuntime::sWamrEngineRefCount = 0;
 #endif // HIPHOP_WASM_RUNTIME_WAMR
