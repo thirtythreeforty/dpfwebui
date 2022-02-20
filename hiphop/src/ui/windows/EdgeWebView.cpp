@@ -55,8 +55,8 @@ EdgeWebView::EdgeWebView()
     , fController(nullptr)
     , fView(nullptr)
 {
-    SetDllDirectory(TO_LPCWSTR(Path::getPluginLibrary()));
-    const HMODULE hm = LoadLibrary(L"WebView2Loader.dll");
+    String dllPath = Path::getPluginLibrary() + "\\" + "WebView2Loader.dll";
+    const HMODULE hm = LoadLibrary(TO_LPCWSTR(dllPath));
 
     if (hm == 0) {
         errorMessageBox(L"Could not load WebView2Loader.dll");

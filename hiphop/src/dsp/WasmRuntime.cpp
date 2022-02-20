@@ -38,6 +38,10 @@ WasmRuntime::WasmRuntime()
 {
     std::memset(&fExportsVec, 0, sizeof(fExportsVec));
 
+#ifdef HIPHOP_USE_WAMR_DLL
+    wamr_load_dll();
+#endif
+
     fEngine = wasm_engine_new();
     if (fEngine == nullptr) {
         throw wasm_runtime_exception("wasm_engine_new() failed");
@@ -68,6 +72,9 @@ WasmRuntime::~WasmRuntime()
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
     if (--sWamrRefCount > 0) {
         // Calling wasm_engine_delete() also tears down the full WAMR runtime
+#ifdef HIPHOP_USE_WAMR_DLL
+        wamr_free_dll();
+#endif
         return;
     }
 #endif
@@ -76,6 +83,10 @@ WasmRuntime::~WasmRuntime()
         wasm_engine_delete(fEngine);
         fEngine = nullptr;
     }
+
+#ifdef HIPHOP_USE_WAMR_DLL
+    wamr_free_dll();
+#endif
 }
 
 void WasmRuntime::load(const char* modulePath)

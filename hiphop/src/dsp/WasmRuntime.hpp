@@ -30,6 +30,10 @@
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
 # include "wasm_c_api.h"
+# if defined(DISTRHO_OS_WINDOWS) && defined(HIPHOP_USE_WAMR_DLL)
+#  include <libloaderapi.h>
+#  include "extra/Path.hpp"
+# endif
 #elif HIPHOP_WASM_RUNTIME_WASMER
 # ifdef DISTRHO_OS_WINDOWS
 #  define WASM_API_EXTERN // allow to link against static lib
@@ -93,7 +97,10 @@ private:
 
     static wasm_trap_t* callHostFunction(void *env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec);
 
-    static void toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types);
+#ifndef HIPHOP_USE_WAMR_DLL
+    static
+#endif
+    void toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types);
        
     const char* WTF16ToCString(const WasmValue& wPtr);
     WasmValue   CToWTF16String(const char* s);
@@ -103,15 +110,20 @@ private:
     wasm_module_t*     fModule;
     wasm_instance_t*   fInstance;
     wasm_extern_vec_t  fExportsVec;
-#ifdef HIPHOP_ENABLE_WASI
-    wasi_env_t*        fWasiEnv;
-#endif // HIPHOP_ENABLE_WASI
     WasmFunctionVector fHostFunctions;
     WasmExternMap      fModuleExports;
+#ifdef HIPHOP_ENABLE_WASI
+    wasi_env_t*        fWasiEnv;
+#endif
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
     static int sWamrRefCount;
-#endif // HIPHOP_WASM_RUNTIME_WAMR
+#endif
+
+#ifdef HIPHOP_USE_WAMR_DLL
+# include "WamrDllStub.hpp"
+    HMODULE fWamrDll;
+#endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmRuntime)
 

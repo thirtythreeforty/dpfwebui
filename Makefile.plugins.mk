@@ -187,10 +187,6 @@ WASM_BYTECODE_FILE = optimized.wasm
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
 ifeq ($(WINDOWS),true)
-ifeq ($(HIPHOP_WASM_MODE),aot)
-$(warning FIXME : WAMR AOT mode is crashing on Windows, switching to interp mode)
-HIPHOP_WASM_MODE = interp
-endif
 endif
 ifeq ($(HIPHOP_WASM_MODE),aot)
 # TODO - ARM version
@@ -223,12 +219,17 @@ endif
 
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include
+ifeq ($(LINUX_OR_MACOS),true)
 LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
+endif
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread
 endif
 ifeq ($(WINDOWS),true)
+ifeq ($(HIPHOP_WASM_MODE),interp)
+LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
 LINK_FLAGS += -lWs2_32 -lShlwapi
+endif
 endif
 endif
 
@@ -345,7 +346,23 @@ else
 WAMR_BUILD_CONFIG = Release
 endif
 
-TARGETS += $(WAMR_LIB_PATH) $(WAMRC_BIN_PATH)
+ifeq ($(LINUX_OR_MACOS),true)
+TARGETS += $(WAMR_LIB_PATH)
+endif
+ifeq ($(WINDOWS),true)
+ifeq ($(HIPHOP_WASM_MODE),interp)
+# On Windows the WAMR static lib is only compiled for interp mode.
+TARGETS += $(WAMR_LIB_PATH)
+endif
+ifeq ($(HIPHOP_WASM_MODE),aot)
+# For AOT a MSVC DLL is used because the MinGW static lib is crashing.
+BASE_FLAGS += -DHIPHOP_USE_WAMR_DLL
+endif
+endif
+
+ifeq ($(HIPHOP_WASM_MODE),aot)
+TARGETS += $(WAMRC_BIN_PATH)
+endif
 
 $(WAMR_LIB_PATH): $(WAMR_PATH)/README.md
 	@echo "Building WAMR static library"
@@ -485,6 +502,29 @@ $(EDGE_WEBVIEW2_PATH):
 	@eval $(MSYS_MINGW_SYMLINKS)
 	@nuget install Microsoft.Web.WebView2 -OutputDirectory $(HIPHOP_DEPS_PATH)
 	@ln -rs $(EDGE_WEBVIEW2_PATH).* $(EDGE_WEBVIEW2_PATH)
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Dependency - Download MSVC WAMR DLL for Windows
+
+ifeq ($(WASM_DSP),true)
+ifeq ($(WINDOWS),true)
+ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+ifeq ($(HIPHOP_WASM_MODE),aot)
+IWASMDLL_FILE = libiwasm.dll
+IWASMDLL_URL = https://github.com/lucianoiam/hiphop/files/8104817/$(IWASMDLL_FILE).zip
+IWASMDLL_PATH = $(HIPHOP_DEPS_PATH)/$(IWASMDLL_FILE)
+
+TARGETS += $(IWASMDLL_PATH)
+
+$(IWASMDLL_PATH):
+	@echo Downloading libiwasm.dll
+	@wget -4 -P /tmp $(IWASMDLL_URL)
+	@unzip -o /tmp/$(IWASMDLL_FILE).zip -d $(HIPHOP_DEPS_PATH)
+	@rm /tmp/$(IWASMDLL_FILE).zip
+endif
+endif
 endif
 endif
 
@@ -773,6 +813,33 @@ edge_lib:
 		&& mkdir -p $(LIB_DIR_NOBUNDLE) \
 		&& cp $(WEBVIEW_DLL) $(LIB_DIR_NOBUNDLE) \
 		) || true
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Post build - Copy Windows WAMR DLL, currently only 64-bit is supported
+
+ifeq ($(WASM_DSP),true)
+ifeq ($(WINDOWS),true)
+ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+ifeq ($(HIPHOP_WASM_MODE),aot)
+HIPHOP_TARGET += wamr_lib
+
+wamr_lib:
+	@($(TEST_LV2) \
+		&& mkdir -p $(LIB_DIR_LV2) \
+		&& cp $(IWASMDLL_PATH) $(LIB_DIR_LV2) \
+		) || true
+	@($(TEST_VST3) \
+		&& mkdir -p $(LIB_DIR_VST3) \
+		&& cp $(IWASMDLL_PATH) $(LIB_DIR_VST3) \
+		) || true
+	@($(TEST_NOBUNDLE) \
+		&& mkdir -p $(LIB_DIR_NOBUNDLE) \
+		&& cp $(IWASMDLL_PATH) $(LIB_DIR_NOBUNDLE) \
+		) || true
+endif
+endif
 endif
 endif
 
