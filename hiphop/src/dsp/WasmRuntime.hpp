@@ -116,13 +116,13 @@ private:
     wasi_env_t*        fWasiEnv;
 #endif
 
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
-    static int sWamrEngineRefCount;
-#endif
-
 #ifdef HIPHOP_USE_WAMR_DLL
 # include "WamrDllStub.hpp"
     HMODULE fWamrDll;
+#endif
+
+#ifdef HIPHOP_WASM_RUNTIME_WAMR
+    static int sWamrEngineRefCount;
 #endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmRuntime)

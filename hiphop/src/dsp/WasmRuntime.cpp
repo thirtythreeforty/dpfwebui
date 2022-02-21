@@ -25,8 +25,6 @@
 #define MAX_STRING_SIZE    1024
 #define MAX_HOST_FUNCTIONS 1024
 
-// TODO - check for correct usage of the Wasm C API focusing on memory leaks
-
 WasmRuntime::WasmRuntime()
     : fEngine(nullptr)
     , fStore(nullptr)
@@ -39,7 +37,7 @@ WasmRuntime::WasmRuntime()
     std::memset(&fExportsVec, 0, sizeof(fExportsVec));
 
 #ifdef HIPHOP_USE_WAMR_DLL
-    wamr_load_dll();
+    wamr_dll_load();
 #endif
 
     fEngine = wasm_engine_new();
@@ -72,10 +70,10 @@ WasmRuntime::~WasmRuntime()
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
     if (--sWamrEngineRefCount > 0) {
         // Calling wasm_engine_delete() also tears down the full WAMR runtime.
-        // There is ongoing discussion on how to fix in the library:
+        // There is ongoing discussion on how to fix this:
         // https://github.com/bytecodealliance/wasm-micro-runtime/pull/1001
 #ifdef HIPHOP_USE_WAMR_DLL
-        wamr_free_dll();
+        wamr_dll_free();
 #endif
         return;
     }
@@ -87,7 +85,7 @@ WasmRuntime::~WasmRuntime()
     }
 
 #ifdef HIPHOP_USE_WAMR_DLL
-    wamr_free_dll();
+    wamr_dll_free();
 #endif
 }
 
