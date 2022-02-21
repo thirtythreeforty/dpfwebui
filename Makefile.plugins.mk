@@ -322,8 +322,9 @@ WAMRC_PATH = $(WAMR_PATH)/wamr-compiler
 WAMRC_BUILD_PATH = $(WAMRC_PATH)/build
 WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc
 
-# Disable WASI feature because it is unavailable through the C API.
-# HW_BOUND_CHECK not compiling on MinGW and crashing on Linux/Mac with AOT.
+# Disable WASI feature because it is not exposed by the C API.
+# HW_BOUND_CHECK not compiling on MinGW, producing no sound on Linux+AOT and
+# crashing on Mac+AOT https://github.com/bytecodealliance/wasm-micro-runtime/pull/1001
 WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_DISABLE_HW_BOUND_CHECK=1
 ifeq ($(HIPHOP_WASM_MODE),aot)
 WAMR_CMAKE_ARGS += -DWAMR_BUILD_AOT=1 -DWAMR_BUILD_INTERP=0

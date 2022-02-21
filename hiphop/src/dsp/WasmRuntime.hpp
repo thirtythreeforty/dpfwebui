@@ -44,6 +44,9 @@
 # error "Invalid WebAssembly runtime specified"
 #endif
 
+// WASM C API convention. See Ownership section in wasm_c_api.h.
+#define own
+
 #define MakeI32(x) WASM_I32_VAL(static_cast<int32_t>(x))
 #define MakeI64(x) WASM_I64_VAL(static_cast<int64_t>(x))
 #define MakeF32(x) WASM_F32_VAL(static_cast<float32_t>(x))
@@ -100,7 +103,9 @@ private:
 #ifndef HIPHOP_USE_WAMR_DLL
     static
 #endif
-    void toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types);
+    // - an exception are `own` pointer parameters named `out`, which are copy-back
+    //   output parameters passing back ownership from callee to caller
+    void toCValueTypeVector(WasmValueKindVector kinds, own wasm_valtype_vec_t* out);
        
     const char* WTF16ToCString(const WasmValue& wPtr);
     WasmValue   CToWTF16String(const char* s);

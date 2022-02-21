@@ -408,7 +408,7 @@ wasm_trap_t* WasmRuntime::callHostFunction(void* env, const wasm_val_vec_t* para
     return nullptr;
 }
 
-void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec_t* types)
+own void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, own wasm_valtype_vec_t* out)
 {
     int i = 0;
     const size_t size = kinds.size();
@@ -418,7 +418,7 @@ void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, wasm_valtype_vec
         typesArray[i++] = wasm_valtype_new(*it);
     }
 
-    wasm_valtype_vec_new(types, size, typesArray);
+    wasm_valtype_vec_new(out, size, typesArray);
 }
 
 const char* WasmRuntime::WTF16ToCString(const WasmValue& wPtr)
