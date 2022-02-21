@@ -3,6 +3,7 @@ GENERAL
 
 - Compile AOT files for Mac ARM
 - Incomplete and broken VST3 compatibility (DPF)
+  https://github.com/DISTRHO/DPF/pull/360
 - Map alert(), confirm(), prompt() to native dialogs
 - Profile everything for memory leaks
-- Standalone application support
+- Complete standalone application support

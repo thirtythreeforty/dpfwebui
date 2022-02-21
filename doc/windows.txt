@@ -6,6 +6,7 @@ NOTES FOR WINDOWS
    https://www.msys2.org/ and then follow website instructions on how to install
    the mingw-64 GCC.
 
+
 2. For building the plugin, Edge WebView2 SDK is required. Makefile will try to
    download the SDK if the NuGet tool is already present. If not, NuGet will be
    automatically downloaded for MinGW but on Linux that could need extra work
@@ -24,8 +25,10 @@ NOTES FOR WINDOWS
    - Copy < SOLUTION_DIR >/packages/Microsoft.Web.WebView2.< VERSION > to
      < PLUGIN_DIR >/lib/Microsoft.Web.WebView2  (version suffix stripped)
 
+
 3. For running the plugin on Windows 10 or earlier, the Microsoft Edge WebView2
    Runtime must be installed https://developer.microsoft.com/microsoft-edge/webview2
+
 
 4. The official binary distribution of Wasmer requires MSVC. To overcome this
    problem the Makefile downloads a custom build that is compatible with MinGW.
@@ -44,6 +47,22 @@ NOTES FOR WINDOWS
    cp wasmer/lib/c-api/wasmer.h hiphop/lib/wasmer/include
    mkdir -p hiphop/lib/wasmer/lib
    cp wasmer/target/release/libwasmer.a hiphop/lib/wasmer/lib
+
+
+5. Instructions on how to build libwasmer.a with debug symbols can be found here
+   https://github.com/wasmerio/wasmer/issues/2571
+
+   RUSTFLAGS="-C target-feature=+crt-static" cargo build \
+     --manifest-path lib/c-api/Cargo.toml --no-default-features \
+     --features wat,universal,dylib,staticlib,wasi,middlewares \
+     --features cranelift
+
+   Then for debugging with Carla:
+
+   gdb --args python ~/carla/source/frontend/carla
+   set breakpoint pending on
+   break wasm_module_new
+
 
 5. Node.js is required for building the plugin AssemblyScript files. There is no
    official binary package for MinGW. Makefile will try to download the regular
