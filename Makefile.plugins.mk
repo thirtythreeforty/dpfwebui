@@ -21,7 +21,7 @@ HIPHOP_INJECT_FRAMEWORK_JS ?= false
 # Web view implementation on Linux <gtk|cef>
 HIPHOP_LINUX_WEBVIEW       ?= gtk
 # Set to false for building current architecture only
-HIPHOP_MACOS_UNIVERSAL     ?= false
+HIPHOP_MACOS_UNIVERSAL     ?= true
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
@@ -398,44 +398,45 @@ WASMER_VERSION = 2.1.1
 TARGETS += $(WASMER_PATH)
 
 ifeq ($(LINUX_OR_MACOS),true)
+WASMER_URL = https://github.com/wasmerio/wasmer/releases/download
 ifeq ($(LINUX),true)
-WASMER_PKG_FILE = wasmer-linux-amd64.tar.gz
+WASMER_PKG_FILE_1 = wasmer-linux-amd64.tar.gz
 endif
 ifeq ($(MACOS),true)
 # There is no macOS universal binary of Wasmer, download both architectures and combine.
 WASMER_PKG_FILE_INTEL = wasmer-darwin-amd64.tar.gz
 WASMER_PKG_FILE_ARM = wasmer-darwin-arm64.tar.gz
 ifeq ($(CPU_I386_OR_X86_64),true)
-WASMER_PKG_FILE = $(WASMER_PKG_FILE_INTEL)
+WASMER_PKG_FILE_1 = $(WASMER_PKG_FILE_INTEL)
 WASMER_PKG_FILE_2 = $(WASMER_PKG_FILE_ARM)
 else
-WASMER_PKG_FILE = $(WASMER_PKG_FILE_ARM)
+WASMER_PKG_FILE_1 = $(WASMER_PKG_FILE_ARM)
 WASMER_PKG_FILE_2 = $(WASMER_PKG_FILE_INTEL)
 endif
 endif
-WASMER_URL = https://github.com/wasmerio/wasmer/releases/download
-WASMER_PKG_URL = $(WASMER_URL)/$(WASMER_VERSION)/$(WASMER_PKG_FILE)
+WASMER_PKG_URL_1 = $(WASMER_URL)/$(WASMER_VERSION)/$(WASMER_PKG_FILE_1)
+WASMER_PKG_URL_2 = $(WASMER_URL)/$(WASMER_VERSION)/$(WASMER_PKG_FILE_2)
 endif
 ifeq ($(WINDOWS),true)
 # Wasmer official Windows binary distribution requires MSVC, download a custom build for MinGW.
-WASMER_PKG_FILE = wasmer-mingw-amd64-$(WASMER_VERSION).tar.gz
-WASMER_PKG_URL = https://github.com/lucianoiam/hiphop/files/7796845/$(WASMER_PKG_FILE)
+WASMER_PKG_FILE_1 = wasmer-mingw-amd64-$(WASMER_VERSION).tar.gz
+WASMER_PKG_URL_1 = https://github.com/lucianoiam/hiphop/files/7796845/$(WASMER_PKG_FILE_1)
 endif
 
 # https://stackoverflow.com/questions/37038472/osx-how-to-statically-link-a-library-and-dynamically-link-the-standard-library
 $(WASMER_PATH):
 	@mkdir -p $(WASMER_PATH)
-	@wget -4 -O /tmp/$(WASMER_PKG_FILE) $(WASMER_PKG_URL)
-	@tar xzf /tmp/$(WASMER_PKG_FILE) -C $(WASMER_PATH)
+	@wget -4 -O /tmp/$(WASMER_PKG_FILE_1) $(WASMER_PKG_URL_1)
+	@tar xzf /tmp/$(WASMER_PKG_FILE_1) -C $(WASMER_PATH)
 ifeq ($(LINUX),true)
 	@mv $(WASMER_PATH)/lib/libwasmer.so $(WASMER_PATH)/lib/libwasmer.so.ignore
 endif
 ifeq ($(MACOS),true)
 	@mv $(WASMER_PATH)/lib/libwasmer.dylib $(WASMER_PATH)/lib/libwasmer.dylib.ignore
 endif
-	@rm /tmp/$(WASMER_PKG_FILE)
+	@rm /tmp/$(WASMER_PKG_FILE_1)
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
-	@wget -4 -O /tmp/$(WASMER_PKG_FILE_2) $(WASMER_URL)/$(WASMER_VERSION)/$(WASMER_PKG_FILE_2)
+	@wget -4 -O /tmp/$(WASMER_PKG_FILE_2) $(WASMER_PKG_URL_2)
 	@mkdir -p /tmp/wasmer-2
 	@tar xzf /tmp/$(WASMER_PKG_FILE_2) -C /tmp/wasmer-2
 	@lipo -create $(WASMER_PATH)/lib/libwasmer.a /tmp/wasmer-2/lib/libwasmer.a \
@@ -535,7 +536,7 @@ endif
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
 MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
-MBEDTLS_GIT_TAG = v3.0.0  # LWS build fails for 3.1.0 (Feb 2022)
+MBEDTLS_GIT_TAG = v3.1.0  # LWS build fails for 3.1.0 (Feb 2022)
 MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
 MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
 MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
