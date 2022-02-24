@@ -365,7 +365,8 @@ void CefHelper::setKeyboardFocus(bool keyboardFocus)
     }
     
     if (keyboardFocus) {
-        // CEFKBDFOCUSBUG - This works but generates Xlib errors
+        // Toggling keyboard focus works but generates Xlib errors when
+        // keyboardFocus==true. Possibly incorrect arguments for XIGrabDevice().
         // type 0, error_code 129, request_code 131, minor_code 51 (and 52)
         const ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
         XSetInputFocus(fDisplay, w, RevertToNone, CurrentTime);

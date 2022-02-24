@@ -21,7 +21,7 @@ HIPHOP_INJECT_FRAMEWORK_JS ?= false
 # Web view implementation on Linux <gtk|cef>
 HIPHOP_LINUX_WEBVIEW       ?= gtk
 # Set to false for building current architecture only
-HIPHOP_MACOS_UNIVERSAL     ?= true
+HIPHOP_MACOS_UNIVERSAL     ?= false
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
@@ -203,6 +203,10 @@ endif
 
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
 BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WASMER
+ifeq ($(HIPHOP_WASM_MODE),interp)
+# Both WAMR interp and Wasmer will load bytecode
+HIPHOP_WASM_MODE = jit
+endif
 ifeq ($(HIPHOP_WASM_MODE),jit)
 WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
 else
@@ -392,13 +396,13 @@ endif
 
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
-WASMER_PATH = $(HIPHOP_DEPS_PATH)/wasmer
+WASMER_URL = https://github.com/wasmerio/wasmer/releases/download
 WASMER_VERSION = 2.1.1
+WASMER_PATH = $(HIPHOP_DEPS_PATH)/wasmer
 
 TARGETS += $(WASMER_PATH)
 
 ifeq ($(LINUX_OR_MACOS),true)
-WASMER_URL = https://github.com/wasmerio/wasmer/releases/download
 ifeq ($(LINUX),true)
 WASMER_PKG_FILE_1 = wasmer-linux-amd64.tar.gz
 endif
@@ -514,17 +518,17 @@ ifeq ($(WASM_DSP),true)
 ifeq ($(WINDOWS),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 ifeq ($(HIPHOP_WASM_MODE),aot)
-IWASMDLL_FILE = libiwasm.dll
-IWASMDLL_URL = https://github.com/lucianoiam/hiphop/files/8104817/$(IWASMDLL_FILE).zip
-IWASMDLL_PATH = $(HIPHOP_DEPS_PATH)/$(IWASMDLL_FILE)
+WAMR_DLL_FILE = libiwasm.dll
+WAMR_DLL_URL = https://github.com/lucianoiam/hiphop/files/8104817/$(WAMR_DLL_FILE).zip
+WAMR_DLL_PATH = $(HIPHOP_DEPS_PATH)/$(WAMR_DLL_FILE)
 
-TARGETS += $(IWASMDLL_PATH)
+TARGETS += $(WAMR_DLL_PATH)
 
-$(IWASMDLL_PATH):
+$(WAMR_DLL_PATH):
 	@echo Downloading libiwasm.dll
-	@wget -4 -P /tmp $(IWASMDLL_URL)
-	@unzip -o /tmp/$(IWASMDLL_FILE).zip -d $(HIPHOP_DEPS_PATH)
-	@rm /tmp/$(IWASMDLL_FILE).zip
+	@wget -4 -P /tmp $(WAMR_DLL_URL)
+	@unzip -o /tmp/$(WAMR_DLL_FILE).zip -d $(HIPHOP_DEPS_PATH)
+	@rm /tmp/$(WAMR_DLL_FILE).zip
 endif
 endif
 endif
@@ -825,20 +829,20 @@ ifeq ($(WASM_DSP),true)
 ifeq ($(WINDOWS),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 ifeq ($(HIPHOP_WASM_MODE),aot)
-HIPHOP_TARGET += wamr_lib
+HIPHOP_TARGET += wamr_dll
 
-wamr_lib:
+wamr_dll:
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2) \
-		&& cp $(IWASMDLL_PATH) $(LIB_DIR_LV2) \
+		&& cp $(WAMR_DLL_PATH) $(LIB_DIR_LV2) \
 		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3) \
-		&& cp $(IWASMDLL_PATH) $(LIB_DIR_VST3) \
+		&& cp $(WAMR_DLL_PATH) $(LIB_DIR_VST3) \
 		) || true
 	@($(TEST_NOBUNDLE) \
 		&& mkdir -p $(LIB_DIR_NOBUNDLE) \
-		&& cp $(IWASMDLL_PATH) $(LIB_DIR_NOBUNDLE) \
+		&& cp $(WAMR_DLL_PATH) $(LIB_DIR_NOBUNDLE) \
 		) || true
 endif
 endif
@@ -858,7 +862,7 @@ ifeq ($(CAN_GENERATE_TTL),true)
 HIPHOP_TARGET += lv2ttl
 
 lv2ttl: $(DPF_PATH)/utils/lv2_ttl_generator
-	@# TODO - generate-ttl.sh expects hardcoded directory bin/
+	@# generate-ttl.sh expects hardcoded directory bin/
 	@cd $(DPF_TARGET_DIR)/.. && $(abspath $(DPF_PATH))/utils/generate-ttl.sh
 
 $(DPF_PATH)/utils/lv2_ttl_generator:

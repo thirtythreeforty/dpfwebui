@@ -30,10 +30,6 @@
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
 # include "wasm_c_api.h"
-# if defined(DISTRHO_OS_WINDOWS) && defined(HIPHOP_USE_WAMR_DLL)
-#  include <libloaderapi.h>
-#  include "extra/Path.hpp"
-# endif
 #elif HIPHOP_WASM_RUNTIME_WASMER
 # ifdef DISTRHO_OS_WINDOWS
 #  define WASM_API_EXTERN // allow to link against static lib
@@ -42,6 +38,11 @@
 # include "wasmer.h"
 #else
 # error "Invalid WebAssembly runtime specified"
+#endif
+
+#if defined(DISTRHO_OS_WINDOWS) && defined(HIPHOP_USE_WAMR_DLL)
+# include <libloaderapi.h>
+# include "extra/Path.hpp"
 #endif
 
 // WASM C API convention. See Ownership section in wasm_c_api.h.
