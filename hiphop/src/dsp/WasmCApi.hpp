@@ -21,7 +21,9 @@
 
 #include "src/DistrhoDefines.h"
 
-#ifdef HIPHOP_USE_WAMR_DLL
+#include "extra/macro.h"
+
+#ifdef HIPHOP_WASM_DLL
 # include "extra/Path.hpp"
 # ifdef DISTRHO_OS_WINDOWS
 #  include <libloaderapi.h>
@@ -46,7 +48,7 @@
 START_NAMESPACE_DISTRHO
 
 #ifdef HIPHOP_WASM_DLL
-# define DLL_SYMBOL(name,type) static_cast<type>(getLibrarySymbol(name))
+# define DLL_SYMBOL(name,type) reinterpret_cast<type>(getLibrarySymbol(name))
 #endif
 
 #if defined(__GNUC__) && (__GNUC__ >= 9)
@@ -63,7 +65,7 @@ public:
 #ifdef HIPHOP_WASM_DLL
     WasmCApi()
     {
-        String path = Path::getPluginLibrary() + "\\" + HIPHOP_WASM_DLL;
+        String path = Path::getPluginLibrary() + "\\" XSTR(HIPHOP_WASM_DLL);
 # ifdef DISTRHO_OS_WINDOWS
         fDllHandle = LoadLibrary(path);
 # endif
@@ -88,7 +90,7 @@ public:
     {
 #ifdef HIPHOP_WASM_DLL
         typedef own wasm_engine_t* (*FuncType)();
-        DLL_SYMBOL(__FUNCTION__,FuncType)();
+        return DLL_SYMBOL(__FUNCTION__,FuncType)();
 #else
         return ::wasm_engine_new();
 #endif
@@ -358,7 +360,8 @@ public:
 #endif
     }
 
-    inline void wasm_valtype_vec_new(own wasm_valtype_vec_t* arg0, size_t arg1, own wasm_valtype_t* const arg2[])
+    inline void wasm_valtype_vec_new(own wasm_valtype_vec_t* arg0, size_t arg1,
+                                        own wasm_valtype_t* const arg2[])
     {
 #ifdef HIPHOP_WASM_DLL
         typedef void (*FuncType)(own wasm_valtype_vec_t*, size_t, own wasm_valtype_t* const[]);
@@ -382,7 +385,8 @@ public:
     // Function
     //
 
-    inline own wasm_functype_t* wasm_functype_new(own wasm_valtype_vec_t* arg0, own wasm_valtype_vec_t* arg1)
+    inline own wasm_functype_t* wasm_functype_new(own wasm_valtype_vec_t* arg0,
+                                                    own wasm_valtype_vec_t* arg1)
     {
 #ifdef HIPHOP_WASM_DLL
         typedef own wasm_functype_t* (*FuncType)(own wasm_valtype_vec_t*, own wasm_valtype_vec_t*);
@@ -484,7 +488,7 @@ private:
 # ifdef DISTRHO_OS_WINDOWS
     inline void* getLibrarySymbol(const char* name)
     {
-        return GetProcAddress(fDllHandle, name);
+        return reinterpret_cast<void*>(GetProcAddress(fDllHandle, name));
     }
 
     HMODULE fDllHandle;
