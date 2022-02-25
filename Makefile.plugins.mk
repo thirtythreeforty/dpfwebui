@@ -156,6 +156,8 @@ endif
 ifeq (,$(wildcard $(DPF_PATH)/Makefile))
 _ := $(shell git submodule update --init --recursive)
 endif
+# https://github.com/DISTRHO/DPF/pull/360
+_ := $(shell git -C $(DPF_PATH) apply $(abspath $(HIPHOP_ROOT_PATH))/patch/DPF_PR360.diff 2>/dev/null)
 
 ifeq ($(WEB_UI),true)
 UI_TYPE = external

@@ -18,11 +18,9 @@ from the DSP core. The latter can be implemented in C++ or optionally [AssemblyS
 * Based on DISTRHO Plugin Framework (DPF)
 * C++ or AssemblyScript for DSP code
 * HTML / CSS / JS for UI development
-* VST2 / LV2 plugin formats
+* VST2 / VST3 / LV2 plugin formats
 * Linux / Mac / Windows
 * Just the powerful basics
-
-VST3 support is almost complete, check DPF's GitHub page for further details.
 
 The following language combinations are possible:
 
