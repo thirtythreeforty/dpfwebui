@@ -36,18 +36,14 @@ WasmRuntime::WasmRuntime()
 {
     std::memset(&fExportsVec, 0, sizeof(fExportsVec));
 
-#ifdef HIPHOP_USE_WAMR_DLL
-    wamr_dll_load();
-#endif
-
-    fEngine = wasm_engine_new();
+    fEngine = fLib.wasm_engine_new();
     if (fEngine == nullptr) {
         throw wasm_runtime_exception("wasm_engine_new() failed");
     }
 
-    fStore = wasm_store_new(fEngine); 
+    fStore = fLib.wasm_store_new(fEngine); 
     if (fStore == nullptr) {
-        wasm_engine_delete(fEngine);
+        fLib.wasm_engine_delete(fEngine);
         throw wasm_runtime_exception("wasm_store_new() failed");
     }
 
@@ -63,7 +59,7 @@ WasmRuntime::~WasmRuntime()
     }
 
     if (fStore != nullptr) {
-        wasm_store_delete(fStore);
+        fLib.wasm_store_delete(fStore);
         fStore = nullptr;
     }
 
@@ -72,21 +68,14 @@ WasmRuntime::~WasmRuntime()
         // Calling wasm_engine_delete() also tears down the full WAMR runtime.
         // There is ongoing discussion on how to fix this:
         // https://github.com/bytecodealliance/wasm-micro-runtime/pull/1001
-#ifdef HIPHOP_USE_WAMR_DLL
-        wamr_dll_free();
-#endif
         return;
     }
 #endif
 
     if (fEngine != nullptr) {
-        wasm_engine_delete(fEngine);
+        fLib.wasm_engine_delete(fEngine);
         fEngine = nullptr;
     }
-
-#ifdef HIPHOP_USE_WAMR_DLL
-    wamr_dll_free();
-#endif
 }
 
 void WasmRuntime::load(const char* modulePath)
@@ -105,20 +94,20 @@ void WasmRuntime::load(const char* modulePath)
     std::fseek(file, 0L, SEEK_SET);
 
     wasm_byte_vec_t moduleBytes;
-    wasm_byte_vec_new_uninitialized(&moduleBytes, fileSize);
+    fLib.wasm_byte_vec_new_uninitialized(&moduleBytes, fileSize);
     
     size_t bytesRead = std::fread(moduleBytes.data, 1, fileSize, file);
     std::fclose(file);
 
     if (bytesRead != fileSize) {
-        wasm_byte_vec_delete(&moduleBytes);
+        fLib.wasm_byte_vec_delete(&moduleBytes);
         throw wasm_module_exception("Error reading module file");
     }
 
     // WINWASMERBUG : Following call crashes some hosts on Windows when using
     //                the Wasmer runtime, does not affect WAMR. See bugs.txt.
-    fModule = wasm_module_new(fStore, &moduleBytes);
-    wasm_byte_vec_delete(&moduleBytes);
+    fModule = fLib.wasm_module_new(fStore, &moduleBytes);
+    fLib.wasm_byte_vec_delete(&moduleBytes);
 
     if (fModule == nullptr) {
         throw wasm_runtime_exception("wasm_module_new() failed");
@@ -132,12 +121,12 @@ void WasmRuntime::load(const unsigned char* moduleData, size_t size)
     }
 
     wasm_byte_vec_t moduleBytes;
-    wasm_byte_vec_new_uninitialized(&moduleBytes, size);
+    fLib.wasm_byte_vec_new_uninitialized(&moduleBytes, size);
 
     std::memcpy(moduleBytes.data, moduleData, size);
 
-    fModule = wasm_module_new(fStore, &moduleBytes);
-    wasm_byte_vec_delete(&moduleBytes);
+    fModule = fLib.wasm_module_new(fStore, &moduleBytes);
+    fLib.wasm_byte_vec_delete(&moduleBytes);
 
     if (fModule == nullptr) {
         throw wasm_runtime_exception("wasm_module_new() failed");
@@ -189,15 +178,15 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
     // Build module imports vector
 
     wasm_importtype_vec_t importTypes;
-    wasm_module_imports(fModule, &importTypes);
+    fLib.wasm_module_imports(fModule, &importTypes);
     wasm_extern_vec_t imports;
-    wasm_extern_vec_new_uninitialized(&imports, importTypes.size);
+    fLib.wasm_extern_vec_new_uninitialized(&imports, importTypes.size);
 
     std::unordered_map<std::string, int> importIndex;
     bool moduleNeedsWasi = false;
 
     for (size_t i = 0; i < importTypes.size; i++) {
-        const wasm_name_t *wn = wasm_importtype_name(importTypes.data[i]);
+        const wasm_name_t *wn = fLib.wasm_importtype_name(importTypes.data[i]);
         std::memcpy(name, wn->data, wn->size);
         name[wn->size] = '\0';
         importIndex[name] = i;
@@ -209,7 +198,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
         }
 #endif
         if (!moduleNeedsWasi) {
-            wn = wasm_importtype_module(importTypes.data[i]);
+            wn = fLib.wasm_importtype_module(importTypes.data[i]);
             std::memcpy(name, wn->data, wn->size);
             name[wn->size] = '\0';
             if (std::strstr(name, "wasi_") == name) { // eg, wasi_snapshot_preview1
@@ -218,7 +207,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
         }
     }
 
-    wasm_importtype_vec_delete(&importTypes);
+    fLib.wasm_importtype_vec_delete(&importTypes);
 
 #ifdef HIPHOP_ENABLE_WASI
     if (!moduleNeedsWasi) {
@@ -243,20 +232,20 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
         wasm_valtype_vec_t result;
         toCValueTypeVector(it->second.result, &result);
 
-        const wasm_functype_t* funcType = wasm_functype_new(&params, &result);
-        wasm_func_t* func = wasm_func_new_with_env(fStore, funcType, WasmRuntime::callHostFunction,
-                                                    &fHostFunctions.back(), nullptr);
-        imports.data[importIndex[it->first]] = wasm_func_as_extern(func);
+        const wasm_functype_t* funcType = fLib.wasm_functype_new(&params, &result);
+        wasm_func_t* func = fLib.wasm_func_new_with_env(fStore, funcType, WasmRuntime::callHostFunction,
+                                                        &fHostFunctions.back(), nullptr);
+        imports.data[importIndex[it->first]] = fLib.wasm_func_as_extern(func);
 
-        wasm_valtype_vec_delete(&result);
-        wasm_valtype_vec_delete(&params);
+        fLib.wasm_valtype_vec_delete(&result);
+        fLib.wasm_valtype_vec_delete(&params);
     }
 
     // Create instance and start WASI
 
-    fInstance = wasm_instance_new(fStore, fModule, &imports, nullptr);
+    fInstance = fLib.wasm_instance_new(fStore, fModule, &imports, nullptr);
 
-    wasm_extern_vec_delete(&imports);
+    fLib.wasm_extern_vec_delete(&imports);
 
     if (fInstance == nullptr) {
         throw wasm_runtime_exception("wasm_instance_new() failed");
@@ -270,31 +259,31 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
     }
 
     wasm_val_vec_t empty_val_vec = WASM_EMPTY_VEC;
-    wasm_func_call(wasiStart, &empty_val_vec, &empty_val_vec);
-    wasm_func_delete(wasiStart);
+    fLib.wasm_func_call(wasiStart, &empty_val_vec, &empty_val_vec);
+    fLib.wasm_func_delete(wasiStart);
 #endif
 
     // Build a map of externs indexed by name
 
     fExportsVec.size = 0;
-    wasm_instance_exports(fInstance, &fExportsVec);
+    fLib.wasm_instance_exports(fInstance, &fExportsVec);
     wasm_exporttype_vec_t exportTypes;
-    wasm_module_exports(fModule, &exportTypes);
+    fLib.wasm_module_exports(fModule, &exportTypes);
 
     for (size_t i = 0; i < fExportsVec.size; i++) {
-        const wasm_name_t *wn = wasm_exporttype_name(exportTypes.data[i]);
+        const wasm_name_t *wn = fLib.wasm_exporttype_name(exportTypes.data[i]);
         std::memcpy(name, wn->data, wn->size);
         name[wn->size] = '\0';
         fModuleExports[name] = fExportsVec.data[i];
     }
 
-    wasm_exporttype_vec_delete(&exportTypes);
+    fLib.wasm_exporttype_vec_delete(&exportTypes);
 }
 
 void WasmRuntime::destroyInstance()
 {
     if (fModule != nullptr) {
-        wasm_module_delete(fModule);
+        fLib.wasm_module_delete(fModule);
         fModule = nullptr;
     }
 
@@ -306,12 +295,12 @@ void WasmRuntime::destroyInstance()
 #endif
 
     if (fExportsVec.size != 0) {
-        wasm_extern_vec_delete(&fExportsVec);
+        fLib.wasm_extern_vec_delete(&fExportsVec);
         fExportsVec.size = 0;
     }
 
     if (fInstance != nullptr) {
-        wasm_instance_delete(fInstance);
+        fLib.wasm_instance_delete(fInstance);
         fInstance = nullptr;
     }
 
@@ -321,7 +310,9 @@ void WasmRuntime::destroyInstance()
 
 byte_t* WasmRuntime::getMemory(const WasmValue& wPtr)
 {
-    return wasm_memory_data(wasm_extern_as_memory(fModuleExports["memory"])) + wPtr.of.i32;
+    return fLib.wasm_memory_data(
+        fLib.wasm_extern_as_memory(fModuleExports["memory"])
+    ) + wPtr.of.i32;
 }
 
 char* WasmRuntime::getMemoryAsCString(const WasmValue& wPtr)
@@ -337,13 +328,13 @@ void WasmRuntime::copyCStringToMemory(const WasmValue& wPtr, const char* s)
 WasmValue WasmRuntime::getGlobal(const char* name)
 {
     wasm_val_t value;
-    wasm_global_get(wasm_extern_as_global(fModuleExports[name]), &value);
+    fLib.wasm_global_get(fLib.wasm_extern_as_global(fModuleExports[name]), &value);
     return value;
 }
 
 void WasmRuntime::setGlobal(const char* name, const WasmValue& value)
 {
-    wasm_global_set(wasm_extern_as_global(fModuleExports[name]), &value);
+    fLib.wasm_global_set(fLib.wasm_extern_as_global(fModuleExports[name]), &value);
 }
 
 char* WasmRuntime::getGlobalAsCString(const char* name)
@@ -353,7 +344,7 @@ char* WasmRuntime::getGlobalAsCString(const char* name)
 
 WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector params)
 {
-    const wasm_func_t* func = wasm_extern_as_func(fModuleExports[name]);
+    const wasm_func_t* func = fLib.wasm_extern_as_func(fModuleExports[name]);
 
     // wasm_val_vec_t is implemented differently for each runtime type.
     // Is there a generic way to create an arbitrary sized instance?
@@ -367,13 +358,13 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     wasm_val_t resultArray[1] = { WASM_INIT_VAL };
     wasm_val_vec_t resultVec = WASM_ARRAY_VEC(resultArray);
 
-    const wasm_trap_t* trap = wasm_func_call(func, &paramsVec, &resultVec);
+    const wasm_trap_t* trap = fLib.wasm_func_call(func, &paramsVec, &resultVec);
 
     if (trap != nullptr) {
         std::string s = std::string("Failed call to function ") + name;
 
         wasm_message_t* wm = nullptr;
-        wasm_trap_message(trap, wm);
+        fLib.wasm_trap_message(trap, wm);
 
         if (wm != nullptr) {
             s += std::string(" - trap message: ") + std::string(wm->data /*null terminated*/);
@@ -415,10 +406,10 @@ own void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, own wasm_val
     wasm_valtype_t* typesArray[size];
 
     for (WasmValueKindVector::const_iterator it = kinds.cbegin(); it != kinds.cend(); ++it) {
-        typesArray[i++] = wasm_valtype_new(*it);
+        typesArray[i++] = fLib.wasm_valtype_new(*it);
     }
 
-    wasm_valtype_vec_new(out, size, typesArray);
+    fLib.wasm_valtype_vec_new(out, size, typesArray);
 }
 
 const char* WasmRuntime::WTF16ToCString(const WasmValue& wPtr)

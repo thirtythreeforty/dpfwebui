@@ -28,25 +28,7 @@
 #include "src/DistrhoDefines.h"
 #include "distrho/extra/LeakDetector.hpp"
 
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
-# include "wasm_c_api.h"
-#elif HIPHOP_WASM_RUNTIME_WASMER
-# ifdef DISTRHO_OS_WINDOWS
-#  define WASM_API_EXTERN // allow to link against static lib
-# endif
-# include "wasm.h"
-# include "wasmer.h"
-#else
-# error "Invalid WebAssembly runtime specified"
-#endif
-
-#if defined(DISTRHO_OS_WINDOWS) && defined(HIPHOP_USE_WAMR_DLL)
-# include <libloaderapi.h>
-# include "extra/Path.hpp"
-#endif
-
-// WASM C API convention. See Ownership section in wasm_c_api.h.
-#define own
+#include "WasmCApi.hpp"
 
 #define MakeI32(x) WASM_I32_VAL(static_cast<int32_t>(x))
 #define MakeI64(x) WASM_I64_VAL(static_cast<int64_t>(x))
@@ -101,9 +83,6 @@ private:
 
     static wasm_trap_t* callHostFunction(void *env, const wasm_val_vec_t* paramsVec, wasm_val_vec_t* resultVec);
 
-#ifndef HIPHOP_USE_WAMR_DLL
-    static
-#endif
     // - an exception are `own` pointer parameters named `out`, which are copy-back
     //   output parameters passing back ownership from callee to caller
     void toCValueTypeVector(WasmValueKindVector kinds, own wasm_valtype_vec_t* out);
@@ -111,6 +90,7 @@ private:
     const char* WTF16ToCString(const WasmValue& wPtr);
     WasmValue   CToWTF16String(const char* s);
 
+    WasmCApi           fLib;
     wasm_engine_t*     fEngine;
     wasm_store_t*      fStore;
     wasm_module_t*     fModule;
@@ -122,10 +102,6 @@ private:
     wasi_env_t*        fWasiEnv;
 #endif
 
-#ifdef HIPHOP_USE_WAMR_DLL
-# include "WamrDllStub.hpp"
-    HMODULE fWamrDll;
-#endif
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
     static int sWamrEngineRefCount;
 #endif

@@ -370,7 +370,7 @@ TARGETS += $(WAMR_LIB_PATH)
 endif
 ifeq ($(HIPHOP_WASM_MODE),aot)
 # For AOT a MSVC DLL is used because the MinGW static lib is crashing.
-BASE_FLAGS += -DHIPHOP_USE_WAMR_DLL
+TARGETS += $(WAMR_DLL_PATH)
 endif
 endif
 
@@ -531,7 +531,7 @@ WAMR_DLL_FILE = libiwasm.dll
 WAMR_DLL_URL = https://github.com/lucianoiam/hiphop/files/8104817/$(WAMR_DLL_FILE).zip
 WAMR_DLL_PATH = $(HIPHOP_DEPS_PATH)/$(WAMR_DLL_FILE)
 
-TARGETS += $(WAMR_DLL_PATH)
+BASE_FLAGS += -DHIPHOP_WASM_DLL=$(WAMR_DLL_FILE)
 
 $(WAMR_DLL_PATH):
 	@echo Downloading libiwasm.dll
@@ -817,10 +817,10 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(WINDOWS),true)
-HIPHOP_TARGET += edge_lib
+HIPHOP_TARGET += edge_dll
 WEBVIEW_DLL = $(EDGE_WEBVIEW2_PATH)/runtimes/win-x64/native/WebView2Loader.dll
 
-edge_lib:
+edge_dll:
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2) \
 		&& cp $(WEBVIEW_DLL) $(LIB_DIR_LV2) \
