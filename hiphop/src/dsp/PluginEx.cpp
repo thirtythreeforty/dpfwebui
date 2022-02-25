@@ -32,7 +32,7 @@ PluginEx::~PluginEx()
 {
 #if HIPHOP_ENABLE_SHARED_MEMORY
     fMemory.close();
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 }
 
 #if HIPHOP_ENABLE_SHARED_MEMORY

@@ -22,10 +22,13 @@
 #include "extra/Path.hpp"
 
 #ifdef HIPHOP_WASM_BINARY_AOT
-// TODO - ARM version
-# define WASM_MODULE_PATH "/dsp/x86_64.aot"
+# ifdef __arm__
+#  define WASM_BINARY_FILE "aarch64.aot"
+# else
+#  define WASM_BINARY_FILE "x86_64.aot"
+# endif
 #else
-# define WASM_MODULE_PATH "/dsp/optimized.wasm"
+# define WASM_BINARY_FILE "optimized.wasm"
 #endif
 
 USE_NAMESPACE_DISTRHO
@@ -43,7 +46,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
     fRuntime.reset(new WasmRuntime());
 
     try {
-        const String path = Path::getPluginLibrary() + WASM_MODULE_PATH;
+        const String path = Path::getPluginLibrary() + "/dsp/" WASM_BINARY_FILE;
         fRuntime->load(path);
         onModuleLoad();
     } catch (const std::exception& ex) {

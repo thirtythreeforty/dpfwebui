@@ -180,7 +180,7 @@ void BaseWebHostUI::sharedMemoryChanged(const char* metadata, const unsigned cha
     String b64Data = String::asBase64(data, size);
     webViewPostMessage({"UI", "_sharedMemoryChanged", metadata, b64Data});
 }
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 
 void BaseWebHostUI::sizeChanged(uint width, uint height)
 {
@@ -200,14 +200,14 @@ void BaseWebHostUI::programLoaded(uint32_t index)
 {
     webViewPostMessage({"UI", "programLoaded", index});
 }
-#endif // DISTRHO_PLUGIN_WANT_PROGRAMS
+#endif
 
 #if DISTRHO_PLUGIN_WANT_STATE
 void BaseWebHostUI::stateChanged(const char* key, const char* value)
 {
     webViewPostMessage({"UI", "stateChanged", key, value});
 }
-#endif // DISTRHO_PLUGIN_WANT_STATE
+#endif
 
 void BaseWebHostUI::sizeRequest(const UiBlock& block)
 {
@@ -261,7 +261,7 @@ void BaseWebHostUI::initHandlers()
             static_cast<uint8_t>(args[2].getDouble())   // velocity
         );
     });
-#endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
+#endif
 
     fHandler["editParameter"] = std::make_pair(2, [this](const JsValueVector& args) {
         editParameter(
@@ -284,13 +284,13 @@ void BaseWebHostUI::initHandlers()
             args[1].getString()  // value
         );
     });
-#endif // DISTRHO_PLUGIN_WANT_STATE
+#endif
 
 #if DISTRHO_PLUGIN_WANT_STATEFILES
     fHandler["requestStateFile"] = std::make_pair(1, [this](const JsValueVector& args) {
         requestStateFile(args[0].getString() /*key*/);
     });
-#endif // DISTRHO_PLUGIN_WANT_STATEFILES
+#endif
 
     fHandler["isStandalone"] = std::make_pair(0, [this](const JsValueVector&) {
         webViewPostMessage({"UI", "isStandalone", isStandalone()});

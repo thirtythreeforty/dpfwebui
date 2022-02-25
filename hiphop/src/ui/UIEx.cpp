@@ -40,7 +40,7 @@ UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
     } else {
         d_stderr2("Could not create shared memory");
     }
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 }
 
 UIEx::~UIEx()
@@ -48,7 +48,7 @@ UIEx::~UIEx()
 #if HIPHOP_ENABLE_SHARED_MEMORY
     fMemory.close();
     setState("_shmem", "deinit");
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 }
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
@@ -93,4 +93,4 @@ void UIEx::uiIdle()
         fMemory.in.setRead();
     }
 }
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif

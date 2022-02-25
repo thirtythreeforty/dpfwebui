@@ -126,7 +126,6 @@ private:
 # include "WamrDllStub.hpp"
     HMODULE fWamrDll;
 #endif
-
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
     static int sWamrEngineRefCount;
 #endif

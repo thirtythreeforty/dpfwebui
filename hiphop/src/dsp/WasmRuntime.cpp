@@ -207,7 +207,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
             const wasmer_named_extern_t* ne = wasiImports.data[wasiImportIndex[name]];
             imports.data[i] = const_cast<wasm_extern_t *>(wasmer_named_extern_unwrap(ne));
         }
-#endif // HIPHOP_ENABLE_WASI
+#endif
         if (!moduleNeedsWasi) {
             wn = wasm_importtype_module(importTypes.data[i]);
             std::memcpy(name, wn->data, wn->size);
@@ -228,7 +228,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
     if (moduleNeedsWasi) {
         throw wasm_module_exception("WASI is not enabled but module requires WASI");
     }
-#endif // HIPHOP_ENABLE_WASI
+#endif
 
     // Insert host functions into imports vector
 
@@ -272,7 +272,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
     wasm_val_vec_t empty_val_vec = WASM_EMPTY_VEC;
     wasm_func_call(wasiStart, &empty_val_vec, &empty_val_vec);
     wasm_func_delete(wasiStart);
-#endif // HIPHOP_ENABLE_WASI
+#endif
 
     // Build a map of externs indexed by name
 
@@ -303,7 +303,7 @@ void WasmRuntime::destroyInstance()
         wasi_env_delete(fWasiEnv);
         fWasiEnv = nullptr;
     }
-#endif // HIPHOP_ENABLE_WASI
+#endif
 
     if (fExportsVec.size != 0) {
         wasm_extern_vec_delete(&fExportsVec);
@@ -445,4 +445,4 @@ WasmValue WasmRuntime::CToWTF16String(const char* s)
 
 #ifdef HIPHOP_WASM_RUNTIME_WAMR
 int WasmRuntime::sWamrEngineRefCount = 0;
-#endif // HIPHOP_WASM_RUNTIME_WAMR
+#endif

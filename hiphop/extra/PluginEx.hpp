@@ -43,7 +43,7 @@ public:
     bool   writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
 
     void setState(const char* key, const char* value) override;
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
 protected:
@@ -53,12 +53,12 @@ protected:
         (void)data;
         (void)size;
     }
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 
 private:
 #if HIPHOP_ENABLE_SHARED_MEMORY
     SharedMemoryImpl fMemory;
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEx)
 

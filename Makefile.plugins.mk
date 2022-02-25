@@ -20,6 +20,7 @@ HIPHOP_NETWORK_UI          ?= false
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
 # Web view implementation on Linux <gtk|cef>
 HIPHOP_LINUX_WEBVIEW       ?= gtk
+# WIP : universal build only available for non-network web UI and Wasmer DSP.
 # Set to false for building current architecture only
 HIPHOP_MACOS_UNIVERSAL     ?= false
 
@@ -137,6 +138,9 @@ endif
 
 ifeq ($(MACOS),true)
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
+ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+$(error Universal build is currently not available for WAMR)
+endif
 # Non CPU-specific optimization flags, see DPF Makefile.base.mk
 NOOPT = true
 MACOS_UNIVERSAL_FLAGS = -arch x86_64 -arch arm64
@@ -189,8 +193,13 @@ BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
 ifeq ($(WINDOWS),true)
 endif
 ifeq ($(HIPHOP_WASM_MODE),aot)
-# TODO - ARM version
-WASM_BINARY_FILE = x86_64.aot
+ifeq ($(CPU_I386_OR_X86_64),true)
+WAMRC_TARGET = x86_64
+endif
+ifeq ($(CPU_ARM_OR_AARCH64),true)
+WAMRC_TARGET = aarch64
+endif
+WASM_BINARY_FILE = $(WAMRC_TARGET).aot
 BASE_FLAGS += -DHIPHOP_WASM_BINARY_AOT
 endif
 ifeq ($(HIPHOP_WASM_MODE),interp)
@@ -408,14 +417,14 @@ WASMER_PKG_FILE_1 = wasmer-linux-amd64.tar.gz
 endif
 ifeq ($(MACOS),true)
 # There is no macOS universal binary of Wasmer, download both architectures and combine.
-WASMER_PKG_FILE_INTEL = wasmer-darwin-amd64.tar.gz
 WASMER_PKG_FILE_ARM = wasmer-darwin-arm64.tar.gz
-ifeq ($(CPU_I386_OR_X86_64),true)
-WASMER_PKG_FILE_1 = $(WASMER_PKG_FILE_INTEL)
-WASMER_PKG_FILE_2 = $(WASMER_PKG_FILE_ARM)
-else
+WASMER_PKG_FILE_INTEL = wasmer-darwin-amd64.tar.gz
+ifeq ($(CPU_ARM_OR_AARCH64),true)
 WASMER_PKG_FILE_1 = $(WASMER_PKG_FILE_ARM)
 WASMER_PKG_FILE_2 = $(WASMER_PKG_FILE_INTEL)
+else
+WASMER_PKG_FILE_1 = $(WASMER_PKG_FILE_INTEL)
+WASMER_PKG_FILE_2 = $(WASMER_PKG_FILE_ARM)
 endif
 endif
 WASMER_PKG_URL_1 = $(WASMER_URL)/$(WASMER_VERSION)/$(WASMER_PKG_FILE_1)
@@ -722,9 +731,14 @@ ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 ifeq ($(HIPHOP_WASM_MODE),aot)
 HIPHOP_TARGET += $(WASM_BINARY_PATH)
 
+ifeq ($(CPU_I386_OR_X86_64),true)
+# https://github.com/bytecodealliance/wasm-micro-runtime/issues/1022
+WAMRC_ARGS = --cpu=skylake
+endif
+
 $(WASM_BINARY_PATH): $(WASM_BYTECODE_PATH)
 	@echo "Compiling WASM AOT module"
-	@$(WAMRC_BIN_PATH) --target=x86_64 -o $(WASM_BINARY_PATH) --cpu=skylake \
+	@$(WAMRC_BIN_PATH) --target=$(WAMRC_TARGET) -o $(WASM_BINARY_PATH) $(WAMRC_ARGS) \
 		$(WASM_BYTECODE_PATH)
 endif
 endif

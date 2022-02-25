@@ -56,12 +56,12 @@ protected:
     }
 
     void uiIdle() override;
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 
 private:
 #if HIPHOP_ENABLE_SHARED_MEMORY
     SharedMemoryImpl fMemory;
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIEx)
 
