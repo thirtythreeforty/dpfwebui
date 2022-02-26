@@ -107,11 +107,11 @@ void BaseWebHostUI::load()
 {
     if (fWebView != nullptr) {
 #ifdef HIPHOP_NETWORK_UI
-        // TODO
+        String url("https://localhost:8000"); // TODO - address and port
 #else
         String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
-#endif
         fWebView->navigate(url);
+#endif
     }
 }
 

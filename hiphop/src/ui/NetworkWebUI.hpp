@@ -22,6 +22,8 @@
 #include "extra/UIEx.hpp"
 #include "WebServer.hpp"
 
+#include <libwebsockets.h>
+
 START_NAMESPACE_DISTRHO
 
 class NetworkWebUI : public UIEx
@@ -33,6 +35,14 @@ public:
     // TODO
 
 private:
+    static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
+                           void* user, void* in, size_t len);
+
+    char                      fLwsMountOrigin[PATH_MAX];
+    lws_http_mount            fLwsMount;
+    lws_protocols             fLwsProto[2];
+    lws_context_creation_info fLwsInfo;
+    lws_context*              fLwsContext;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkWebUI)
 

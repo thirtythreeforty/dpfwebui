@@ -284,6 +284,11 @@ ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
 BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
 endif
 
+ifeq ($(HIPHOP_NETWORK_UI),true)
+BASE_FLAGS += -I$(LWS_PATH)/include -I$(MBEDTLS_PATH)/include
+LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib -lwebsockets \
+              -L$(MBEDTLS_BUILD_PATH) -lmbedtls -lmbedcrypto -lmbedx509
+endif
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread -ldl
 endif
@@ -552,7 +557,7 @@ endif
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
 MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
-MBEDTLS_GIT_TAG = v3.1.0  # LWS build fails for 3.1.0 (Feb 2022)
+MBEDTLS_GIT_TAG = v3.0.0  # LWS build fails for 3.1.0 (Feb 2022)
 MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
 MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
 MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
