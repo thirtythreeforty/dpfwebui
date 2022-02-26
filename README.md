@@ -2,10 +2,10 @@ Hip-Hop / High Performance Hybrid Audio Plugins
 -----------------------------------------------
 
 This project provides [DPF](http://github.com/DISTRHO/DPF) compatible classes
-and a handy Makefile for creating audio plugins that run their UI in a web view.
-Main goal is to facilitate the creation of complex user interfaces leveraging
-JavaScript, HTML and related technologies. The web UI runs completely decoupled
-from the DSP core. The latter can be implemented in C++ or optionally [AssemblyScript](https://www.assemblyscript.org).
+and a Makefile for creating audio plugins that run their UI in a web view. Main
+goal is to facilitate the creation of complex user interfaces leveraging
+JavaScript, HTML and related technologies. The web UI runs decoupled from the
+DSP. The latter can be implemented in C++ or optionally [AssemblyScript](https://www.assemblyscript.org).
 
 ![Screenshot_2021-10-24_18-30-37](https://user-images.githubusercontent.com/930494/138603460-e8407acb-35db-4bcb-b991-7b7cd7e74381.png)
 
@@ -16,7 +16,7 @@ from the DSP core. The latter can be implemented in C++ or optionally [AssemblyS
 ### Features
 
 * Based on DISTRHO Plugin Framework (DPF)
-* C++ or AssemblyScript for DSP code
+* C++ or AssemblyScript for DSP development
 * HTML / CSS / JS for UI development
 * VST2 / VST3 / LV2 plugin formats
 * Linux / Mac / Windows
@@ -29,7 +29,7 @@ DSP|UI |Comments
 C++|JS |Web view user interface, see example [webgain](https://github.com/lucianoiam/hiphop/tree/master/examples/webgain).
 AS |JS |Web view user interface, see example [jitdrum](https://github.com/lucianoiam/hiphop/tree/master/examples/jitdrum).
 AS |C++|DPF Graphics Library (DGL), see example [astone](https://github.com/lucianoiam/hiphop/tree/master/examples/astone).
-C++|C++|Do not use this project, just use DPF instead.
+C++|C++|No need for this project, use DPF instead.
 
 For information on the implementation go [here](https://github.com/lucianoiam/hiphop/blob/master/doc/internals.md).
 
@@ -103,8 +103,8 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 
 The framework sports an accurate motto: "DPF is designed to make development of
 new plugins an easy and enjoyable task". It is a low footprint yet powerful tool
-that allows developers to focus on productivity by already solving many non
-trivial issues commonly found in the audio plugins domain.
+that allows developers to focus on productivity by already solving many
+non-trivial issues found in the audio plugins domain.
 
 What makes it great?
 

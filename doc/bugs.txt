@@ -1,15 +1,18 @@
+Keep each bug uniquely tagged for easy lookup across potentially multiple files.
+
+
 LINUX
 -----
 
-- LXDRAGDROPBUG : Drag and drop not working on both WKGTK and CEF web views.
+LXDRAGDROPBUG : Drag and drop not working on both WKGTK and CEF web views.
 
-- WKGTKRESIZEBUG : Broken CSS viewport units (vw/vh/vmin/vmax) in WebKitGTK 
-  web view due to workaround for https://bugs.webkit.org/show_bug.cgi?id=229227
+WKGTKRESIZEBUG : Broken CSS viewport units (vw/vh/vmin/vmax) in WebKitGTK web
+view due to workaround for https://bugs.webkit.org/show_bug.cgi?id=229227
 
 
 WINDOWS
 -------
 
-- WINWASMERBUG : WASM plugins crash on Carla and Live when running the Wasmer
-  runtime. Work as expected on REAPER, Renoise and Ardour 7. Crash reproducible
-  with both MinGW static lib and official MSVC wasmer.dll. No issues with WAMR.
+WINWASMERBUG : WASM plugins crash on Carla and Live when running the Wasmer
+runtime. Work as expected on REAPER, Renoise and Ardour 7. Crash reproducible
+with both MinGW static lib and official MSVC wasmer.dll. No issues with WAMR.

@@ -8,19 +8,18 @@ Plugins leveraging this feature embed the [WAMR](https://github.com/bytecodealli
 for running precompiled AssemblyScript code at near native performance.
 
 It is worth noting that the Wasm VM and the web view are completely separated
-entities that only communicate through a minimal key/value pairs interface
-provided by DPF. Decoupled DSP and UI code is enforced by DPF as one of its
-design goals and this is preserved when opting for AS and/or the web view
-features. The Wasm VM runs in parallel to the web view, and the latter will be
-loaded or unloaded depending the UI visibility state. There is no continuously
-running hidden web view or similar hacks involved.
+entities that only communicate through a key/value pairs interface provided by
+DPF (states) or shared memory. Decoupled DSP and UI code is enforced by DPF and
+this project builds upon this design. The Wasm VM runs in parallel to the web
+view, and the latter will be loaded or unloaded depending the UI visibility
+state. There is no continuously running hidden web view or similar hacks.
 
 Hip-Hop provides two AssemblyScript files that must be included in user projects:
 
 File      | Description
 ----------|-------------------------------------------------------------
-dpf.ts    | Public plugin interface, use this for writing plugins.
-index.ts  | Private plugin interface, basically glue code between C++ and the public interface.
+dpf.ts    | Public plugin interface, used for writing plugins.
+index.ts  | Private plugin interface, glue code between C++ and the public interface.
 
 User DSP code should follow the standard AssemblyScript project format described
 [here](https://www.assemblyscript.org/quick-start.html). AssemblyScript project
@@ -52,8 +51,7 @@ Windows 11 already ships with this library.
 Usage of JS frameworks is up to the developer. No web equivalent versions of the
 DPF/DGL widgets are provided. There are some options available:
 
-- Rely on stock HTML elements plus styling, it might be enough for some simple
-use cases.
+- Rely on stock HTML elements plus styling
 - Browse the web for available toolkits like this one [here](https://github.com/DeutscheSoft/toolkit)
 - Try my widgets library [here](https://github.com/lucianoiam/guinda). It
 is incomplete and still under development as of Aug '21.

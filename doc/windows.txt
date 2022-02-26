@@ -7,9 +7,9 @@ NOTES FOR WINDOWS
    the mingw-64 GCC.
 
 
-2. For building the plugin, Edge WebView2 SDK is required. Makefile will try to
-   download the SDK if the NuGet tool is already present. If not, NuGet will be
-   automatically downloaded for MinGW but on Linux that could need extra work
+2. For building the plugin the Edge WebView2 SDK is required. Makefile will try
+   to download the SDK if the NuGet tool is already present. If not, NuGet will
+   be automatically downloaded for MinGW but on Linux that could need extra work
    https://docs.microsoft.com/en-us/nuget/install-nuget-client-tools
    Some distros like Ubuntu already offer it: sudo apt install nuget
 
@@ -42,11 +42,11 @@ NOTES FOR WINDOWS
    export PATH="/c/Users/< USERNAME >/.cargo/bin:$PATH"
    git clone https://github.com/wasmerio/wasmer
    make -C wasmer
-   mkdir -p hiphop/lib/wasmer/include
-   cp wasmer/lib/c-api/tests/wasm-c-api/include/wasm.h hiphop/lib/wasmer/include
-   cp wasmer/lib/c-api/wasmer.h hiphop/lib/wasmer/include
-   mkdir -p hiphop/lib/wasmer/lib
-   cp wasmer/target/release/libwasmer.a hiphop/lib/wasmer/lib
+   mkdir -p hiphop/deps/wasmer/include
+   cp wasmer/lib/c-api/tests/wasm-c-api/include/wasm.h hiphop/deps/wasmer/include
+   cp wasmer/lib/c-api/wasmer.h hiphop/deps/wasmer/include
+   mkdir -p hiphop/deps/wasmer/lib
+   cp wasmer/target/release/libwasmer.a hiphop/deps/wasmer/lib
 
 
 5. Instructions on how to build libwasmer.a with debug symbols can be found here
