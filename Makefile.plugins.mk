@@ -139,7 +139,7 @@ endif
 ifeq ($(MACOS),true)
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-$(error Universal build is currently not available for WAMR)
+$(error Universal build is currently unavailable for WAMR)
 endif
 # Non CPU-specific optimization flags, see DPF Makefile.base.mk
 NOOPT = true
@@ -153,6 +153,7 @@ endif
 # ------------------------------------------------------------------------------
 # Include DPF Makefile for plugins
 
+# These commands cannot belong to a target because this Makefile relies on DPF's
 ifeq (,$(wildcard $(DPF_PATH)/Makefile))
 _ := $(shell git submodule update --init --recursive)
 endif
@@ -337,8 +338,8 @@ WAMRC_PATH = $(WAMR_PATH)/wamr-compiler
 WAMRC_BUILD_PATH = $(WAMRC_PATH)/build
 WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc
 
-# Disable WASI feature because it is not exposed by the C API.
-# HW_BOUND_CHECK not compiling on MinGW, producing no sound on Linux+AOT and
+# Disable WASI feature because it is not exposed by the WAMR C API.
+# HW_BOUND_CHECK not compiling on MinGW, leads to muted plugins on Linux+AOT and
 # crashing on Mac+AOT https://github.com/bytecodealliance/wasm-micro-runtime/pull/1001
 WAMR_CMAKE_ARGS = -DWAMR_BUILD_LIBC_WASI=0 -DWAMR_DISABLE_HW_BOUND_CHECK=1
 ifeq ($(HIPHOP_WASM_MODE),aot)
@@ -647,6 +648,7 @@ ifeq ($(HIPHOP_LINUX_WEBVIEW),cef)
 BASE_FLAGS += -DHIPHOP_LINUX_WEBVIEW_CEF
 endif
 
+# See Makefile.cef.mk and Makefile.gtk.mk
 HIPHOP_TARGET += lxhelper_bin
 
 LXHELPER_NAME = ui-helper
