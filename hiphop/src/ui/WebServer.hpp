@@ -22,6 +22,8 @@
 #include "src/DistrhoDefines.h"
 #include "distrho/extra/LeakDetector.hpp"
 
+#include <libwebsockets.h>
+
 START_NAMESPACE_DISTRHO
 
 class WebServer
@@ -33,6 +35,14 @@ public:
     // TODO
 
 private:
+    static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
+                           void* user, void* in, size_t len);
+
+    char                      fMountOrigin[PATH_MAX];
+    lws_http_mount            fMount;
+    lws_protocols             fProtocol[2];
+    lws_context_creation_info fContextInfo;
+    lws_context*              fContext;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebServer)
 

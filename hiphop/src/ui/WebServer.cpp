@@ -16,14 +16,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstring>
+
+#include "extra/Path.hpp"
 #include "WebServer.hpp"
+
+USE_NAMESPACE_DISTRHO
 
 WebServer::WebServer()
 {
-    // TODO
+    lws_set_log_level(LLL_ERR|LLL_WARN|LLL_DEBUG, 0);
+
+    std::memset(fProtocol, 0, sizeof(fProtocol));
+    fProtocol[0].name = "lws-dpf";
+    fProtocol[0].callback = WebServer::lwsCallback;
+
+    std::strcpy(fMountOrigin, Path::getPluginLibrary() + "/ui/");
+
+    std::memset(&fMount, 0, sizeof(fMount));
+    fMount.mountpoint       = "/";
+    fMount.mountpoint_len   = std::strlen(fMount.mountpoint);
+    fMount.origin           = fMountOrigin;
+    fMount.origin_protocol  = LWSMPRO_FILE;
+    fMount.def              = "index.html";
+#ifndef NDEBUG
+    // Caching headers
+    fMount.cache_max_age    = 3600;
+    fMount.cache_reusable   = 1;
+    fMount.cache_revalidate = 1;
+#endif
+
+    std::memset(&fContextInfo, 0, sizeof(fContextInfo));
+    fContextInfo.port      = 9090; // FIXME - pick available port from a range
+    fContextInfo.protocols = fProtocol;
+    fContextInfo.mounts    = &fMount;
+    fContextInfo.uid       = -1;
+    fContextInfo.gid       = -1;
+    fContextInfo.user      = this;
+
+    fContext = lws_create_context(&fContextInfo);
 }
 
 WebServer::~WebServer()
 {
+    if (fContext != nullptr) {
+        lws_context_destroy(fContext);
+        fContext = nullptr;
+    }
+}
+
+int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
+                           void* user, void* in, size_t len)
+{
     // TODO
+
+    return 0;
 }
