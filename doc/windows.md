@@ -35,6 +35,7 @@ NOTES FOR WINDOWS
    Windows version if npm is absent. https://github.com/msys2/MINGW-packages
    provides a recipe for building Node.js but as of Jul '21 it seems broken.
 
+   ```Bash
    pacman -S mingw-w64-x86_64-python2 mingw-w64-x86_64-nasm \
       mingw-w64-x86_64-c-ares mingw-w64-x86_64-http-parser \
       mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-libuv winpty \
@@ -42,6 +43,7 @@ NOTES FOR WINDOWS
    git clone https://github.com/msys2/MINGW-packages
    cd MINGW-packages/mingw-w64-nodejs
    makepkg
+   ```
 
 
 5. The default WebAssembly runtime is WAMR, however the static library built by
@@ -54,14 +56,16 @@ NOTES FOR WINDOWS
    - Install [Visual Studio Community](https://visualstudio.microsoft.com/downloads/)
    - Install [CMake for Windows](https://cmake.org/download/)
    - Install [Git for Windows](https://github.com/git-for-windows/git/releases/)
-   - Open Git bash 
-   - git clone https://github.com/bytecodealliance/wasm-micro-runtime
+   - Open Git bash and build
+   ```Bash
+     git clone https://github.com/bytecodealliance/wasm-micro-runtime
      cd wasm-micro-runtime/product-mini/platforms/windows
      mkdir build
      cd build
      cmake .. -DWAMR_BUILD_LIB_PTHREAD=1 -DWAMR_BUILD_AOT=1 \
               -DWAMR_BUILD_INTERP=0 -DWAMR_BUILD_LIBC_UVWASI=0
      cmake --build . --config Release
+   ```
    - Look for libiwasm.dll in ./Release
 
    Note that WAMR_BUILD_LIBC_UVWASI=0 is required otherwise plugins will crash.
@@ -72,9 +76,7 @@ NOTES FOR WINDOWS
    problem the Makefile downloads a custom build that is compatible with MinGW.
    If rebuilding Wasmer from source is needed, these are the steps:
 
-   https://stackoverflow.com/questions/47379214/step-by-step-instruction-to
-   -install-rust-and-cargo-for-mingw-with-msys2
-
+   ```Bash
    wget -O rustup-init.exe https://win.rustup.rs/
    ./rustup-init   (select host triple: x86_64-pc-windows-gnu)
    export PATH="/c/Users/< USERNAME >/.cargo/bin:$PATH"
@@ -85,6 +87,9 @@ NOTES FOR WINDOWS
    cp wasmer/lib/c-api/wasmer.h hiphop/deps/wasmer/include
    mkdir -p hiphop/deps/wasmer/lib
    cp wasmer/target/release/libwasmer.a hiphop/deps/wasmer/lib
+   ```
+   
+   More details [here](https://stackoverflow.com/questions/47379214/step-by-step-instruction-to-install-rust-and-cargo-for-mingw-with-msys2)
 
    As of Feb '22 this runtime makes plugins crash on some hosts like Ableton
    Live and Carla.
@@ -93,13 +98,17 @@ NOTES FOR WINDOWS
 7. Instructions on how to build libwasmer.a with debug symbols can be found here
    https://github.com/wasmerio/wasmer/issues/2571
 
+   ```Bash
    RUSTFLAGS="-C target-feature=+crt-static" cargo build \
      --manifest-path lib/c-api/Cargo.toml --no-default-features \
      --features wat,universal,dylib,staticlib,wasi,middlewares \
      --features cranelift
+   ```
 
    Then for debugging with Carla:
 
+   ```Bash
    gdb --args python ~/carla/source/frontend/carla
    set breakpoint pending on
    break wasm_module_new
+   ```
