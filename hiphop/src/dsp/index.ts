@@ -58,8 +58,8 @@ export function glue_write_midi_event(midiEvent: DISTRHO.MidiEvent): bool {
 export function glue_get_time_position(): DISTRHO.TimePosition {
     _get_time_position()
     let pos = new DISTRHO.TimePosition
-    pos.playing = <bool>_rw_int32_1
-    pos.frame = _rw_int64_1
+    pos.playing = <bool>_rw_int32_0
+    pos.frame = _rw_int64_0
     return pos
 }
 
@@ -96,11 +96,11 @@ export function _init_parameter(index: u32): void {
     const parameter = new DISTRHO.Parameter
     pluginInstance.initParameter(index, parameter)
 
-    _rw_int32_1 = parameter.hints
-    _ro_string_1 = _wtf16_to_c_string(parameter.name)
-    _rw_float32_1 = parameter.ranges.def
-    _rw_float32_2 = parameter.ranges.min
-    _rw_float32_3 = parameter.ranges.max
+    _rw_int32_0 = parameter.hints
+    _ro_string_0 = _wtf16_to_c_string(parameter.name)
+    _rw_float32_0 = parameter.ranges.def
+    _rw_float32_1 = parameter.ranges.min
+    _rw_float32_2 = parameter.ranges.max
 }
 
 export function _get_parameter_value(index: u32): f32 {
@@ -127,8 +127,8 @@ export function _init_state(index: u32): void {
 
     pluginInstance.initState(index, stateKey, defaultStateValue)
 
-    _ro_string_1 = _wtf16_to_c_string(stateKey.value)
-    _ro_string_2 = _wtf16_to_c_string(defaultStateValue.value)
+    _ro_string_0 = _wtf16_to_c_string(stateKey.value)
+    _ro_string_1 = _wtf16_to_c_string(defaultStateValue.value)
 }
 
 export function _set_state(key: ArrayBuffer, value: ArrayBuffer): void {
@@ -203,31 +203,31 @@ let raw_midi_events = new DataView(_rw_midi_block, 0, MAX_MIDI_EVENT_BYTES)
 // AssemblyScript does not support multi-values yet. Export a couple of generic
 // variables for returning complex data types like initParameter() requires.
 
+export let _rw_int32_0: i32
 export let _rw_int32_1: i32
 export let _rw_int32_2: i32
 export let _rw_int32_3: i32
-export let _rw_int32_4: i32
+export let _rw_int64_0: i64
 export let _rw_int64_1: i64
 export let _rw_int64_2: i64
 export let _rw_int64_3: i64
-export let _rw_int64_4: i64
+export let _rw_float32_0: f32
 export let _rw_float32_1: f32
 export let _rw_float32_2: f32
 export let _rw_float32_3: f32
-export let _rw_float32_4: f32
+export let _rw_float64_0: f64
 export let _rw_float64_1: f64
 export let _rw_float64_2: f64
 export let _rw_float64_3: f64
-export let _rw_float64_4: f64
+export let _ro_string_0: ArrayBuffer
 export let _ro_string_1: ArrayBuffer
-export let _ro_string_2: ArrayBuffer
 
 // These are useful for passing strings from host to Wasm
 
 const MAX_STRING_BYTES = 1024
 
+export let _rw_string_0 = new ArrayBuffer(MAX_STRING_BYTES)
 export let _rw_string_1 = new ArrayBuffer(MAX_STRING_BYTES)
-export let _rw_string_2 = new ArrayBuffer(MAX_STRING_BYTES)
 
 // Functions for converting between AssemblyScript and C strings
 

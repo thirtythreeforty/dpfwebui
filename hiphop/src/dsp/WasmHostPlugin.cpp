@@ -135,11 +135,11 @@ void WasmHostPlugin::initParameter(uint32_t index, Parameter& parameter)
         SCOPED_RUNTIME_LOCK();
 
         fRuntime->callFunction("_init_parameter", { MakeI32(index) });
-        parameter.hints      = fRuntime->getGlobal("_rw_int32_1").of.i32;
-        parameter.name       = fRuntime->getGlobalAsCString("_ro_string_1");
-        parameter.ranges.def = fRuntime->getGlobal("_rw_float32_1").of.f32;
-        parameter.ranges.min = fRuntime->getGlobal("_rw_float32_2").of.f32;
-        parameter.ranges.max = fRuntime->getGlobal("_rw_float32_3").of.f32;
+        parameter.hints      = fRuntime->getGlobal("_rw_int32_0").of.i32;
+        parameter.name       = fRuntime->getGlobalAsCString("_ro_string_0");
+        parameter.ranges.def = fRuntime->getGlobal("_rw_float32_0").of.f32;
+        parameter.ranges.min = fRuntime->getGlobal("_rw_float32_1").of.f32;
+        parameter.ranges.max = fRuntime->getGlobal("_rw_float32_2").of.f32;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -206,8 +206,8 @@ void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& default
         SCOPED_RUNTIME_LOCK();
 
         fRuntime->callFunction("_init_state", { MakeI32(index) });
-        stateKey = fRuntime->getGlobalAsCString("_ro_string_1");
-        defaultStateValue = fRuntime->getGlobalAsCString("_ro_string_2");
+        stateKey = fRuntime->getGlobalAsCString("_ro_string_0");
+        defaultStateValue = fRuntime->getGlobalAsCString("_ro_string_1");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -221,9 +221,9 @@ void WasmHostPlugin::setState(const char* key, const char* value)
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
+        const WasmValue wkey = fRuntime->getGlobal("_rw_string_0");
         fRuntime->copyCStringToMemory(wkey, key);
-        const WasmValue wval = fRuntime->getGlobal("_rw_string_2");
+        const WasmValue wval = fRuntime->getGlobal("_rw_string_1");
         fRuntime->copyCStringToMemory(wval, value);
         fRuntime->callFunction("_set_state", { wkey, wval });
     } catch (const std::exception& ex) {
@@ -238,7 +238,7 @@ String WasmHostPlugin::getState(const char* key) const
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        const WasmValue wkey = fRuntime->getGlobal("_rw_string_1");
+        const WasmValue wkey = fRuntime->getGlobal("_rw_string_0");
         fRuntime->copyCStringToMemory(wkey, key);
         const char* val = fRuntime->callFunctionReturnCString("_get_state", { wkey });
 
@@ -375,8 +375,8 @@ WasmValueVector WasmHostPlugin::getTimePosition(WasmValueVector params)
         SCOPED_RUNTIME_LOCK();
 
         const TimePosition& pos = Plugin::getTimePosition();
-        fRuntime->setGlobal("_rw_int32_1", MakeI32(pos.playing));
-        fRuntime->setGlobal("_rw_int64_1", MakeI64(pos.frame));
+        fRuntime->setGlobal("_rw_int32_0", MakeI32(pos.playing));
+        fRuntime->setGlobal("_rw_int64_0", MakeI64(pos.frame));
 
         return {};
     } catch (const std::exception& ex) {

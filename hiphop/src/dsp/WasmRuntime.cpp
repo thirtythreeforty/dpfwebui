@@ -427,7 +427,7 @@ WasmValue WasmRuntime::CToWTF16String(const char* s)
         throw wasm_module_exception("Wasm module does not export function _c_to_wtf16_string");
     }
 
-    const WasmValue wPtr = getGlobal("_rw_string_1");
+    const WasmValue wPtr = getGlobal("_rw_string_0");
 
     copyCStringToMemory(wPtr, s);
 
