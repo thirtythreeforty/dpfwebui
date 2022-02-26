@@ -293,10 +293,14 @@ else
 LINK_FLAGS += -lwebsockets
 endif
 LINK_FLAGS += -lmbedtls -lmbedcrypto -lmbedx509
+ifeq ($(LINUX),true)
+LINK_FLAGS += -lcap
 endif
 ifeq ($(WINDOWS),true)
 LINK_FLAGS += -lWs2_32
 endif
+endif
+
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread -ldl
 endif
@@ -608,10 +612,16 @@ endif
 
 TARGETS += $(LWS_LIB_PATH)
 
+ifeq ($(LINUX),true)
+LWS_CMAKE_ENV = export CFLAGS=-fPIC
+else
+LWS_CMAKE_ENV = true
+endif
+
 $(LWS_LIB_PATH): $(LWS_PATH)
 	@echo "Building libwebsockets static library"
-	@mkdir -p $(LWS_BUILD_PATH) && cd $(LWS_BUILD_PATH) && cmake .. $(LWS_CMAKE_ARGS) \
-		&& make
+	@mkdir -p $(LWS_BUILD_PATH) && cd $(LWS_BUILD_PATH) && $(LWS_CMAKE_ENV) \
+		&& cmake .. $(LWS_CMAKE_ARGS) && cmake --build .
 
 $(LWS_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
