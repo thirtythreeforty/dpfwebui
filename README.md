@@ -18,9 +18,12 @@ DSP. The latter can be implemented in C++ or optionally [AssemblyScript](https:/
 * Based on DISTRHO Plugin Framework (DPF)
 * C++ or AssemblyScript for DSP development
 * HTML / CSS / JS for UI development
-* VST2 / VST3 / LV2 plugin formats
+* VST2 / VST3(¹) / LV2 plugin formats
 * Linux / Mac / Windows
 * Just the powerful basics
+
+¹ Not ready for production as of Feb '22, some platform/host combinations still
+do not work. More details [here](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
 
 The following language combinations are possible:
 
@@ -32,9 +35,6 @@ AS |C++|DPF Graphics Library (DGL), see example [astone](https://github.com/luci
 C++|C++|No need for this project, use DPF instead.
 
 For information on the implementation go [here](https://github.com/lucianoiam/hiphop/blob/master/doc/internals.md).
-
-There are no known stopper bugs, however there is a [list](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt) of smaller details that would be nice to
-address at some point.
 
 ### Example JavaScript UI code
 

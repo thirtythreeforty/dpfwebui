@@ -7,6 +7,12 @@ LINUX
   view due to workaround for https://bugs.webkit.org/show_bug.cgi?id=229227
 
 
+MACOS
+-----
+
+- VST3 plugins not loading on Ableton Live, work as expected on REAPER.
+
+
 WINDOWS
 -------
 
