@@ -30,7 +30,45 @@ NOTES FOR WINDOWS
    Runtime must be installed https://developer.microsoft.com/microsoft-edge/webview2
 
 
-4. The official binary distribution of Wasmer requires MSVC. To overcome this
+4. Node.js is required for building the plugin AssemblyScript files. There is no
+   official binary package for MinGW. Makefile will try to download the regular
+   Windows version if npm is absent. https://github.com/msys2/MINGW-packages
+   provides a recipe for building Node.js but as of Jul '21 it seems broken.
+
+   pacman -S mingw-w64-x86_64-python2 mingw-w64-x86_64-nasm \
+      mingw-w64-x86_64-c-ares mingw-w64-x86_64-http-parser \
+      mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-libuv winpty \
+      mingw-w64-x86_64-icu
+   git clone https://github.com/msys2/MINGW-packages
+   cd MINGW-packages/mingw-w64-nodejs
+   makepkg
+
+
+5. The default WebAssembly runtime is WAMR, however the static library built by
+   MinGW GCC (libvmlib.a) seems to be broken when the WAMR ahead-of-time (AOT)
+   feature is enabled. For debugging purposes look [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/25fc006c3359e0788b42bc9a11923f8ffbe29577/core/iwasm/aot/aot_runtime.c#L1542)
+   and [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/52b6c73d9c2dee4973271a5cb1e2b9242a7a975b/core/iwasm/common/arch/invokeNative_general.c#L10).
+   To overcome this issue plugins link against a MSVC DLL instead which is
+   downloaded by the Makefile. Here are the steps for building it from source:
+
+   - Install [Visual Studio Community](https://visualstudio.microsoft.com/downloads/)
+   - Install [CMake for Windows](https://cmake.org/download/)
+   - Install [Git for Windows](https://github.com/git-for-windows/git/releases/)
+   - Open Git bash 
+   - git clone https://github.com/bytecodealliance/wasm-micro-runtime
+     cd wasm-micro-runtime/product-mini/platforms/windows
+     mkdir build
+     cd build
+     cmake .. -DWAMR_BUILD_LIB_PTHREAD=1 -DWAMR_BUILD_AOT=1 \
+              -DWAMR_BUILD_INTERP=0 -DWAMR_BUILD_LIBC_UVWASI=0
+     cmake --build . --config Release
+   - Look for libiwasm.dll in ./Release
+
+   Note that WAMR_BUILD_LIBC_UVWASI=0 is required otherwise plugins will crash.
+   Official instructions for building the DLL can be found [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/doc/build_wamr.md).
+
+
+6. The official binary distribution of Wasmer requires MSVC. To overcome this
    problem the Makefile downloads a custom build that is compatible with MinGW.
    If rebuilding Wasmer from source is needed, these are the steps:
 
@@ -48,8 +86,11 @@ NOTES FOR WINDOWS
    mkdir -p hiphop/deps/wasmer/lib
    cp wasmer/target/release/libwasmer.a hiphop/deps/wasmer/lib
 
+   As of Feb '22 this runtime makes plugins crash on some hosts like Ableton
+   Live and Carla.
 
-5. Instructions on how to build libwasmer.a with debug symbols can be found here
+
+7. Instructions on how to build libwasmer.a with debug symbols can be found here
    https://github.com/wasmerio/wasmer/issues/2571
 
    RUSTFLAGS="-C target-feature=+crt-static" cargo build \
@@ -62,17 +103,3 @@ NOTES FOR WINDOWS
    gdb --args python ~/carla/source/frontend/carla
    set breakpoint pending on
    break wasm_module_new
-
-
-5. Node.js is required for building the plugin AssemblyScript files. There is no
-   official binary package for MinGW. Makefile will try to download the regular
-   Windows version if npm is absent. https://github.com/msys2/MINGW-packages
-   provides a recipe for building Node.js but as of Jul '21 it seems broken.
-
-   pacman -S mingw-w64-x86_64-python2 mingw-w64-x86_64-nasm \
-      mingw-w64-x86_64-c-ares mingw-w64-x86_64-http-parser \
-      mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-libuv winpty \
-      mingw-w64-x86_64-icu
-   git clone https://github.com/msys2/MINGW-packages
-   cd MINGW-packages/mingw-w64-nodejs
-   makepkg

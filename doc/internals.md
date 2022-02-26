@@ -7,12 +7,13 @@ and specifically designed for targeting [WebAssembly](https://webassembly.org).
 Plugins leveraging this feature embed the [WAMR](https://github.com/bytecodealliance/wasm-micro-runtime) runtime or optionally [Wasmer](https://github.com/wasmerio/wasmer)
 for running precompiled AssemblyScript code at near native performance.
 
-It is worth noting that the Wasm VM and the web view are completely separated
-entities that only communicate through a key/value pairs interface provided by
-DPF (states) or shared memory. Decoupled DSP and UI code is enforced by DPF and
-this project builds upon this design. The Wasm VM runs in parallel to the web
-view, and the latter will be loaded or unloaded depending the UI visibility
-state. There is no continuously running hidden web view or similar hacks.
+It is worth noting that code running on top of the Wasm runtime and the web view
+are completely separated entities that only communicate through a key/value
+pairs interface provided by DPF (states) or shared memory. Completely decoupled
+DSP and UI is enforced by DPF and this project builds upon this design. The Wasm
+runtime runs in parallel to the web view, and the latter will be loaded or
+unloaded depending on the UI visibility state. There is no continuously running
+hidden web view or similar hacks involved.
 
 Hip-Hop provides two AssemblyScript files that must be included in user projects:
 
