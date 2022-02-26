@@ -285,9 +285,17 @@ BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
 endif
 
 ifeq ($(HIPHOP_NETWORK_UI),true)
-BASE_FLAGS += -I$(LWS_PATH)/include -I$(MBEDTLS_PATH)/include
-LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib -lwebsockets \
-              -L$(MBEDTLS_BUILD_PATH) -lmbedtls -lmbedcrypto -lmbedx509
+BASE_FLAGS += -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH) -I$(MBEDTLS_PATH)/include
+LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib  -L$(MBEDTLS_BUILD_PATH)
+ifeq ($(WINDOWS),true)
+LINK_FLAGS += -lwebsockets_static
+else
+LINK_FLAGS += -lwebsockets
+endif
+LINK_FLAGS += -lmbedtls -lmbedcrypto -lmbedx509
+endif
+ifeq ($(WINDOWS),true)
+LINK_FLAGS += -lWs2_32
 endif
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lpthread -ldl
@@ -594,6 +602,7 @@ LWS_CMAKE_ARGS = -DLWS_WITH_SHARED=0 -DLWS_WITHOUT_TESTAPPS=1 -DLWS_WITH_MBEDTLS
                  -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
 
 ifeq ($(WINDOWS),true)
+LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets_static.a
 LWS_CMAKE_ARGS += -G"MSYS Makefiles"
 endif
 
