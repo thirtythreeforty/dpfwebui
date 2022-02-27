@@ -25,7 +25,7 @@ class UI {
     constructor() {
         this._resolve = {};
 
-        window.webviewHost.addMessageListener((args) => {
+        window.host.addMessageListener((args) => {
             if (args[0] != 'UI') {
                 this.messageReceived(args); // passthrough
                 return;
@@ -158,7 +158,7 @@ class UI {
     // Non-DPF method for sending a message to the web host
     // void BaseWebHostUI::webViewPostMessage(const JsValueVector& args)
     postMessage(...args) {
-        window.webviewHost.postMessage(args);
+        window.host.postMessage(args);
     }
 
     // Non-DPF callback method for receiving messages from the web host

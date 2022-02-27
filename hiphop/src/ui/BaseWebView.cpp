@@ -24,14 +24,14 @@
 #define JS_DISABLE_CONTEXT_MENU  "window.oncontextmenu = (e) => e.preventDefault();"
 #define JS_DISABLE_PRINT         "window.onkeydown = (e) => { if ((e.key == 'p') && (e.ctrlKey || e.metaKey)) e.preventDefault(); };"
 #define JS_CREATE_CONSOLE        "window.console = {" \
-                                 "   log  : (s) => window.webviewHost.postMessage(['console', 'log'  , String(s)])," \
-                                 "   info : (s) => window.webviewHost.postMessage(['console', 'info' , String(s)])," \
-                                 "   warn : (s) => window.webviewHost.postMessage(['console', 'warn' , String(s)])," \
-                                 "   error: (s) => window.webviewHost.postMessage(['console', 'error', String(s)])" \
+                                 "   log  : (s) => window.host.postMessage(['console', 'log'  , String(s)])," \
+                                 "   info : (s) => window.host.postMessage(['console', 'info' , String(s)])," \
+                                 "   warn : (s) => window.host.postMessage(['console', 'warn' , String(s)])," \
+                                 "   error: (s) => window.host.postMessage(['console', 'error', String(s)])" \
                                  "};"
-#define JS_CREATE_HOST_OBJECT    "window.webviewHost = new EventTarget;" \
-                                 "window.webviewHost.addMessageListener = (lr) => {" \
-                                    "window.webviewHost.addEventListener('message', (ev) => lr(ev.detail))" \
+#define JS_CREATE_HOST_OBJECT    "window.host = new EventTarget;" \
+                                 "window.host.addMessageListener = (lr) => {" \
+                                    "window.host.addEventListener('message', (ev) => lr(ev.detail))" \
                                  "};"
 
 #define CSS_DISABLE_IMAGE_DRAG   "img { user-drag: none; -webkit-user-drag: none; }"
@@ -116,14 +116,14 @@ void BaseWebView::setEventHandler(WebViewEventHandler* handler)
 void BaseWebView::postMessage(const JsValueVector& args)
 {
     // This method implements something like a "reverse postMessage()" aiming to keep the bridge
-    // symmetrical. Global window.webviewHost is an EventTarget that can be listened for messages.
+    // symmetrical. Global window.host is an EventTarget that can be listened for messages.
     String payload = serializeJsValues(args);
 
     if (fPrintTraffic) {
         std::cerr << "cpp -> js : " << payload.buffer() << std::endl << std::flush;
     }
     
-    String js = "window.webviewHost.dispatchEvent(new CustomEvent('message',{detail:" + payload + "}));";
+    String js = "window.host.dispatchEvent(new CustomEvent('message',{detail:" + payload + "}));";
     runScript(js);
 }
 

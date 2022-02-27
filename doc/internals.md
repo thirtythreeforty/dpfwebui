@@ -69,7 +69,7 @@ useful for creating new hybrid features.
 
 For the UI a small JS wrapper around the C++ `DISTRHO::UI` class is provided
 for convenience. New integrations between C++ and JS code can be easily built
-around a single function `window.webviewHost.postMessage()` that wraps the
+around a single function `window.host.postMessage()` that wraps the
 platform specific calls:
 
 Linux CEF:
@@ -81,12 +81,12 @@ Linux GTK, Mac:
 Windows:
 `window.chrome.webview.postMessage()`
 
-In an attempt to keep the interface symmetrical and generic, `window.webviewHost`
+In an attempt to keep the interface symmetrical and generic, `window.host`
 is created as a `EventTarget` instance that can listened for events named
 'message' on the JS side. This allows C++ to send messages by running the
 following JS code:
 
-`window.webviewHost.dispatchEvent(new CustomEvent('message',{detail:args}))`
+`window.host.dispatchEvent(new CustomEvent('message',{detail:args}))`
 
 The `DISTRHO::WebHostUI` and JS `DISTRHO.UI` classes use the above mechanism
 to map some useful plugin methods, like the ones shown in the first code example
@@ -97,7 +97,7 @@ The bridge interface in a nutshell:
 ```
 // Send from JS to C++
 
-window.webviewHost.postMessage([...]);
+window.host.postMessage([...]);
 
 void WebHostUI::webMessageReceived(const JsValueVector&) {
 
@@ -109,7 +109,7 @@ void WebHostUI::webMessageReceived(const JsValueVector&) {
 
 WebHostUI::webPostMessage({...});
 
-window.webviewHost.addMessageListener((args) => {
+window.host.addMessageListener((args) => {
     
     // Receive in JS from C++
 

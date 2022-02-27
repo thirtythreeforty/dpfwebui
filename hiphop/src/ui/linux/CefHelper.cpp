@@ -27,7 +27,7 @@
 #include "distrho/extra/sofd/libsofd.h"
 #include "extra/Path.hpp"
 
-#define JS_POST_MESSAGE_SHIM "window.webviewHost.postMessage = (args) => window.hostPostMessage(args);"
+#define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.hostPostMessage(args);"
 
 static int XErrorHandlerImpl(Display* display, XErrorEvent* event);
 static int XIOErrorHandlerImpl(Display* display);

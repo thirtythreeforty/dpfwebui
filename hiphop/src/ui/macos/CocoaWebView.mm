@@ -39,7 +39,7 @@
 #define fNsWebView    ((DistrhoWebView *)fWebView)
 #define fNsDelegate   ((DistrhoWebViewDelegate *)fDelegate)
 
-#define JS_POST_MESSAGE_SHIM "window.webviewHost.postMessage = (args) => window.webkit.messageHandlers.host.postMessage(args);"
+#define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.webkit.messageHandlers.host.postMessage(args);"
 
 USE_NAMESPACE_DISTRHO
 
