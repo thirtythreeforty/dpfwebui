@@ -16,24 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LINUX_WEB_HOST_UI_HPP
-#define LINUX_WEB_HOST_UI_HPP
+#ifndef LINUX_WEB_UI_HPP
+#define LINUX_WEB_UI_HPP
 
 // Avoid X11 Window and DGL::Window clashing during build by
 // including Xlib before any other header that includes DPF.
 #include <X11/Xlib.h>
 
-#include "../BaseWebHostUI.hpp"
+#include "../BaseWebUI.hpp"
 #include "ChildProcessWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class LinuxWebHostUI : public BaseWebHostUI
+class LinuxWebUI : public BaseWebUI
 {
 public:
-    LinuxWebHostUI(uint baseWidth = 0, uint baseHeight = 0,
+    LinuxWebUI(uint baseWidth = 0, uint baseHeight = 0,
         uint32_t backgroundColor = 0xffffffff, bool startLoading = true);
-    virtual ~LinuxWebHostUI();
+    virtual ~LinuxWebUI();
 
     void openSystemWebBrowser(String& url) override;
 
@@ -43,10 +43,10 @@ protected:
     void      processStandaloneEvents() override;
 
 private:
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LinuxWebHostUI)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LinuxWebUI)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // LINUX_WEB_HOST_UI_HPP
+#endif  // LINUX_WEB_UI_HPP

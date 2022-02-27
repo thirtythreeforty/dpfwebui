@@ -88,7 +88,7 @@ following JS code:
 
 `window.host.dispatchEvent(new CustomEvent('message',{detail:args}))`
 
-The `DISTRHO::WebHostUI` and JS `DISTRHO.UI` classes use the above mechanism
+The `DISTRHO::WebUI` and JS `DISTRHO.UI` classes use the above mechanism
 to map some useful plugin methods, like the ones shown in the first code example
 of the main README.
 
@@ -99,7 +99,7 @@ The bridge interface in a nutshell:
 
 window.host.postMessage([...]);
 
-void WebHostUI::webMessageReceived(const JsValueVector&) {
+void WebUI::webMessageReceived(const JsValueVector&) {
 
    // Receive in C++ from JS
 
@@ -107,7 +107,7 @@ void WebHostUI::webMessageReceived(const JsValueVector&) {
 
 // Send from C++ to JS
 
-WebHostUI::webPostMessage({...});
+WebUI::webPostMessage({...});
 
 window.host.addMessageListener((args) => {
     

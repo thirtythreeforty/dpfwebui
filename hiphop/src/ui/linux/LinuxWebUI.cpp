@@ -19,11 +19,11 @@
 #include <errno.h>
 #include <X11/Xresource.h>
 
-#include "LinuxWebHostUI.hpp"
+#include "LinuxWebUI.hpp"
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(BaseWebHostUI* ui)
+float DISTRHO::getDisplayScaleFactor(BaseWebUI* ui)
 {
     if (ui == nullptr) {
         return 1.f;
@@ -34,9 +34,9 @@ float DISTRHO::getDisplayScaleFactor(BaseWebHostUI* ui)
     return webview->getDisplayScaleFactor();
 }
 
-LinuxWebHostUI::LinuxWebHostUI(uint baseWidth, uint baseHeight,
+LinuxWebUI::LinuxWebUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : BaseWebHostUI(baseWidth, baseHeight, backgroundColor)
+    : BaseWebUI(baseWidth, baseHeight, backgroundColor)
 {
     if (!shouldCreateWebView()) {
         return;
@@ -64,12 +64,12 @@ LinuxWebHostUI::LinuxWebHostUI(uint baseWidth, uint baseHeight,
     }
 }
 
-LinuxWebHostUI::~LinuxWebHostUI()
+LinuxWebUI::~LinuxWebUI()
 {
     // TODO - standalone support
 }
 
-void LinuxWebHostUI::openSystemWebBrowser(String& url)
+void LinuxWebUI::openSystemWebBrowser(String& url)
 {
     char buf[256];
     snprintf(buf, sizeof(buf), "xdg-open %s", url.buffer());
@@ -79,18 +79,18 @@ void LinuxWebHostUI::openSystemWebBrowser(String& url)
     }
 }
 
-void LinuxWebHostUI::sizeRequest(const UiBlock& block)
+void LinuxWebUI::sizeRequest(const UiBlock& block)
 {
     queue(block);   // queue for next uiIdle() call
 }
 
-uintptr_t LinuxWebHostUI::createStandaloneWindow()
+uintptr_t LinuxWebUI::createStandaloneWindow()
 {
     // TODO - standalone support
     return 0;
 }
 
-void LinuxWebHostUI::processStandaloneEvents()
+void LinuxWebUI::processStandaloneEvents()
 {
     // TODO - standalone support
 }

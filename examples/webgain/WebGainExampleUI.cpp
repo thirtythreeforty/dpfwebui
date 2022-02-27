@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "WebHostUI.hpp"
+#include "WebUI.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class WebGainExampleUI : public WebHostUI
+class WebGainExampleUI : public WebUI
 {
 public:
     // The color argument is for painting the native window background before
@@ -28,10 +28,10 @@ public:
     // helps eliminating flicker when opening the plugin user interface.
 
     WebGainExampleUI()
-        : WebHostUI(600 /*width*/, 300 /*width*/, 0xD4B6EFFF /*background*/, false /*load*/)
+        : WebUI(600 /*width*/, 300 /*width*/, 0xD4B6EFFF /*background*/, false /*load*/)
     {
         // Web view not ready yet. Calls to runScript() or any DPF methods mapped
-        // by WebHostUI are forbidden. Mapped methods are those that have their
+        // by WebUI are forbidden. Mapped methods are those that have their
         // counterparts in JavaScript; they rely on message passing and ultimately
         // runScript(). Setting the parent class constructor parameter startLoading
         // to false gives a chance to inject any needed scripts here, for example:

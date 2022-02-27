@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "WindowsWebHostUI.hpp"
+#include "WindowsWebUI.hpp"
 
 #include <shellapi.h>
 #include <shellscalingapi.h>
@@ -25,7 +25,7 @@ BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam);
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(BaseWebHostUI* ui)
+float DISTRHO::getDisplayScaleFactor(BaseWebUI* ui)
 {
     float k = 1.f;
 
@@ -73,9 +73,9 @@ float DISTRHO::getDisplayScaleFactor(BaseWebHostUI* ui)
     return k;
 }
 
-WindowsWebHostUI::WindowsWebHostUI(uint baseWidth, uint baseHeight,
+WindowsWebUI::WindowsWebUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : BaseWebHostUI(baseWidth, baseHeight, backgroundColor)
+    : BaseWebUI(baseWidth, baseHeight, backgroundColor)
     , fHostHWnd(0)
 {
     if (!shouldCreateWebView()) {
@@ -106,28 +106,28 @@ WindowsWebHostUI::WindowsWebHostUI(uint baseWidth, uint baseHeight,
     }
 }
 
-WindowsWebHostUI::~WindowsWebHostUI()
+WindowsWebUI::~WindowsWebUI()
 {
     // TODO - standalone support
 }
 
-void WindowsWebHostUI::openSystemWebBrowser(String& url)
+void WindowsWebUI::openSystemWebBrowser(String& url)
 {
     ShellExecute(0, "open", url.buffer(), 0, 0, SW_SHOWNORMAL);
 }
 
-uintptr_t WindowsWebHostUI::createStandaloneWindow()
+uintptr_t WindowsWebUI::createStandaloneWindow()
 {
     // TODO - standalone support
     return 0;
 }
 
-void WindowsWebHostUI::processStandaloneEvents()
+void WindowsWebUI::processStandaloneEvents()
 {
     // TODO - standalone support
 }
 
-void WindowsWebHostUI::hostWindowSendKeyEvent(UINT message, KBDLLHOOKSTRUCT* lpData)
+void WindowsWebUI::hostWindowSendKeyEvent(UINT message, KBDLLHOOKSTRUCT* lpData)
 {
     // Translate low level keyboard events into a format suitable for SendMessage()
     WPARAM wParam = lpData->vkCode;

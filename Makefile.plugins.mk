@@ -106,7 +106,7 @@ endif
 
 ifeq ($(WEB_UI),true)
 HIPHOP_FILES_UI  = UIEx.cpp \
-                   BaseWebHostUI.cpp \
+                   BaseWebUI.cpp \
                    BaseWebView.cpp \
                    JsValue.cpp
 ifeq ($(HIPHOP_NETWORK_UI),true)
@@ -114,17 +114,17 @@ HIPHOP_FILES_UI += NetworkWebUI.cpp \
                    WebServer.cpp
 endif
 ifeq ($(LINUX),true)
-HIPHOP_FILES_UI += linux/LinuxWebHostUI.cpp \
+HIPHOP_FILES_UI += linux/LinuxWebUI.cpp \
                    linux/ChildProcessWebView.cpp \
                    linux/IpcChannel.cpp \
                    linux/ipc.c
 endif
 ifeq ($(MACOS),true)
-HIPHOP_FILES_UI += macos/MacWebHostUI.mm \
+HIPHOP_FILES_UI += macos/MacWebUI.mm \
                    macos/CocoaWebView.mm
 endif
 ifeq ($(WINDOWS),true)
-HIPHOP_FILES_UI += windows/WindowsWebHostUI.cpp \
+HIPHOP_FILES_UI += windows/WindowsWebUI.cpp \
                    windows/EdgeWebView.cpp \
                    windows/WebView2EventHandler.cpp \
                    windows/cJSON.c

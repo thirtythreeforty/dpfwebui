@@ -16,24 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WEB_HOST_UI_HPP
-#define WEB_HOST_UI_HPP
+#ifndef NETWORK_UI_HPP
+#define NETWORK_UI_HPP
 
-#include "src/DistrhoDefines.h"
+#include "extra/UIEx.hpp"
+#include "WebServer.hpp"
 
-#ifdef DISTRHO_OS_LINUX
-# include "ui/linux/LinuxWebHostUI.hpp"
-typedef LinuxWebHostUI WebHostUI;
-#endif
+START_NAMESPACE_DISTRHO
 
-#ifdef DISTRHO_OS_MAC
-# include "ui/macos/MacWebHostUI.hpp"
-typedef MacWebHostUI WebHostUI;
-#endif
+class NetworkUI : public UIEx
+{
+public:
+    NetworkUI(uint width = 0, uint height = 0, bool automaticallyScaleAndSetAsMinimumSize = false);
+    virtual ~NetworkUI();
 
-#ifdef DISTRHO_OS_WINDOWS
-# include "ui/windows/WindowsWebHostUI.hpp"
-typedef WindowsWebHostUI WebHostUI;
-#endif
+    // TODO
 
-#endif  // WEB_HOST_UI_HPP
+private:
+    WebServer fServer;
+
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkUI)
+
+};
+
+END_NAMESPACE_DISTRHO
+
+#endif  // NETWORK_UI_HPP

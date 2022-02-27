@@ -16,17 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "NetworkWebUI.hpp"
+#ifndef WEB_UI_HPP
+#define WEB_UI_HPP
 
-USE_NAMESPACE_DISTRHO
+#include "src/DistrhoDefines.h"
 
-NetworkWebUI::NetworkWebUI(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
-    : UIEx(width, height, automaticallyScaleAndSetAsMinimumSize)
-{
-    // TODO
-}
+#ifdef DISTRHO_OS_LINUX
+# include "ui/linux/LinuxWebUI.hpp"
+typedef LinuxWebUI WebUI;
+#endif
 
-NetworkWebUI::~NetworkWebUI()
-{
-    // TODO
-}
+#ifdef DISTRHO_OS_MAC
+# include "ui/macos/MacWebUI.hpp"
+typedef MacWebUI WebUI;
+#endif
+
+#ifdef DISTRHO_OS_WINDOWS
+# include "ui/windows/WindowsWebUI.hpp"
+typedef WindowsWebUI WebUI;
+#endif
+
+#endif  // WEB_UI_HPP

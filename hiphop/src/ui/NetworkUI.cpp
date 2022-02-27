@@ -16,34 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MAC_WEB_HOST_UI_HPP
-#define MAC_WEB_HOST_UI_HPP
+#include "NetworkUI.hpp"
 
-#include "../BaseWebHostUI.hpp"
-#include "CocoaWebView.hpp"
+USE_NAMESPACE_DISTRHO
 
-START_NAMESPACE_DISTRHO
-
-class MacWebHostUI : public BaseWebHostUI
+NetworkUI::NetworkUI(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
+    : UIEx(width, height, automaticallyScaleAndSetAsMinimumSize)
 {
-public:
-    MacWebHostUI(uint baseWidth = 0, uint baseHeight = 0,
-        uint32_t backgroundColor = 0xffffffff, bool startLoading = true);
-    virtual ~MacWebHostUI();
+    // TODO
+}
 
-    void openSystemWebBrowser(String& url) override;
-
-protected:
-    uintptr_t createStandaloneWindow() override;
-    void      processStandaloneEvents() override;
-
-private:
-    uintptr_t fWindow;
-
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MacWebHostUI)
-
-};
-
-END_NAMESPACE_DISTRHO
-
-#endif  // MAC_WEB_HOST_UI_HPP
+NetworkUI::~NetworkUI()
+{
+    // TODO
+}

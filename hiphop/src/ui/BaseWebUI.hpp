@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BASE_WEB_HOST_UI_HPP
-#define BASE_WEB_HOST_UI_HPP
+#ifndef BASE_WEB_UI_HPP
+#define BASE_WEB_UI_HPP
 
 #include <functional>
 #include <unordered_map>
@@ -27,26 +27,26 @@
 #include "BaseWebView.hpp"
 
 #ifdef HIPHOP_NETWORK_UI
-# include "NetworkWebUI.hpp"
+# include "NetworkUI.hpp"
 #endif
 
 START_NAMESPACE_DISTRHO
 
 #ifdef HIPHOP_NETWORK_UI
-typedef NetworkWebUI BaseUI; // support for https+ws clients
+typedef NetworkUI BaseUI; // support for https+ws clients
 #else
 typedef UIEx BaseUI; // support local webview only
 #endif
 
-class BaseWebHostUI;
-float getDisplayScaleFactor(BaseWebHostUI* ui); // implemented for each platform
+class BaseWebUI;
+float getDisplayScaleFactor(BaseWebUI* ui); // implemented for each platform
 
-class BaseWebHostUI : public BaseUI, private WebViewEventHandler
+class BaseWebUI : public BaseUI, private WebViewEventHandler
 {
 public:
-    BaseWebHostUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
+    BaseWebUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
         bool startLoading = true);
-    virtual ~BaseWebHostUI();
+    virtual ~BaseWebUI();
 
     typedef std::function<void()> UiBlock;
 
@@ -125,10 +125,10 @@ private:
     InitMessageQueue  fInitMessageQueue;
     MessageHandlerMap fHandler;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseWebHostUI)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseWebUI)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // BASE_WEB_HOST_UI_HPP
+#endif  // BASE_WEB_UI_HPP

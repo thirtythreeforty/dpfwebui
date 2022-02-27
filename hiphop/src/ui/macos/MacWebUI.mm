@@ -18,13 +18,13 @@
 
 #import <AppKit/Appkit.h>
 
-#include "MacWebHostUI.hpp"
+#include "MacWebUI.hpp"
 
 #define fNsWindow ((NSWindow*)fWindow)
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(BaseWebHostUI* ui)
+float DISTRHO::getDisplayScaleFactor(BaseWebUI* ui)
 {
     if (ui == nullptr) {
         return [NSScreen mainScreen].backingScaleFactor;
@@ -35,9 +35,9 @@ float DISTRHO::getDisplayScaleFactor(BaseWebHostUI* ui)
     return window.backingScaleFactor;
 }
 
-MacWebHostUI::MacWebHostUI(uint baseWidth, uint baseHeight,
+MacWebUI::MacWebUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : BaseWebHostUI(baseWidth, baseHeight, backgroundColor)
+    : BaseWebUI(baseWidth, baseHeight, backgroundColor)
     , fWindow(0)
 {
     if (!shouldCreateWebView()) {
@@ -51,13 +51,13 @@ MacWebHostUI::MacWebHostUI(uint baseWidth, uint baseHeight,
     }
 }
 
-MacWebHostUI::~MacWebHostUI()
+MacWebUI::~MacWebUI()
 {
     [fNsWindow orderOut:nil];
     [fNsWindow release];
 }
 
-void MacWebHostUI::openSystemWebBrowser(String& url)
+void MacWebUI::openSystemWebBrowser(String& url)
 {
     NSString *s = [[NSString alloc] initWithCString:url.buffer() encoding:NSUTF8StringEncoding];
     NSURL *nsUrl = [[NSURL alloc] initWithString:s];
@@ -66,7 +66,7 @@ void MacWebHostUI::openSystemWebBrowser(String& url)
     [s release];
 }
 
-uintptr_t MacWebHostUI::createStandaloneWindow()
+uintptr_t MacWebUI::createStandaloneWindow()
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
@@ -88,7 +88,7 @@ uintptr_t MacWebHostUI::createStandaloneWindow()
     return (uintptr_t)window.contentView;
 }
 
-void MacWebHostUI::processStandaloneEvents()
+void MacWebUI::processStandaloneEvents()
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     NSDate* date = [NSDate distantPast];

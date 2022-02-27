@@ -42,7 +42,7 @@ class UI {
             }
         });
 
-        // Call WebHostUI::flushInitMessageQueue() to receive any UI message
+        // Call WebUI::flushInitMessageQueue() to receive any UI message
         // generated while the web view was still loading. Since this involves
         // message passing, it will not cause any UI methods to be triggered
         // synchronously and it is safe to indirectly call from super() in
@@ -132,37 +132,37 @@ class UI {
     }
 
     // Non-DPF method for grabbing or releasing the keyboard focus
-    // void BaseWebHostUI::setKeyboardFocus()
+    // void BaseWebUI::setKeyboardFocus()
     setKeyboardFocus(focus) {
         this._call('setKeyboardFocus', focus);
     }
 
     // Non-DPF method for opening the default system browser
-    // void BaseWebHostUI::openSystemWebBrowser(String& url)
+    // void BaseWebUI::openSystemWebBrowser(String& url)
     openSystemWebBrowser(url) {
         this._call('openSystemWebBrowser', url);
     }
 
     // Non-DPF method that returns the UI width at initialization time
-    // uint BaseWebHostUI::getInitialWidth()
+    // uint BaseWebUI::getInitialWidth()
     async getInitialWidth() {
         return this._callAndExpectReply('getInitialWidth');
     }
 
     // Non-DPF method that returns the UI height at initialization time
-    // uint BaseWebHostUI::getInitialHeight()
+    // uint BaseWebUI::getInitialHeight()
     async getInitialHeight() {
         return this._callAndExpectReply('getInitialHeight');
     }
 
     // Non-DPF method for sending a message to the web host
-    // void BaseWebHostUI::webViewPostMessage(const JsValueVector& args)
+    // void BaseWebUI::webViewPostMessage(const JsValueVector& args)
     postMessage(...args) {
         window.host.postMessage(args);
     }
 
     // Non-DPF callback method for receiving messages from the web host
-    // void BaseWebHostUI::webMessageReceived(const JsValueVector& args)
+    // void BaseWebUI::webMessageReceived(const JsValueVector& args)
     messageReceived(args) {
         // default empty implementation
     }

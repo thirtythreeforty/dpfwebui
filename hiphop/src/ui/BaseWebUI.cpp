@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "BaseWebHostUI.hpp"
+#include "BaseWebUI.hpp"
 
 #include <iostream>
 
@@ -35,7 +35,7 @@ USE_NAMESPACE_DISTRHO
 // VST3/Mac plugins on secondary displays might open with wrong dimensions.
 #define MAIN_DISPLAY_SCALE_FACTOR() getDisplayScaleFactor(0)
 
-BaseWebHostUI::BaseWebHostUI(uint widthCssPx, uint heightCssPx,
+BaseWebUI::BaseWebUI(uint widthCssPx, uint heightCssPx,
         uint32_t backgroundColor, bool /*startLoading*/)
     : BaseUI(MAIN_DISPLAY_SCALE_FACTOR() * widthCssPx, MAIN_DISPLAY_SCALE_FACTOR() * heightCssPx)
     , fInitialWidth(widthCssPx)
@@ -49,27 +49,27 @@ BaseWebHostUI::BaseWebHostUI(uint widthCssPx, uint heightCssPx,
     initHandlers();
 }
 
-BaseWebHostUI::~BaseWebHostUI()
+BaseWebUI::~BaseWebUI()
 {
     if (fWebView != nullptr) {
         delete fWebView;
     }
 }
 
-void BaseWebHostUI::queue(const UiBlock& block)
+void BaseWebUI::queue(const UiBlock& block)
 {
     fUiBlock = block;
     fUiBlockQueued = true;
 }
 
-bool BaseWebHostUI::shouldCreateWebView()
+bool BaseWebUI::shouldCreateWebView()
 {
     // When running as a plugin the UI ctor/dtor can be repeatedly called with
     // no parent window available, do not create the web view in such cases.
     return isStandalone() || (getParentWindowHandle() != 0);
 }
 
-void BaseWebHostUI::setWebView(BaseWebView* webView)
+void BaseWebUI::setWebView(BaseWebView* webView)
 {
     fWebView = webView;
 
@@ -103,7 +103,7 @@ void BaseWebHostUI::setWebView(BaseWebView* webView)
     setSize(width, height);
 }
 
-void BaseWebHostUI::load()
+void BaseWebUI::load()
 {
     if (fWebView != nullptr) {
 #ifdef HIPHOP_NETWORK_UI
@@ -115,14 +115,14 @@ void BaseWebHostUI::load()
     }
 }
 
-void BaseWebHostUI::runScript(String& source)
+void BaseWebUI::runScript(String& source)
 {
     if (fWebView != nullptr) {
         fWebView->runScript(source);
     }
 }
 
-void BaseWebHostUI::injectScript(String& source)
+void BaseWebUI::injectScript(String& source)
 {
     // Cannot inject scripts after navigation has started
     if (fWebView != nullptr) {
@@ -130,7 +130,7 @@ void BaseWebHostUI::injectScript(String& source)
     }
 }
 
-void BaseWebHostUI::webViewPostMessage(const JsValueVector& args)
+void BaseWebUI::webViewPostMessage(const JsValueVector& args)
 {
     if (fMessageQueueReady) {
         fWebView->postMessage(args);
@@ -139,7 +139,7 @@ void BaseWebHostUI::webViewPostMessage(const JsValueVector& args)
     }
 }
 
-void BaseWebHostUI::flushInitMessageQueue()
+void BaseWebUI::flushInitMessageQueue()
 {
     if (fMessageQueueReady) {
         return;
@@ -154,12 +154,12 @@ void BaseWebHostUI::flushInitMessageQueue()
     fInitMessageQueue.clear();
 }
 
-void BaseWebHostUI::setKeyboardFocus(bool focus)
+void BaseWebUI::setKeyboardFocus(bool focus)
 {
     fWebView->setKeyboardFocus(focus);
 }
 
-void BaseWebHostUI::uiIdle()
+void BaseWebUI::uiIdle()
 {
     BaseUI::uiIdle();
     
@@ -174,7 +174,7 @@ void BaseWebHostUI::uiIdle()
 }
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
-void BaseWebHostUI::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+void BaseWebUI::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
 {
     (void)size;
     String b64Data = String::asBase64(data, size);
@@ -182,7 +182,7 @@ void BaseWebHostUI::sharedMemoryChanged(const char* metadata, const unsigned cha
 }
 #endif
 
-void BaseWebHostUI::sizeChanged(uint width, uint height)
+void BaseWebUI::sizeChanged(uint width, uint height)
 {
     UI::sizeChanged(width, height);
     
@@ -190,31 +190,31 @@ void BaseWebHostUI::sizeChanged(uint width, uint height)
     webViewPostMessage({"UI", "sizeChanged", width, height});
 }
 
-void BaseWebHostUI::parameterChanged(uint32_t index, float value)
+void BaseWebUI::parameterChanged(uint32_t index, float value)
 {
     webViewPostMessage({"UI", "parameterChanged", index, value});
 }
 
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
-void BaseWebHostUI::programLoaded(uint32_t index)
+void BaseWebUI::programLoaded(uint32_t index)
 {
     webViewPostMessage({"UI", "programLoaded", index});
 }
 #endif
 
 #if DISTRHO_PLUGIN_WANT_STATE
-void BaseWebHostUI::stateChanged(const char* key, const char* value)
+void BaseWebUI::stateChanged(const char* key, const char* value)
 {
     webViewPostMessage({"UI", "stateChanged", key, value});
 }
 #endif
 
-void BaseWebHostUI::sizeRequest(const UiBlock& block)
+void BaseWebUI::sizeRequest(const UiBlock& block)
 {
     block();    // on Linux block execution is queued
 }
 
-void BaseWebHostUI::initHandlers()
+void BaseWebUI::initHandlers()
 {
     // It is not possible to implement JS synchronous calls that return values
     // without resorting to dirty hacks. Use JS async functions instead, and
@@ -339,12 +339,12 @@ void BaseWebHostUI::initHandlers()
 #endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 }
 
-void BaseWebHostUI::handleWebViewLoadFinished()
+void BaseWebUI::handleWebViewLoadFinished()
 {
     onWebContentReady();
 }
 
-void BaseWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
+void BaseWebUI::handleWebViewScriptMessage(const JsValueVector& args)
 {
     if ((args.size() < 2) || (args[0].getString() != "UI")) {
         onWebMessageReceived(args); // passthrough
@@ -354,7 +354,7 @@ void BaseWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
     String key = args[1].getString();
 
     if (fHandler.find(key.buffer()) == fHandler.end()) {
-        d_stderr2("Unknown WebHostUI method");
+        d_stderr2("Unknown WebUI method");
         return;
     }
 
@@ -363,14 +363,14 @@ void BaseWebHostUI::handleWebViewScriptMessage(const JsValueVector& args)
     ArgumentCountAndMessageHandler handler = fHandler[key.buffer()];
 
     if (handler.first != static_cast<int>(handlerArgs.size())) {
-        d_stderr2("Incorrect WebHostUI method argument count");
+        d_stderr2("Incorrect WebUI method argument count");
         return;
     }
 
     handler.second(handlerArgs);
 }
 
-void BaseWebHostUI::handleWebViewConsole(const String& tag, const String& text)
+void BaseWebUI::handleWebViewConsole(const String& tag, const String& text)
 {
     if (tag == "log") {
         std::cout << text.buffer() << std::endl;
