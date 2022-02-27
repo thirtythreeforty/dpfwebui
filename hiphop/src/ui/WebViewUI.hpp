@@ -19,10 +19,6 @@
 #ifndef WEBVIEW_UI_HPP
 #define WEBVIEW_UI_HPP
 
-#include <functional>
-#include <unordered_map>
-#include <vector>
-
 #include "WebUIBase.hpp"
 #include "WebViewBase.hpp"
 
@@ -96,10 +92,6 @@ private:
 
     typedef std::vector<JsValueVector> InitMessageQueue;
 
-    typedef std::function<void(const JsValueVector& args)> MessageHandler;
-    typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
-    typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
-
     uint              fInitialWidth;
     uint              fInitialHeight;
     uint32_t          fBackgroundColor;
@@ -109,7 +101,6 @@ private:
     WebViewBase*      fWebView;
     UiBlock           fUiBlock;
     InitMessageQueue  fInitMessageQueue;
-    MessageHandlerMap fHandler;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebViewUI)
 

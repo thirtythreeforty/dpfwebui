@@ -19,6 +19,10 @@
 #ifndef WEB_UI_BASE_HPP
 #define WEB_UI_BASE_HPP
 
+#include <functional>
+#include <unordered_map>
+#include <utility>
+
 #include "extra/UIEx.hpp"
 #include "JsValue.hpp"
 
@@ -31,9 +35,6 @@ public:
     virtual ~WebUIBase();
 
 protected:
-    virtual void postMessage(const JsValueVector& args);
-    virtual void onMessageReceived(const JsValueVector& args);
-
     void sizeChanged(uint width, uint height) override;
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
@@ -46,7 +47,17 @@ protected:
     void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) override;
 #endif
 
+    virtual void postMessage(const JsValueVector& args);
+    virtual void onMessageReceived(const JsValueVector& args);
+
+    typedef std::function<void(const JsValueVector& args)> MessageHandler;
+    typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
+    typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
+
+    MessageHandlerMap fHandler;
+
 private:
+    void initHandlers();
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 

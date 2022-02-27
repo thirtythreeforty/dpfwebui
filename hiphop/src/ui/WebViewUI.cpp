@@ -20,7 +20,6 @@
 
 #include <iostream>
 
-#include "distrho/extra/Base64.hpp"
 #include "extra/Path.hpp"
 
 #define HTML_INDEX_PATH "/ui/index.html"
@@ -79,7 +78,7 @@ void WebViewUI::setWebView(WebViewBase* webView)
     fWebView->setPrintTraffic(true);
 #endif
     
-#ifdef HIPHOP_INJECT_FRAMEWORK_JS
+#if defined(HIPHOP_INJECT_FRAMEWORK_JS) && !defined(HIPHOP_NETWORK_UI) 
     String js = String(
 #include "ui/dpf.js.inc"
     );
@@ -224,58 +223,6 @@ void WebViewUI::initHandlers()
         });
     });
 
-#if DISTRHO_PLUGIN_WANT_MIDI_INPUT
-    fHandler["sendNote"] = std::make_pair(3, [this](const JsValueVector& args) {
-        sendNote(
-            static_cast<uint8_t>(args[0].getDouble()),  // channel
-            static_cast<uint8_t>(args[1].getDouble()),  // note
-            static_cast<uint8_t>(args[2].getDouble())   // velocity
-        );
-    });
-#endif
-
-    fHandler["editParameter"] = std::make_pair(2, [this](const JsValueVector& args) {
-        editParameter(
-            static_cast<uint32_t>(args[0].getDouble()), // index
-            static_cast<bool>(args[1].getBool())        // started
-        );
-    });
-
-    fHandler["setParameterValue"] = std::make_pair(2, [this](const JsValueVector& args) {
-        setParameterValue(
-            static_cast<uint32_t>(args[0].getDouble()), // index
-            static_cast<float>(args[1].getDouble())     // value
-        );
-    });
-
-#if DISTRHO_PLUGIN_WANT_STATE
-    fHandler["setState"] = std::make_pair(2, [this](const JsValueVector& args) {
-        setState(
-            args[0].getString(), // key
-            args[1].getString()  // value
-        );
-    });
-#endif
-
-#if DISTRHO_PLUGIN_WANT_STATEFILES
-    fHandler["requestStateFile"] = std::make_pair(1, [this](const JsValueVector& args) {
-        requestStateFile(args[0].getString() /*key*/);
-    });
-#endif
-
-    fHandler["isStandalone"] = std::make_pair(0, [this](const JsValueVector&) {
-        postMessage({"UI", "isStandalone", isStandalone()});
-    });
-
-    fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JsValueVector& args) {
-        setKeyboardFocus(static_cast<bool>(args[0].getBool()));
-    });
-
-    fHandler["openSystemWebBrowser"] = std::make_pair(1, [this](const JsValueVector& args) {
-        String url = args[0].getString();
-        openSystemWebBrowser(url);
-    });
-
     fHandler["getInitialWidth"] = std::make_pair(0, [this](const JsValueVector&) {
         postMessage({"UI", "getInitialWidth", static_cast<double>(getInitialWidth())});
     });
@@ -284,30 +231,18 @@ void WebViewUI::initHandlers()
         postMessage({"UI", "getInitialHeight", static_cast<double>(getInitialHeight())});
     });
 
+    fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JsValueVector& args) {
+        setKeyboardFocus(static_cast<bool>(args[0].getBool()));
+    });
+
     fHandler["flushInitMessageQueue"] = std::make_pair(0, [this](const JsValueVector&) {
         flushInitMessageQueue();
     });
 
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
-    fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JsValueVector& args) {
-        std::vector<uint8_t> data = d_getChunkFromBase64String(args[1].getString());
-        writeSharedMemory(
-            args[0].getString(), // metadata
-            static_cast<const unsigned char*>(data.data()),
-            static_cast<size_t>(data.size())
-        );
+    fHandler["openSystemWebBrowser"] = std::make_pair(1, [this](const JsValueVector& args) {
+        String url = args[0].getString();
+        openSystemWebBrowser(url);
     });
-
-#if HIPHOP_ENABLE_WASM_PLUGIN
-    fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JsValueVector& args) {
-        std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
-        sideloadWasmBinary(
-            static_cast<const unsigned char*>(data.data()),
-            static_cast<size_t>(data.size())
-        );
-    });
-#endif // HIPHOP_ENABLE_WASM_PLUGIN
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 }
 
 void WebViewUI::handleWebViewLoadFinished()

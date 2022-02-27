@@ -18,27 +18,19 @@
 
 #include "WebUIBase.hpp"
 
+#include "distrho/extra/Base64.hpp"
+
 USE_NAMESPACE_DISTRHO
 
 WebUIBase::WebUIBase(uint width, uint height)
     : UIEx(width, height)
 {
-    // TODO
+    initHandlers();
 }
 
 WebUIBase::~WebUIBase()
 {
     // TODO
-}
-
-void WebUIBase::postMessage(const JsValueVector& args)
-{
-    // TODO - broadcast to all clients
-}
-
-void WebUIBase::onMessageReceived(const JsValueVector& args)
-{
-    (void)args;
 }
 
 void WebUIBase::sizeChanged(uint width, uint height)
@@ -74,3 +66,80 @@ void WebUIBase::sharedMemoryChanged(const char* metadata, const unsigned char* d
     postMessage({"UI", "_sharedMemoryChanged", metadata, b64Data});
 }
 #endif
+
+void WebUIBase::postMessage(const JsValueVector& args)
+{
+    // TODO - broadcast to all clients
+}
+
+void WebUIBase::onMessageReceived(const JsValueVector& args)
+{
+    (void)args;
+}
+
+void WebUIBase::initHandlers()
+{
+    fHandler["isStandalone"] = std::make_pair(0, [this](const JsValueVector&) {
+        postMessage({"UI", "isStandalone", isStandalone()});
+    });
+
+#if DISTRHO_PLUGIN_WANT_MIDI_INPUT
+    fHandler["sendNote"] = std::make_pair(3, [this](const JsValueVector& args) {
+        sendNote(
+            static_cast<uint8_t>(args[0].getDouble()),  // channel
+            static_cast<uint8_t>(args[1].getDouble()),  // note
+            static_cast<uint8_t>(args[2].getDouble())   // velocity
+        );
+    });
+#endif
+
+    fHandler["editParameter"] = std::make_pair(2, [this](const JsValueVector& args) {
+        editParameter(
+            static_cast<uint32_t>(args[0].getDouble()), // index
+            static_cast<bool>(args[1].getBool())        // started
+        );
+    });
+
+    fHandler["setParameterValue"] = std::make_pair(2, [this](const JsValueVector& args) {
+        setParameterValue(
+            static_cast<uint32_t>(args[0].getDouble()), // index
+            static_cast<float>(args[1].getDouble())     // value
+        );
+    });
+
+#if DISTRHO_PLUGIN_WANT_STATE
+    fHandler["setState"] = std::make_pair(2, [this](const JsValueVector& args) {
+        setState(
+            args[0].getString(), // key
+            args[1].getString()  // value
+        );
+    });
+#endif
+
+#if DISTRHO_PLUGIN_WANT_STATEFILES
+    fHandler["requestStateFile"] = std::make_pair(1, [this](const JsValueVector& args) {
+        requestStateFile(args[0].getString() /*key*/);
+    });
+#endif
+
+#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+    fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JsValueVector& args) {
+        std::vector<uint8_t> data = d_getChunkFromBase64String(args[1].getString());
+        writeSharedMemory(
+            args[0].getString(), // metadata
+            static_cast<const unsigned char*>(data.data()),
+            static_cast<size_t>(data.size())
+        );
+    });
+
+#if HIPHOP_ENABLE_WASM_PLUGIN
+    fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JsValueVector& args) {
+        std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
+        sideloadWasmBinary(
+            static_cast<const unsigned char*>(data.data()),
+            static_cast<size_t>(data.size())
+        );
+    });
+#endif // HIPHOP_ENABLE_WASM_PLUGIN
+#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+}
