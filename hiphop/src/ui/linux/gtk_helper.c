@@ -173,7 +173,7 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
     // works. Note this renders viewport based units useless (vw/vh/vmin/vmax). 
     gtk_window_resize(ctx->window, max_width, max_height);
 
-    ctx->webView = WEBKIT_WEBVIEW(webkit_web_view_new());
+    ctx->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
     g_signal_connect(ctx->webView, "load-changed", G_CALLBACK(web_view_load_changed_cb), ctx);
     g_signal_connect(ctx->webView, "key-press-event", G_CALLBACK(web_view_keypress_cb), ctx);
     WebKitUserContentManager *manager = webkit_web_view_get_user_content_manager(ctx->webView);
