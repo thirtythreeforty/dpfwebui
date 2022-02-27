@@ -67,7 +67,8 @@ WebServer::~WebServer()
 
 void WebServer::process()
 {
-    lws_service(fContext, 0);
+    // Avoid blocking - https://github.com/warmcat/libwebsockets/issues/1735
+    lws_service(fContext, -1);
 }
 
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
