@@ -20,7 +20,6 @@
 #define WEBVIEW_BASE_HPP
 
 #include <cstdint>
-#include <vector>
 
 #include "distrho/extra/String.hpp"
 #include "Window.hpp"
@@ -28,8 +27,6 @@
 #include "JsValue.hpp"
 
 START_NAMESPACE_DISTRHO
-
-typedef std::vector<JsValue> JsValueVector;
 
 class WebViewEventHandler
 {

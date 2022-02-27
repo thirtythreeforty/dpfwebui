@@ -20,6 +20,7 @@
 #define WEB_UI_BASE_HPP
 
 #include "extra/UIEx.hpp"
+#include "JsValue.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -28,6 +29,21 @@ class WebUIBase : public UIEx
 public:
     WebUIBase(uint width = 0, uint height = 0);
     virtual ~WebUIBase();
+
+protected:
+    virtual void postMessage(const JsValueVector& args);
+
+    void sizeChanged(uint width, uint height) override;
+    void parameterChanged(uint32_t index, float value) override;
+#if DISTRHO_PLUGIN_WANT_PROGRAMS
+    void programLoaded(uint32_t index) override;
+#endif
+#if DISTRHO_PLUGIN_WANT_STATE
+    void stateChanged(const char* key, const char* value) override;
+#endif
+#if HIPHOP_ENABLE_SHARED_MEMORY
+    void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) override;
+#endif
 
 private:
 

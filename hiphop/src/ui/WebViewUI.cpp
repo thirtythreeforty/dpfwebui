@@ -131,15 +131,6 @@ void WebViewUI::injectScript(String& source)
     }
 }
 
-void WebViewUI::webViewPostMessage(const JsValueVector& args)
-{
-    if (fMessageQueueReady) {
-        fWebView->postMessage(args);
-    } else {
-        fInitMessageQueue.push_back(args);
-    }
-}
-
 void WebViewUI::flushInitMessageQueue()
 {
     if (fMessageQueueReady) {
@@ -160,6 +151,15 @@ void WebViewUI::setKeyboardFocus(bool focus)
     fWebView->setKeyboardFocus(focus);
 }
 
+void WebViewUI::postMessage(const JsValueVector& args)
+{
+    if (fMessageQueueReady) {
+        fWebView->postMessage(args);
+    } else {
+        fInitMessageQueue.push_back(args);
+    }
+}
+
 void WebViewUI::uiIdle()
 {
     WebViewUIBase::uiIdle();
@@ -174,41 +174,11 @@ void WebViewUI::uiIdle()
     }
 }
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
-void WebViewUI::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
-{
-    (void)size;
-    String b64Data = String::asBase64(data, size);
-    webViewPostMessage({"UI", "_sharedMemoryChanged", metadata, b64Data});
-}
-#endif
-
 void WebViewUI::sizeChanged(uint width, uint height)
 {
-    UI::sizeChanged(width, height);
-    
+    WebViewUIBase::sizeChanged(width, height);
     fWebView->setSize(width, height);
-    webViewPostMessage({"UI", "sizeChanged", width, height});
 }
-
-void WebViewUI::parameterChanged(uint32_t index, float value)
-{
-    webViewPostMessage({"UI", "parameterChanged", index, value});
-}
-
-#if DISTRHO_PLUGIN_WANT_PROGRAMS
-void WebViewUI::programLoaded(uint32_t index)
-{
-    webViewPostMessage({"UI", "programLoaded", index});
-}
-#endif
-
-#if DISTRHO_PLUGIN_WANT_STATE
-void WebViewUI::stateChanged(const char* key, const char* value)
-{
-    webViewPostMessage({"UI", "stateChanged", key, value});
-}
-#endif
 
 void WebViewUI::sizeRequest(const UiBlock& block)
 {
@@ -222,15 +192,15 @@ void WebViewUI::initHandlers()
     // fulfill their promises here. See for example getWidth() and getHeight().
 
     fHandler["getWidth"] = std::make_pair(0, [this](const JsValueVector&) {
-        webViewPostMessage({"UI", "getWidth", static_cast<double>(getWidth())});
+        postMessage({"UI", "getWidth", static_cast<double>(getWidth())});
     });
 
     fHandler["getHeight"] = std::make_pair(0, [this](const JsValueVector&) {
-        webViewPostMessage({"UI", "getHeight", static_cast<double>(getHeight())});
+        postMessage({"UI", "getHeight", static_cast<double>(getHeight())});
     });
 
     fHandler["isResizable"] = std::make_pair(0, [this](const JsValueVector&) {
-        webViewPostMessage({"UI", "isResizable", isResizable()});
+        postMessage({"UI", "isResizable", isResizable()});
     });
 
     fHandler["setWidth"] = std::make_pair(1, [this](const JsValueVector& args) {
@@ -294,7 +264,7 @@ void WebViewUI::initHandlers()
 #endif
 
     fHandler["isStandalone"] = std::make_pair(0, [this](const JsValueVector&) {
-        webViewPostMessage({"UI", "isStandalone", isStandalone()});
+        postMessage({"UI", "isStandalone", isStandalone()});
     });
 
     fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JsValueVector& args) {
@@ -307,11 +277,11 @@ void WebViewUI::initHandlers()
     });
 
     fHandler["getInitialWidth"] = std::make_pair(0, [this](const JsValueVector&) {
-        webViewPostMessage({"UI", "getInitialWidth", static_cast<double>(getInitialWidth())});
+        postMessage({"UI", "getInitialWidth", static_cast<double>(getInitialWidth())});
     });
 
     fHandler["getInitialHeight"] = std::make_pair(0, [this](const JsValueVector&) {
-        webViewPostMessage({"UI", "getInitialHeight", static_cast<double>(getInitialHeight())});
+        postMessage({"UI", "getInitialHeight", static_cast<double>(getInitialHeight())});
     });
 
     fHandler["flushInitMessageQueue"] = std::make_pair(0, [this](const JsValueVector&) {

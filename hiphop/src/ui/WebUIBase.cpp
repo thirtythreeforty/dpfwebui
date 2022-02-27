@@ -30,3 +30,42 @@ WebUIBase::~WebUIBase()
 {
     // TODO
 }
+
+void WebUIBase::postMessage(const JsValueVector& args)
+{
+    // TODO - broadcast to all clients
+}
+
+void WebUIBase::sizeChanged(uint width, uint height)
+{
+    UIEx::sizeChanged(width, height);
+    postMessage({"UI", "sizeChanged", width, height});
+}
+
+void WebUIBase::parameterChanged(uint32_t index, float value)
+{
+    postMessage({"UI", "parameterChanged", index, value});
+}
+
+#if DISTRHO_PLUGIN_WANT_PROGRAMS
+void WebUIBase::programLoaded(uint32_t index)
+{
+    postMessage({"UI", "programLoaded", index});
+}
+#endif
+
+#if DISTRHO_PLUGIN_WANT_STATE
+void WebUIBase::stateChanged(const char* key, const char* value)
+{
+    postMessage({"UI", "stateChanged", key, value});
+}
+#endif
+
+#if HIPHOP_ENABLE_SHARED_MEMORY
+void WebUIBase::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+{
+    (void)size;
+    String b64Data = String::asBase64(data, size);
+    postMessage({"UI", "_sharedMemoryChanged", metadata, b64Data});
+}
+#endif

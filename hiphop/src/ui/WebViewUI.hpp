@@ -70,26 +70,14 @@ protected:
     void runScript(String& source);
     void injectScript(String& source);
 
-    void webViewPostMessage(const JsValueVector& args);
-
     void flushInitMessageQueue();
     void setKeyboardFocus(bool focus);
 
+    void postMessage(const JsValueVector& args) override;
+
     void uiIdle() override;
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
-    void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) override;
-#endif
-
     void sizeChanged(uint width, uint height) override;
-
-    void parameterChanged(uint32_t index, float value) override;
-#if DISTRHO_PLUGIN_WANT_PROGRAMS
-    void programLoaded(uint32_t index) override;
-#endif
-#if DISTRHO_PLUGIN_WANT_STATE
-    void stateChanged(const char* key, const char* value) override;
-#endif
 
     virtual void onWebContentReady() {}
     virtual void onWebMessageReceived(const JsValueVector& args) { (void)args; }

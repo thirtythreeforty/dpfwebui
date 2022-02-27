@@ -156,7 +156,7 @@ class UI {
     }
 
     // Non-DPF method for sending a message to the web host
-    // void WebViewUI::webViewPostMessage(const JsValueVector& args)
+    // void WebViewUI::postMessage(const JsValueVector& args)
     postMessage(...args) {
         window.host.postMessage(args);
     }
