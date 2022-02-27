@@ -312,13 +312,13 @@ void WebViewUI::initHandlers()
 
 void WebViewUI::handleWebViewLoadFinished()
 {
-    onWebContentReady();
+    onDocumentReady();
 }
 
 void WebViewUI::handleWebViewScriptMessage(const JsValueVector& args)
 {
     if ((args.size() < 2) || (args[0].getString() != "UI")) {
-        onWebMessageReceived(args); // passthrough
+        onMessageReceived(args); // passthrough
         return;
     }
 

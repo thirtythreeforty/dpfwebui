@@ -32,6 +32,7 @@ public:
 
 protected:
     virtual void postMessage(const JsValueVector& args);
+    virtual void onMessageReceived(const JsValueVector& args);
 
     void sizeChanged(uint width, uint height) override;
     void parameterChanged(uint32_t index, float value) override;

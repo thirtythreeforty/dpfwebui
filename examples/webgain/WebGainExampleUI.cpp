@@ -54,13 +54,13 @@ public:
     ~WebGainExampleUI() {}
 
 protected:
-    void onWebContentReady() override
+    void onDocumentReady() override
     {
         // Called when the main document finished loading and DOM is ready.
         // It is now safe to call runScript() and mapped DPF methods.
     }
 
-    void onWebMessageReceived(const JsValueVector& args) override
+    void onMessageReceived(const JsValueVector& args) override
     {
         // Web view and DOM are guaranteed to be ready here.
         (void)args;

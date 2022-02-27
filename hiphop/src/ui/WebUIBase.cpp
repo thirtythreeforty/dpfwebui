@@ -36,6 +36,11 @@ void WebUIBase::postMessage(const JsValueVector& args)
     // TODO - broadcast to all clients
 }
 
+void WebUIBase::onMessageReceived(const JsValueVector& args)
+{
+    (void)args;
+}
+
 void WebUIBase::sizeChanged(uint width, uint height)
 {
     UIEx::sizeChanged(width, height);

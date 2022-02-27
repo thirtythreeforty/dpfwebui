@@ -76,13 +76,11 @@ protected:
     void postMessage(const JsValueVector& args) override;
 
     void uiIdle() override;
-
     void sizeChanged(uint width, uint height) override;
 
-    virtual void onWebContentReady() {}
-    virtual void onWebMessageReceived(const JsValueVector& args) { (void)args; }
-
     virtual void sizeRequest(const UiBlock& block);
+    
+    virtual void onDocumentReady() {}
 
     virtual uintptr_t createStandaloneWindow() = 0;
     virtual void      processStandaloneEvents() = 0;
