@@ -19,12 +19,12 @@
 #ifndef MAC_WEB_UI_HPP
 #define MAC_WEB_UI_HPP
 
-#include "../WebUIBase.hpp"
+#include "../WebViewUI.hpp"
 #include "CocoaWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class MacWebUI : public WebUIBase
+class MacWebUI : public WebViewUI
 {
 public:
     MacWebUI(uint baseWidth = 0, uint baseHeight = 0,

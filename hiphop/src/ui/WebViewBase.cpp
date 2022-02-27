@@ -40,7 +40,7 @@
 #define CSS_DISABLE_OVERFLOW     "body { overflow: hidden; }"
 
 /**
- * Keep this class generic; specific plugin features belong to WebUIBase.
+ * Keep this class generic; specific plugin features belong to WebViewUI.
  */
 
 USE_NAMESPACE_DISTRHO

@@ -24,7 +24,7 @@
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(WebUIBase* ui)
+float DISTRHO::getDisplayScaleFactor(WebViewUI* ui)
 {
     if (ui == nullptr) {
         return [NSScreen mainScreen].backingScaleFactor;
@@ -37,7 +37,7 @@ float DISTRHO::getDisplayScaleFactor(WebUIBase* ui)
 
 MacWebUI::MacWebUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : WebUIBase(baseWidth, baseHeight, backgroundColor)
+    : WebViewUI(baseWidth, baseHeight, backgroundColor)
     , fWindow(0)
 {
     if (!shouldCreateWebView()) {

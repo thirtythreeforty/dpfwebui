@@ -92,6 +92,8 @@ private:
 
     WebViewEventHandler* fHandler;
 
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebViewBase)
+
 };
 
 END_NAMESPACE_DISTRHO

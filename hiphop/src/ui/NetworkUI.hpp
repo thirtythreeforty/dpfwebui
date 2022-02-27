@@ -19,18 +19,19 @@
 #ifndef NETWORK_UI_HPP
 #define NETWORK_UI_HPP
 
-#include "extra/UIEx.hpp"
+#include "WebUIBase.hpp"
 #include "WebServer.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class NetworkUI : public UIEx
+class NetworkUI : public WebUIBase
 {
 public:
-    NetworkUI(uint width = 0, uint height = 0, bool automaticallyScaleAndSetAsMinimumSize = false);
+    NetworkUI(uint width = 0, uint height = 0);
     virtual ~NetworkUI();
 
-    // TODO
+protected:
+    virtual void uiIdle() override;
 
 private:
     WebServer fServer;

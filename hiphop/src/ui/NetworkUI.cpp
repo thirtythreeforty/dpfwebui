@@ -20,8 +20,8 @@
 
 USE_NAMESPACE_DISTRHO
 
-NetworkUI::NetworkUI(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
-    : UIEx(width, height, automaticallyScaleAndSetAsMinimumSize)
+NetworkUI::NetworkUI(uint width, uint height)
+    : WebUIBase(width, height)
 {
     // TODO
 }
@@ -29,4 +29,9 @@ NetworkUI::NetworkUI(uint width, uint height, bool automaticallyScaleAndSetAsMin
 NetworkUI::~NetworkUI()
 {
     // TODO
+}
+
+void NetworkUI::uiIdle()
+{
+    fServer.process();
 }

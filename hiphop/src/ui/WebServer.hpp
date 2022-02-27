@@ -32,7 +32,7 @@ public:
     WebServer();
     virtual ~WebServer();
 
-    // TODO
+    void process();
 
 private:
     static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,

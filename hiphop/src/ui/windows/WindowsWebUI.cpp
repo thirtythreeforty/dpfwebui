@@ -25,7 +25,7 @@ BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam);
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(WebUIBase* ui)
+float DISTRHO::getDisplayScaleFactor(WebViewUI* ui)
 {
     float k = 1.f;
 
@@ -75,7 +75,7 @@ float DISTRHO::getDisplayScaleFactor(WebUIBase* ui)
 
 WindowsWebUI::WindowsWebUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : WebUIBase(baseWidth, baseHeight, backgroundColor)
+    : WebViewUI(baseWidth, baseHeight, backgroundColor)
     , fHostHWnd(0)
 {
     if (!shouldCreateWebView()) {

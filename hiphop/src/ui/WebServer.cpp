@@ -65,10 +65,21 @@ WebServer::~WebServer()
     }
 }
 
+void WebServer::process()
+{
+    lws_service(fContext, 0);
+}
+
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
                            void* user, void* in, size_t len)
 {
     // TODO
+
+    (void)wsi;
+    (void)reason;
+    (void)user;
+    (void)in;
+    (void)len;
 
     return 0;
 }
