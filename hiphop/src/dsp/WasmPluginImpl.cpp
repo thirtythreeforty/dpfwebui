@@ -18,7 +18,7 @@
 
 #include <stdexcept>
 
-#include "WasmHostPlugin.hpp"
+#include "WasmPluginImpl.hpp"
 #include "extra/Path.hpp"
 
 #ifdef HIPHOP_WASM_BINARY_AOT
@@ -33,7 +33,7 @@
 
 USE_NAMESPACE_DISTRHO
 
-WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
+WasmPlugin::WasmPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
                                 std::shared_ptr<WasmRuntime> runtime)
     : PluginEx(parameterCount, programCount, stateCount)
     , fActive(false)
@@ -58,7 +58,7 @@ WasmHostPlugin::WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, u
 #define CHECK_INSTANCE() checkInstance(__FUNCTION__)
 #define SCOPED_RUNTIME_LOCK() ScopedSpinLock lock(fRuntimeLock)
 
-const char* WasmHostPlugin::getLabel() const
+const char* WasmPlugin::getLabel() const
 {
     try {
         CHECK_INSTANCE();
@@ -72,7 +72,7 @@ const char* WasmHostPlugin::getLabel() const
     }
 }
 
-const char* WasmHostPlugin::getMaker() const
+const char* WasmPlugin::getMaker() const
 {
     try {
         CHECK_INSTANCE();
@@ -86,7 +86,7 @@ const char* WasmHostPlugin::getMaker() const
     }
 }
 
-const char* WasmHostPlugin::getLicense() const
+const char* WasmPlugin::getLicense() const
 {
     try {
         CHECK_INSTANCE();
@@ -100,7 +100,7 @@ const char* WasmHostPlugin::getLicense() const
     }
 }
 
-uint32_t WasmHostPlugin::getVersion() const
+uint32_t WasmPlugin::getVersion() const
 {
     try {
         CHECK_INSTANCE();
@@ -114,7 +114,7 @@ uint32_t WasmHostPlugin::getVersion() const
     }
 }
 
-int64_t WasmHostPlugin::getUniqueId() const
+int64_t WasmPlugin::getUniqueId() const
 {
     try {
         CHECK_INSTANCE();
@@ -128,7 +128,7 @@ int64_t WasmHostPlugin::getUniqueId() const
     }
 }
 
-void WasmHostPlugin::initParameter(uint32_t index, Parameter& parameter)
+void WasmPlugin::initParameter(uint32_t index, Parameter& parameter)
 {
     try {
         CHECK_INSTANCE();
@@ -145,7 +145,7 @@ void WasmHostPlugin::initParameter(uint32_t index, Parameter& parameter)
     }
 }
 
-float WasmHostPlugin::getParameterValue(uint32_t index) const
+float WasmPlugin::getParameterValue(uint32_t index) const
 {
     try {
         CHECK_INSTANCE();
@@ -160,7 +160,7 @@ float WasmHostPlugin::getParameterValue(uint32_t index) const
     }
 }
 
-void WasmHostPlugin::setParameterValue(uint32_t index, float value)
+void WasmPlugin::setParameterValue(uint32_t index, float value)
 {
     try {
         CHECK_INSTANCE();
@@ -173,7 +173,7 @@ void WasmHostPlugin::setParameterValue(uint32_t index, float value)
 }
 
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
-void WasmHostPlugin::initProgramName(uint32_t index, String& programName)
+void WasmPlugin::initProgramName(uint32_t index, String& programName)
 {
     try {
         CHECK_INSTANCE();
@@ -185,7 +185,7 @@ void WasmHostPlugin::initProgramName(uint32_t index, String& programName)
     }
 }
 
-void WasmHostPlugin::loadProgram(uint32_t index)
+void WasmPlugin::loadProgram(uint32_t index)
 {
     try {
         CHECK_INSTANCE();
@@ -199,7 +199,7 @@ void WasmHostPlugin::loadProgram(uint32_t index)
 #endif // DISTRHO_PLUGIN_WANT_PROGRAMS
 
 #if DISTRHO_PLUGIN_WANT_STATE
-void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
+void WasmPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
 {
     try {
         CHECK_INSTANCE();
@@ -213,7 +213,7 @@ void WasmHostPlugin::initState(uint32_t index, String& stateKey, String& default
     }
 }
 
-void WasmHostPlugin::setState(const char* key, const char* value)
+void WasmPlugin::setState(const char* key, const char* value)
 {
     PluginEx::setState(key, value);
 
@@ -232,7 +232,7 @@ void WasmHostPlugin::setState(const char* key, const char* value)
 }
 
 #if DISTRHO_PLUGIN_WANT_FULL_STATE
-String WasmHostPlugin::getState(const char* key) const
+String WasmPlugin::getState(const char* key) const
 {
     try {
         CHECK_INSTANCE();
@@ -253,7 +253,7 @@ String WasmHostPlugin::getState(const char* key) const
 
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
-void WasmHostPlugin::activate()
+void WasmPlugin::activate()
 {
     try {
         CHECK_INSTANCE();
@@ -266,7 +266,7 @@ void WasmHostPlugin::activate()
     }
 }
 
-void WasmHostPlugin::deactivate()
+void WasmPlugin::deactivate()
 {
     try {
         CHECK_INSTANCE();
@@ -280,11 +280,11 @@ void WasmHostPlugin::deactivate()
 }
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
-    void WasmHostPlugin::run(const float** inputs, float** outputs, uint32_t frames,
+    void WasmPlugin::run(const float** inputs, float** outputs, uint32_t frames,
                                 const MidiEvent* midiEvents, uint32_t midiEventCount)
 {
 #else
-    void WasmHostPlugin::run(const float** inputs, float** outputs, uint32_t frames)
+    void WasmPlugin::run(const float** inputs, float** outputs, uint32_t frames)
 {
     const MidiEvent* midiEvents = 0;
     uint32_t midiEventCount = 0;
@@ -335,7 +335,7 @@ void WasmHostPlugin::deactivate()
 }
 
 #if HIPHOP_ENABLE_SHARED_MEMORY
-void WasmHostPlugin::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+void WasmPlugin::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
 {
     if (std::strcmp(metadata, "_wasm_bin") == 0) {
         try {
@@ -346,7 +346,7 @@ void WasmHostPlugin::sharedMemoryChanged(const char* metadata, const unsigned ch
     }
 }
 
-void WasmHostPlugin::loadWasmBinary(const unsigned char* data, size_t size)
+void WasmPlugin::loadWasmBinary(const unsigned char* data, size_t size)
 {
     // No need to check if the runtime is running
     SCOPED_RUNTIME_LOCK();
@@ -366,7 +366,7 @@ void WasmHostPlugin::loadWasmBinary(const unsigned char* data, size_t size)
 }
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
-WasmValueVector WasmHostPlugin::getTimePosition(WasmValueVector params)
+WasmValueVector WasmPlugin::getTimePosition(WasmValueVector params)
 {
     (void)params;
 #if DISTRHO_PLUGIN_WANT_TIMEPOS
@@ -389,7 +389,7 @@ WasmValueVector WasmHostPlugin::getTimePosition(WasmValueVector params)
 #endif // DISTRHO_PLUGIN_WANT_TIMEPOS
 }
 
-WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
+WasmValueVector WasmPlugin::writeMidiEvent(WasmValueVector params)
 {
     (void)params;
 #if DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
@@ -423,7 +423,7 @@ WasmValueVector WasmHostPlugin::writeMidiEvent(WasmValueVector params)
 #endif // DISTRHO_PLUGIN_WANT_MIDI_OUTPUT
 }
 
-void WasmHostPlugin::onModuleLoad()
+void WasmPlugin::onModuleLoad()
 {
     WasmFunctionMap hostFunc;
 
@@ -432,11 +432,11 @@ void WasmHostPlugin::onModuleLoad()
     }};
 
     hostFunc["_get_time_position"] = { {}, {}, 
-        std::bind(&WasmHostPlugin::getTimePosition, this, std::placeholders::_1)
+        std::bind(&WasmPlugin::getTimePosition, this, std::placeholders::_1)
     };
 
     hostFunc["_write_midi_event"] = { {}, { WASM_I32 }, 
-        std::bind(&WasmHostPlugin::writeMidiEvent, this, std::placeholders::_1)
+        std::bind(&WasmPlugin::writeMidiEvent, this, std::placeholders::_1)
     };
 
     fRuntime->createInstance(hostFunc);
@@ -445,7 +445,7 @@ void WasmHostPlugin::onModuleLoad()
     fRuntime->setGlobal("_rw_num_outputs", MakeI32(DISTRHO_PLUGIN_NUM_OUTPUTS));
 }
 
-void WasmHostPlugin::checkInstance(const char* caller) const
+void WasmPlugin::checkInstance(const char* caller) const
 {
     if (!fRuntime->hasInstance()) {
         throw std::runtime_error(std::string(caller) + "() : missing wasm instance");

@@ -16,4 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "dsp/WasmHostPlugin.hpp"
+#ifndef WASM_PLUGIN_HPP
+#define WASM_PLUGIN_HPP
+
+#include "dsp/WasmPluginImpl.hpp"
+
+#endif  // WASM_PLUGIN_HPP

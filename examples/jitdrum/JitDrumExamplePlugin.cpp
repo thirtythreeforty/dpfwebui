@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "WasmHostPlugin.hpp"
+#include "WasmPlugin.hpp"
 
 Plugin* DISTRHO::createPlugin()
 {
-    return new WasmHostPlugin(0 /*parameters*/, 0 /*programs*/, 0 /*states*/);
+    return new WasmPlugin(0 /*parameters*/, 0 /*programs*/, 0 /*states*/);
 }

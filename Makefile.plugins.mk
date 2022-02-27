@@ -95,7 +95,7 @@ LIB_DIR_NOBUNDLE = $(DPF_TARGET_DIR)/$(NAME)-lib
 
 ifeq ($(WASM_DSP),true)
 HIPHOP_FILES_DSP  = PluginEx.cpp \
-                    WasmHostPlugin.cpp \
+                    WasmPluginImpl.cpp \
                     WasmRuntime.cpp
 
 FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/dsp/%)

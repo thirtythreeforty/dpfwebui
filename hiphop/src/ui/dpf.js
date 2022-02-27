@@ -179,7 +179,7 @@ class UI {
         // default empty implementation
     }
 
-    // Non-DPF method that loads binary into DISTRHO::WasmHostPlugin instance
+    // Non-DPF method that loads binary into DISTRHO::WasmPlugin instance
     // void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
     sideloadWasmBinary(data /*Uint8Array*/) {
         this._call('sideloadWasmBinary', base64EncArr(data));

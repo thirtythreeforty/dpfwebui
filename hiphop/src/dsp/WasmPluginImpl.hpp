@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WASM_HOST_PLUGIN_HPP
-#define WASM_HOST_PLUGIN_HPP
+#ifndef WASM_PLUGIN_IMPL_HPP
+#define WASM_PLUGIN_IMPL_HPP
 
 #include <memory>
 
@@ -27,12 +27,12 @@
 
 START_NAMESPACE_DISTRHO
 
-class WasmHostPlugin : public PluginEx
+class WasmPlugin : public PluginEx
 {
 public:
-    WasmHostPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
+    WasmPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount,
                     std::shared_ptr<WasmRuntime> runtime = nullptr);
-    virtual ~WasmHostPlugin() {}
+    virtual ~WasmPlugin() {}
 
     const char* getLabel() const override;
     const char* getMaker() const override;
@@ -85,10 +85,10 @@ private:
     std::shared_ptr<WasmRuntime> fRuntime;
     mutable SpinLock             fRuntimeLock;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmHostPlugin)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmPlugin)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // WASM_HOST_PLUGIN_HPP
+#endif  // WASM_PLUGIN_IMPL_HPP

@@ -22,7 +22,7 @@
 #include "distrho/extra/Sleep.hpp"
 #include "distrho/extra/Thread.hpp"
 
-#include "WasmHostPlugin.hpp"
+#include "WasmPlugin.hpp"
 
 class TimerThread : public Thread
 {
@@ -63,11 +63,11 @@ private:
 
 };
 
-class HotSwapExamplePlugin : public WasmHostPlugin
+class HotSwapExamplePlugin : public WasmPlugin
 {
 public:
     HotSwapExamplePlugin() noexcept
-        : WasmHostPlugin(16 /*parameters*/, 0 /*programs*/, 0 /*states*/)
+        : WasmPlugin(16 /*parameters*/, 0 /*programs*/, 0 /*states*/)
         , fNote(0)
         , fTimer(
             500 /*120 BPM*/,
@@ -77,14 +77,14 @@ public:
 
     void activate() noexcept override
     {
-        WasmHostPlugin::activate();
+        WasmPlugin::activate();
         fTimer.start();
     }
 
     void deactivate() noexcept override
     {
         fTimer.stop();
-        WasmHostPlugin::deactivate();
+        WasmPlugin::deactivate();
     }
 
     void run(const float** inputs, float** outputs, uint32_t frames,
@@ -109,7 +109,7 @@ public:
         }
 
         // Call run() in plugin.ts, see source file for more plugin methods.
-        WasmHostPlugin::run(inputs, outputs, frames, midiEvents, midiEventCount);
+        WasmPlugin::run(inputs, outputs, frames, midiEvents, midiEventCount);
     }
 
 private:
