@@ -23,12 +23,12 @@
 // including Xlib before any other header that includes DPF.
 #include <X11/Xlib.h>
 
-#include "../BaseWebUI.hpp"
+#include "../WebUIBase.hpp"
 #include "ChildProcessWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class LinuxWebUI : public BaseWebUI
+class LinuxWebUI : public WebUIBase
 {
 public:
     LinuxWebUI(uint baseWidth = 0, uint baseHeight = 0,

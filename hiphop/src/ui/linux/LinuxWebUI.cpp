@@ -23,7 +23,7 @@
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(BaseWebUI* ui)
+float DISTRHO::getDisplayScaleFactor(WebUIBase* ui)
 {
     if (ui == nullptr) {
         return 1.f;
@@ -36,7 +36,7 @@ float DISTRHO::getDisplayScaleFactor(BaseWebUI* ui)
 
 LinuxWebUI::LinuxWebUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : BaseWebUI(baseWidth, baseHeight, backgroundColor)
+    : WebUIBase(baseWidth, baseHeight, backgroundColor)
 {
     if (!shouldCreateWebView()) {
         return;

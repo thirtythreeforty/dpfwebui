@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "BaseWebView.hpp"
+#include "WebViewBase.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -40,12 +40,12 @@
 #define CSS_DISABLE_OVERFLOW     "body { overflow: hidden; }"
 
 /**
- * Keep this class generic; specific plugin features belong to BaseWebUI.
+ * Keep this class generic; specific plugin features belong to WebUIBase.
  */
 
 USE_NAMESPACE_DISTRHO
 
-BaseWebView::BaseWebView()
+WebViewBase::WebViewBase()
     : fWidth(0)
     , fHeight(0)
     , fBackgroundColor(0)
@@ -55,65 +55,65 @@ BaseWebView::BaseWebView()
     , fHandler(nullptr)
 {}
 
-uint BaseWebView::getWidth()
+uint WebViewBase::getWidth()
 {
     return fWidth;
 }
 
-uint BaseWebView::getHeight()
+uint WebViewBase::getHeight()
 {
     return fHeight;
 }
 
-void BaseWebView::setSize(uint width, uint height)
+void WebViewBase::setSize(uint width, uint height)
 {
     fWidth = width;
     fHeight = height;
     onSize(width, height);
 }
 
-uint32_t BaseWebView::getBackgroundColor()
+uint32_t WebViewBase::getBackgroundColor()
 {
     return fBackgroundColor;
 }
 
-void BaseWebView::setBackgroundColor(uint32_t rgba)
+void WebViewBase::setBackgroundColor(uint32_t rgba)
 {
     fBackgroundColor = rgba;
 }
 
-uintptr_t BaseWebView::getParent()
+uintptr_t WebViewBase::getParent()
 {
     return fParent;
 }
 
-void BaseWebView::setParent(uintptr_t parent)
+void WebViewBase::setParent(uintptr_t parent)
 {
     fParent = parent;
 }
 
-bool BaseWebView::getKeyboardFocus()
+bool WebViewBase::getKeyboardFocus()
 {
     return fKeyboardFocus;
 }    
 
-void BaseWebView::setKeyboardFocus(bool focus)
+void WebViewBase::setKeyboardFocus(bool focus)
 {
     fKeyboardFocus = focus;
     onKeyboardFocus(focus);
 }
 
-void BaseWebView::setPrintTraffic(bool printTraffic)
+void WebViewBase::setPrintTraffic(bool printTraffic)
 {
     fPrintTraffic = printTraffic;
 }
 
-void BaseWebView::setEventHandler(WebViewEventHandler* handler)
+void WebViewBase::setEventHandler(WebViewEventHandler* handler)
 {
     fHandler = handler;
 }
 
-void BaseWebView::postMessage(const JsValueVector& args)
+void WebViewBase::postMessage(const JsValueVector& args)
 {
     // This method implements something like a "reverse postMessage()" aiming to keep the bridge
     // symmetrical. Global window.host is an EventTarget that can be listened for messages.
@@ -127,7 +127,7 @@ void BaseWebView::postMessage(const JsValueVector& args)
     runScript(js);
 }
 
-void BaseWebView::injectDefaultScripts()
+void WebViewBase::injectDefaultScripts()
 {
     String js = String(JS_DISABLE_CONTEXT_MENU)
               + String(JS_DISABLE_PRINT)
@@ -136,7 +136,7 @@ void BaseWebView::injectDefaultScripts()
     injectScript(js);
 }
 
-void BaseWebView::handleLoadFinished()
+void WebViewBase::handleLoadFinished()
 {
     String css = String(CSS_DISABLE_IMAGE_DRAG)
                + String(CSS_DISABLE_SELECTION)
@@ -149,7 +149,7 @@ void BaseWebView::handleLoadFinished()
     }
 }
 
-void BaseWebView::handleScriptMessage(const JsValueVector& args)
+void WebViewBase::handleScriptMessage(const JsValueVector& args)
 {
     if ((args.size() == 3) && (args[0].getString() == "console")) {
         if (fHandler != nullptr) {
@@ -167,7 +167,7 @@ void BaseWebView::handleScriptMessage(const JsValueVector& args)
     }
 }
 
-String BaseWebView::serializeJsValues(const JsValueVector& args)
+String WebViewBase::serializeJsValues(const JsValueVector& args)
 {
     std::stringstream ss;
     ss << '[';
@@ -184,7 +184,7 @@ String BaseWebView::serializeJsValues(const JsValueVector& args)
     return String(ss.str().c_str());
 }
 
-void BaseWebView::addStylesheet(String& source)
+void WebViewBase::addStylesheet(String& source)
 {
     String js = "document.head.insertAdjacentHTML('beforeend', '<style>" + source + "</style>');";
     runScript(js);

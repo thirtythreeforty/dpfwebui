@@ -19,7 +19,7 @@
 #ifndef COCOA_WEBVIEW_HPP
 #define COCOA_WEBVIEW_HPP
 
-#include "../BaseWebView.hpp"
+#include "../WebViewBase.hpp"
 
 // While it is possible to #import Obj-C headers here, that would force all
 // source files importing CocoaWebView.hpp to do so before any other project
@@ -27,7 +27,7 @@
 
 START_NAMESPACE_DISTRHO
 
-class CocoaWebView : public BaseWebView
+class CocoaWebView : public WebViewBase
 {
 public:
     CocoaWebView();

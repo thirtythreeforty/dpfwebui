@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BASE_WEBVIEW_HPP
-#define BASE_WEBVIEW_HPP
+#ifndef WEBVIEW_BASE_HPP
+#define WEBVIEW_BASE_HPP
 
 #include <cstdint>
 #include <vector>
@@ -40,11 +40,11 @@ public:
 
 };
 
-class BaseWebView
+class WebViewBase
 {
 public:
-    BaseWebView();
-    virtual ~BaseWebView() {}
+    WebViewBase();
+    virtual ~WebViewBase() {}
 
     uint getWidth();
     uint getHeight();
@@ -96,4 +96,4 @@ private:
 
 END_NAMESPACE_DISTRHO
 
-#endif // BASE_WEBVIEW_HPP
+#endif // WEBVIEW_BASE_HPP

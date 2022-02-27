@@ -19,12 +19,12 @@
 #ifndef WINDOWS_WEB_UI_HPP
 #define WINDOWS_WEB_UI_HPP
 
-#include "../BaseWebUI.hpp"
+#include "../WebUIBase.hpp"
 #include "EdgeWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class WindowsWebUI : public BaseWebUI
+class WindowsWebUI : public WebUIBase
 {
 public:
     WindowsWebUI(uint baseWidth = 0, uint baseHeight = 0,

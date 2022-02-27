@@ -132,37 +132,37 @@ class UI {
     }
 
     // Non-DPF method for grabbing or releasing the keyboard focus
-    // void BaseWebUI::setKeyboardFocus()
+    // void WebUIBase::setKeyboardFocus()
     setKeyboardFocus(focus) {
         this._call('setKeyboardFocus', focus);
     }
 
     // Non-DPF method for opening the default system browser
-    // void BaseWebUI::openSystemWebBrowser(String& url)
+    // void WebUIBase::openSystemWebBrowser(String& url)
     openSystemWebBrowser(url) {
         this._call('openSystemWebBrowser', url);
     }
 
     // Non-DPF method that returns the UI width at initialization time
-    // uint BaseWebUI::getInitialWidth()
+    // uint WebUIBase::getInitialWidth()
     async getInitialWidth() {
         return this._callAndExpectReply('getInitialWidth');
     }
 
     // Non-DPF method that returns the UI height at initialization time
-    // uint BaseWebUI::getInitialHeight()
+    // uint WebUIBase::getInitialHeight()
     async getInitialHeight() {
         return this._callAndExpectReply('getInitialHeight');
     }
 
     // Non-DPF method for sending a message to the web host
-    // void BaseWebUI::webViewPostMessage(const JsValueVector& args)
+    // void WebUIBase::webViewPostMessage(const JsValueVector& args)
     postMessage(...args) {
         window.host.postMessage(args);
     }
 
     // Non-DPF callback method for receiving messages from the web host
-    // void BaseWebUI::webMessageReceived(const JsValueVector& args)
+    // void WebUIBase::webMessageReceived(const JsValueVector& args)
     messageReceived(args) {
         // default empty implementation
     }

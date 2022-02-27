@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BASE_WEB_UI_HPP
-#define BASE_WEB_UI_HPP
+#ifndef WEB_UI_BASE_HPP
+#define WEB_UI_BASE_HPP
 
 #include <functional>
 #include <unordered_map>
 #include <vector>
 
 #include "extra/UIEx.hpp"
-#include "BaseWebView.hpp"
+#include "WebViewBase.hpp"
 
 #ifdef HIPHOP_NETWORK_UI
 # include "NetworkUI.hpp"
@@ -32,21 +32,21 @@
 
 START_NAMESPACE_DISTRHO
 
+class WebUIBase;
+float getDisplayScaleFactor(WebUIBase* ui); // implemented for each platform
+
 #ifdef HIPHOP_NETWORK_UI
-typedef NetworkUI BaseUI; // support for https+ws clients
+typedef NetworkUI WebUIBaseParent;
 #else
-typedef UIEx BaseUI; // support local webview only
+typedef UIEx WebUIBaseParent;
 #endif
 
-class BaseWebUI;
-float getDisplayScaleFactor(BaseWebUI* ui); // implemented for each platform
-
-class BaseWebUI : public BaseUI, private WebViewEventHandler
+class WebUIBase : public WebUIBaseParent, private WebViewEventHandler
 {
 public:
-    BaseWebUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
+    WebUIBase(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
         bool startLoading = true);
-    virtual ~BaseWebUI();
+    virtual ~WebUIBase();
 
     typedef std::function<void()> UiBlock;
 
@@ -57,13 +57,13 @@ public:
 
     uintptr_t getPlatformWindow() const { return fPlatformWindow; }
 
-    BaseWebView* getWebView() { return fWebView; }
+    WebViewBase* getWebView() { return fWebView; }
 
     virtual void openSystemWebBrowser(String& url) = 0;
 
 protected:
     bool shouldCreateWebView();
-    void setWebView(BaseWebView* webView);
+    void setWebView(WebViewBase* webView);
 
     void load();
     
@@ -120,15 +120,15 @@ private:
     bool              fMessageQueueReady;
     bool              fUiBlockQueued;
     uintptr_t         fPlatformWindow;
-    BaseWebView*      fWebView;
+    WebViewBase*      fWebView;
     UiBlock           fUiBlock;
     InitMessageQueue  fInitMessageQueue;
     MessageHandlerMap fHandler;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BaseWebUI)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // BASE_WEB_UI_HPP
+#endif  // WEB_UI_BASE_HPP

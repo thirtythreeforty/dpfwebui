@@ -106,8 +106,8 @@ endif
 
 ifeq ($(WEB_UI),true)
 HIPHOP_FILES_UI  = UIEx.cpp \
-                   BaseWebUI.cpp \
-                   BaseWebView.cpp \
+                   WebUIBase.cpp \
+                   WebViewBase.cpp \
                    JsValue.cpp
 ifeq ($(HIPHOP_NETWORK_UI),true)
 HIPHOP_FILES_UI += NetworkWebUI.cpp \
