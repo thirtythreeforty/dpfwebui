@@ -16,20 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef WINDOWS_WEB_UI_HPP
-#define WINDOWS_WEB_UI_HPP
+#ifndef WINDOWS_WEBVIEW_UI_HPP
+#define WINDOWS_WEBVIEW_UI_HPP
 
 #include "../WebViewUI.hpp"
 #include "EdgeWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class WindowsWebUI : public WebViewUI
+class WindowsWebViewUI : public WebViewUI
 {
 public:
-    WindowsWebUI(uint baseWidth = 0, uint baseHeight = 0,
+    WindowsWebViewUI(uint baseWidth = 0, uint baseHeight = 0,
         uint32_t backgroundColor = 0xffffffff, bool startLoading = true);
-    virtual ~WindowsWebUI();
+    virtual ~WindowsWebViewUI();
 
     void openSystemWebBrowser(String& url) override;
 
@@ -42,10 +42,10 @@ private:
 
     HWND fHostHWnd;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WindowsWebUI)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WindowsWebViewUI)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // WINDOWS_WEB_UI_HPP
+#endif  // WINDOWS_WEBVIEW_UI_HPP

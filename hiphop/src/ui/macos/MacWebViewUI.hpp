@@ -16,37 +16,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LINUX_WEB_UI_HPP
-#define LINUX_WEB_UI_HPP
-
-// Avoid X11 Window and DGL::Window clashing during build by
-// including Xlib before any other header that includes DPF.
-#include <X11/Xlib.h>
+#ifndef MAC_WEBVIEW_UI_HPP
+#define MAC_WEBVIEW_UI_HPP
 
 #include "../WebViewUI.hpp"
-#include "ChildProcessWebView.hpp"
+#include "CocoaWebView.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class LinuxWebUI : public WebViewUI
+class MacWebViewUI : public WebViewUI
 {
 public:
-    LinuxWebUI(uint baseWidth = 0, uint baseHeight = 0,
+    MacWebViewUI(uint baseWidth = 0, uint baseHeight = 0,
         uint32_t backgroundColor = 0xffffffff, bool startLoading = true);
-    virtual ~LinuxWebUI();
+    virtual ~MacWebViewUI();
 
     void openSystemWebBrowser(String& url) override;
 
 protected:
-    void      sizeRequest(const UiBlock& block) override;
     uintptr_t createStandaloneWindow() override;
     void      processStandaloneEvents() override;
 
 private:
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LinuxWebUI)
+    uintptr_t fWindow;
+
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MacWebViewUI)
 
 };
 
 END_NAMESPACE_DISTRHO
 
-#endif  // LINUX_WEB_UI_HPP
+#endif  // MAC_WEBVIEW_UI_HPP

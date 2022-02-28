@@ -22,18 +22,18 @@
 #include "src/DistrhoDefines.h"
 
 #ifdef DISTRHO_OS_LINUX
-# include "ui/linux/LinuxWebUI.hpp"
-typedef LinuxWebUI WebUI;
+# include "ui/linux/LinuxWebViewUI.hpp"
+typedef LinuxWebViewUI WebUI;
 #endif
 
 #ifdef DISTRHO_OS_MAC
-# include "ui/macos/MacWebUI.hpp"
-typedef MacWebUI WebUI;
+# include "ui/macos/MacWebViewUI.hpp"
+typedef MacWebViewUI WebUI;
 #endif
 
 #ifdef DISTRHO_OS_WINDOWS
-# include "ui/windows/WindowsWebUI.hpp"
-typedef WindowsWebUI WebUI;
+# include "ui/windows/WindowsWebViewUI.hpp"
+typedef WindowsWebViewUI WebUI;
 #endif
 
 #endif  // WEB_UI_HPP

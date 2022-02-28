@@ -29,8 +29,8 @@ USE_NAMESPACE_DISTRHO
 // DPF implementation of VST3 on macOS needs the DISTRHO::UI constructor to be
 // called with already scaled dimensions because the later setSize() request in
 // setWebView() is ignored; see https://github.com/DISTRHO/DPF/issues/359. Since
-// the parent native window only becomes available later on during UI lifecycle,
-// scale factor for secondary displays cannot be determined on UI construction.
+// the parent native window only becomes available later on UI lifecycle, scale
+// factor for secondary displays cannot be determined on UI construction.
 // VST3/Mac plugins on secondary displays might open with wrong dimensions.
 #define MAIN_DISPLAY_SCALE_FACTOR() getDisplayScaleFactor(0)
 
@@ -107,11 +107,11 @@ void WebViewUI::load()
 {
     if (fWebView != nullptr) {
 #ifdef HIPHOP_NETWORK_UI
-        String url("https://localhost:8000"); // TODO - address and port
+        String url = "file://"; // TODO : https://< 127.0.0.1 | lan addr >:port
 #else
         String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
-        fWebView->navigate(url);
 #endif
+        fWebView->navigate(url);
     }
 }
 
@@ -186,9 +186,7 @@ void WebViewUI::sizeRequest(const UiBlock& block)
 
 void WebViewUI::initHandlers()
 {
-    // It is not possible to implement JS synchronous calls that return values
-    // without resorting to dirty hacks. Use JS async functions instead, and
-    // fulfill their promises here. See for example getWidth() and getHeight().
+    // These handlers only make sense for the local web view
 
     fHandler["getWidth"] = std::make_pair(0, [this](const JsValueVector&) {
         postMessage({"UI", "getWidth", static_cast<double>(getWidth())});
@@ -252,28 +250,7 @@ void WebViewUI::handleWebViewLoadFinished()
 
 void WebViewUI::handleWebViewScriptMessage(const JsValueVector& args)
 {
-    if ((args.size() < 2) || (args[0].getString() != "UI")) {
-        onMessageReceived(args); // passthrough
-        return;
-    }
-
-    String key = args[1].getString();
-
-    if (fHandler.find(key.buffer()) == fHandler.end()) {
-        d_stderr2("Unknown WebUI method");
-        return;
-    }
-
-    const JsValueVector handlerArgs(args.cbegin() + 2, args.cend());
-    
-    ArgumentCountAndMessageHandler handler = fHandler[key.buffer()];
-
-    if (handler.first != static_cast<int>(handlerArgs.size())) {
-        d_stderr2("Incorrect WebUI method argument count");
-        return;
-    }
-
-    handler.second(handlerArgs);
+    handleMessage(args);
 }
 
 void WebViewUI::handleWebViewConsole(const String& tag, const String& text)

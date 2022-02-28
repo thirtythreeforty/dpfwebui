@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "WindowsWebUI.hpp"
+#include "WindowsWebViewUI.hpp"
 
 #include <shellapi.h>
 #include <shellscalingapi.h>
@@ -73,7 +73,7 @@ float DISTRHO::getDisplayScaleFactor(WebViewUI* ui)
     return k;
 }
 
-WindowsWebUI::WindowsWebUI(uint baseWidth, uint baseHeight,
+WindowsWebViewUI::WindowsWebViewUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
     : WebViewUI(baseWidth, baseHeight, backgroundColor)
     , fHostHWnd(0)
@@ -106,28 +106,28 @@ WindowsWebUI::WindowsWebUI(uint baseWidth, uint baseHeight,
     }
 }
 
-WindowsWebUI::~WindowsWebUI()
+WindowsWebViewUI::~WindowsWebViewUI()
 {
     // TODO - standalone support
 }
 
-void WindowsWebUI::openSystemWebBrowser(String& url)
+void WindowsWebViewUI::openSystemWebBrowser(String& url)
 {
     ShellExecute(0, "open", url.buffer(), 0, 0, SW_SHOWNORMAL);
 }
 
-uintptr_t WindowsWebUI::createStandaloneWindow()
+uintptr_t WindowsWebViewUI::createStandaloneWindow()
 {
     // TODO - standalone support
     return 0;
 }
 
-void WindowsWebUI::processStandaloneEvents()
+void WindowsWebViewUI::processStandaloneEvents()
 {
     // TODO - standalone support
 }
 
-void WindowsWebUI::hostWindowSendKeyEvent(UINT message, KBDLLHOOKSTRUCT* lpData)
+void WindowsWebViewUI::hostWindowSendKeyEvent(UINT message, KBDLLHOOKSTRUCT* lpData)
 {
     // Translate low level keyboard events into a format suitable for SendMessage()
     WPARAM wParam = lpData->vkCode;

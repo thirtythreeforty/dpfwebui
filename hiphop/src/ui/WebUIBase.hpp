@@ -50,6 +50,8 @@ protected:
     virtual void postMessage(const JsValueVector& args);
     virtual void onMessageReceived(const JsValueVector& args);
 
+    void handleMessage(const JsValueVector& args);
+
     typedef std::function<void(const JsValueVector& args)> MessageHandler;
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;

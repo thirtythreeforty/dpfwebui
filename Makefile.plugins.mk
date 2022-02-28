@@ -5,24 +5,32 @@
 # Configuration defaults
 
 # Location for binaries
-DPF_TARGET_DIR             ?= bin
+DPF_TARGET_DIR ?= bin
+
 # Location for object files
-DPF_BUILD_DIR              ?= build
+DPF_BUILD_DIR ?= build
+
 # WebAssembly runtime library <wamr|wasmer>
-HIPHOP_WASM_RUNTIME        ?= wamr
+HIPHOP_WASM_RUNTIME ?= wamr
+
 # WebAssembly execution mode - WAMR <aot|interp>, Wasmer <jit>
-HIPHOP_WASM_MODE           ?= aot
+HIPHOP_WASM_MODE ?= aot
+
 # WebAssembly System Interface only available for Wasmer
-HIPHOP_WASM_WASI           ?= false
+HIPHOP_WASM_WASI ?= false
+
 # Enable built-in websockets server and load content over HTTPS   [WIP]
-HIPHOP_NETWORK_UI          ?= false
+HIPHOP_NETWORK_UI ?= false
+
 # Automatically inject dpf.js when loading content from file://
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
+
 # Web view implementation on Linux <gtk|cef>
-HIPHOP_LINUX_WEBVIEW       ?= gtk
+HIPHOP_LINUX_WEBVIEW ?= gtk
+
 # WIP : universal build only available for non-network web UI and Wasmer DSP.
 # Set to false for building current architecture only
-HIPHOP_MACOS_UNIVERSAL     ?= false
+HIPHOP_MACOS_UNIVERSAL ?= false
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
@@ -115,17 +123,17 @@ HIPHOP_FILES_UI += NetworkUI.cpp \
                    WebServer.cpp
 endif
 ifeq ($(LINUX),true)
-HIPHOP_FILES_UI += linux/LinuxWebUI.cpp \
+HIPHOP_FILES_UI += linux/LinuxWebViewUI.cpp \
                    linux/ChildProcessWebView.cpp \
                    linux/IpcChannel.cpp \
                    linux/ipc.c
 endif
 ifeq ($(MACOS),true)
-HIPHOP_FILES_UI += macos/MacWebUI.mm \
+HIPHOP_FILES_UI += macos/MacWebViewUI.mm \
                    macos/CocoaWebView.mm
 endif
 ifeq ($(WINDOWS),true)
-HIPHOP_FILES_UI += windows/WindowsWebUI.cpp \
+HIPHOP_FILES_UI += windows/WindowsWebViewUI.cpp \
                    windows/EdgeWebView.cpp \
                    windows/WebView2EventHandler.cpp \
                    windows/cJSON.c

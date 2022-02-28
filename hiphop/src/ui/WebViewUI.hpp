@@ -29,12 +29,12 @@
 START_NAMESPACE_DISTRHO
 
 class WebViewUI;
-float getDisplayScaleFactor(WebViewUI* ui); // implemented for each platform
+float getDisplayScaleFactor(WebViewUI* ui); // see [Platform]WebViewuI
 
 #ifdef HIPHOP_NETWORK_UI
-typedef NetworkUI WebViewUIBase; // https + websockets messaging
+typedef NetworkUI WebViewUIBase; // https:// + WebSockets messaging
 #else
-typedef WebUIBase WebViewUIBase; // file + local webview messaging
+typedef WebUIBase WebViewUIBase; // file://  + Local web view messaging
 #endif
 
 class WebViewUI : public WebViewUIBase, private WebViewEventHandler

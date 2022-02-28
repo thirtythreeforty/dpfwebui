@@ -77,12 +77,34 @@ void WebUIBase::onMessageReceived(const JsValueVector& args)
     (void)args;
 }
 
+void WebUIBase::handleMessage(const JsValueVector& args)
+{
+    if ((args.size() < 2) || (args[0].getString() != "UI")) {
+        onMessageReceived(args); // passthrough
+        return;
+    }
+
+    String key = args[1].getString();
+
+    if (fHandler.find(key.buffer()) == fHandler.end()) {
+        d_stderr2("Unknown WebUI method");
+        return;
+    }
+
+    const JsValueVector handlerArgs(args.cbegin() + 2, args.cend());
+    
+    ArgumentCountAndMessageHandler handler = fHandler[key.buffer()];
+
+    if (handler.first != static_cast<int>(handlerArgs.size())) {
+        d_stderr2("Incorrect WebUI method argument count");
+        return;
+    }
+
+    handler.second(handlerArgs);
+}
+
 void WebUIBase::initHandlers()
 {
-    fHandler["isStandalone"] = std::make_pair(0, [this](const JsValueVector&) {
-        postMessage({"UI", "isStandalone", isStandalone()});
-    });
-
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
     fHandler["sendNote"] = std::make_pair(3, [this](const JsValueVector& args) {
         sendNote(
@@ -142,4 +164,12 @@ void WebUIBase::initHandlers()
     });
 #endif // HIPHOP_ENABLE_WASM_PLUGIN
 #endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+
+    // It is not possible to implement JS synchronous calls that return values
+    // without resorting to dirty hacks. Use JS async functions instead, and
+    // fulfill their promises here. See for example getWidth() and getHeight().
+
+    fHandler["isStandalone"] = std::make_pair(0, [this](const JsValueVector&) {
+        postMessage({"UI", "isStandalone", isStandalone()});
+    });
 }
