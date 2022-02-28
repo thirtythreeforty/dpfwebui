@@ -107,7 +107,8 @@ void WebViewUI::load()
 {
     if (fWebView != nullptr) {
 #ifdef HIPHOP_NETWORK_UI
-        String url = "file://"; // TODO : https://< 127.0.0.1 | lan addr >:port
+        // TODO : https://< 127.0.0.1 | lan addr >:port
+        String url = String("file:///");
 #else
         String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
 #endif

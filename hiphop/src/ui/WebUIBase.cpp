@@ -67,11 +67,6 @@ void WebUIBase::sharedMemoryChanged(const char* metadata, const unsigned char* d
 }
 #endif
 
-void WebUIBase::postMessage(const JsValueVector& args)
-{
-    // TODO - broadcast to all clients
-}
-
 void WebUIBase::onMessageReceived(const JsValueVector& args)
 {
     (void)args;

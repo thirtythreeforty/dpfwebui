@@ -31,7 +31,9 @@ public:
     virtual ~NetworkUI();
 
 protected:
-    virtual void uiIdle() override;
+    void uiIdle() override;
+
+    void postMessage(const JsValueVector& args) override;
 
 private:
     WebServer fServer;

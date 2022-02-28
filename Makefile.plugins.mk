@@ -19,7 +19,7 @@ HIPHOP_WASM_MODE ?= aot
 # WebAssembly System Interface only available for Wasmer
 HIPHOP_WASM_WASI ?= false
 
-# Enable built-in websockets server and load content over HTTPS   [WIP]
+# Enable built-in websockets server and load content over HTTPS [WIP]
 HIPHOP_NETWORK_UI ?= false
 
 # Automatically inject dpf.js when loading content from file://
@@ -28,7 +28,7 @@ HIPHOP_INJECT_FRAMEWORK_JS ?= false
 # Web view implementation on Linux <gtk|cef>
 HIPHOP_LINUX_WEBVIEW ?= gtk
 
-# WIP : universal build only available for non-network web UI and Wasmer DSP.
+# Universal build only available for non-network web UI and Wasmer DSP
 # Set to false for building current architecture only
 HIPHOP_MACOS_UNIVERSAL ?= false
 

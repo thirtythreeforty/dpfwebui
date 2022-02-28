@@ -35,3 +35,10 @@ void NetworkUI::uiIdle()
 {
     fServer.process();
 }
+
+void NetworkUI::postMessage(const JsValueVector& args)
+{
+    // TODO - broadcast to all clients
+
+    (void)args;
+}

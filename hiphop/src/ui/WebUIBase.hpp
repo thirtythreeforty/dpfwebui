@@ -47,7 +47,7 @@ protected:
     void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) override;
 #endif
 
-    virtual void postMessage(const JsValueVector& args);
+    virtual void postMessage(const JsValueVector& args) = 0;
     virtual void onMessageReceived(const JsValueVector& args);
 
     void handleMessage(const JsValueVector& args);
