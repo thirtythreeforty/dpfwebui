@@ -30,7 +30,7 @@ WasmRuntime::WasmRuntime()
     , fStore(nullptr)
     , fModule(nullptr)
     , fInstance(nullptr)
-#ifdef HIPHOP_ENABLE_WASI
+#if defined(HIPHOP_ENABLE_WASI)
     , fWasiEnv(nullptr)
 #endif
 {
@@ -47,7 +47,7 @@ WasmRuntime::WasmRuntime()
         throw wasm_runtime_exception("wasm_store_new() failed");
     }
 
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
+#if defined(HIPHOP_WASM_RUNTIME_WAMR)
     sWamrEngineRefCount++;
 #endif
 }
@@ -63,7 +63,7 @@ WasmRuntime::~WasmRuntime()
         fStore = nullptr;
     }
 
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
+#if defined(HIPHOP_WASM_RUNTIME_WAMR)
     if (--sWamrEngineRefCount > 0) {
         // Calling wasm_engine_delete() also tears down the full WAMR runtime.
         // There is ongoing discussion on how to fix this:
@@ -146,7 +146,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
 
     char name[MAX_STRING_SIZE];
 
-#ifdef HIPHOP_ENABLE_WASI
+#if defined(HIPHOP_ENABLE_WASI)
     // Build a map of WASI imports
     // Call to wasi_get_imports() fails because of missing host imports, use
     // wasi_get_unordered_imports() https://github.com/wasmerio/wasmer/issues/2450
@@ -191,7 +191,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
         name[wn->size] = '\0';
         importIndex[name] = i;
 
-#ifdef HIPHOP_ENABLE_WASI
+#if defined(HIPHOP_ENABLE_WASI)
         if (wasiImportIndex.find(name) != wasiImportIndex.end()) {
             const wasmer_named_extern_t* ne = wasiImports.data[wasiImportIndex[name]];
             imports.data[i] = const_cast<wasm_extern_t *>(wasmer_named_extern_unwrap(ne));
@@ -209,7 +209,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
 
     fLib.wasm_importtype_vec_delete(&importTypes);
 
-#ifdef HIPHOP_ENABLE_WASI
+#if defined(HIPHOP_ENABLE_WASI)
     if (!moduleNeedsWasi) {
         throw wasm_module_exception("WASI is enabled but module is not WASI compliant");
     }
@@ -251,7 +251,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
         throw wasm_runtime_exception("wasm_instance_new() failed");
     }
     
-#ifdef HIPHOP_ENABLE_WASI
+#if defined(HIPHOP_ENABLE_WASI)
     wasm_func_t* wasiStart = wasi_get_start_function(fInstance);
     
     if (wasiStart == nullptr) {
@@ -287,7 +287,7 @@ void WasmRuntime::destroyInstance()
         fModule = nullptr;
     }
 
-#ifdef HIPHOP_ENABLE_WASI
+#if defined(HIPHOP_ENABLE_WASI)
     if (fWasiEnv != nullptr) {
         wasi_env_delete(fWasiEnv);
         fWasiEnv = nullptr;
@@ -351,7 +351,7 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
     wasm_val_vec_t paramsVec;
     paramsVec.size = params.size();
     paramsVec.data = params.data();
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
+#if defined(HIPHOP_WASM_RUNTIME_WAMR)
     paramsVec.num_elems = params.size();
     paramsVec.size_of_elem = sizeof(wasm_val_t);
 #endif
@@ -434,6 +434,6 @@ WasmValue WasmRuntime::CToWTF16String(const char* s)
     return callFunctionReturnSingleValue("_c_to_wtf16_string", { wPtr });
 }
 
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
+#if defined(HIPHOP_WASM_RUNTIME_WAMR)
 int WasmRuntime::sWamrEngineRefCount = 0;
 #endif

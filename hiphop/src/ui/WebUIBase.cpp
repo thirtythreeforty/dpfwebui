@@ -157,7 +157,7 @@ void WebUIBase::initHandlers()
             static_cast<size_t>(data.size())
         );
     });
-#endif // HIPHOP_ENABLE_WASM_PLUGIN
+#endif
 #endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
 
     // It is not possible to implement JS synchronous calls that return values

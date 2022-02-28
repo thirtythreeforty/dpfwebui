@@ -20,7 +20,7 @@
 #define PATH_HPP
 
 #include "distrho/extra/String.hpp"
-#ifndef DISABLE_PATH_GET_PLUGIN_LIBRARY
+#if !defined(DISABLE_PATH_GET_PLUGIN_LIBRARY)
   // Including this file when compiling the CEF helper would involve adding
   // lots of dependencies from DPF, helper only needs to call getCachesPath().
   // The GTK-based helper does not need to call functions in LinuxPath.cpp.
@@ -61,7 +61,7 @@ namespace PathSubdirectory {
 
 struct Path
 {
-#ifndef DISABLE_PATH_GET_PLUGIN_LIBRARY
+#if !defined(DISABLE_PATH_GET_PLUGIN_LIBRARY)
     static String getPluginLibrary()
     {
 #if DISTRHO_OS_LINUX

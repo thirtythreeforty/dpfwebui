@@ -21,8 +21,8 @@
 #include "WasmPluginImpl.hpp"
 #include "extra/Path.hpp"
 
-#ifdef HIPHOP_WASM_BINARY_AOT
-# ifdef __arm__
+#if defined(HIPHOP_WASM_BINARY_AOT)
+# if defined(__arm__)
 #  define WASM_BINARY_FILE "aarch64.aot"
 # else
 #  define WASM_BINARY_FILE "x86_64.aot"
@@ -249,7 +249,7 @@ String WasmPlugin::getState(const char* key) const
         return String();
     }
 }
-#endif // DISTRHO_PLUGIN_WANT_FULL_STATE
+#endif
 
 #endif // DISTRHO_PLUGIN_WANT_STATE
 

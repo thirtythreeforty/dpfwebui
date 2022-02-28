@@ -50,7 +50,7 @@ LinuxWebViewUI::LinuxWebViewUI(uint baseWidth, uint baseHeight,
         // LXDRAGDROPBUG : No drag and drop on both GTK and CEF web views
         "window._webview_env = {};"
         "_webview_env.noDragAndDrop = true;"
-#ifdef HIPHOP_LINUX_WEBVIEW_GTK
+#if defined(HIPHOP_LINUX_WEBVIEW_GTK)
         // WKGTKRESIZEBUG : Broken vw/vh/vmin/vmax CSS units
         "_webview_env.noCSSViewportUnits = true;"
         // No touch events for <input type="range"> elements

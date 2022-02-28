@@ -23,17 +23,17 @@
 
 #include "extra/macro.h"
 
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
 # include "extra/Path.hpp"
-# ifdef DISTRHO_OS_WINDOWS
+# if defined(DISTRHO_OS_WINDOWS)
 #  include <libloaderapi.h>
 # endif
 #endif
 
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
+#if defined(HIPHOP_WASM_RUNTIME_WAMR)
 # include "wasm_c_api.h"
-#elif HIPHOP_WASM_RUNTIME_WASMER
-# ifdef DISTRHO_OS_WINDOWS
+#elif defined(HIPHOP_WASM_RUNTIME_WASMER)
+# if defined(DISTRHO_OS_WINDOWS)
 #  define WASM_API_EXTERN // allow to link against static lib
 # endif
 # include "wasm.h"
@@ -47,7 +47,7 @@
 
 START_NAMESPACE_DISTRHO
 
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
 # define DLL_SYMBOL(name,type) reinterpret_cast<type>(getLibrarySymbol(name))
 #endif
 
@@ -62,11 +62,11 @@ START_NAMESPACE_DISTRHO
 class WasmCApi
 {
 public:
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
     WasmCApi()
     {
         String path = Path::getPluginLibrary() + "\\" XSTR(HIPHOP_WASM_DLL);
-# ifdef DISTRHO_OS_WINDOWS
+# if defined(DISTRHO_OS_WINDOWS)
         fDllHandle = LoadLibrary(path);
 # endif
     }
@@ -74,7 +74,7 @@ public:
     ~WasmCApi()
     {
         if (fDllHandle != nullptr) {
-# ifdef DISTRHO_OS_WINDOWS
+# if defined(DISTRHO_OS_WINDOWS)
             FreeLibrary(fDllHandle);
 # endif
             fDllHandle = nullptr;
@@ -88,7 +88,7 @@ public:
 
     inline own wasm_engine_t* wasm_engine_new(void)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef own wasm_engine_t* (*FuncType)();
         return DLL_SYMBOL(__FUNCTION__,FuncType)();
 #else
@@ -98,7 +98,7 @@ public:
 
     inline void wasm_engine_delete(own wasm_engine_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_engine_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -112,7 +112,7 @@ public:
 
     inline own wasm_store_t* wasm_store_new(wasm_engine_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef own wasm_store_t* (*FuncType)(wasm_engine_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -122,7 +122,7 @@ public:
 
     inline void wasm_store_delete(own wasm_store_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_store_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -137,7 +137,7 @@ public:
     inline own wasm_instance_t* wasm_instance_new(wasm_store_t* arg0, const wasm_module_t* arg1,
                                             const wasm_extern_vec_t * arg2, own wasm_trap_t** arg3)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef own wasm_instance_t* (*FuncType)(wasm_store_t*, const wasm_module_t*,
                                                     const wasm_extern_vec_t*, own wasm_trap_t**);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1, arg2, arg3);
@@ -148,7 +148,7 @@ public:
 
     inline void wasm_instance_delete(own wasm_instance_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_instance_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -158,7 +158,7 @@ public:
 
     inline void wasm_instance_exports(const wasm_instance_t* arg0, own wasm_extern_vec_t* arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(const wasm_instance_t*, own wasm_extern_vec_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -172,7 +172,7 @@ public:
 
     inline void wasm_byte_vec_new_uninitialized(own wasm_byte_vec_t* arg0, size_t arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_byte_vec_t*, size_t);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -182,7 +182,7 @@ public:
 
     inline void wasm_byte_vec_delete(own wasm_byte_vec_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_byte_vec_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -196,7 +196,7 @@ public:
 
     inline own wasm_module_t* wasm_module_new(wasm_store_t* arg0, const wasm_byte_vec_t* arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef own wasm_module_t* (*FuncType)(wasm_store_t*, const wasm_byte_vec_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -206,7 +206,7 @@ public:
 
     inline void wasm_module_delete(own wasm_module_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_module_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -216,7 +216,7 @@ public:
 
     inline void wasm_module_imports(const wasm_module_t* arg0, own wasm_importtype_vec_t* arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(const wasm_module_t*, own wasm_importtype_vec_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -226,7 +226,7 @@ public:
 
     inline void wasm_module_exports(const wasm_module_t* arg0, own wasm_exporttype_vec_t* arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(const wasm_module_t*, own wasm_exporttype_vec_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -240,7 +240,7 @@ public:
 
     inline const wasm_name_t* wasm_importtype_module(const wasm_importtype_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef const wasm_name_t* (*FuncType)(const wasm_importtype_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -250,7 +250,7 @@ public:
 
     inline const wasm_name_t* wasm_importtype_name(const wasm_importtype_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef const wasm_name_t* (*FuncType)(const wasm_importtype_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -260,7 +260,7 @@ public:
 
     inline void wasm_importtype_vec_delete(own wasm_importtype_vec_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_importtype_vec_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -274,7 +274,7 @@ public:
 
     inline const wasm_name_t* wasm_exporttype_name(const wasm_exporttype_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef const wasm_name_t* (*FuncType)(const wasm_exporttype_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -284,7 +284,7 @@ public:
 
     inline void wasm_exporttype_vec_delete(own wasm_exporttype_vec_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_exporttype_vec_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -298,7 +298,7 @@ public:
 
     inline void wasm_extern_vec_new_uninitialized(own wasm_extern_vec_t* arg0, size_t arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_extern_vec_t*, size_t);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -308,7 +308,7 @@ public:
 
     inline void wasm_extern_vec_delete(own wasm_extern_vec_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_extern_vec_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -318,7 +318,7 @@ public:
 
     inline wasm_func_t* wasm_extern_as_func(wasm_extern_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef wasm_func_t* (*FuncType)(wasm_extern_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -328,7 +328,7 @@ public:
 
     inline wasm_global_t* wasm_extern_as_global(wasm_extern_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef wasm_global_t* (*FuncType)(wasm_extern_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -338,7 +338,7 @@ public:
 
     inline wasm_memory_t* wasm_extern_as_memory(wasm_extern_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef wasm_memory_t* (*FuncType)(wasm_extern_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -352,7 +352,7 @@ public:
 
     inline own wasm_valtype_t* wasm_valtype_new(wasm_valkind_t arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef own wasm_valtype_t* (*FuncType)(wasm_valkind_t);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -363,7 +363,7 @@ public:
     inline void wasm_valtype_vec_new(own wasm_valtype_vec_t* arg0, size_t arg1,
                                         own wasm_valtype_t* const arg2[])
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_valtype_vec_t*, size_t, own wasm_valtype_t* const[]);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1, arg2);
 #else
@@ -373,7 +373,7 @@ public:
 
     inline void wasm_valtype_vec_delete(own wasm_valtype_vec_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(own wasm_valtype_vec_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -388,7 +388,7 @@ public:
     inline own wasm_functype_t* wasm_functype_new(own wasm_valtype_vec_t* arg0,
                                                     own wasm_valtype_vec_t* arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef own wasm_functype_t* (*FuncType)(own wasm_valtype_vec_t*, own wasm_valtype_vec_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -400,7 +400,7 @@ public:
                                             wasm_func_callback_with_env_t arg2, void* arg3,
                                             void (*arg4)(void*))
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef own wasm_func_t* (*FuncType)(wasm_store_t*, const wasm_functype_t*,
         wasm_func_callback_with_env_t, void*, void (*)(void*));
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1, arg2, arg3, arg4);
@@ -411,7 +411,7 @@ public:
 
     inline wasm_extern_t* wasm_func_as_extern(wasm_func_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef wasm_extern_t* (*FuncType)(wasm_func_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -422,7 +422,7 @@ public:
     inline own wasm_trap_t* wasm_func_call(const wasm_func_t* arg0, const wasm_val_vec_t* arg1,
                                             wasm_val_vec_t* arg2)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef own wasm_trap_t* (*FuncType)(const wasm_func_t*, const wasm_val_vec_t*,
                                             wasm_val_vec_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1, arg2);
@@ -437,7 +437,7 @@ public:
 
     inline byte_t* wasm_memory_data(wasm_memory_t* arg0)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef byte_t* (*FuncType)(wasm_memory_t*);
         return DLL_SYMBOL(__FUNCTION__,FuncType)(arg0);
 #else
@@ -451,7 +451,7 @@ public:
 
     inline void wasm_global_get(const wasm_global_t* arg0, own wasm_val_t* arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(const wasm_global_t*, own wasm_val_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -461,7 +461,7 @@ public:
 
     inline void wasm_global_set(wasm_global_t* arg0, const wasm_val_t* arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(wasm_global_t* arg0, const wasm_val_t* arg1);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -475,7 +475,7 @@ public:
     
     inline void wasm_trap_message(const wasm_trap_t* arg0, own wasm_message_t* arg1)
     {
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
         typedef void (*FuncType)(const wasm_trap_t*, own wasm_message_t*);
         DLL_SYMBOL(__FUNCTION__,FuncType)(arg0, arg1);
 #else
@@ -483,9 +483,9 @@ public:
 #endif
     }
 
-#ifdef HIPHOP_WASM_DLL
+#if defined(HIPHOP_WASM_DLL)
 private:
-# ifdef DISTRHO_OS_WINDOWS
+# if defined(DISTRHO_OS_WINDOWS)
     inline void* getLibrarySymbol(const char* name)
     {
         return reinterpret_cast<void*>(GetProcAddress(fDllHandle, name));

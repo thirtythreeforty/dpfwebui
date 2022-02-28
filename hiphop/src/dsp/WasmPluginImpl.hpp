@@ -55,7 +55,7 @@ public:
     void   setState(const char* key, const char* value) override;
 #if DISTRHO_PLUGIN_WANT_FULL_STATE
     String getState(const char* key) const override;
-#endif // DISTRHO_PLUGIN_WANT_FULL_STATE
+#endif
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
     void activate() override;

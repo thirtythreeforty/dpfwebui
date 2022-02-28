@@ -21,17 +21,17 @@
 
 #include "src/DistrhoDefines.h"
 
-#ifdef DISTRHO_OS_LINUX
+#if defined(DISTRHO_OS_LINUX)
 # include "ui/linux/LinuxWebViewUI.hpp"
 typedef LinuxWebViewUI WebUI;
 #endif
 
-#ifdef DISTRHO_OS_MAC
+#if defined(DISTRHO_OS_MAC)
 # include "ui/macos/MacWebViewUI.hpp"
 typedef MacWebViewUI WebUI;
 #endif
 
-#ifdef DISTRHO_OS_WINDOWS
+#if defined(DISTRHO_OS_WINDOWS)
 # include "ui/windows/WindowsWebViewUI.hpp"
 typedef WindowsWebViewUI WebUI;
 #endif

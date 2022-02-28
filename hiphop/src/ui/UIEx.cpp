@@ -77,7 +77,7 @@ void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
     
     writeSharedMemory("_wasm_bin", data, size);
 }
-#endif // HIPHOP_ENABLE_WASM_PLUGIN
+#endif
 #endif // HIPHOP_ENABLE_SHARED_MEMORY
 
 #if HIPHOP_ENABLE_SHARED_MEMORY

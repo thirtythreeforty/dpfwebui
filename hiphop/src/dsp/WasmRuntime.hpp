@@ -98,11 +98,11 @@ private:
     wasm_extern_vec_t  fExportsVec;
     WasmFunctionVector fHostFunctions;
     WasmExternMap      fModuleExports;
-#ifdef HIPHOP_ENABLE_WASI
+#if defined(HIPHOP_ENABLE_WASI)
     wasi_env_t*        fWasiEnv;
 #endif
 
-#ifdef HIPHOP_WASM_RUNTIME_WAMR
+#if defined(HIPHOP_WASM_RUNTIME_WAMR)
     static int sWamrEngineRefCount;
 #endif
 
@@ -115,7 +115,7 @@ struct wasm_module_exception : public virtual std::runtime_error
     using std::runtime_error::runtime_error;
 };
 
-#ifdef HIPHOP_WASM_RUNTIME_WASMER
+#if defined(HIPHOP_WASM_RUNTIME_WASMER)
 struct wasm_runtime_exception : public virtual std::exception
 {
     wasm_runtime_exception(std::string what)

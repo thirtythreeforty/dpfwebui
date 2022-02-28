@@ -22,7 +22,7 @@
 #include "WebUIBase.hpp"
 #include "WebViewBase.hpp"
 
-#ifdef HIPHOP_NETWORK_UI
+#if defined(HIPHOP_NETWORK_UI)
 # include "NetworkUI.hpp"
 #endif
 
@@ -31,7 +31,7 @@ START_NAMESPACE_DISTRHO
 class WebViewUI;
 float getDisplayScaleFactor(WebViewUI* ui); // see [Platform]WebViewuI
 
-#ifdef HIPHOP_NETWORK_UI
+#if defined(HIPHOP_NETWORK_UI)
 typedef NetworkUI WebViewUIBase; // https:// + WebSockets messaging
 #else
 typedef WebUIBase WebViewUIBase; // file://  + Local web view messaging

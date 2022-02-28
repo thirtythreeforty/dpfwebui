@@ -74,7 +74,7 @@ void WebViewUI::setWebView(WebViewBase* webView)
     fWebView = webView;
 
     fWebView->setEventHandler(this);
-#ifdef HIPHOP_PRINT_TRAFFIC
+#if defined(HIPHOP_PRINT_TRAFFIC)
     fWebView->setPrintTraffic(true);
 #endif
     
@@ -106,7 +106,7 @@ void WebViewUI::setWebView(WebViewBase* webView)
 void WebViewUI::load()
 {
     if (fWebView != nullptr) {
-#ifdef HIPHOP_NETWORK_UI
+#if defined(HIPHOP_NETWORK_UI)
         // TODO : https://< 127.0.0.1 | lan addr >:port
         String url = String("file:///");
 #else
