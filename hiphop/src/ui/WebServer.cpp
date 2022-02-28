@@ -54,6 +54,18 @@ WebServer::WebServer()
     fContextInfo.gid       = -1;
     fContextInfo.user      = this;
 
+    // SSL (WIP)
+    // https://github.com/warmcat/libwebsockets/blob/main/READMEs/README.test-apps.md
+    // cp -rp ./scripts/client-ca /tmp
+    // cd /tmp/client-ca
+    // ./create-ca.sh
+    // ./create-server-cert.sh server
+    // ./create-client-cert.sh client
+    //fContextInfo.options = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
+    //fContextInfo.ssl_cert_filepath        = "/tmp/client-ca/server.pem";
+    //fContextInfo.ssl_private_key_filepath = "/tmp/client-ca/server.key";
+    //fContextInfo.ssl_ca_filepath          = "/tmp/client-ca/ca.pem";
+
     fContext = lws_create_context(&fContextInfo);
 }
 
@@ -74,13 +86,27 @@ void WebServer::process()
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
                            void* user, void* in, size_t len)
 {
-    // TODO
+    void* userdata = lws_context_user(lws_get_context(wsi));
+    WebServer* server = static_cast<WebServer*>(userdata);
+    int rc;
 
-    (void)wsi;
-    (void)reason;
-    (void)user;
-    (void)in;
-    (void)len;
+    switch (reason) {
+        /*case LWS_CALLBACK_ESTABLISHED:
+            rc = server->add_client(wsi);
+            break;
+        case LWS_CALLBACK_CLOSED:
+            rc = server->del_client(wsi);
+            break;
+        case LWS_CALLBACK_RECEIVE:
+            rc = server->recv_client(wsi, in, len);
+            break;
+        case LWS_CALLBACK_SERVER_WRITEABLE:
+            rc = server->write_client(wsi);
+            break;*/
+        default:
+            rc = lws_callback_http_dummy(wsi, reason, user, in, len);
+            break;
+    }
 
-    return 0;
+    return rc;
 }
