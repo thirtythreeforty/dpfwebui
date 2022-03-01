@@ -35,25 +35,101 @@ public:
         TString
     };
 
-    JsValue()         : fT(TNull),   fB(false), fD(0)  {}
-    JsValue(bool b)   : fT(TBool),   fB(b),     fD(0)  {}
-    JsValue(double d) : fT(TDouble), fB(false), fD(d)  {}
-    JsValue(String s) : fT(TString), fB(false), fD(0), fS(s) {}
+    JsValue() noexcept
+        : fT(TNull)
+        , fB(false)
+        , fD(0)
+    {}
 
+    JsValue(bool b) noexcept
+        : fT(TBool)
+        , fB(b)
+        , fD(0)
+    {}
+
+    JsValue(double d) noexcept
+        : fT(TDouble)
+        , fB(false)
+        , fD(d)
+    {}
+
+    JsValue(String s) noexcept
+        : fT(TString)
+        , fB(false)
+        , fD(0)
+        , fS(s)
+    {}
+
+    //
     // Convenience constructors
-    JsValue(uint32_t i)    : fT(TDouble), fB(false), fD(static_cast<double>(i)) {}
-    JsValue(float f)       : fT(TDouble), fB(false), fD(static_cast<double>(f)) {}
-    JsValue(const char *s) : fT(TString), fB(false), fD(0), fS(String(s)) {}
+    //
 
-    bool   isNull()    const { return fT == TNull; }
-    Type   getType()   const { return fT; }
-    bool   getBool()   const { return fB; }
-    double getDouble() const { return fD; }
-    String getString() const { return fS; }
+    JsValue(uint32_t i) noexcept
+        : fT(TDouble)
+        , fB(false)
+        , fD(static_cast<double>(i))
+    {}
 
-    operator bool()   const { return fB; }
-    operator double() const { return fD; }
-    operator String() const { return fS; }
+    JsValue(float f) noexcept
+        : fT(TDouble)
+        , fB(false)
+        , fD(static_cast<double>(f))
+    {}
+
+    JsValue(const char *s) noexcept
+        : fT(TString)
+        , fB(false)
+        , fD(0)
+        , fS(String(s))
+    {}
+
+    //
+    // Getters
+    //
+
+    bool isNull() const noexcept
+    {
+        return fT == TNull;
+    }
+
+    Type getType() const noexcept
+    {
+        return fT;
+    }
+
+    bool getBool() const noexcept
+    {
+        return fB;
+    }
+
+    double getDouble() const noexcept
+    {
+        return fD;
+    }
+
+    String getString() const noexcept
+    {
+        return fS;
+    }
+
+    //
+    // Type casting operators
+    //
+
+    operator bool() const noexcept
+    {
+        return fB;
+    }
+
+    operator double() const noexcept
+    {
+        return fD;
+    }
+
+    operator String() const noexcept
+    {
+        return fS;
+    }
 
 private:
     Type   fT;
@@ -63,9 +139,9 @@ private:
 
 };
 
-typedef std::vector<JsValue> JsValueVector;
-
 END_NAMESPACE_DISTRHO
+
+typedef std::vector<JsValue> JsValueVector;
 
 std::ostream& operator<<(std::ostream &os, const JsValue &val);
 
