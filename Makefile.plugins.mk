@@ -32,6 +32,10 @@ HIPHOP_LINUX_WEBVIEW ?= gtk
 # Set to false for building current architecture only
 HIPHOP_MACOS_UNIVERSAL ?= false
 
+# Support macOS down to High Sierra when WKWebView was introduced. This setting
+# must be enabled when compiling on newer systems otherwise plugins will crash.
+HIPHOP_MACOS_OLD ?= false
+
 ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
 endif
@@ -186,10 +190,12 @@ ifeq ($(LINUX),true)
 BASE_FLAGS += -lrt
 endif
 ifeq ($(MACOS),true)
-# This is needed otherwise expect crashes on older macOS when compiling on newer
-# systems. Minimum supported target is High Sierra when WKWebView was introduced.
+# Mute lots of warnings from DPF: 'vfork' is deprecated: Use posix_spawn or fork
+BASE_FLAGS += -Wno-deprecated-declarations
+ifeq ($(HIPHOP_MACOS_OLD),true)
 # Warning: ...was built for newer macOS version (11.0) than being linked (10.13)
 BASE_FLAGS += -mmacosx-version-min=10.13
+endif
 endif
 
 # ------------------------------------------------------------------------------
