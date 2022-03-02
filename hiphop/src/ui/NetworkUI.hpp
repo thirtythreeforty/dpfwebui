@@ -30,6 +30,8 @@ public:
     NetworkUI(uint width = 0, uint height = 0);
     virtual ~NetworkUI();
 
+    WebServer& getWebServer() { return fServer; }
+
 protected:
     void uiIdle() override;
 

@@ -50,14 +50,16 @@ WebServer::WebServer(const char* jsInjectionTarget)
         fMount.interpret        = &fMountOptions;
     }
 #ifndef NDEBUG
-    // Caching headers
+    // Send caching headers
     fMount.cache_max_age    = 3600;
     fMount.cache_reusable   = 1;
     fMount.cache_revalidate = 1;
 #endif
 
+    findAvailablePort();
+
     std::memset(&fContextInfo, 0, sizeof(fContextInfo));
-    fContextInfo.port      = 9090; // FIXME - pick available port from a range
+    fContextInfo.port      = fPort;
     fContextInfo.protocols = fProtocol;
     fContextInfo.mounts    = &fMount;
     fContextInfo.uid       = -1;
@@ -87,6 +89,18 @@ WebServer::~WebServer()
     }
 }
 
+String WebServer::getLocalUrl()
+{
+    // TODO - HTTPS
+    return String("http://localhost:") + String(fPort);
+}
+
+String WebServer::getLanUrl()
+{
+    // TODO - lan addr
+    return String("http://192.168.1.1:") + String(fPort);
+}
+
 void WebServer::injectScript(String& script)
 {
     fInjectedScripts.push_back(script);
@@ -96,6 +110,11 @@ void WebServer::process()
 {
     // Avoid blocking - https://github.com/warmcat/libwebsockets/issues/1735
     lws_service(fContext, -1);
+}
+
+void WebServer::findAvailablePort()
+{
+    fPort = 9090; // FIXME - pick available port from a range
 }
 
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,

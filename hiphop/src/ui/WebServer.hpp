@@ -34,11 +34,16 @@ public:
     WebServer(const char* jsInjectionTarget = nullptr);
     virtual ~WebServer();
 
+    String getLocalUrl();
+    String getLanUrl();
+
     virtual void injectScript(String& script);
 
     void process();
 
 private:
+    void findAvailablePort();
+
     static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
                            void* user, void* in, size_t len);
     static const char* lwsReplaceFunc(void* data, int index);
@@ -51,6 +56,8 @@ private:
     lws_protocols              fProtocol[2];
     lws_context_creation_info  fContextInfo;
     lws_context*               fContext;
+
+    int fPort;
 
     typedef std::vector<String> StringVector;
     StringVector fInjectedScripts;
