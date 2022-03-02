@@ -75,7 +75,7 @@ CocoaWebView::CocoaWebView()
     );
     injectScript(js);
 
-    injectCreateHostObjectScript();
+    injectHostObjectScripts();
 
     js = String(JS_POST_MESSAGE_SHIM);
     injectScript(js);

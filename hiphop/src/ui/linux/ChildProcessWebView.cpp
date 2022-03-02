@@ -109,7 +109,20 @@ ChildProcessWebView::ChildProcessWebView()
         d_stderr("Timeout waiting for UI helper init - %s", strerror(errno));
     }
 
-    injectCreateHostObjectScript();
+    injectHostObjectScripts();
+
+    // Allow JavaScript code to detect some unavailable features
+    String js = String(
+        // LXDRAGDROPBUG : No drag and drop on both GTK and CEF web views
+        "window.host.env.noDragAndDrop = true;"
+#if defined(HIPHOP_LINUX_WEBVIEW_GTK)
+        // WKGTKRESIZEBUG : Broken vw/vh/vmin/vmax CSS units
+        "window.host.env.noCSSViewportUnits = true;"
+        // No touch events for <input type="range"> elements
+        "window.host.env.noRangeInputTouch = true;"
+#endif
+    );
+    injectScript(js);
 
     fIpc->write(OP_INJECT_SHIMS);
 }

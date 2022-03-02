@@ -23,17 +23,19 @@
 
 // This could be moved into dpf.js but then JavaScript code should be checking
 // for the platform type in order to insert JS_POST_MESSAGE_SHIM. Leaving
-// platform-dependent code in a single place (C++) for a cleaner approach. 
+// platform-dependent code in a single place (C++) for a cleaner approach.
 #define JS_CREATE_HOST_OBJECT  "window.host = new EventTarget;" \
                                "window.host.addMessageListener = (lr) => {" \
                                "  window.host.addEventListener('message', (ev) => lr(ev.detail))" \
-                               "};"
+                               "};" \
+                               "window.host.env = {};"
 #define JS_CREATE_CONSOLE  "window.console = {" \
                            "   log  : (s) => window.host.postMessage(['console', 'log'  , String(s)])," \
                            "   info : (s) => window.host.postMessage(['console', 'info' , String(s)])," \
                            "   warn : (s) => window.host.postMessage(['console', 'warn' , String(s)])," \
                            "   error: (s) => window.host.postMessage(['console', 'error', String(s)])" \
                            "};"
+
 /**
  * Keep this class generic; plugin specific features belong to WebViewUI.
  */
@@ -122,7 +124,7 @@ void WebViewBase::postMessage(const JsValueVector& args)
     runScript(js);
 }
 
-void WebViewBase::injectCreateHostObjectScript()
+void WebViewBase::injectHostObjectScripts()
 {
     String js = String(JS_CREATE_HOST_OBJECT) + String(JS_CREATE_CONSOLE);
     injectScript(js);

@@ -45,20 +45,6 @@ LinuxWebViewUI::LinuxWebViewUI(uint baseWidth, uint baseHeight,
     ChildProcessWebView* webview = new ChildProcessWebView();
     setWebView(webview); // base class owns web view
 
-    // Allow JavaScript code to detect some unavailable features
-    String js = String(
-        // LXDRAGDROPBUG : No drag and drop on both GTK and CEF web views
-        "window._webview_env = {};"
-        "_webview_env.noDragAndDrop = true;"
-#if defined(HIPHOP_LINUX_WEBVIEW_GTK)
-        // WKGTKRESIZEBUG : Broken vw/vh/vmin/vmax CSS units
-        "_webview_env.noCSSViewportUnits = true;"
-        // No touch events for <input type="range"> elements
-        "_webview_env.noRangeInputTouch = true;"
-#endif
-    );
-    webview->injectScript(js);
-
     if (startLoading) {
         load();
     }

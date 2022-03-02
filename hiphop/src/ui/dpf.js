@@ -22,41 +22,24 @@ let $injectedjs;
 
 const DISTRHO = (() => {
 
-// TODO : remote messaging and stub (when loading html in browser for debug)
-
 class UI {
 
     constructor() {
         this._resolve = {};
 
-        if (window.host === undefined) {
-            return; // TODO
+        if (DISTRHO.env.webview) {
+            this._initLocalMessageChannel();
+
+            // Call WebUI::flushInitMessageQueue() to receive any UI message
+            // generated while the web view was still loading. Since this
+            // involves message passing, it will not cause any UI methods to be
+            // triggered synchronously and it is safe to indirectly call from
+            // super() in subclass constructors.
+            this._call('flushInitMessageQueue');
+
+        } else if (DISTRHO.env.remote) {
+            this._initNetworkMessageChannel();
         }
-
-        window.host.addMessageListener((args) => {
-            if (args[0] != 'UI') {
-                this.messageReceived(args); // passthrough
-                return;
-            }
-
-            const method = args[1];
-            args = args.slice(2);
-
-            if (method in this._resolve) {
-                this._resolve[method][0](...args); // fulfill promise
-                delete this._resolve[method];
-            } else {
-                this[method](...args); // call method
-            }
-        });
-
-        // Call WebUI::flushInitMessageQueue() to receive any UI message
-        // generated while the web view was still loading. Since this involves
-        // message passing, it will not cause any UI methods to be triggered
-        // synchronously and it is safe to indirectly call from super() in
-        // subclass constructors.
-
-        this._call('flushInitMessageQueue');
     }
 
     // uint UI::getWidth()
@@ -166,7 +149,13 @@ class UI {
     // Non-DPF method for sending a message to the web host
     // void WebViewUI::postMessage(const JsValueVector& args)
     postMessage(...args) {
-        window.host.postMessage(args);
+        if (DISTRHO.env.webview) {
+            window.host.postMessage(args);
+        } else if (DISTRHO.env.remote) {
+            // TODO
+        } else {
+            console.log(`DBG: postMessage(${args})`);
+        }
     }
 
     // Non-DPF callback method for receiving messages from the web host
@@ -215,6 +204,33 @@ class UI {
         });
     }
 
+    // Initialize native C++/JS message channel for the local webview
+    _initLocalMessageChannel() {
+        window.host.addMessageListener((args) => {
+            if (args[0] != 'UI') {
+                this.messageReceived(args); // passthrough
+                return;
+            }
+
+            const method = args[1];
+            args = args.slice(2);
+
+            if (method in this._resolve) {
+                this._resolve[method][0](...args); // fulfill promise
+                delete this._resolve[method];
+            } else {
+                this[method](...args); // call method
+            }
+        });
+    }
+
+    // Initialize WebSockets-based message channel for network clients
+    _initNetworkMessageChannel() {
+        
+        // TODO
+
+    }
+
 }
 
 
@@ -239,8 +255,17 @@ window.onkeydown = (e) => {
     }
 };
 
-const env = window._webview_env || {};
-delete window._webview_env;
+let env;
+if (window.host !== undefined) {
+    env = window.host.env || {};
+    env.webview = true;
+    env.remote = false;
+    delete window.host.env;
+} else {
+    env = {};
+    env.webview = false;
+    env.remote = window.location.protocol.indexOf('http') == 0;
+}
 
 return { UI: UI, env: env }; // DISTRHO
 
