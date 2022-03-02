@@ -34,7 +34,7 @@ public:
     WebServer(const char* jsInjectionTarget = nullptr);
     virtual ~WebServer();
 
-    virtual void injectScript(String script);
+    virtual void injectScript(String& script);
 
     void process();
 

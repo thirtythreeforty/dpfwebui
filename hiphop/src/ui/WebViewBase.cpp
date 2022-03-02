@@ -21,26 +21,21 @@
 #include <iostream>
 #include <sstream>
 
-#define JS_DISABLE_CONTEXT_MENU  "window.oncontextmenu = (e) => e.preventDefault();"
-#define JS_DISABLE_PRINT         "window.onkeydown = (e) => { if ((e.key == 'p') && (e.ctrlKey || e.metaKey)) e.preventDefault(); };"
-#define JS_CREATE_CONSOLE        "window.console = {" \
-                                 "   log  : (s) => window.host.postMessage(['console', 'log'  , String(s)])," \
-                                 "   info : (s) => window.host.postMessage(['console', 'info' , String(s)])," \
-                                 "   warn : (s) => window.host.postMessage(['console', 'warn' , String(s)])," \
-                                 "   error: (s) => window.host.postMessage(['console', 'error', String(s)])" \
-                                 "};"
-#define JS_CREATE_HOST_OBJECT    "window.host = new EventTarget;" \
-                                 "window.host.addMessageListener = (lr) => {" \
-                                    "window.host.addEventListener('message', (ev) => lr(ev.detail))" \
-                                 "};"
-
-#define CSS_DISABLE_IMAGE_DRAG   "img { user-drag: none; -webkit-user-drag: none; }"
-#define CSS_DISABLE_SELECTION    "body { user-select: none; -webkit-user-select: none; }"
-#define CSS_DISABLE_PINCH_ZOOM   "body { touch-action: pan-x pan-y; }"
-#define CSS_DISABLE_OVERFLOW     "body { overflow: hidden; }"
-
+// This could be moved into dpf.js but then JavaScript code should be checking
+// for the platform type in order to insert JS_POST_MESSAGE_SHIM. Leaving
+// platform-dependent code in a single place (C++) for a cleaner approach. 
+#define JS_CREATE_HOST_OBJECT  "window.host = new EventTarget;" \
+                               "window.host.addMessageListener = (lr) => {" \
+                               "  window.host.addEventListener('message', (ev) => lr(ev.detail))" \
+                               "};"
+#define JS_CREATE_CONSOLE  "window.console = {" \
+                           "   log  : (s) => window.host.postMessage(['console', 'log'  , String(s)])," \
+                           "   info : (s) => window.host.postMessage(['console', 'info' , String(s)])," \
+                           "   warn : (s) => window.host.postMessage(['console', 'warn' , String(s)])," \
+                           "   error: (s) => window.host.postMessage(['console', 'error', String(s)])" \
+                           "};"
 /**
- * Keep this class generic; specific plugin features belong to WebViewUI.
+ * Keep this class generic; plugin specific features belong to WebViewUI.
  */
 
 USE_NAMESPACE_DISTRHO
@@ -127,23 +122,14 @@ void WebViewBase::postMessage(const JsValueVector& args)
     runScript(js);
 }
 
-void WebViewBase::injectDefaultScripts()
+void WebViewBase::injectCreateHostObjectScript()
 {
-    String js = String(JS_DISABLE_CONTEXT_MENU)
-              + String(JS_DISABLE_PRINT)
-              + String(JS_CREATE_CONSOLE)
-              + String(JS_CREATE_HOST_OBJECT);
+    String js = String(JS_CREATE_HOST_OBJECT) + String(JS_CREATE_CONSOLE);
     injectScript(js);
 }
 
 void WebViewBase::handleLoadFinished()
 {
-    String css = String(CSS_DISABLE_IMAGE_DRAG)
-               + String(CSS_DISABLE_SELECTION)
-               + String(CSS_DISABLE_PINCH_ZOOM)
-               + String(CSS_DISABLE_OVERFLOW);
-    addStylesheet(css);
-
     if (fHandler != nullptr) {
         fHandler->handleWebViewLoadFinished();
     }

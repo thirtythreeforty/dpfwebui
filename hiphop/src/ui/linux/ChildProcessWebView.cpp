@@ -109,7 +109,7 @@ ChildProcessWebView::ChildProcessWebView()
         d_stderr("Timeout waiting for UI helper init - %s", strerror(errno));
     }
 
-    injectDefaultScripts(); // non-virtual, safe to call
+    injectCreateHostObjectScript();
 
     fIpc->write(OP_INJECT_SHIMS);
 }

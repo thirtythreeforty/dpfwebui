@@ -75,7 +75,7 @@ CocoaWebView::CocoaWebView()
     );
     injectScript(js);
 
-    injectDefaultScripts(); // non-virtual, safe to call
+    injectCreateHostObjectScript();
 
     js = String(JS_POST_MESSAGE_SHIM);
     injectScript(js);

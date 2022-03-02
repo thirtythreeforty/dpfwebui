@@ -77,10 +77,6 @@ WebServer::WebServer(const char* jsInjectionTarget)
     //fContextInfo.ssl_ca_filepath          = "/tmp/client-ca/ca.pem";
 
     fContext = lws_create_context(&fContextInfo);
-
-
-    injectScript(String("console.log('FIXME 1');"));
-    injectScript(String("console.log('FIXME 2');"));
 }
 
 WebServer::~WebServer()
@@ -91,7 +87,7 @@ WebServer::~WebServer()
     }
 }
 
-void WebServer::injectScript(String script)
+void WebServer::injectScript(String& script)
 {
     fInjectedScripts.push_back(script);
 }
@@ -151,6 +147,11 @@ int WebServer::injectScripts(lws_process_html_args* args)
 {
     lws_process_html_state phs;
     std::memset(&phs, 0, sizeof(phs));
+    
+    if (fInjectedScripts.size() == 0) {
+        return lws_chunked_html_process(args, &phs) ? -1 : 0;
+    }
+
     const char* vars[1] = {INJECTED_JS_TOKEN};
     phs.vars = vars;
     phs.count_vars = 1;

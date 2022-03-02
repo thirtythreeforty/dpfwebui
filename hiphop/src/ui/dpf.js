@@ -29,6 +29,10 @@ class UI {
     constructor() {
         this._resolve = {};
 
+        if (window.host === undefined) {
+            return; // TODO
+        }
+
         window.host.addMessageListener((args) => {
             if (args[0] != 'UI') {
                 this.messageReceived(args); // passthrough
@@ -213,10 +217,32 @@ class UI {
 
 }
 
+
+//
+// Definitions below do not leak into the global namespace
+//
+
+const addStylesheet = (css) => {
+    document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
+};
+
+addStylesheet('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
+addStylesheet('body { user-select: none; -webkit-user-select: none; }'); // disable selection
+addStylesheet('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
+addStylesheet('body { overflow: hidden; }'); // disable overflow
+
+window.oncontextmenu = (e) => e.preventDefault(); // disable context menu
+
+window.onkeydown = (e) => { 
+    if ((e.key == 'p') && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault(); // disable print
+    }
+};
+
 const env = window._webview_env || {};
 delete window._webview_env;
 
-return { UI: UI, env: env };
+return { UI: UI, env: env }; // DISTRHO
 
 
 /*\

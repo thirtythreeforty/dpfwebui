@@ -70,7 +70,7 @@ protected:
     virtual void onSize(uint width, uint height) = 0;
     virtual void onKeyboardFocus(bool focus) { (void)focus; };
 
-    void injectDefaultScripts();
+    void injectCreateHostObjectScript();
     
     void handleLoadFinished();
     void handleScriptMessage(const JsValueVector& args);
