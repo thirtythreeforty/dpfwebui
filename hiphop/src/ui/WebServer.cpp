@@ -22,7 +22,7 @@
 #include "WebServer.hpp"
 
 #define PROTOCOL_NAME     "lws-dpf"
-#define INJECTED_JS_TOKEN "$injectedjs"
+#define INJECTED_JS_TOKEN "$injectedjs" // not currently used
 
 USE_NAMESPACE_DISTRHO
 
