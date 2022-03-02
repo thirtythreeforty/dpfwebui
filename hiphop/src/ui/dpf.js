@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Scripts are appended right after the following line when HIPHOP_NETWORK_UI
+// is enabled, otherwise they are injected using the native webview interface.
+let $injectedjs;
+
 const DISTRHO = (() => {
 
 // TODO : remote messaging and stub (when loading html in browser for debug)

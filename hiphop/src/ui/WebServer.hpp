@@ -19,6 +19,8 @@
 #ifndef WEB_SERVER_HPP
 #define WEB_SERVER_HPP
 
+#include <vector>
+
 #include "src/DistrhoDefines.h"
 #include "distrho/extra/LeakDetector.hpp"
 
@@ -29,20 +31,29 @@ START_NAMESPACE_DISTRHO
 class WebServer
 {
 public:
-    WebServer();
+    WebServer(const char* jsInjectionTarget = nullptr);
     virtual ~WebServer();
+
+    virtual void injectScript(String script);
 
     void process();
 
 private:
     static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
                            void* user, void* in, size_t len);
+    static const char* lwsReplaceFunc(void* data, int index);
 
-    char                      fMountOrigin[PATH_MAX];
-    lws_http_mount            fMount;
-    lws_protocols             fProtocol[2];
-    lws_context_creation_info fContextInfo;
-    lws_context*              fContext;
+    int injectScripts(lws_process_html_args* args);
+
+    char                       fMountOrigin[PATH_MAX];
+    lws_http_mount             fMount;
+    lws_protocol_vhost_options fMountOptions;
+    lws_protocols              fProtocol[2];
+    lws_context_creation_info  fContextInfo;
+    lws_context*               fContext;
+
+    typedef std::vector<String> StringVector;
+    StringVector fInjectedScripts;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebServer)
 

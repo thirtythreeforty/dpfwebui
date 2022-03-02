@@ -21,14 +21,17 @@
 #include "extra/Path.hpp"
 #include "WebServer.hpp"
 
+#define PROTOCOL_NAME     "lws-dpf"
+#define INJECTED_JS_TOKEN "$injectedjs"
+
 USE_NAMESPACE_DISTRHO
 
-WebServer::WebServer()
+WebServer::WebServer(const char* jsInjectionTarget)
 {
     lws_set_log_level(LLL_ERR|LLL_WARN|LLL_DEBUG, 0);
 
     std::memset(fProtocol, 0, sizeof(fProtocol));
-    fProtocol[0].name = "lws-dpf";
+    fProtocol[0].name = PROTOCOL_NAME;
     fProtocol[0].callback = WebServer::lwsCallback;
 
     std::strcpy(fMountOrigin, Path::getPluginLibrary() + "/ui/");
@@ -39,6 +42,13 @@ WebServer::WebServer()
     fMount.origin           = fMountOrigin;
     fMount.origin_protocol  = LWSMPRO_FILE;
     fMount.def              = "index.html";
+
+    if (jsInjectionTarget != nullptr) {
+        std::memset(&fMountOptions, 0, sizeof(fMountOptions));
+        fMountOptions.name      = jsInjectionTarget;
+        fMountOptions.value     = PROTOCOL_NAME;
+        fMount.interpret        = &fMountOptions;
+    }
 #ifndef NDEBUG
     // Caching headers
     fMount.cache_max_age    = 3600;
@@ -67,6 +77,10 @@ WebServer::WebServer()
     //fContextInfo.ssl_ca_filepath          = "/tmp/client-ca/ca.pem";
 
     fContext = lws_create_context(&fContextInfo);
+
+
+    injectScript(String("console.log('FIXME 1');"));
+    injectScript(String("console.log('FIXME 2');"));
 }
 
 WebServer::~WebServer()
@@ -75,6 +89,11 @@ WebServer::~WebServer()
         lws_context_destroy(fContext);
         fContext = nullptr;
     }
+}
+
+void WebServer::injectScript(String script)
+{
+    fInjectedScripts.push_back(script);
 }
 
 void WebServer::process()
@@ -88,9 +107,16 @@ int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
 {
     void* userdata = lws_context_user(lws_get_context(wsi));
     WebServer* server = static_cast<WebServer*>(userdata);
-    int rc;
-
+    int rc = 0; /* 0 OK, close connection otherwise */
+    
+    //d_stderr("LWS callback reason : %d \n", reason);
+    
     switch (reason) {
+        case LWS_CALLBACK_PROCESS_HTML: {
+            lws_process_html_args* args = static_cast<lws_process_html_args*>(in);
+            rc = server->injectScripts(args);
+            break;
+        }
         /*case LWS_CALLBACK_ESTABLISHED:
             rc = server->add_client(wsi);
             break;
@@ -107,6 +133,45 @@ int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
             rc = lws_callback_http_dummy(wsi, reason, user, in, len);
             break;
     }
+
+    return rc;
+}
+
+const char* WebServer::lwsReplaceFunc(void* data, int index)
+{
+    switch (index) {
+        case 0:
+            return static_cast<const char*>(data);
+        default:
+            return "";
+    }
+}
+
+int WebServer::injectScripts(lws_process_html_args* args)
+{
+    lws_process_html_state phs;
+    std::memset(&phs, 0, sizeof(phs));
+    const char* vars[1] = {INJECTED_JS_TOKEN};
+    phs.vars = vars;
+    phs.count_vars = 1;
+    phs.replace = WebServer::lwsReplaceFunc;
+
+    const char* s = INJECTED_JS_TOKEN ";\n";
+    size_t len = strlen(s);
+    for (StringVector::const_iterator it = fInjectedScripts.begin(); it != fInjectedScripts.end(); ++it) {
+        len += it->length();
+    }
+
+    char* js = new char[len + 1];
+    std::strcat(js, s);
+    for (StringVector::const_iterator it = fInjectedScripts.begin(); it != fInjectedScripts.end(); ++it) {
+        std::strcat(js, *it);
+    }
+
+    phs.data = js;
+
+    int rc = lws_chunked_html_process(args, &phs) ? -1 : 0;
+    delete[] js;
 
     return rc;
 }

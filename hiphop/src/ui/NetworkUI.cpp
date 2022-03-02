@@ -22,6 +22,7 @@ USE_NAMESPACE_DISTRHO
 
 NetworkUI::NetworkUI(uint width, uint height)
     : WebUIBase(width, height)
+    , fServer("dpf.js")
 {
     // TODO
 }
