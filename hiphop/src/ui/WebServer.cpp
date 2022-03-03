@@ -31,7 +31,7 @@
 #include "extra/Path.hpp"
 #include "WebServer.hpp"
 
-#define FIRST_PORT 49152 // first in dynamic/private range
+#define FIRST_PORT        49152 // first in dynamic/private range
 
 #define TRANSFER_PROTOCOL "http"
 #define LWS_PROTOCOL_NAME "lws-dpf"
@@ -53,6 +53,15 @@ USE_NAMESPACE_DISTRHO
 
 WebServer::WebServer(const char* jsInjectionTarget)
 {
+#if defined(DISTRHO_OS_WINDOWS)
+    WSADATA wsaData;
+    int rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (rc != 0) {
+        d_stderr2(LOG_TAG " : failed WSAStartup()");
+        return;
+    }
+#endif
+
     fPort = findAvailablePort();
     if (fPort == -1) {
         d_stderr2(LOG_TAG " : could not find available port");
@@ -116,11 +125,15 @@ WebServer::~WebServer()
         lws_context_destroy(fContext);
         fContext = nullptr;
     }
+
+#if defined(DISTRHO_OS_WINDOWS)
+    WSACleanup();
+#endif
 }
 
 String WebServer::getLocalUrl()
 {
-    return String(TRANSFER_PROTOCOL "://localhost:") + String(fPort);
+    return String(TRANSFER_PROTOCOL "://127.0.0.1:") + String(fPort);
 }
 
 String WebServer::getPublicUrl()
