@@ -31,13 +31,23 @@
 #include "extra/Path.hpp"
 #include "WebServer.hpp"
 
-#define LOG_TAG       "WebServer"
-#define PROTOCOL_NAME "lws-dpf"
+#define FIRST_PORT 49152 // first in dynamic/private range
 
-#define FIRST_PORT    49152 // first in dynamic/private range
+#define TRANSFER_PROTOCOL "http"
+#define LWS_PROTOCOL_NAME "lws-dpf"
+#define LOG_TAG           "WebServer"
 
 // JavaScript injection feature currently not in use, leaving code just in case.
 #define INJECTED_JS_TOKEN "$injectedjs"
+
+// Deal with the special snowflake
+#if defined(DISTRHO_OS_WINDOWS)
+# define IS_EADDRINUSE() (WSAGetLastError() == WSAEADDRINUSE) // errno==0
+# define CLOSE(s)        closesocket(s)
+#else
+# define IS_EADDRINUSE() (errno == EADDRINUSE)
+# define CLOSE(s)        close(s)
+#endif
 
 USE_NAMESPACE_DISTRHO
 
@@ -49,10 +59,10 @@ WebServer::WebServer(const char* jsInjectionTarget)
         return;
     }
 
-    lws_set_log_level(LLL_ERR|LLL_WARN|LLL_DEBUG, 0);
+    lws_set_log_level(LLL_ERR|LLL_WARN/*|LLL_DEBUG*/, 0);
 
     std::memset(fProtocol, 0, sizeof(fProtocol));
-    fProtocol[0].name = PROTOCOL_NAME;
+    fProtocol[0].name = LWS_PROTOCOL_NAME;
     fProtocol[0].callback = WebServer::lwsCallback;
 
     std::strcpy(fMountOrigin, Path::getPluginLibrary() + "/ui/");
@@ -66,9 +76,9 @@ WebServer::WebServer(const char* jsInjectionTarget)
 
     if (jsInjectionTarget != nullptr) {
         std::memset(&fMountOptions, 0, sizeof(fMountOptions));
-        fMountOptions.name      = jsInjectionTarget;
-        fMountOptions.value     = PROTOCOL_NAME;
-        fMount.interpret        = &fMountOptions;
+        fMountOptions.name  = jsInjectionTarget;
+        fMountOptions.value = LWS_PROTOCOL_NAME;
+        fMount.interpret    = &fMountOptions;
     }
 #ifndef NDEBUG
     // Send caching headers
@@ -110,13 +120,43 @@ WebServer::~WebServer()
 
 String WebServer::getLocalUrl()
 {
-    return String("http://localhost:") + String(fPort);
+    return String(TRANSFER_PROTOCOL "://localhost:") + String(fPort);
 }
 
 String WebServer::getPublicUrl()
 {
-    // TODO - real LAN addr instead of dummy hardcoded value
-    return String("http://192.168.1.1:") + String(fPort);
+    String url;
+
+    const int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd == -1) {
+        d_stderr(LOG_TAG " : failed socket(), errno %d", errno);
+        return url;
+    }
+
+    sockaddr_in addr;
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr("8.8.8.8"); // Google DNS
+    addr.sin_port = htons(53);
+
+    if (connect(sockfd, (const sockaddr*)&addr, sizeof(addr)) == 0) {
+        socklen_t addrlen = sizeof(addr);
+
+        if (getsockname(sockfd, (sockaddr*)&addr, &addrlen) == 0) {
+            const char* ip = inet_ntoa(addr.sin_addr);
+            url = String(TRANSFER_PROTOCOL "://") + ip + ":" + String(fPort);
+        } else {
+            d_stderr(LOG_TAG " : failed getsockname(), errno %d", errno);
+        }
+    } else {
+        d_stderr(LOG_TAG " : failed connect(), errno %d", errno);
+    }
+
+    if (CLOSE(sockfd) == -1) {
+        d_stderr(LOG_TAG " : failed close(), errno %d", errno);
+    }
+
+    return url;
 }
 
 void WebServer::injectScript(String& script)
@@ -131,20 +171,11 @@ void WebServer::process()
     lws_service(fContext, -1);
 }
 
-// Deal with the special snowflake
-#if defined(DISTRHO_OS_WINDOWS)
-# define IS_EADDRINUSE() (WSAGetLastError() == WSAEADDRINUSE) // errno==0
-# define CLOSE(s)        closesocket(s)
-#else
-# define IS_EADDRINUSE() (errno == EADDRINUSE)
-# define CLOSE(s)        close(s)
-#endif
-
 int WebServer::findAvailablePort()
 {
-    const int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd == -1) {
-        d_stderr(LOG_TAG " : failed socket()");
+    const int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        d_stderr(LOG_TAG " : failed socket(), errno %d", errno);
         return -1;
     }
 
@@ -158,7 +189,7 @@ int WebServer::findAvailablePort()
     while ((port == -1) && (i < 65535)) {
         addr.sin_port = htons(i);
 
-        if (bind(fd, (const sockaddr*)(&addr), sizeof(addr)) == 0) {
+        if (bind(sockfd, (const sockaddr*)&addr, sizeof(addr)) == 0) {
             port = i;
         } else {
             if (IS_EADDRINUSE()) {
@@ -170,8 +201,8 @@ int WebServer::findAvailablePort()
         }
     }
 
-    if (CLOSE(fd) == -1) {
-        d_stderr(LOG_TAG " : failed close()");
+    if (CLOSE(sockfd) == -1) {
+        d_stderr(LOG_TAG " : failed close(), errno %d", errno);
     }
 
     return port;
