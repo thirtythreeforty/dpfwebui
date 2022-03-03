@@ -231,26 +231,42 @@ class UI {
 
 
 //
-// Basic setup so the web UI behaves more like a native UI
+// Basic setup so the web UI behaves more like a native UI 
 //
+function applyUiTweaks() {
+    window.oncontextmenu = (e) => e.preventDefault(); // disable context menu
 
-window.oncontextmenu = (e) => e.preventDefault(); // disable context menu
+    window.onkeydown = (e) => { 
+        if ((e.key == 'p') && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault(); // disable print
+        }
+    };
 
-window.onkeydown = (e) => { 
-    if ((e.key == 'p') && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault(); // disable print
-    }
-};
+    const style = (css) => {
+        document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
+    };
 
-addStylesheet('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
-addStylesheet('body { user-select: none; -webkit-user-select: none; }'); // disable selection
-addStylesheet('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
-addStylesheet('body { overflow: hidden; }'); // disable overflow
-
-function addStylesheet(css) {
-    document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
+    style('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
+    style('body { user-select: none; -webkit-user-select: none; }'); // disable selection
+    style('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
+    style('body { overflow: hidden; }'); // disable overflow
 }
 
+applyUiTweaks();
+
+
+//
+// Return namespace, see const DISTRHO = ... definition above.
+//
+// DISTRHO {
+//    UI:  class        Base class for UIs, approximately matches C++ version.
+//    env: {            Information about the environment
+//       network: bool  True when document loaded via HTTP
+//       webview: bool  True when running in the plugin web view
+//       ...            Additional fields defined by web views
+//    }
+// }
+//
 function buildEnvObject() {
     let env = {
         network: window.location.protocol.indexOf('http') == 0
@@ -265,17 +281,6 @@ function buildEnvObject() {
     }
     return Object.freeze(env);
 }
-
-// Return namespace, see const DISTRHO = ... definition above.
-//
-// DISTRHO {
-//    UI:  class        Base class for UIs, approximately matches C++ version.
-//    env: {            Information about the environment
-//       network: bool  True when document loaded via HTTP
-//       webview: bool  True when running in the plugin web view
-//       ...            Additional fields defined by web views
-//    }
-// }
 
 return { UI: UI, env: buildEnvObject() };
 
