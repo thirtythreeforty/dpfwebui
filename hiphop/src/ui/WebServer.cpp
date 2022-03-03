@@ -19,8 +19,14 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
+
+#include "src/DistrhoDefines.h"
+#if defined(DISTRHO_OS_WINDOWS)
+# include <winsock2.h>
+#else
+# include <arpa/inet.h>
+# include <sys/socket.h>
+#endif
 
 #include "extra/Path.hpp"
 #include "WebServer.hpp"
