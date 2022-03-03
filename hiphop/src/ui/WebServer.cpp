@@ -17,17 +17,31 @@
  */
 
 #include <cstring>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include "extra/Path.hpp"
 #include "WebServer.hpp"
 
-#define PROTOCOL_NAME     "lws-dpf"
-#define INJECTED_JS_TOKEN "$injectedjs" // currently not in use
+#define LOG_TAG       "WebServer"
+#define PROTOCOL_NAME "lws-dpf"
+
+#define FIRST_PORT    49152 // first in dynamic/private range
+
+// JavaScript injection feature currently not in use, leaving code just in case.
+#define INJECTED_JS_TOKEN "$injectedjs"
 
 USE_NAMESPACE_DISTRHO
 
 WebServer::WebServer(const char* jsInjectionTarget)
 {
+    fPort = findAvailablePort();
+    if (fPort == -1) {
+        d_stderr2(LOG_TAG " : could not find available port");
+        return;
+    }
+
     lws_set_log_level(LLL_ERR|LLL_WARN|LLL_DEBUG, 0);
 
     std::memset(fProtocol, 0, sizeof(fProtocol));
@@ -55,8 +69,6 @@ WebServer::WebServer(const char* jsInjectionTarget)
     fMount.cache_reusable   = 1;
     fMount.cache_revalidate = 1;
 #endif
-
-    findAvailablePort();
 
     std::memset(&fContextInfo, 0, sizeof(fContextInfo));
     fContextInfo.port      = fPort;
@@ -91,7 +103,6 @@ WebServer::~WebServer()
 
 String WebServer::getLocalUrl()
 {
-    // TODO - HTTPS
     return String("http://localhost:") + String(fPort);
 }
 
@@ -112,9 +123,41 @@ void WebServer::process()
     lws_service(fContext, -1);
 }
 
-void WebServer::findAvailablePort()
+int WebServer::findAvailablePort()
 {
-    fPort = 9090; // FIXME - pick available port from a range
+    const int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd == -1) {
+        d_stderr(LOG_TAG " : socket() failed");
+        return - 1;
+    }
+
+    sockaddr_in addr;
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = INADDR_ANY;
+
+    int port = -1, i = FIRST_PORT;
+
+    while ((port == -1) && (i < 65535)) {
+        addr.sin_port = htons(i);
+
+        if (bind(fd, (const sockaddr*)(&addr), sizeof(addr)) == 0) {
+            port = i;
+        } else {
+            if (errno == EADDRINUSE) {
+                i++;
+            } else {
+                d_stderr(LOG_TAG " : bind() failed");
+                break;
+            }
+        }
+    }
+
+    if (close(fd) == -1) {
+        d_stderr(LOG_TAG " : close failed()");
+    }
+
+    return port;
 }
 
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
