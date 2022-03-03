@@ -115,7 +115,7 @@ String WebServer::getLocalUrl()
 
 String WebServer::getPublicUrl()
 {
-    // TODO - lan addr
+    // TODO - real LAN addr instead of dummy hardcoded value
     return String("http://192.168.1.1:") + String(fPort);
 }
 
@@ -126,7 +126,8 @@ void WebServer::injectScript(String& script)
 
 void WebServer::process()
 {
-    // Avoid blocking - https://github.com/warmcat/libwebsockets/issues/1735
+    // Avoid blocking on some platforms by passing timeout=-1
+    // https://github.com/warmcat/libwebsockets/issues/1735
     lws_service(fContext, -1);
 }
 
