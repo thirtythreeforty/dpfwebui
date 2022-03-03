@@ -106,7 +106,7 @@ String WebServer::getLocalUrl()
     return String("http://localhost:") + String(fPort);
 }
 
-String WebServer::getLanUrl()
+String WebServer::getPublicUrl()
 {
     // TODO - lan addr
     return String("http://192.168.1.1:") + String(fPort);

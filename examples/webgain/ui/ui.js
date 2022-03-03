@@ -69,3 +69,28 @@ class WebGainExampleUI extends DISTRHO.UI {
     }
 
 }
+
+//
+// Optional: workaround for input[type=range] sliders on Linux touchscreen
+//
+// Not sure this is a bug or feature of WebKitGTK. These elements do not
+// react to touches on Linux but do on other platforms. It does not seem to
+// be a hiphop bug as touch works as expected for every other element.
+//
+if (DISTRHO.env.noRangeInputTouch) {
+    document.querySelectorAll('input[type=range]').forEach((el) => {
+        el.addEventListener('touchmove', (ev) => {
+            const minVal = parseFloat(ev.target.min);
+            const maxVal = parseFloat(ev.target.max);
+            const width = ev.target.offsetWidth;
+            const x = ev.touches[0].clientX;                
+            const minX = ev.target.getBoundingClientRect().x;
+            const maxX = minX + width;
+            if ((x < minX) || (x > maxX)) return;
+            const normVal = (x - minX) / width;
+            const val = minVal + normVal * (maxVal - minVal);
+            ev.target.value = val;
+            ev.target.dispatchEvent(new CustomEvent('input'));
+        });
+    });
+}

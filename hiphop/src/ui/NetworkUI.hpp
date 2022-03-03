@@ -32,12 +32,16 @@ public:
 
     WebServer& getWebServer() { return fServer; }
 
+    String getPublicUrl() { return fServer.getPublicUrl(); }
+
 protected:
     void uiIdle() override;
 
     void postMessage(const JsValueVector& args) override;
 
 private:
+    void initHandlers();
+
     WebServer fServer;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkUI)

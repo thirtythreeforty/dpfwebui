@@ -24,7 +24,7 @@ NetworkUI::NetworkUI(uint width, uint height)
     : WebUIBase(width, height)
     , fServer()
 {
-    // TODO
+    initHandlers();
 }
 
 NetworkUI::~NetworkUI()
@@ -42,4 +42,11 @@ void NetworkUI::postMessage(const JsValueVector& args)
     // TODO - broadcast to all clients
 
     (void)args;
+}
+
+void NetworkUI::initHandlers()
+{
+    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JsValueVector&) {
+        postMessage({"UI", "getPublicUrl", getPublicUrl()});
+    });
 }

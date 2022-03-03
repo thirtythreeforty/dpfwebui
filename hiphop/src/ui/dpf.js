@@ -178,6 +178,12 @@ class UI {
         this._call('sideloadWasmBinary', base64EncArr(data));
     }
 
+    // Non-DPF method that returns the plugin UI public URL
+    // String NetworkUI::getPublicUrl()
+    async getPublicUrl() {
+        return this._callAndExpectReply('getPublicUrl');
+    }
+
     // Helper for decoding received shared memory data
     _sharedMemoryChanged(metadata /*string*/, b64Data /*string*/) {
         this.sharedMemoryChanged(metadata, base64DecToArr(b64Data));

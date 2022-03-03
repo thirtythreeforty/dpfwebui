@@ -35,7 +35,7 @@ public:
     virtual ~WebServer();
 
     String getLocalUrl();
-    String getLanUrl();
+    String getPublicUrl();
 
     virtual void injectScript(String& script);
 
