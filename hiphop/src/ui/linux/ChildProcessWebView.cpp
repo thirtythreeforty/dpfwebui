@@ -111,7 +111,9 @@ ChildProcessWebView::ChildProcessWebView()
 
     injectHostObjectScripts();
 
-    // Allow JavaScript code to detect some unavailable features
+    // Allow JavaScript code to detect some unavailable features.
+    // window.host.env is merged into DISTRHO.env by dpf.js to keep all
+    // environment information in a single place.
     String js = String(
         // LXDRAGDROPBUG : No drag and drop on both GTK and CEF web views
         "window.host.env.noDragAndDrop = true;"

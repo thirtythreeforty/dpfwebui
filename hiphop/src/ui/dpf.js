@@ -33,7 +33,7 @@ class UI {
             // super() in subclass constructors.
             this._call('flushInitMessageQueue');
 
-        } else if (DISTRHO.env.remote) {
+        } else if (DISTRHO.env.network) {
             this._initNetworkMessageChannel();
         }
     }
@@ -147,10 +147,10 @@ class UI {
     postMessage(...args) {
         if (DISTRHO.env.webview) {
             window.host.postMessage(args);
-        } else if (DISTRHO.env.remote) {
+        } else if (DISTRHO.env.network) {
             // TODO
         } else {
-            console.log(`DBG: postMessage(${args})`);
+            console.log(`stub: postMessage(${args})`);
         }
     }
 
@@ -231,17 +231,8 @@ class UI {
 
 
 //
-// Definitions below do not leak into the global namespace
+// Basic setup so the web UI behaves more like a native UI
 //
-
-const addStylesheet = (css) => {
-    document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
-};
-
-addStylesheet('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
-addStylesheet('body { user-select: none; -webkit-user-select: none; }'); // disable selection
-addStylesheet('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
-addStylesheet('body { overflow: hidden; }'); // disable overflow
 
 window.oncontextmenu = (e) => e.preventDefault(); // disable context menu
 
@@ -251,19 +242,42 @@ window.onkeydown = (e) => {
     }
 };
 
-let env;
-if (window.host !== undefined) {
-    env = window.host.env || {};
-    env.webview = true;
-    env.remote = false;
-    delete window.host.env;
-} else {
-    env = {};
-    env.webview = false;
-    env.remote = window.location.protocol.indexOf('http') == 0;
+addStylesheet('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
+addStylesheet('body { user-select: none; -webkit-user-select: none; }'); // disable selection
+addStylesheet('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
+addStylesheet('body { overflow: hidden; }'); // disable overflow
+
+function addStylesheet(css) {
+    document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
 }
 
-return { UI: UI, env: env }; // DISTRHO
+function buildEnvObject() {
+    let env = {
+        network: window.location.protocol.indexOf('http') == 0
+    };
+    if (window.host !== undefined) {
+        env = window.host.env || {};
+        env.webview = true;
+        delete window.host.env;
+    } else {
+        env = {};
+        env.webview = false;
+    }
+    return Object.freeze(env);
+}
+
+// Return namespace, see const DISTRHO = ... definition above.
+//
+// DISTRHO {
+//    UI:  class        Base class for UIs, approximately matches C++ version.
+//    env: {            Information about the environment
+//       network: bool  True when document loaded via HTTP
+//       webview: bool  True when running in the plugin web view
+//       ...            Additional fields defined by web views
+//    }
+// }
+
+return { UI: UI, env: buildEnvObject() };
 
 
 /*\
