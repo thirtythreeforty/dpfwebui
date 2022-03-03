@@ -22,7 +22,7 @@
 
 #include "src/DistrhoDefines.h"
 #if defined(DISTRHO_OS_WINDOWS)
-# include <winsock2.h>
+# include <Winsock2.h>
 #else
 # include <arpa/inet.h>
 # include <sys/socket.h>
@@ -130,12 +130,21 @@ void WebServer::process()
     lws_service(fContext, -1);
 }
 
+// Deal with the special snowflake
+#if defined(DISTRHO_OS_WINDOWS)
+# define IS_EADDRINUSE() (WSAGetLastError() == WSAEADDRINUSE) // errno==0
+# define CLOSE(s)        closesocket(s)
+#else
+# define IS_EADDRINUSE() (errno == EADDRINUSE)
+# define CLOSE(s)        close(s)
+#endif
+
 int WebServer::findAvailablePort()
 {
     const int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd == -1) {
-        d_stderr(LOG_TAG " : socket() failed");
-        return - 1;
+        d_stderr(LOG_TAG " : failed socket()");
+        return -1;
     }
 
     sockaddr_in addr;
@@ -151,17 +160,17 @@ int WebServer::findAvailablePort()
         if (bind(fd, (const sockaddr*)(&addr), sizeof(addr)) == 0) {
             port = i;
         } else {
-            if (errno == EADDRINUSE) {
+            if (IS_EADDRINUSE()) {
                 i++;
             } else {
-                d_stderr(LOG_TAG " : bind() failed");
+                d_stderr(LOG_TAG " : failed bind(), errno %d", errno);
                 break;
             }
         }
     }
 
-    if (close(fd) == -1) {
-        d_stderr(LOG_TAG " : close failed()");
+    if (CLOSE(fd) == -1) {
+        d_stderr(LOG_TAG " : failed close()");
     }
 
     return port;
