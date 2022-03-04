@@ -45,26 +45,6 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
 #endif
 {}
 
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-size_t PluginEx::getSharedMemorySize() const noexcept
-{
-    return fMemory.out.getSizeBytes();
-}
-#endif
-
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-bool PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
-{
-    if (fMemory.out.write(metadata, data, size)) {
-        // UI picks up data periodically
-        return true;
-    } else {
-        d_stderr2("Could not write shared memory (plugin->ui)");
-        return false;
-    }
-}
-#endif
-
 #if DISTRHO_PLUGIN_WANT_STATE
 void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateValue)
 {
@@ -88,6 +68,7 @@ void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateV
         if (fMemory.create()) {
             defaultStateValue = String("p2ui:") + fMemory.out.getDataFilename()
                             + String(";ui2p:") + fMemory.in.getDataFilename();
+            sharedMemoryReady();
         } else {
             defaultStateValue = "";
             d_stderr2("Could not create shared memory");
@@ -110,10 +91,24 @@ void PluginEx::setState(const char* key, const char* value)
 #endif
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     if ((std::strcmp(key, "_shmem_data") == 0) && ! fMemory.in.isRead()) {
-        sharedMemoryChanged(fMemory.in.getMetadata(), fMemory.in.getDataPointer(),
-                            fMemory.in.getDataSize());
+        sharedMemoryChanged(fMemory.in.getDataPointer() + fMemory.in.getDataOffset(),
+                            fMemory.in.getDataSize(), fMemory.in.getToken());
         fMemory.in.setRead();
     }
 #endif
 }
 #endif // DISTRHO_PLUGIN_WANT_STATE
+
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+bool PluginEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
+                                 const char* token)
+{
+    if (fMemory.out.write(data, size, offset, token)) {
+        // UI picks up data periodically
+        return true;
+    } else {
+        d_stderr2("Could not write shared memory (plugin->ui)");
+        return false;
+    }
+}
+#endif

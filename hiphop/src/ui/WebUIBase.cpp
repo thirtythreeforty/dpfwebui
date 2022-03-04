@@ -55,11 +55,16 @@ void WebUIBase::stateChanged(const char* key, const char* value)
 #endif
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-void WebUIBase::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+void WebUIBase::sharedMemoryReady()
+{
+    postMessage({"UI", "sharedMemoryReady"});
+}
+
+void WebUIBase::sharedMemoryChanged(const unsigned char* data, size_t size, const char* token)
 {
     (void)size;
     String b64Data = String::asBase64(data, size);
-    postMessage({"UI", "_sharedMemoryChanged", metadata, b64Data});
+    postMessage({"UI", "_sharedMemoryChanged", b64Data, token});
 }
 #endif
 
@@ -137,11 +142,12 @@ void WebUIBase::initHandlers()
 
 #if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JsValueVector& args) {
-        std::vector<uint8_t> data = d_getChunkFromBase64String(args[1].getString());
+        std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         writeSharedMemory(
-            args[0].getString(), // metadata
             static_cast<const unsigned char*>(data.data()),
-            static_cast<size_t>(data.size())
+            static_cast<size_t>(data.size()),
+            static_cast<size_t>(args[1].getDouble()), // offset
+            args[2].getString() // token
         );
     });
 

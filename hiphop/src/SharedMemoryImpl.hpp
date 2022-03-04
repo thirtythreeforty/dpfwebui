@@ -26,21 +26,22 @@
 
 START_NAMESPACE_DISTRHO
 
-// Total size 1KiB
+// Total size 128 bytes
 struct SharedMemoryHeader
 {
-    unsigned char readFlag;
+    unsigned char readFlag; // atomic
+    uint32_t      dataOffset;
     uint32_t      dataSize;
-    char          metadata[1005];
+    char          token[123];
 };
 
 // This class wraps SharedMemory and adds a read state flag and metadata
 template<class S, size_t N>
-class TaggedSharedMemory
+class StatefulSharedMemory
 {
 public:
-    TaggedSharedMemory() {}
-    virtual ~TaggedSharedMemory() {}
+    StatefulSharedMemory() {}
+    virtual ~StatefulSharedMemory() {}
 
     bool create()
     {
@@ -48,7 +49,11 @@ public:
             return false;
         }
 
-        getHeaderPointer()->readFlag = 1;
+        SharedMemoryHeader *hdr = getHeaderPointer();
+        hdr->readFlag = 1;
+        hdr->dataOffset = 0;
+        hdr->dataSize = 0;
+        hdr->token[0] = '\0';
 
         return true;
     }
@@ -86,9 +91,14 @@ public:
         getHeaderPointer()->readFlag = 1;
     }
 
-    const char* getMetadata() const noexcept
+    const char* getToken() const noexcept
     {
-        return getHeaderPointer()->metadata;
+        return getHeaderPointer()->token;
+    }
+
+    size_t getDataOffset() const noexcept
+    {
+        return static_cast<size_t>(getHeaderPointer()->dataOffset);
     }
 
     size_t getDataSize() const noexcept
@@ -107,9 +117,9 @@ public:
         return fImpl.getDataFilename();
     }
 
-    bool write(const char* metadata, const S* data, size_t size)
+    bool write(const S* data, size_t size, size_t offset, const char* token)
     {
-        if (size > getSize()) {
+        if (size > (getSize() - offset)) {
             return false;
         }
         
@@ -119,10 +129,16 @@ public:
             return false;
         }
 
-        std::strcpy(hdr->metadata, metadata);
+        std::memcpy(getDataPointer() + offset, data, sizeof(S) * size);
+        
+        hdr->dataOffset = static_cast<uint32_t>(offset);
+        hdr->dataSize = static_cast<uint32_t>(size);
 
-        std::memcpy(getDataPointer(), data, sizeof(S) * size);
-        hdr->dataSize = size;
+        if (token != nullptr) {
+            std::strcpy(hdr->token, token);
+        } else {
+            hdr->token[0] = '\0';
+        }
         
         hdr->readFlag = 0; // do it last
 
@@ -136,10 +152,10 @@ private:
 
     SharedMemory<S,N> fImpl;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TaggedSharedMemory)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatefulSharedMemory)
 };
 
-// This struct wraps two instances of TaggedSharedMemory
+// This struct wraps two instances of StatefulSharedMemory
 template<class S, size_t N>
 struct DuplexSharedMemory
 {
@@ -160,8 +176,8 @@ struct DuplexSharedMemory
         return true;
     }
 
-    TaggedSharedMemory<S,N> in;
-    TaggedSharedMemory<S,N> out;
+    StatefulSharedMemory<S,N> in;
+    StatefulSharedMemory<S,N> out;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DuplexSharedMemory)
 };

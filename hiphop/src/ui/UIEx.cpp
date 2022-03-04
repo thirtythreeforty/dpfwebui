@@ -25,14 +25,10 @@ UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
 {}
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-size_t UIEx::getSharedMemorySize() const noexcept
+bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
+                             const char* token)
 {
-    return fMemory.out.getSizeBytes();
-}
-
-bool UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
-{
-    if (fMemory.out.write(metadata, data, size)) {
+    if (fMemory.out.write(data, size, offset, token)) {
         // Notify Plugin instance there is new data available for reading
         setState("_shmem_data", "");
         return true;
@@ -48,7 +44,7 @@ void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
     // Send binary to the Plugin instance. This could be also achieved using the
     // state interface by first encoding data into something like Base64.
     
-    writeSharedMemory("_wasm_bin", data, size);
+    writeSharedMemory(data, size, 0, "_wasm_bin");
 }
 #endif
 #endif // HIPHOP_PLUGIN_WANT_SHARED_MEMORY
@@ -61,8 +57,8 @@ void UIEx::uiIdle()
     // implemented, or DPF modified so the uiIdle() frequency can be configured.
 
     if (fMemory.in.isCreatedOrConnected() && ! fMemory.in.isRead()) {
-        sharedMemoryChanged(fMemory.in.getMetadata(), fMemory.in.getDataPointer(),
-                            fMemory.in.getDataSize());
+        sharedMemoryChanged(fMemory.in.getDataPointer() + fMemory.in.getDataOffset(),
+                            fMemory.in.getDataSize(), fMemory.in.getToken());
         fMemory.in.setRead();
     }
 }
@@ -80,14 +76,18 @@ void UIEx::stateChanged(const char* key, const char* value)
         if (val.length() > 0) {
             size_t sep = val.find(';');
             String ui2p = String(val.buffer() + sep + 6);
-            if (fMemory.out.connect(ui2p) == nullptr) {
-                d_stderr2("Could not connect to shared memory (plugin->ui)");
-            }
 
-            val.truncate(sep);
-            String p2ui = String(val.buffer() + 5);
-            if (fMemory.in.connect(p2ui) == nullptr) {
-                d_stderr2("Could not connect to shared memory (ui->plugin)");
+            if (fMemory.out.connect(ui2p) != nullptr) {
+                val.truncate(sep);
+                String p2ui = String(val.buffer() + 5);
+
+                if (fMemory.in.connect(p2ui) != nullptr) {
+                    sharedMemoryReady();
+                } else {
+                    d_stderr2("Could not connect to shared memory (ui->plugin)");
+                }
+            } else {
+                d_stderr2("Could not connect to shared memory (plugin->ui)");
             }
         }
     }

@@ -35,6 +35,8 @@ public:
     virtual ~WebUIBase() {}
 
 protected:
+    void uiIdle() override {}
+
     void sizeChanged(uint width, uint height) override;
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
@@ -44,7 +46,8 @@ protected:
     void stateChanged(const char* key, const char* value) override;
 #endif
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) override;
+    void sharedMemoryReady() override;
+    void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) override;
 #endif
 
     virtual void postMessage(const JsValueVector& args) = 0;

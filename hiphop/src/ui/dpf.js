@@ -161,14 +161,20 @@ class UI {
     }
 
     // Non-DPF method that writes memory shared with DISTRHO::PluginEx instance
-    // void UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
-    writeSharedMemory(metadata /*string*/, data /*Uint8Array*/) {
-        this._call('writeSharedMemory', metadata, base64EncArr(data));
+    // void UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset, const char* token)
+    writeSharedMemory(data /*Uint8Array*/, offset /*Number*/, token /*String*/) {
+        this._call('writeSharedMemory', base64EncArr(data), offset || 0, token);
+    }
+
+    // Non-DPF callback method that notifies when shared memory is ready to use
+    // void UIEx::sharedMemoryReady()
+    sharedMemoryReady() {
+        // default empty implementation
     }
 
     // Non-DPF callback method that notifies when shared memory has been written
-    // void UIEx::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
-    sharedMemoryChanged(metadata /*string*/, data /*Uint8Array*/) {
+    // void UIEx::sharedMemoryChanged(const unsigned char* data, size_t size, const char* token)
+    sharedMemoryChanged(data /*Uint8Array*/, token /*String*/) {
         // default empty implementation
     }
 
@@ -185,8 +191,8 @@ class UI {
     }
 
     // Helper for decoding received shared memory data
-    _sharedMemoryChanged(metadata /*string*/, b64Data /*string*/) {
-        this.sharedMemoryChanged(metadata, base64DecToArr(b64Data));
+    _sharedMemoryChanged(b64Data /*String*/, token /*String*/) {
+        this.sharedMemoryChanged(base64DecToArr(b64Data), token);
     }
 
     // Helper for calling UI methods

@@ -38,11 +38,6 @@ public:
     PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount);
     virtual ~PluginEx() {}
 
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    size_t getSharedMemorySize() const noexcept;
-    bool   writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
-#endif
-
 #if DISTRHO_PLUGIN_WANT_STATE
     void initState(uint32_t index, String& stateKey, String& defaultStateValue) override;
     void setState(const char* key, const char* value) override;
@@ -50,11 +45,18 @@ public:
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 protected:
-    virtual void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size) 
+    SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
+
+    bool writeSharedMemory(const unsigned char* data, size_t size, size_t offset = 0,
+                           const char* token = nullptr);
+
+    virtual void sharedMemoryReady() {}
+
+    virtual void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) 
     {
-        (void)metadata;
         (void)data;
         (void)size;
+        (void)token;
     }
 #endif
 

@@ -344,9 +344,9 @@ void WasmPlugin::deactivate()
 }
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-void WasmPlugin::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
+void WasmPlugin::sharedMemoryChanged(const unsigned char* data, size_t size, const char* token)
 {
-    if (std::strcmp(metadata, "_wasm_bin") == 0) {
+    if (std::strcmp(token, "_wasm_bin") == 0) {
         try {
             loadWasmBinary(data, size);
         } catch (const std::exception& ex) {
