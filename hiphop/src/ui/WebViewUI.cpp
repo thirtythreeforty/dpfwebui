@@ -109,7 +109,7 @@ void WebViewUI::load()
 #if defined(HIPHOP_NETWORK_UI)
         // Note that the local webview still uses the native bridge for message
         // passing instead of WebSockets.
-        String url = getWebServer().getLocalUrl();
+        String url = getLocalUrl();
 #else
         String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
 #endif

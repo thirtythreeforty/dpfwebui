@@ -16,58 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cerrno>
 #include <cstring>
-#include <unistd.h>
-
-#include "src/DistrhoDefines.h"
-#if defined(DISTRHO_OS_WINDOWS)
-# include <Winsock2.h>
-#else
-# include <arpa/inet.h>
-# include <sys/socket.h>
-#endif
 
 #include "extra/Path.hpp"
 #include "WebServer.hpp"
 
-#define FIRST_PORT        49152 // first in dynamic/private range
-
-#define TRANSFER_PROTOCOL "http"
 #define LWS_PROTOCOL_NAME "lws-dpf"
-#define LOG_TAG           "WebServer"
-
-// JavaScript injection feature currently not in use, leaving code just in case.
-#define INJECTED_JS_TOKEN "$injectedjs"
-
-// Deal with the special snowflake
-#if defined(DISTRHO_OS_WINDOWS)
-# define IS_EADDRINUSE() (WSAGetLastError() == WSAEADDRINUSE) // errno==0
-# define CLOSE(s)        closesocket(s)
-#else
-# define IS_EADDRINUSE() (errno == EADDRINUSE)
-# define CLOSE(s)        close(s)
-#endif
 
 USE_NAMESPACE_DISTRHO
 
-WebServer::WebServer(const char* jsInjectionTarget)
+// JS injection feature currently not in use, leaving code just in case.
+WebServer::WebServer()
+    : fContext(nullptr)
+{}
+
+void WebServer::init(int port, const char* jsInjectTarget, const char* jsInjectToken)
 {
-#if defined(DISTRHO_OS_WINDOWS)
-    WSADATA wsaData;
-    int rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (rc != 0) {
-        d_stderr2(LOG_TAG " : failed WSAStartup()");
-        return;
-    }
-#endif
-
-    fPort = findAvailablePort();
-    if (fPort == -1) {
-        d_stderr2(LOG_TAG " : could not find available port");
-        return;
-    }
-
     lws_set_log_level(LLL_ERR|LLL_WARN/*|LLL_DEBUG*/, 0);
 
     std::memset(fProtocol, 0, sizeof(fProtocol));
@@ -83,9 +47,10 @@ WebServer::WebServer(const char* jsInjectionTarget)
     fMount.origin_protocol  = LWSMPRO_FILE;
     fMount.def              = "index.html";
 
-    if (jsInjectionTarget != nullptr) {
+    if ((jsInjectTarget != nullptr) && (jsInjectToken != nullptr)) {
+        fJsInjectToken = jsInjectToken;
         std::memset(&fMountOptions, 0, sizeof(fMountOptions));
-        fMountOptions.name  = jsInjectionTarget;
+        fMountOptions.name  = jsInjectTarget;
         fMountOptions.value = LWS_PROTOCOL_NAME;
         fMount.interpret    = &fMountOptions;
     }
@@ -97,7 +62,7 @@ WebServer::WebServer(const char* jsInjectionTarget)
 #endif
 
     std::memset(&fContextInfo, 0, sizeof(fContextInfo));
-    fContextInfo.port      = fPort;
+    fContextInfo.port      = port;
     fContextInfo.protocols = fProtocol;
     fContextInfo.mounts    = &fMount;
     fContextInfo.uid       = -1;
@@ -125,51 +90,6 @@ WebServer::~WebServer()
         lws_context_destroy(fContext);
         fContext = nullptr;
     }
-
-#if defined(DISTRHO_OS_WINDOWS)
-    WSACleanup();
-#endif
-}
-
-String WebServer::getLocalUrl()
-{
-    return String(TRANSFER_PROTOCOL "://127.0.0.1:") + String(fPort);
-}
-
-String WebServer::getPublicUrl()
-{
-    String url;
-
-    const int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd == -1) {
-        d_stderr(LOG_TAG " : failed socket(), errno %d", errno);
-        return url;
-    }
-
-    sockaddr_in addr;
-    std::memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr("8.8.8.8"); // Google DNS
-    addr.sin_port = htons(53);
-
-    if (connect(sockfd, (const sockaddr*)&addr, sizeof(addr)) == 0) {
-        socklen_t addrlen = sizeof(addr);
-
-        if (getsockname(sockfd, (sockaddr*)&addr, &addrlen) == 0) {
-            const char* ip = inet_ntoa(addr.sin_addr);
-            url = String(TRANSFER_PROTOCOL "://") + ip + ":" + String(fPort);
-        } else {
-            d_stderr(LOG_TAG " : failed getsockname(), errno %d", errno);
-        }
-    } else {
-        d_stderr(LOG_TAG " : failed connect(), errno %d", errno);
-    }
-
-    if (CLOSE(sockfd) == -1) {
-        d_stderr(LOG_TAG " : failed close(), errno %d", errno);
-    }
-
-    return url;
 }
 
 void WebServer::injectScript(String& script)
@@ -182,43 +102,6 @@ void WebServer::process()
     // Avoid blocking on some platforms by passing timeout=-1
     // https://github.com/warmcat/libwebsockets/issues/1735
     lws_service(fContext, -1);
-}
-
-int WebServer::findAvailablePort()
-{
-    const int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        d_stderr(LOG_TAG " : failed socket(), errno %d", errno);
-        return -1;
-    }
-
-    sockaddr_in addr;
-    std::memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-
-    int port = -1, i = FIRST_PORT;
-
-    while ((port == -1) && (i < 65535)) {
-        addr.sin_port = htons(i);
-
-        if (bind(sockfd, (const sockaddr*)&addr, sizeof(addr)) == 0) {
-            port = i;
-        } else {
-            if (IS_EADDRINUSE()) {
-                i++;
-            } else {
-                d_stderr(LOG_TAG " : failed bind(), errno %d", errno);
-                break;
-            }
-        }
-    }
-
-    if (CLOSE(sockfd) == -1) {
-        d_stderr(LOG_TAG " : failed close(), errno %d", errno);
-    }
-
-    return port;
 }
 
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
@@ -275,19 +158,22 @@ int WebServer::injectScripts(lws_process_html_args* args)
         return lws_chunked_html_process(args, &phs) ? -1 : 0;
     }
 
-    const char* vars[1] = {INJECTED_JS_TOKEN};
+    const char* vars[1] = {fJsInjectToken};
     phs.vars = vars;
     phs.count_vars = 1;
     phs.replace = WebServer::lwsReplaceFunc;
 
-    const char* s = INJECTED_JS_TOKEN ";\n";
-    size_t len = strlen(s);
+    size_t len = 0;
+
     for (StringVector::const_iterator it = fInjectedScripts.begin(); it != fInjectedScripts.end(); ++it) {
         len += it->length();
     }
 
+    len += strlen(fJsInjectToken) + 2;
     char* js = new char[len + 1];
-    std::strcat(js, s);
+    std::strcat(js, fJsInjectToken);
+    std::strcat(js, ";\n");
+
     for (StringVector::const_iterator it = fInjectedScripts.begin(); it != fInjectedScripts.end(); ++it) {
         std::strcat(js, *it);
     }

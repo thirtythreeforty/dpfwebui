@@ -21,8 +21,8 @@
 
 #include <vector>
 
-#include "src/DistrhoDefines.h"
 #include "distrho/extra/LeakDetector.hpp"
+#include "distrho/extra/String.hpp"
 
 #include <libwebsockets.h>
 
@@ -31,24 +31,23 @@ START_NAMESPACE_DISTRHO
 class WebServer
 {
 public:
-    WebServer(const char* jsInjectionTarget = nullptr);
+    WebServer();
     virtual ~WebServer();
 
-    String getLocalUrl();
-    String getPublicUrl();
+    void init(int port, const char* jsInjectTarget = nullptr, const char* jsInjectToken = nullptr);
 
     virtual void injectScript(String& script);
 
     void process();
 
 private:
-    int findAvailablePort();
-
     static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
                            void* user, void* in, size_t len);
     static const char* lwsReplaceFunc(void* data, int index);
 
     int injectScripts(lws_process_html_args* args);
+
+    String fJsInjectToken;
 
     char                       fMountOrigin[PATH_MAX];
     lws_http_mount             fMount;
@@ -56,8 +55,6 @@ private:
     lws_protocols              fProtocol[2];
     lws_context_creation_info  fContextInfo;
     lws_context*               fContext;
-
-    int fPort;
 
     typedef std::vector<String> StringVector;
     StringVector fInjectedScripts;

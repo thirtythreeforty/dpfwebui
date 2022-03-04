@@ -30,9 +30,8 @@ public:
     NetworkUI(uint width = 0, uint height = 0);
     virtual ~NetworkUI();
 
-    WebServer& getWebServer() { return fServer; }
-
-    String getPublicUrl() { return fServer.getPublicUrl(); }
+    String getLocalUrl();
+    String getPublicUrl();
 
 protected:
     void uiIdle() override;
@@ -41,7 +40,9 @@ protected:
 
 private:
     void initHandlers();
+    int  findAvailablePort();
 
+    int       fPort;
     WebServer fServer;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkUI)
