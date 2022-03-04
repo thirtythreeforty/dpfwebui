@@ -28,11 +28,6 @@ WebUIBase::WebUIBase(uint width, uint height)
     initHandlers();
 }
 
-WebUIBase::~WebUIBase()
-{
-    // TODO
-}
-
 void WebUIBase::sizeChanged(uint width, uint height)
 {
     UIEx::sizeChanged(width, height);
@@ -149,7 +144,7 @@ void WebUIBase::initHandlers()
         );
     });
 
-#if HIPHOP_ENABLE_WASM_PLUGIN
+#if defined(HIPHOP_WASM_SUPPORT)
     fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JsValueVector& args) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         sideloadWasmBinary(

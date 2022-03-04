@@ -32,7 +32,7 @@ class WebUIBase : public UIEx
 {
 public:
     WebUIBase(uint width = 0, uint height = 0);
-    virtual ~WebUIBase();
+    virtual ~WebUIBase() {}
 
 protected:
     void sizeChanged(uint width, uint height) override;

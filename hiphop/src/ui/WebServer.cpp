@@ -28,11 +28,11 @@
 
 USE_NAMESPACE_DISTRHO
 
-// JS injection feature currently not in use, leaving code just in case.
 WebServer::WebServer()
     : fContext(nullptr)
 {}
 
+// JS injection feature currently not in use, leaving code just in case.
 void WebServer::init(int port, const char* jsInjectTarget, const char* jsInjectToken)
 {
     lws_set_log_level(LLL_ERR|LLL_WARN/*|LLL_DEBUG*/, 0);
