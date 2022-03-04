@@ -18,8 +18,11 @@
 
 #include <cstring>
 
-#include "extra/Path.hpp"
 #include "WebServer.hpp"
+
+// Keep DPF include after WebServer.hpp to avoid warning from MinGW gcc:
+// "Please include winsock2.h before windows.h"
+#include "extra/Path.hpp"
 
 #define LWS_PROTOCOL_NAME "lws-dpf"
 

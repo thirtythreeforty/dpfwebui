@@ -21,10 +21,10 @@
 
 #include <vector>
 
+#include <libwebsockets.h>
+
 #include "distrho/extra/LeakDetector.hpp"
 #include "distrho/extra/String.hpp"
-
-#include <libwebsockets.h>
 
 START_NAMESPACE_DISTRHO
 
