@@ -70,8 +70,12 @@ bool PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data
 }
 #endif
 
+#if DISTRHO_PLUGIN_WANT_STATE
 void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateValue)
 {
+    (void)index;
+    (void)stateKey;
+    (void)defaultStateValue;
 #if defined(HIPHOP_NETWORK_UI)
     if (index == fStateIndexWsPort) {
         stateKey = "_wsport";
@@ -88,6 +92,8 @@ void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateV
 
 void PluginEx::setState(const char* key, const char* value)
 {
+    (void)key;
+    (void)value;
 #if defined(HIPHOP_NETWORK_UI)
     if (std::strcmp(key, "_wsport") == 0) {
         fWebServerPort = std::atoi(value);
@@ -115,3 +121,4 @@ void PluginEx::setState(const char* key, const char* value)
     }
 #endif
 }
+#endif // DISTRHO_PLUGIN_WANT_STATE

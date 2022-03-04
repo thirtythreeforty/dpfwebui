@@ -43,8 +43,10 @@ public:
     bool   writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
 #endif
 
+#if DISTRHO_PLUGIN_WANT_STATE
     void initState(uint32_t index, String& stateKey, String& defaultStateValue) override;
     void setState(const char* key, const char* value) override;
+#endif
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 protected:
