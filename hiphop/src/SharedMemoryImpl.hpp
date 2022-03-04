@@ -145,8 +145,7 @@ struct DuplexSharedMemory
 {
     DuplexSharedMemory() {}
     
-    // Convenience methods
-    
+    // Convenience method
     bool create()
     {
         if (! in.create()) {
@@ -159,17 +158,6 @@ struct DuplexSharedMemory
         }
 
         return true;
-    }
-
-    void close()
-    {
-        if (in.isCreatedOrConnected()) {
-            in.close();
-        }
-
-        if (out.isCreatedOrConnected()) {
-            out.close();
-        }
     }
 
     TaggedSharedMemory<S,N> in;

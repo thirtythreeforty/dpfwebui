@@ -128,11 +128,11 @@ void NetworkUI::postMessage(const JsValueVector& args)
 #if DISTRHO_PLUGIN_WANT_STATE
 void NetworkUI::stateChanged(const char* key, const char* value)
 {
-    if (std::strcmp(key, "_wsport") == 0) {
+    if (std::strcmp(key, "_ws_port") == 0) {
         fPort = std::atoi(value);
         if (fPort == -1) {
             fPort = findAvailablePort();
-            setState("_wsport", std::to_string(fPort).c_str());
+            setState("_ws_port", std::to_string(fPort).c_str());
         } else {
             d_stderr(LOG_TAG " : reusing port %d", fPort);
         }

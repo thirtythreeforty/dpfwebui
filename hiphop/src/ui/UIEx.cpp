@@ -22,34 +22,7 @@
 
 UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
     : UI(width, height, automaticallyScaleAndSetAsMinimumSize)
-{
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    // Asynchronous state updates are only possible from the UI to the Plugin
-    // instance and not the other way around. So the UI creates the shared
-    // memory and lets the Plugin know how to locate it with filenames and when
-    // to destroy it. DPF state updates flow: UI--state-->Host--state-->Plugin.
-
-    if (fMemory.create()) {
-        String val;
-        val = "init_p2ui:";
-        val += fMemory.in.getDataFilename();
-        setState("_shmem", val);
-        val = "init_ui2p:";
-        val += fMemory.out.getDataFilename();
-        setState("_shmem", val);
-    } else {
-        d_stderr2("Could not create shared memory");
-    }
-#endif
-}
-
-UIEx::~UIEx()
-{
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    fMemory.close();
-    setState("_shmem", "deinit");
-#endif
-}
+{}
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 size_t UIEx::getSharedMemorySize() const noexcept
@@ -61,7 +34,7 @@ bool UIEx::writeSharedMemory(const char* metadata, const unsigned char* data, si
 {
     if (fMemory.out.write(metadata, data, size)) {
         // Notify Plugin instance there is new data available for reading
-        setState("_shmem", "data_ui2p");
+        setState("_shmem_data", "");
         return true;
     } else {
         d_stderr2("Could not write shared memory (ui->plugin)");
@@ -87,10 +60,37 @@ void UIEx::uiIdle()
     // is not fast enough for visualizations a custom timer solution needs to be
     // implemented, or DPF modified so the uiIdle() frequency can be configured.
 
-    if (! fMemory.in.isRead()) {
+    if (fMemory.in.isCreatedOrConnected() && ! fMemory.in.isRead()) {
         sharedMemoryChanged(fMemory.in.getMetadata(), fMemory.in.getDataPointer(),
                             fMemory.in.getDataSize());
         fMemory.in.setRead();
     }
+}
+#endif
+
+#if DISTRHO_PLUGIN_WANT_STATE
+void UIEx::stateChanged(const char* key, const char* value)
+{
+    (void)key;
+    (void)value;
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+    if (std::strcmp(key, "_shmem_files") == 0) {
+        String val = String(value);
+
+        if (val.length() > 0) {
+            size_t sep = val.find(';');
+            String ui2p = String(val.buffer() + sep + 6);
+            if (fMemory.out.connect(ui2p) == nullptr) {
+                d_stderr2("Could not connect to shared memory (plugin->ui)");
+            }
+
+            val.truncate(sep);
+            String p2ui = String(val.buffer() + 5);
+            if (fMemory.in.connect(p2ui) == nullptr) {
+                d_stderr2("Could not connect to shared memory (ui->plugin)");
+            }
+        }
+    }
+#endif
 }
 #endif

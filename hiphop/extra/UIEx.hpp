@@ -36,7 +36,7 @@ class UIEx : public UI
 {
 public:
     UIEx(uint width = 0, uint height = 0, bool automaticallyScaleAndSetAsMinimumSize = false);
-    virtual ~UIEx();
+    virtual ~UIEx() {}
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     size_t getSharedMemorySize() const noexcept;
@@ -46,16 +46,19 @@ public:
 #endif
 #endif // HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 protected:
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     virtual void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
     {
         (void)metadata;
         (void)data;
         (void)size;
     }
-
+#endif
     void uiIdle() override;
+
+#if DISTRHO_PLUGIN_WANT_STATE
+    void stateChanged(const char* key, const char* value) override;
 #endif
 
 private:

@@ -36,7 +36,7 @@ class PluginEx : public Plugin
 {
 public:
     PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount);
-    virtual ~PluginEx();
+    virtual ~PluginEx() {}
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     size_t getSharedMemorySize() const noexcept;
@@ -64,7 +64,8 @@ private:
     int fWebServerPort;
 #endif
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    uint32_t fStateIndexShMem;
+    uint32_t fStateIndexShMemFiles;
+    uint32_t fStateIndexShMemData;
     SharedMemoryImpl fMemory;
 #endif
 

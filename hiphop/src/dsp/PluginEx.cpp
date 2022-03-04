@@ -25,7 +25,7 @@
 # define COUNT_0 0
 #endif
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY // DistrhoPluginInfo.h
-# define COUNT_1 1
+# define COUNT_1 2
 #else
 # define COUNT_1 0
 #endif
@@ -34,21 +34,16 @@
 
 PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount)
     : Plugin(parameterCount, programCount, stateCount + INTERNAL_STATE_COUNT)
+    // stateCount is the last user state index
 #if defined(HIPHOP_NETWORK_UI)
-    , fStateIndexWsPort(stateCount/*last index*/ + __COUNTER__)
+    , fStateIndexWsPort(stateCount + __COUNTER__)
     , fWebServerPort(0)
 #endif
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    , fStateIndexShMem(stateCount/*last index*/ + __COUNTER__)
+    , fStateIndexShMemFiles(stateCount + __COUNTER__)
+    , fStateIndexShMemData(stateCount + __COUNTER__)
 #endif
 {}
-
-PluginEx::~PluginEx()
-{
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    fMemory.close();
-#endif
-}
 
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 size_t PluginEx::getSharedMemorySize() const noexcept
@@ -78,13 +73,27 @@ void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateV
     (void)defaultStateValue;
 #if defined(HIPHOP_NETWORK_UI)
     if (index == fStateIndexWsPort) {
-        stateKey = "_wsport";
+        stateKey = "_ws_port";
         defaultStateValue = "-1";
     }
 #endif
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    if (index == fStateIndexShMem) {
-        stateKey = "_shmem";
+    if (index == fStateIndexShMemFiles) {
+        // Plugin creates the shared memory and lets the UI know how to find it
+        // by storing the filenames in internal state. UI->Plugin changes are
+        // picked up asynchronously via the DPF state callback. Plugin->UI
+        // changes are detected by polling the shared memory read state flag.
+        stateKey = "_shmem_files";
+
+        if (fMemory.create()) {
+            defaultStateValue = String("p2ui:") + fMemory.out.getDataFilename()
+                            + String(";ui2p:") + fMemory.in.getDataFilename();
+        } else {
+            defaultStateValue = "";
+            d_stderr2("Could not create shared memory");
+        }
+    } else if (index == fStateIndexShMemData) {
+        stateKey = "_shmem_data";
         defaultStateValue = "";
     }
 #endif
@@ -95,29 +104,15 @@ void PluginEx::setState(const char* key, const char* value)
     (void)key;
     (void)value;
 #if defined(HIPHOP_NETWORK_UI)
-    if (std::strcmp(key, "_wsport") == 0) {
+    if (std::strcmp(key, "_ws_port") == 0) {
         fWebServerPort = std::atoi(value);
     }
 #endif
 #if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
-    if (std::strcmp(key, "_shmem") == 0) {
-        if (std::strstr(value, "init_p2ui:") == value) {
-            if (fMemory.out.connect(value + 10) == nullptr) {
-                d_stderr2("Could not connect to shared memory (plugin->ui)");
-            }
-        } else if (std::strstr(value, "init_ui2p:") == value) {
-            if (fMemory.in.connect(value + 10) == nullptr) {
-                d_stderr2("Could not connect to shared memory (ui->plugin)");
-            }
-        } else if (std::strstr(value, "data_ui2p") == value) {
-            if (! fMemory.in.isRead()) { // check not needed, do it for correctness
-                sharedMemoryChanged(fMemory.in.getMetadata(), fMemory.in.getDataPointer(),
-                                    fMemory.in.getDataSize());
-                fMemory.in.setRead();
-            }
-        } else if (std::strstr(value, "deinit") == value) {
-            fMemory.close();
-        }
+    if ((std::strcmp(key, "_shmem_data") == 0) && ! fMemory.in.isRead()) {
+        sharedMemoryChanged(fMemory.in.getMetadata(), fMemory.in.getDataPointer(),
+                            fMemory.in.getDataSize());
+        fMemory.in.setRead();
     }
 #endif
 }
