@@ -23,7 +23,7 @@
 UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
     : UI(width, height, automaticallyScaleAndSetAsMinimumSize)
 {
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     // Asynchronous state updates are only possible from the UI to the Plugin
     // instance and not the other way around. So the UI creates the shared
     // memory and lets the Plugin know how to locate it with filenames and when
@@ -45,13 +45,13 @@ UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
 
 UIEx::~UIEx()
 {
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     fMemory.close();
     setState("_shmem", "deinit");
 #endif
 }
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 size_t UIEx::getSharedMemorySize() const noexcept
 {
     return fMemory.out.getSizeBytes();
@@ -78,9 +78,9 @@ void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
     writeSharedMemory("_wasm_bin", data, size);
 }
 #endif
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif // HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 void UIEx::uiIdle()
 {
     // ExternalWindow does not implement the IdleCallback methods. If uiIdle()

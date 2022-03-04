@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstring>
 #include <stdexcept>
 
 #include "WasmPluginImpl.hpp"
@@ -201,13 +202,21 @@ void WasmPlugin::loadProgram(uint32_t index)
 #if DISTRHO_PLUGIN_WANT_STATE
 void WasmPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
 {
+    PluginEx::initState(index, stateKey, defaultStateValue);
+    
     try {
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
         fRuntime->callFunction("_init_state", { MakeI32(index) });
-        stateKey = fRuntime->getGlobalAsCString("_ro_string_0");
-        defaultStateValue = fRuntime->getGlobalAsCString("_ro_string_1");
+        const char* key = fRuntime->getGlobalAsCString("_ro_string_0");
+        const char* val = fRuntime->getGlobalAsCString("_ro_string_1");
+
+        // Do not overwrite PluginEx internal states
+        if (std::strlen(key) > 0) {
+            stateKey = key;
+            defaultStateValue = val;
+        }
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -334,7 +343,7 @@ void WasmPlugin::deactivate()
     }
 }
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 void WasmPlugin::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
 {
     if (std::strcmp(metadata, "_wasm_bin") == 0) {
@@ -364,7 +373,7 @@ void WasmPlugin::loadWasmBinary(const unsigned char* data, size_t size)
         fRuntime->callFunction("_activate");
     }
 }
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif // HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 
 WasmValueVector WasmPlugin::getTimePosition(WasmValueVector params)
 {

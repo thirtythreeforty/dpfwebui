@@ -58,7 +58,7 @@ void WebUIBase::stateChanged(const char* key, const char* value)
 }
 #endif
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 void WebUIBase::sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
 {
     (void)size;
@@ -139,7 +139,7 @@ void WebUIBase::initHandlers()
     });
 #endif
 
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JsValueVector& args) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[1].getString());
         writeSharedMemory(
@@ -158,7 +158,7 @@ void WebUIBase::initHandlers()
         );
     });
 #endif
-#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_ENABLE_SHARED_MEMORY
+#endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 
     // It is not possible to implement JS synchronous calls that return values
     // without resorting to dirty hacks. Use JS async functions instead, and

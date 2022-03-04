@@ -43,6 +43,7 @@ USE_NAMESPACE_DISTRHO
 
 NetworkUI::NetworkUI(uint width, uint height)
     : WebUIBase(width, height)
+    , fPort(0)
 {
 #if defined(DISTRHO_OS_WINDOWS)
     WSADATA wsaData;
@@ -52,15 +53,16 @@ NetworkUI::NetworkUI(uint width, uint height)
         return;
     }
 #endif
-    fPort = findAvailablePort();
 
-    if (fPort == -1) {
-        d_stderr2(LOG_TAG " : could not find available port");
-        return;
-    }
-
-    fServer.init(fPort);
     initHandlers();
+
+#if ! DISTRHO_PLUGIN_WANT_STATE
+    // Port is not remembered when state support is disabled
+    fPort = findAvailablePort();
+    if (fPort != -1) {
+        initServer();
+    }
+#endif
 }
 
 NetworkUI::~NetworkUI()
@@ -123,6 +125,24 @@ void NetworkUI::postMessage(const JsValueVector& args)
     (void)args;
 }
 
+#if DISTRHO_PLUGIN_WANT_STATE
+void NetworkUI::stateChanged(const char* key, const char* value)
+{
+    if (std::strcmp(key, "_wsport") == 0) {
+        fPort = std::atoi(value);
+        if (fPort == -1) {
+            fPort = findAvailablePort();
+            setState("_wsport", std::to_string(fPort).c_str());
+        } else {
+            d_stderr(LOG_TAG " : reusing port %d", fPort);
+        }
+        if (fPort != -1) {
+            initServer();
+        }
+    }
+}
+#endif
+
 void NetworkUI::initHandlers()
 {
     fHandler["getPublicUrl"] = std::make_pair(0, [this](const JsValueVector&) {
@@ -130,8 +150,19 @@ void NetworkUI::initHandlers()
     });
 }
 
+void NetworkUI::initServer()
+{
+    fServer.init(fPort);
+    d_stderr(LOG_TAG " : server up @ %s", getPublicUrl().buffer());
+}
+
 int NetworkUI::findAvailablePort()
 {
+    // Ports are not reused during process lifetime unless SO_REUSEADDR is set.
+    // Once a plugin binds to a port it is safe to assume that other plugin
+    // instances will not claim the same port. A single plugin can reuse a port
+    // by enabling DISTRHO_PLUGIN_WANT_STATE so it can be stored in a DPF state.
+
     const int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
         d_stderr(LOG_TAG " : failed socket(), errno %d", errno);
@@ -162,6 +193,12 @@ int NetworkUI::findAvailablePort()
 
     if (CLOSE_SOCKET(sockfd) == -1) {
         d_stderr(LOG_TAG " : failed close(), errno %d", errno);
+    }
+
+    if (port != -1) {
+        d_stderr(LOG_TAG " : found available port %d", port);
+    } else {
+        d_stderr2(LOG_TAG " : could not find available port");
     }
 
     return port;

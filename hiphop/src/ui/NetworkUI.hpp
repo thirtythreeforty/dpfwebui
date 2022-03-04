@@ -38,8 +38,13 @@ protected:
 
     void postMessage(const JsValueVector& args) override;
 
+#if DISTRHO_PLUGIN_WANT_STATE
+    void stateChanged(const char* key, const char* value) override;
+#endif
+
 private:
     void initHandlers();
+    void initServer();
     int  findAvailablePort();
 
     int       fPort;

@@ -22,7 +22,7 @@
 #include "DistrhoUI.hpp"
 #include "SharedMemoryImpl.hpp"
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 # if ! DISTRHO_PLUGIN_WANT_STATE
 #  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
 # endif
@@ -38,15 +38,15 @@ public:
     UIEx(uint width = 0, uint height = 0, bool automaticallyScaleAndSetAsMinimumSize = false);
     virtual ~UIEx();
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     size_t getSharedMemorySize() const noexcept;
     bool   writeSharedMemory(const char* metadata /*C str*/, const unsigned char* data, size_t size);
 #if HIPHOP_ENABLE_WASM_PLUGIN
     void   sideloadWasmBinary(const unsigned char* data, size_t size);
 #endif
-#endif // HIPHOP_ENABLE_SHARED_MEMORY
+#endif // HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 protected:
     virtual void sharedMemoryChanged(const char* metadata, const unsigned char* data, size_t size)
     {
@@ -59,7 +59,7 @@ protected:
 #endif
 
 private:
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     SharedMemoryImpl fMemory;
 #endif
 

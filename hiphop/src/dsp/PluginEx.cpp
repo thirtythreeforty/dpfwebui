@@ -18,29 +18,46 @@
 
 #include "extra/PluginEx.hpp"
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
-# define DUMMY __COUNTER__
+// This is horrible but __COUNTER__ alone cannot solve the problem
+#if defined(HIPHOP_NETWORK_UI)
+# define COUNT_0 1
+#else
+# define COUNT_0 0
+#endif
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY // DistrhoPluginInfo.h
+# define COUNT_1 1
+#else
+# define COUNT_1 0
 #endif
 
-#define STATE_COUNT __COUNTER__
+#define INTERNAL_STATE_COUNT (COUNT_0 + COUNT_1)
 
 PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount)
-    : Plugin(parameterCount, programCount, stateCount + STATE_COUNT /*internal state*/)
+    : Plugin(parameterCount, programCount, stateCount + INTERNAL_STATE_COUNT)
+#if defined(HIPHOP_NETWORK_UI)
+    , fStateIndexWsPort(stateCount/*last index*/ + __COUNTER__)
+    , fWebServerPort(0)
+#endif
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+    , fStateIndexShMem(stateCount/*last index*/ + __COUNTER__)
+#endif
 {}
 
 PluginEx::~PluginEx()
 {
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     fMemory.close();
 #endif
 }
 
-#if HIPHOP_ENABLE_SHARED_MEMORY
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 size_t PluginEx::getSharedMemorySize() const noexcept
 {
     return fMemory.out.getSizeBytes();
 }
+#endif
 
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
 bool PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data, size_t size)
 {
     if (fMemory.out.write(metadata, data, size)) {
@@ -51,9 +68,32 @@ bool PluginEx::writeSharedMemory(const char* metadata, const unsigned char* data
         return false;
     }
 }
+#endif
+
+void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateValue)
+{
+#if defined(HIPHOP_NETWORK_UI)
+    if (index == fStateIndexWsPort) {
+        stateKey = "_wsport";
+        defaultStateValue = "-1";
+    }
+#endif
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+    if (index == fStateIndexShMem) {
+        stateKey = "_shmem";
+        defaultStateValue = "";
+    }
+#endif
+}
 
 void PluginEx::setState(const char* key, const char* value)
 {
+#if defined(HIPHOP_NETWORK_UI)
+    if (std::strcmp(key, "_wsport") == 0) {
+        fWebServerPort = std::atoi(value);
+    }
+#endif
+#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
     if (std::strcmp(key, "_shmem") == 0) {
         if (std::strstr(value, "init_p2ui:") == value) {
             if (fMemory.out.connect(value + 10) == nullptr) {
@@ -73,5 +113,5 @@ void PluginEx::setState(const char* key, const char* value)
             fMemory.close();
         }
     }
+#endif
 }
-#endif // HIPHOP_ENABLE_SHARED_MEMORY

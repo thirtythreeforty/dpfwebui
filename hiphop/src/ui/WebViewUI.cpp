@@ -18,6 +18,7 @@
 
 #include "WebViewUI.hpp"
 
+#include <cstring>
 #include <iostream>
 
 #include "extra/Path.hpp"
@@ -106,14 +107,18 @@ void WebViewUI::setWebView(WebViewBase* webView)
 void WebViewUI::load()
 {
     if (fWebView != nullptr) {
-#if defined(HIPHOP_NETWORK_UI)
-        // Note that the local webview still uses the native bridge for message
-        // passing instead of WebSockets.
+#if defined(HIPHOP_NETWORK_UI) 
+# if ! DISTRHO_PLUGIN_WANT_STATE
+        // State is needed for reusing the web server port during the plugin
+        // lifetime. Note that the local webview still uses the native bridge
+        // for messaging instead of WebSockets when loading document via HTTP.
         String url = getLocalUrl();
+        fWebView->navigate(url);
+# endif
 #else
         String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
-#endif
         fWebView->navigate(url);
+#endif
     }
 }
 
@@ -174,6 +179,20 @@ void WebViewUI::uiIdle()
         processStandaloneEvents();
     }
 }
+
+#if DISTRHO_PLUGIN_WANT_STATE
+void WebViewUI::stateChanged(const char* key, const char* value)
+{
+    WebViewUIBase::stateChanged(key, value);
+
+#if defined(HIPHOP_NETWORK_UI)
+    if ((std::strcmp(key, "_wsport") == 0) && (fWebView != nullptr)) {
+        String url = getLocalUrl();
+        fWebView->navigate(url);
+    }
+#endif
+}
+#endif
 
 void WebViewUI::sizeChanged(uint width, uint height)
 {
