@@ -99,7 +99,7 @@ The bridge interface in a nutshell:
 
 window.host.postMessage([...]);
 
-void WebUI::webMessageReceived(const JSValue::array&) {
+void WebUI::onMessageReceived(const JSValue::array&) {
 
    // Receive in C++ from JS
 
@@ -107,7 +107,7 @@ void WebUI::webMessageReceived(const JSValue::array&) {
 
 // Send from C++ to JS
 
-WebUI::webPostMessage({...});
+WebUI::postMessage({...});
 
 window.host.addMessageListener((args) => {
     
@@ -115,8 +115,3 @@ window.host.addMessageListener((args) => {
 
 });
 ```
-
-Message arguments must be an array/vector containing values of primitive data
-types. These values are wrapped by `DISTRHO::JSValue` instances. The following
-JS types are supported: boolean, number, string. Any other types are mapped to
-null.
