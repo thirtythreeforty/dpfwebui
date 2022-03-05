@@ -99,7 +99,7 @@ The bridge interface in a nutshell:
 
 window.host.postMessage([...]);
 
-void WebUI::webMessageReceived(const JSValue::array&) {
+void WebUI::webMessageReceived(const JSArray&) {
 
    // Receive in C++ from JS
 

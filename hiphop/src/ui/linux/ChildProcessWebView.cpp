@@ -256,7 +256,7 @@ void ChildProcessWebView::handleInit(float displayScaleFactor)
 void ChildProcessWebView::handleHelperScriptMessage(const char *payload, int payloadSize)
 {
     // Should validate payload is never read past payloadSize 
-    JSValue::array args;
+    JSArray args;
     int offset = 0;
 
     while (offset < payloadSize) {

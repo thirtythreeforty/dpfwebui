@@ -68,12 +68,12 @@ void WebUIBase::sharedMemoryChanged(const unsigned char* data, size_t size, cons
 }
 #endif
 
-void WebUIBase::onMessageReceived(const JSValue::array& args)
+void WebUIBase::onMessageReceived(const JSArray& args)
 {
     (void)args;
 }
 
-void WebUIBase::handleMessage(const JSValue::array& args)
+void WebUIBase::handleMessage(const JSArray& args)
 {
     if ((args.size() < 2) || (args[0].getString() != "UI")) {
         onMessageReceived(args); // passthrough
@@ -87,7 +87,7 @@ void WebUIBase::handleMessage(const JSValue::array& args)
         return;
     }
 
-    const JSValue::array handlerArgs(args.cbegin() + 2, args.cend());
+    const JSArray handlerArgs(args.cbegin() + 2, args.cend());
     
     ArgumentCountAndMessageHandler handler = fHandler[key.buffer()];
 
@@ -102,7 +102,7 @@ void WebUIBase::handleMessage(const JSValue::array& args)
 void WebUIBase::initHandlers()
 {
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
-    fHandler["sendNote"] = std::make_pair(3, [this](const JSValue::array& args) {
+    fHandler["sendNote"] = std::make_pair(3, [this](const JSArray& args) {
         sendNote(
             static_cast<uint8_t>(args[0].getNumber()),  // channel
             static_cast<uint8_t>(args[1].getNumber()),  // note
@@ -111,14 +111,14 @@ void WebUIBase::initHandlers()
     });
 #endif
 
-    fHandler["editParameter"] = std::make_pair(2, [this](const JSValue::array& args) {
+    fHandler["editParameter"] = std::make_pair(2, [this](const JSArray& args) {
         editParameter(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<bool>(args[1].getBoolean())        // started
         );
     });
 
-    fHandler["setParameterValue"] = std::make_pair(2, [this](const JSValue::array& args) {
+    fHandler["setParameterValue"] = std::make_pair(2, [this](const JSArray& args) {
         setParameterValue(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<float>(args[1].getNumber())     // value
@@ -126,7 +126,7 @@ void WebUIBase::initHandlers()
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    fHandler["setState"] = std::make_pair(2, [this](const JSValue::array& args) {
+    fHandler["setState"] = std::make_pair(2, [this](const JSArray& args) {
         setState(
             args[0].getString(), // key
             args[1].getString()  // value
@@ -135,13 +135,13 @@ void WebUIBase::initHandlers()
 #endif
 
 #if DISTRHO_PLUGIN_WANT_STATEFILES
-    fHandler["requestStateFile"] = std::make_pair(1, [this](const JSValue::array& args) {
+    fHandler["requestStateFile"] = std::make_pair(1, [this](const JSArray& args) {
         requestStateFile(args[0].getString() /*key*/);
     });
 #endif
 
 #if DISTRHO_PLUGIN_WANT_STATE && defined(HIPHOP_SHARED_MEMORY_SIZE)
-    fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JSValue::array& args) {
+    fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JSArray& args) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         writeSharedMemory(
             static_cast<const unsigned char*>(data.data()),
@@ -152,7 +152,7 @@ void WebUIBase::initHandlers()
     });
 
 #if defined(HIPHOP_WASM_SUPPORT)
-    fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JSValue::array& args) {
+    fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JSArray& args) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         sideloadWasmBinary(
             static_cast<const unsigned char*>(data.data()),
@@ -166,7 +166,7 @@ void WebUIBase::initHandlers()
     // without resorting to dirty hacks. Use JS async functions instead, and
     // fulfill their promises here. See for example getWidth() and getHeight().
 
-    fHandler["isStandalone"] = std::make_pair(0, [this](const JSValue::array&) {
+    fHandler["isStandalone"] = std::make_pair(0, [this](const JSArray&) {
         postMessage({"UI", "isStandalone", isStandalone()});
     });
 }

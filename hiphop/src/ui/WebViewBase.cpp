@@ -110,7 +110,7 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
     fHandler = handler;
 }
 
-void WebViewBase::postMessage(const JSValue::array& args)
+void WebViewBase::postMessage(const JSArray& args)
 {
     // This method implements something like a "reverse postMessage()" aiming to keep the bridge
     // symmetrical. Global window.host is an EventTarget that can be listened for messages.
@@ -137,7 +137,7 @@ void WebViewBase::handleLoadFinished()
     }
 }
 
-void WebViewBase::handleScriptMessage(const JSValue::array& args)
+void WebViewBase::handleScriptMessage(const JSArray& args)
 {
     if ((args.size() == 3) && (args[0].getString() == "console")) {
         if (fHandler != nullptr) {
@@ -155,12 +155,12 @@ void WebViewBase::handleScriptMessage(const JSValue::array& args)
     }
 }
 
-String WebViewBase::serializeJSValues(const JSValue::array& args)
+String WebViewBase::serializeJSValues(const JSArray& args)
 {
     std::stringstream ss;
     ss << '[';
 
-    for (JSValue::array::const_iterator it = args.cbegin(); it != args.cend(); ++it) {
+    for (JSArray::const_iterator it = args.cbegin(); it != args.cend(); ++it) {
         if (it != args.cbegin()) {
             ss << ',';
         }

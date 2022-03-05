@@ -143,7 +143,7 @@ class UI {
     }
 
     // Non-DPF method for sending a message to the web host
-    // void WebViewUI::postMessage(const JSValue::array& args)
+    // void WebViewUI::postMessage(const JSArray& args)
     postMessage(...args) {
         if (DISTRHO.env.webview) {
             window.host.postMessage(args);
@@ -155,7 +155,7 @@ class UI {
     }
 
     // Non-DPF callback method for receiving messages from the web host
-    // void WebViewUI::webMessageReceived(const JSValue::array& args)
+    // void WebViewUI::webMessageReceived(const JSArray& args)
     messageReceived(args) {
         // default empty implementation
     }

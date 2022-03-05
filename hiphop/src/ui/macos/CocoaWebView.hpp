@@ -41,7 +41,7 @@ public:
     // Allow calling some protected methods from Objective-C instances
     
     void didFinishNavigation() { handleLoadFinished(); }
-    void didReceiveScriptMessage(const JSValue::array& args) { handleScriptMessage(args); }
+    void didReceiveScriptMessage(const JSArray& args) { handleScriptMessage(args); }
 
 protected:
     void onSize(uint width, uint height) override;

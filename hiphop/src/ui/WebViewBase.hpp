@@ -32,7 +32,7 @@ class WebViewEventHandler
 {
 public:
     virtual void handleWebViewLoadFinished() = 0;
-    virtual void handleWebViewScriptMessage(const JSValue::array& args) = 0;
+    virtual void handleWebViewScriptMessage(const JSArray& args) = 0;
     virtual void handleWebViewConsole(const String& tag, const String& text) = 0;
 
 };
@@ -59,7 +59,7 @@ public:
     void setPrintTraffic(bool printTraffic);
     void setEventHandler(WebViewEventHandler* handler);
     
-    void postMessage(const JSValue::array& args);
+    void postMessage(const JSArray& args);
 
     virtual void realize() = 0;
     virtual void navigate(String& url) = 0;
@@ -73,10 +73,10 @@ protected:
     void injectHostObjectScripts();
     
     void handleLoadFinished();
-    void handleScriptMessage(const JSValue::array& args);
+    void handleScriptMessage(const JSArray& args);
 
 private:
-    String serializeJSValues(const JSValue::array& args);
+    String serializeJSValues(const JSArray& args);
 
     void addStylesheet(String& source);
 

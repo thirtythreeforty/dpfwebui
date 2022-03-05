@@ -30,9 +30,6 @@ START_NAMESPACE_DISTRHO
 class JSValue
 {
 public:
-    typedef std::vector<JSValue> array;
-    typedef std::unordered_map<const char*,JSValue> object;
-
     enum Type {
         TNull,
         TBool,
@@ -99,8 +96,8 @@ public:
     bool    getBoolean() const noexcept { return fBoolean; }
     double  getNumber()  const noexcept { return fNumber; }
     String  getString()  const noexcept { return fString; }
-    array&  getArray()   noexcept { return fArray; }
-    object& getObject()  noexcept { return fObject; }
+    //array&  getArray()   noexcept { return fArray; }
+    //object& getObject()  noexcept { return fObject; }
 
     //
     // Type casting operators
@@ -109,20 +106,23 @@ public:
     operator bool()   const noexcept { return fBoolean; }
     operator double() const noexcept { return fNumber; }
     operator String() const noexcept { return fString; }
-    operator array()  noexcept { return fArray; }
-    operator object() noexcept { return fObject; }
+    //operator array()  noexcept { return fArray; }
+    //operator object() noexcept { return fObject; }
 
 private:
     Type   fType;
     bool   fBoolean;
     double fNumber;
     String fString;
-    array  fArray;
-    object fObject;
+    void*  fArray;
+    void*  fObject;
 
 };
 
 END_NAMESPACE_DISTRHO
+
+typedef std::vector<JSValue> JSArray;
+typedef std::unordered_map<const char*,JSValue> JSObject;
 
 std::ostream& operator<<(std::ostream &os, const DISTRHO::JSValue &val);
 
