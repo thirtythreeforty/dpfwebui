@@ -19,11 +19,12 @@ DSP. The latter can be implemented in C++ or optionally [AssemblyScript](https:/
 * C++ or AssemblyScript for DSP development
 * HTML / CSS / JS for UI development
 * VST2 / VST3(¹) / LV2 plugin formats
+* Network UI support(²)
 * Linux / Mac / Windows
 * Just the powerful basics
 
-¹ Not ready for production as of Feb '22, some platform/host combinations still
-do not work. More details [here](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
+¹ May not work on some platform/DAW combinations like Ableton Live for macOS. More details [here](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
+² For controlling plugins from devices in the local network (ie., tablets). Feature currently under development.
 
 The following language combinations are possible:
 
