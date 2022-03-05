@@ -263,7 +263,7 @@ HRESULT EdgeWebView::handleWebView2NavigationCompleted(ICoreWebView2 *sender,
 HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
                                                       ICoreWebView2WebMessageReceivedEventArgs *eventArgs)
 {
-    // Edge WebView2 does not provide access to V8 values; resort to parsing JSON
+    // Edge WebView2 does not provide access to raw values, resort to parsing JSON.
     (void)sender;
 
     LPWSTR jsonStr;
@@ -287,7 +287,7 @@ HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
                 } else if (cJSON_IsNumber(jArg)) {
                     args.push_back(JSValue(cJSON_GetNumberValue(jArg)));
                 } else if (cJSON_IsString(jArg)) {
-                    args.push_back(JSValue(String(cJSON_GetStringValue(jArg))));
+                    args.push_back(JSValue(cJSON_GetStringValue(jArg)));
                 } else {
                     args.push_back(JSValue()); // null
                 }

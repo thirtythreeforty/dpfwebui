@@ -26,6 +26,8 @@
 
 #include "distrho/extra/String.hpp"
 
+#include "cJSON.h"
+
 START_NAMESPACE_DISTRHO
 
 class JSValue
@@ -58,27 +60,34 @@ public:
     ~JSValue();
 
     // Getters
-    bool    isNull()     const noexcept;
-    type    getType()    const noexcept;
+    bool    isNull() const noexcept;
+    type    getType() const noexcept;
     bool    getBoolean() const;
-    double  getNumber()  const;
-    String  getString()  const;
-    array&  getArray();
-    object& getObject();
+    double  getNumber() const;
+    String  getString() const;
+    array&  getArray() const;
+    object& getObject() const;
 
     // Type casting operators
-    operator bool()   const noexcept { return fBoolean; }
+    operator bool() const noexcept { return fBoolean; }
     operator double() const noexcept { return fNumber; }
     operator String() const noexcept { return fString; }
-    operator array()  noexcept { return getArray(); }
+    operator array() noexcept { return getArray(); }
     operator object() noexcept { return getObject(); }
 
+    // Serialization/deserialization
+    static JSValue fromJSON(const String& jsonText);
+    static String  toJSON(const JSValue& value, bool format = false);
+
 private:
-    type   fType;
-    bool   fBoolean;
+    JSValue(cJSON* json) noexcept;
+    cJSON* toCJSON() const noexcept;
+
+    mutable type fType;
+    bool fBoolean;
     double fNumber;
     String fString;
-    void*  fContainer;
+    mutable void* fContainer;
 
 };
 

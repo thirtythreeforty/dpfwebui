@@ -278,7 +278,7 @@ void ChildProcessWebView::handleHelperScriptMessage(const char *payload, int pay
                 break;
             case ARG_TYPE_STRING:
                 offset += 1 /*type*/ + strlen(value) + 1 /*\0*/;
-                args.push_back(JSValue(String(value)));
+                args.push_back(JSValue(static_cast<const char*>(value)));
                 break;
             default:
                 offset += 1;
