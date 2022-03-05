@@ -20,7 +20,7 @@
 #define JS_VALUE_HPP
 
 #include <exception>
-#include <ostream>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -55,6 +55,7 @@ public:
     JSValue(uint32_t i) noexcept;
     JSValue(float f) noexcept;
     JSValue(const char *s) noexcept;
+    JSValue(const array& a) noexcept;
 
     // Destructor
     ~JSValue();
@@ -76,23 +77,22 @@ public:
     operator object() noexcept { return getObject(); }
 
     // Serialization/deserialization
+    String toJSON(bool format = false);
     static JSValue fromJSON(const String& jsonText);
-    static String  toJSON(const JSValue& value, bool format = false);
 
 private:
     JSValue(cJSON* json) noexcept;
     cJSON* toCJSON() const noexcept;
 
-    mutable type fType;
-    bool fBoolean;
+    mutable type  fType;
+    mutable void* fContainer;
+    mutable bool  fContainerOwn;
+    bool   fBoolean;
     double fNumber;
     String fString;
-    mutable void* fContainer;
 
 };
 
 END_NAMESPACE_DISTRHO
-
-std::ostream& operator<<(std::ostream &os, const DISTRHO::JSValue &val);
 
 #endif // JS_VALUE_HPP

@@ -76,8 +76,6 @@ protected:
     void handleScriptMessage(const JSValue::array& args);
 
 private:
-    String serializeJSValues(const JSValue::array& args);
-
     void addStylesheet(String& source);
 
     uint      fWidth;

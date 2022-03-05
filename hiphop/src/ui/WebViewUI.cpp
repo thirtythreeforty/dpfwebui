@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "WebViewUI.hpp"
-
 #include <cstring>
-#include <iostream>
+
+#include "WebViewUI.hpp"
 
 #include "extra/Path.hpp"
 
@@ -277,12 +276,12 @@ void WebViewUI::handleWebViewScriptMessage(const JSValue::array& args)
 void WebViewUI::handleWebViewConsole(const String& tag, const String& text)
 {
     if (tag == "log") {
-        std::cout << text.buffer() << std::endl;
+        d_stderr("%s", text.buffer());
     } else if (tag == "info") {
-        std::cout << "INFO : " << text.buffer() << std::endl;
+        d_stderr("INFO : %s", text.buffer());
     } else if (tag == "warn") {
-        std::cout << "WARN : " << text.buffer() << std::endl;
+        d_stderr("WARN : %s", text.buffer());
     } else if (tag == "error") {
-        std::cerr << "ERROR : " << text.buffer() << std::endl;
+        d_stderr("ERROR : %s", text.buffer());
     }
 }

@@ -22,61 +22,78 @@ USE_NAMESPACE_DISTRHO
 
 JSValue::JSValue() noexcept
     : fType(TNull)
+    , fContainer(nullptr)
+    , fContainerOwn(false)
     , fBoolean(false)
     , fNumber(0)
-    , fContainer(nullptr)
 {}
 
 JSValue::JSValue(bool b) noexcept
     : fType(TBoolean)
+    , fContainer(nullptr)
+    , fContainerOwn(false)
     , fBoolean(b)
     , fNumber(0)
-    , fContainer(nullptr)
 {}
 
 JSValue::JSValue(double d) noexcept
     : fType(TNumber)
+    , fContainer(nullptr)
+    , fContainerOwn(false)
     , fBoolean(false)
     , fNumber(d)
-    , fContainer(nullptr)
 {}
 
 JSValue::JSValue(String s) noexcept
     : fType(TString)
+    , fContainer(nullptr)
+    , fContainerOwn(false)
     , fBoolean(false)
     , fNumber(0)
     , fString(s)
-    , fContainer(nullptr)
 {}
 
 JSValue::JSValue(uint32_t i) noexcept
     : fType(TNumber)
+    , fContainer(nullptr)
+    , fContainerOwn(false)
     , fBoolean(false)
     , fNumber(static_cast<double>(i))
-    , fContainer(nullptr)
 {}
 
 JSValue::JSValue(float f) noexcept
     : fType(TNumber)
+    , fContainer(nullptr)
+    , fContainerOwn(false)
     , fBoolean(false)
     , fNumber(static_cast<double>(f))
-    , fContainer(nullptr)
 {}
 
 JSValue::JSValue(const char *s) noexcept
     : fType(TString)
+    , fContainer(nullptr)
+    , fContainerOwn(false)
     , fBoolean(false)
     , fNumber(0)
     , fString(String(s))
-    , fContainer(nullptr)
+{}
+
+JSValue::JSValue(const array& a) noexcept
+    : fType(TArray)
+    , fContainer(static_cast<void*>(const_cast<array*>(&a)))
+    , fContainerOwn(false)
+    , fBoolean(false)
+    , fNumber(0)
 {}
 
 JSValue::~JSValue()
 {
-    if (fType == TArray) {
-        delete &getArray();
-    } else if (fType == TObject) {
-        delete &getObject();
+    if (fContainerOwn) {
+        if (fType == TArray) {
+            delete &getArray();
+        } else if (fType == TObject) {
+            delete &getObject();
+        }
     }
 }
 
@@ -126,6 +143,7 @@ JSValue::array& JSValue::getArray() const
     } else {
         fType = TArray;
         fContainer = static_cast<void*>(new array());
+        fContainerOwn = true;
     }
 
     return *reinterpret_cast<array*>(fContainer);
@@ -140,37 +158,76 @@ JSValue::object& JSValue::getObject() const
     } else {
         fType = TObject;
         fContainer = static_cast<void*>(new object());
+        fContainerOwn = true;
     }
 
     return *reinterpret_cast<object*>(fContainer);
 }
 
-JSValue JSValue::fromJSON(const String& jsonText)
+String JSValue::toJSON(bool format)
 {
-    cJSON* json = cJSON_Parse(jsonText);
-    JSValue value = JSValue(json);
-    cJSON_free(json);
-
-    return value;
-}
-
-String JSValue::toJSON(const JSValue& value, bool format)
-{
-    cJSON* json = value.toCJSON();
+    cJSON* json = toCJSON();
     char* s = format ? cJSON_Print(json) : cJSON_PrintUnformatted(json);
-    cJSON_free(json);
-
+    cJSON_Delete(json);
     String jsonText = String(s);
     cJSON_free(s);
 
     return jsonText;
 }
 
+JSValue JSValue::fromJSON(const String& jsonText)
+{
+    cJSON* json = cJSON_Parse(jsonText);
+    JSValue value = JSValue(json);
+    cJSON_Delete(json);
+
+    return value;
+}
+
+cJSON* JSValue::toCJSON() const noexcept
+{
+    cJSON* json;
+
+    switch(fType) {
+        case TBoolean:
+            json = fBoolean ? cJSON_CreateTrue() : cJSON_CreateFalse();
+            break;
+        case TNumber:
+            json = cJSON_CreateNumber(fNumber);
+            break;
+        case TString:
+            json = cJSON_CreateString(fString);
+            break;
+        case TArray: {
+            json = cJSON_CreateArray();
+            JSValue::array& array = getArray();
+            for (JSValue::array::iterator it = array.begin(); it != array.end(); ++it) {
+                cJSON_AddItemToArray(json, it->toCJSON());
+            }
+            break;
+        }
+        case TObject: {
+            json = cJSON_CreateObject();
+            JSValue::object& object = getObject();
+            for (JSValue::object::iterator it = object.begin(); it != object.end(); ++it) {
+                cJSON_AddItemToObject(json, it->first, it->second.toCJSON());
+            }
+            break;
+        }
+        default:
+            json = cJSON_CreateNull();
+            break;
+    }
+
+    return json;
+}
+
 JSValue::JSValue(cJSON* json) noexcept
     : fType(TNull)
+    , fContainer(nullptr)
+    , fContainerOwn(false)
     , fBoolean(false)
     , fNumber(0)
-    , fContainer(nullptr)
 {
     if (cJSON_IsFalse(json)) {
         fType = TBoolean;
@@ -199,91 +256,4 @@ JSValue::JSValue(cJSON* json) noexcept
     } else {
         // null
     }
-}
-
-cJSON* JSValue::toCJSON() const noexcept
-{
-    cJSON* json;
-
-    switch(fType) {
-        case TBoolean:
-            json = fBoolean ? cJSON_CreateTrue() : cJSON_CreateFalse();
-            break;
-        case TNumber:
-            json = cJSON_CreateNumber(fNumber);
-            break;
-        case TString:
-            json = cJSON_CreateString(fString);
-            break;
-        case TArray: {
-            json = cJSON_CreateArray();
-            JSValue::array& array = getArray();
-            for (JSValue::array::iterator it = array.begin(); it != array.end(); ++it) {
-                cJSON* item = it->toCJSON();
-                cJSON_AddItemToArray(json, item);
-                cJSON_free(item);
-            }
-            break;
-        }
-        case TObject: {
-            json = cJSON_CreateObject();
-            JSValue::object& object = getObject();
-            for (JSValue::object::iterator it = object.begin(); it != object.end(); ++it) {
-                cJSON* item = it->second.toCJSON();
-                cJSON_AddItemToObject(json, it->first, item);
-                cJSON_free(item);
-            }
-            break;
-        }
-        default:
-            json = cJSON_CreateNull();
-            break;
-    }
-
-    return json;
-}
-
-std::ostream& operator<<(std::ostream &os, const JSValue &val) {
-    switch (val.getType()) {
-        case JSValue::TNull:
-            os << "null";
-            break;
-
-        case JSValue::TBoolean:
-            os << (val.getBoolean() ? "true" : "false");
-            break;
-
-        case JSValue::TNumber: {
-            const double d = val.getNumber();
-            if (std::isnan(d)) {
-                os << "NaN";
-            } else if (std::isinf(d)) {
-                os << (d < 0 ? "-Inf" : "Inf");
-            } else {
-                os << d;
-            }
-            break;
-        }
-
-        case JSValue::TString: {
-            const String& s = val.getString();
-            const char *buf = s.buffer();
-            const int len = s.length();
-            os << '"';
-            for (int i = 0; i < len; i++) {
-                if (buf[i] != '"') {
-                    os << buf[i];
-                } else {
-                    os << "\\\"";
-                }
-            }
-            os << '"';
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    return os;
 }

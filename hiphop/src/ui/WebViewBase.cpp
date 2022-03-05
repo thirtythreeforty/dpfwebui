@@ -18,9 +18,6 @@
 
 #include "WebViewBase.hpp"
 
-#include <iostream>
-#include <sstream>
-
 // This could be moved into dpf.js but then JavaScript code should be checking
 // for the platform type in order to insert JS_POST_MESSAGE_SHIM. Leaving
 // platform-dependent code in a single place (C++) for a cleaner approach.
@@ -37,7 +34,7 @@
                            "};"
 
 /**
- * Keep this class generic; plugin specific features belong to WebViewUI.
+ * Keep this class generic, plugin specific features belong to WebViewUI.
  */
 
 USE_NAMESPACE_DISTRHO
@@ -112,15 +109,18 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
 
 void WebViewBase::postMessage(const JSValue::array& args)
 {
-    // This method implements something like a "reverse postMessage()" aiming to keep the bridge
-    // symmetrical. Global window.host is an EventTarget that can be listened for messages.
-    String payload = serializeJSValues(args);
+    // This method implements something like a "reverse postMessage()" aiming to
+    // keep the bridge symmetrical. Global window.host is an EventTarget that
+    // can be listened for messages.
+    String payload = JSValue(args).toJSON();
 
     if (fPrintTraffic) {
-        std::cerr << "cpp -> js : " << payload.buffer() << std::endl << std::flush;
+        d_stderr("cpp->js : %s", payload.buffer());
     }
     
-    String js = "window.host.dispatchEvent(new CustomEvent('message',{detail:" + payload + "}));";
+    String js = "window.host.dispatchEvent(new CustomEvent('message',"
+                    "{detail:" + payload + "}"
+                "));";
     runScript(js);
 }
 
@@ -145,8 +145,7 @@ void WebViewBase::handleScriptMessage(const JSValue::array& args)
         }
     } else {
         if (fPrintTraffic) {
-            std::cerr << "cpp <- js : " << serializeJSValues(args).buffer()
-                << std::endl << std::flush;
+            d_stderr("cpp<-js : %s", JSValue(args).toJSON().buffer());
         }
         
         if (fHandler != nullptr) {
@@ -155,25 +154,9 @@ void WebViewBase::handleScriptMessage(const JSValue::array& args)
     }
 }
 
-String WebViewBase::serializeJSValues(const JSValue::array& args)
-{
-    std::stringstream ss;
-    ss << '[';
-
-    for (JSValue::array::const_iterator it = args.cbegin(); it != args.cend(); ++it) {
-        if (it != args.cbegin()) {
-            ss << ',';
-        }
-        ss << *it;
-    }
-
-    ss << ']';
-
-    return String(ss.str().c_str());
-}
-
 void WebViewBase::addStylesheet(String& source)
 {
-    String js = "document.head.insertAdjacentHTML('beforeend', '<style>" + source + "</style>');";
+    String js = "document.head.insertAdjacentHTML('beforeend',"
+                    "'<style>" + source + "</style>');";
     runScript(js);
 }
