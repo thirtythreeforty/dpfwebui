@@ -121,7 +121,8 @@ HIPHOP_FILES_UI  = UIEx.cpp \
                    WebUIBase.cpp \
                    WebViewBase.cpp \
                    WebViewUI.cpp \
-                   JsValue.cpp
+                   JsValue.cpp \
+                   cJSON.c
 ifeq ($(HIPHOP_NETWORK_UI),true)
 HIPHOP_FILES_UI += NetworkUI.cpp \
                    WebServer.cpp
@@ -139,8 +140,7 @@ endif
 ifeq ($(WINDOWS),true)
 HIPHOP_FILES_UI += windows/WindowsWebViewUI.cpp \
                    windows/EdgeWebView.cpp \
-                   windows/WebView2EventHandler.cpp \
-                   windows/cJSON.c
+                   windows/WebView2EventHandler.cpp
 endif
 
 FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/ui/%)
