@@ -32,7 +32,7 @@ struct SharedMemoryHeader
     unsigned char readFlag; // atomic
     uint32_t      dataOffset;
     uint32_t      dataSize;
-    char          token[123];
+    char          token[119];
 };
 
 // This class wraps SharedMemory and adds a read state flag and metadata
