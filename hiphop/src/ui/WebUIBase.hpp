@@ -24,7 +24,7 @@
 #include <utility>
 
 #include "extra/UIEx.hpp"
-#include "JsValue.hpp"
+#include "JSValue.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -50,12 +50,12 @@ protected:
     void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) override;
 #endif
 
-    virtual void postMessage(const JsValueVector& args) = 0;
-    virtual void onMessageReceived(const JsValueVector& args);
+    virtual void postMessage(const JSValue::array& args) = 0;
+    virtual void onMessageReceived(const JSValue::array& args);
 
-    void handleMessage(const JsValueVector& args);
+    void handleMessage(const JSValue::array& args);
 
-    typedef std::function<void(const JsValueVector& args)> MessageHandler;
+    typedef std::function<void(const JSValue::array& args)> MessageHandler;
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
 

@@ -121,7 +121,7 @@ HIPHOP_FILES_UI  = UIEx.cpp \
                    WebUIBase.cpp \
                    WebViewBase.cpp \
                    WebViewUI.cpp \
-                   JsValue.cpp \
+                   JSValue.cpp \
                    cJSON.c
 ifeq ($(HIPHOP_NETWORK_UI),true)
 HIPHOP_FILES_UI += NetworkUI.cpp \

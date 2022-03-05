@@ -36,7 +36,7 @@ public:
 protected:
     void uiIdle() override;
 
-    void postMessage(const JsValueVector& args) override;
+    void postMessage(const JSValue::array& args) override;
 
 #if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* key, const char* value) override;

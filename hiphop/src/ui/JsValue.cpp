@@ -16,22 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "JsValue.hpp"
+#include "JSValue.hpp"
 
-USE_NAMESPACE_DISTRHO
+// Avoid clashing with macOS WebKit class JSValue by making namespace explicit
 
-std::ostream& operator<<(std::ostream &os, const JsValue &val) {
+std::ostream& operator<<(std::ostream &os, const DISTRHO::JSValue &val) {
     switch (val.getType()) {
-        case JsValue::TNull:
+        case DISTRHO::JSValue::TNull:
             os << "null";
             break;
 
-        case JsValue::TBool:
-            os << (val.getBool() ? "true" : "false");
+        case DISTRHO::JSValue::TBool:
+            os << (val.getBoolean() ? "true" : "false");
             break;
 
-        case JsValue::TDouble: {
-            const double d = val.getDouble();
+        case DISTRHO::JSValue::TNumber: {
+            const double d = val.getNumber();
             if (std::isnan(d)) {
                 os << "NaN";
             } else if (std::isinf(d)) {
@@ -42,7 +42,7 @@ std::ostream& operator<<(std::ostream &os, const JsValue &val) {
             break;
         }
 
-        case JsValue::TString: {
+        case DISTRHO::JSValue::TString: {
             const String& s = val.getString();
             const char *buf = s.buffer();
             const int len = s.length();

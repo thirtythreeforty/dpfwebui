@@ -20,129 +20,110 @@
 #define JS_VALUE_HPP
 
 #include <ostream>
+#include <unordered_map>
 #include <vector>
 
 #include "distrho/extra/String.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class JsValue {
+class JSValue
+{
 public:
+    typedef std::vector<JSValue> array;
+    typedef std::unordered_map<const char*,JSValue> object;
+
     enum Type {
         TNull,
         TBool,
-        TDouble,
-        TString
+        TNumber,
+        TString,
+        TArray,
+        TObject
     };
 
-    JsValue() noexcept
-        : fT(TNull)
-        , fB(false)
-        , fD(0)
+    JSValue() noexcept
+        : fType(TNull)
+        , fBoolean(false)
+        , fNumber(0)
     {}
 
-    JsValue(bool b) noexcept
-        : fT(TBool)
-        , fB(b)
-        , fD(0)
+    JSValue(bool b) noexcept
+        : fType(TBool)
+        , fBoolean(b)
+        , fNumber(0)
     {}
 
-    JsValue(double d) noexcept
-        : fT(TDouble)
-        , fB(false)
-        , fD(d)
+    JSValue(double d) noexcept
+        : fType(TNumber)
+        , fBoolean(false)
+        , fNumber(d)
     {}
 
-    JsValue(String s) noexcept
-        : fT(TString)
-        , fB(false)
-        , fD(0)
-        , fS(s)
+    JSValue(String s) noexcept
+        : fType(TString)
+        , fBoolean(false)
+        , fNumber(0)
+        , fString(s)
     {}
 
     //
     // Convenience constructors
     //
 
-    JsValue(uint32_t i) noexcept
-        : fT(TDouble)
-        , fB(false)
-        , fD(static_cast<double>(i))
+    JSValue(uint32_t i) noexcept
+        : fType(TNumber)
+        , fBoolean(false)
+        , fNumber(static_cast<double>(i))
     {}
 
-    JsValue(float f) noexcept
-        : fT(TDouble)
-        , fB(false)
-        , fD(static_cast<double>(f))
+    JSValue(float f) noexcept
+        : fType(TNumber)
+        , fBoolean(false)
+        , fNumber(static_cast<double>(f))
     {}
 
-    JsValue(const char *s) noexcept
-        : fT(TString)
-        , fB(false)
-        , fD(0)
-        , fS(String(s))
+    JSValue(const char *s) noexcept
+        : fType(TString)
+        , fBoolean(false)
+        , fNumber(0)
+        , fString(String(s))
     {}
 
     //
     // Getters
     //
 
-    bool isNull() const noexcept
-    {
-        return fT == TNull;
-    }
-
-    Type getType() const noexcept
-    {
-        return fT;
-    }
-
-    bool getBool() const noexcept
-    {
-        return fB;
-    }
-
-    double getDouble() const noexcept
-    {
-        return fD;
-    }
-
-    String getString() const noexcept
-    {
-        return fS;
-    }
+    bool    isNull()     const noexcept { return fType == TNull; }
+    Type    getType()    const noexcept { return fType; }
+    bool    getBoolean() const noexcept { return fBoolean; }
+    double  getNumber()  const noexcept { return fNumber; }
+    String  getString()  const noexcept { return fString; }
+    array&  getArray()   noexcept { return fArray; }
+    object& getObject()  noexcept { return fObject; }
 
     //
     // Type casting operators
     //
 
-    operator bool() const noexcept
-    {
-        return fB;
-    }
-
-    operator double() const noexcept
-    {
-        return fD;
-    }
-
-    operator String() const noexcept
-    {
-        return fS;
-    }
+    operator bool()   const noexcept { return fBoolean; }
+    operator double() const noexcept { return fNumber; }
+    operator String() const noexcept { return fString; }
+    operator array()  noexcept { return fArray; }
+    operator object() noexcept { return fObject; }
 
 private:
-    Type   fT;
-    bool   fB;
-    double fD;
-    String fS;
+    Type   fType;
+    bool   fBoolean;
+    double fNumber;
+    String fString;
+    array  fArray;
+    object fObject;
 
 };
 
 END_NAMESPACE_DISTRHO
 
-typedef std::vector<JsValue> JsValueVector;
-
-std::ostream& operator<<(std::ostream &os, const JsValue &val);
+std::ostream& operator<<(std::ostream &os, const DISTRHO::JSValue &val);
 
 #endif // JS_VALUE_HPP

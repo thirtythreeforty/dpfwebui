@@ -110,11 +110,11 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
     fHandler = handler;
 }
 
-void WebViewBase::postMessage(const JsValueVector& args)
+void WebViewBase::postMessage(const JSValue::array& args)
 {
     // This method implements something like a "reverse postMessage()" aiming to keep the bridge
     // symmetrical. Global window.host is an EventTarget that can be listened for messages.
-    String payload = serializeJsValues(args);
+    String payload = serializeJSValues(args);
 
     if (fPrintTraffic) {
         std::cerr << "cpp -> js : " << payload.buffer() << std::endl << std::flush;
@@ -137,7 +137,7 @@ void WebViewBase::handleLoadFinished()
     }
 }
 
-void WebViewBase::handleScriptMessage(const JsValueVector& args)
+void WebViewBase::handleScriptMessage(const JSValue::array& args)
 {
     if ((args.size() == 3) && (args[0].getString() == "console")) {
         if (fHandler != nullptr) {
@@ -145,7 +145,7 @@ void WebViewBase::handleScriptMessage(const JsValueVector& args)
         }
     } else {
         if (fPrintTraffic) {
-            std::cerr << "cpp <- js : " << serializeJsValues(args).buffer()
+            std::cerr << "cpp <- js : " << serializeJSValues(args).buffer()
                 << std::endl << std::flush;
         }
         
@@ -155,12 +155,12 @@ void WebViewBase::handleScriptMessage(const JsValueVector& args)
     }
 }
 
-String WebViewBase::serializeJsValues(const JsValueVector& args)
+String WebViewBase::serializeJSValues(const JSValue::array& args)
 {
     std::stringstream ss;
     ss << '[';
 
-    for (JsValueVector::const_iterator it = args.cbegin(); it != args.cend(); ++it) {
+    for (JSValue::array::const_iterator it = args.cbegin(); it != args.cend(); ++it) {
         if (it != args.cbegin()) {
             ss << ',';
         }

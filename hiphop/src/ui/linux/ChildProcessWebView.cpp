@@ -256,7 +256,7 @@ void ChildProcessWebView::handleInit(float displayScaleFactor)
 void ChildProcessWebView::handleHelperScriptMessage(const char *payload, int payloadSize)
 {
     // Should validate payload is never read past payloadSize 
-    JsValueVector args;
+    JSValue::array args;
     int offset = 0;
 
     while (offset < payloadSize) {
@@ -266,23 +266,23 @@ void ChildProcessWebView::handleHelperScriptMessage(const char *payload, int pay
         switch (*type) {
             case ARG_TYPE_FALSE:
                 offset += 1;
-                args.push_back(JsValue(false));
+                args.push_back(JSValue(false));
                 break;
             case ARG_TYPE_TRUE:
                 offset += 1;
-                args.push_back(JsValue(true));
+                args.push_back(JSValue(true));
                 break;
             case ARG_TYPE_DOUBLE:
                 offset += 1 + sizeof(double);
-                args.push_back(JsValue(*reinterpret_cast<const double *>(value)));
+                args.push_back(JSValue(*reinterpret_cast<const double *>(value)));
                 break;
             case ARG_TYPE_STRING:
                 offset += 1 /*type*/ + strlen(value) + 1 /*\0*/;
-                args.push_back(JsValue(String(value)));
+                args.push_back(JSValue(String(value)));
                 break;
             default:
                 offset += 1;
-                args.push_back(JsValue()); // null
+                args.push_back(JSValue()); // null
                 break;
         }
     }
