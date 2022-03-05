@@ -19,6 +19,7 @@
 #ifndef JS_VALUE_HPP
 #define JS_VALUE_HPP
 
+#include <exception>
 #include <ostream>
 #include <unordered_map>
 #include <vector>
@@ -30,31 +31,41 @@ START_NAMESPACE_DISTRHO
 class JSValue
 {
 public:
+    typedef std::vector<JSValue> array;
+    typedef std::unordered_map<const char*,JSValue> object;
+
     enum Type {
         TNull,
-        TBool,
+        TBoolean,
         TNumber,
         TString,
         TArray,
         TObject
     };
 
+    //
+    // Constructors
+    //
+
     JSValue() noexcept
         : fType(TNull)
         , fBoolean(false)
         , fNumber(0)
+        , fContainer(nullptr)
     {}
 
     JSValue(bool b) noexcept
-        : fType(TBool)
+        : fType(TBoolean)
         , fBoolean(b)
         , fNumber(0)
+        , fContainer(nullptr)
     {}
 
     JSValue(double d) noexcept
         : fType(TNumber)
         , fBoolean(false)
         , fNumber(d)
+        , fContainer(nullptr)
     {}
 
     JSValue(String s) noexcept
@@ -62,6 +73,7 @@ public:
         , fBoolean(false)
         , fNumber(0)
         , fString(s)
+        , fContainer(nullptr)
     {}
 
     //
@@ -72,12 +84,14 @@ public:
         : fType(TNumber)
         , fBoolean(false)
         , fNumber(static_cast<double>(i))
+        , fContainer(nullptr)
     {}
 
     JSValue(float f) noexcept
         : fType(TNumber)
         , fBoolean(false)
         , fNumber(static_cast<double>(f))
+        , fContainer(nullptr)
     {}
 
     JSValue(const char *s) noexcept
@@ -85,19 +99,90 @@ public:
         , fBoolean(false)
         , fNumber(0)
         , fString(String(s))
+        , fContainer(nullptr)
     {}
+
+    //
+    // Destructor
+    //
+
+    ~JSValue()
+    {
+        if (fType == TArray) {
+            delete &getArray();
+        } else if (fType == TObject) {
+            delete &getObject();
+        }
+    }
 
     //
     // Getters
     //
 
-    bool    isNull()     const noexcept { return fType == TNull; }
-    Type    getType()    const noexcept { return fType; }
-    bool    getBoolean() const noexcept { return fBoolean; }
-    double  getNumber()  const noexcept { return fNumber; }
-    String  getString()  const noexcept { return fString; }
-    //array&  getArray()   noexcept { return fArray; }
-    //object& getObject()  noexcept { return fObject; }
+    bool isNull() const noexcept
+    {
+        return fType == TNull;
+    }
+
+    Type getType() const noexcept
+    {
+        return fType;
+    }
+
+    bool getBoolean() const
+    {
+        if (fType != TBoolean) {
+            throw std::runtime_error("Value type is not boolean");
+        }
+
+        return fBoolean;
+    }
+
+    double getNumber() const
+    {
+        if (fType != TNumber) {
+            throw std::runtime_error("Value type is not number");
+        }
+
+        return fNumber;
+    }
+
+    String getString() const
+    {
+        if (fType != TString) {
+            throw std::runtime_error("Value type is not string");
+        }
+
+        return fString;
+    }
+    
+    array& getArray()
+    {
+        if (fType != TNull) {
+            if (fType != TArray) {
+                throw std::runtime_error("Value type is not array");
+            }
+        } else {
+            fType = TArray;
+            fContainer = static_cast<void*>(new array());
+        }
+
+        return *reinterpret_cast<array*>(fContainer);
+    }
+
+    object& getObject()
+    {
+        if (fType != TNull) {
+            if (fType != TObject) {
+                throw std::runtime_error("Value type is not object");
+            }
+        } else {
+            fType = TObject;
+            fContainer = static_cast<void*>(new object());
+        }
+
+        return *reinterpret_cast<object*>(fContainer);
+    }
 
     //
     // Type casting operators
@@ -106,23 +191,19 @@ public:
     operator bool()   const noexcept { return fBoolean; }
     operator double() const noexcept { return fNumber; }
     operator String() const noexcept { return fString; }
-    //operator array()  noexcept { return fArray; }
-    //operator object() noexcept { return fObject; }
+    operator array()  noexcept { return getArray(); }
+    operator object() noexcept { return getObject(); }
 
 private:
     Type   fType;
     bool   fBoolean;
     double fNumber;
     String fString;
-    //void*  fArray;
-    //void*  fObject;
+    void*  fContainer;
 
 };
 
 END_NAMESPACE_DISTRHO
-
-typedef std::vector<DISTRHO::JSValue> JSArray;
-typedef std::unordered_map<const char*,DISTRHO::JSValue> JSObject;
 
 std::ostream& operator<<(std::ostream &os, const DISTRHO::JSValue &val);
 

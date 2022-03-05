@@ -26,7 +26,7 @@ std::ostream& operator<<(std::ostream &os, const DISTRHO::JSValue &val) {
             os << "null";
             break;
 
-        case DISTRHO::JSValue::TBool:
+        case DISTRHO::JSValue::TBoolean:
             os << (val.getBoolean() ? "true" : "false");
             break;
 

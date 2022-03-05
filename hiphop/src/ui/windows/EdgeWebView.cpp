@@ -271,7 +271,7 @@ HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
     cJSON* jArgs = cJSON_Parse(TO_LPCSTR(jsonStr));
     CoTaskMemFree(jsonStr);
 
-    JSArray args;
+    JSValue::array args;
     
     if (cJSON_IsArray(jArgs)) {
         const int numArgs = cJSON_GetArraySize(jArgs);
