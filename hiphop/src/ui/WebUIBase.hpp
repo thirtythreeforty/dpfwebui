@@ -24,7 +24,7 @@
 #include <utility>
 
 #include "extra/UIEx.hpp"
-#include "JSValue.hpp"
+#include "extra/JSValue.hpp"
 
 START_NAMESPACE_DISTRHO
 

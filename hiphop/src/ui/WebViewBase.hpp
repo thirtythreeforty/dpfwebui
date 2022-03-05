@@ -24,7 +24,7 @@
 #include "distrho/extra/String.hpp"
 #include "Window.hpp"
 
-#include "JSValue.hpp"
+#include "extra/JSValue.hpp"
 
 START_NAMESPACE_DISTRHO
 
