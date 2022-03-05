@@ -29,7 +29,7 @@ float DISTRHO::getDisplayScaleFactor(WebViewUI* ui)
 {
     float k = 1.f;
 
-    const HMODULE shcore = LoadLibrary("Shcore.dll");
+    const HMODULE shcore = LoadLibrary(L"Shcore.dll");
 
     if (shcore == nullptr) {
         return k;
@@ -113,7 +113,7 @@ WindowsWebViewUI::~WindowsWebViewUI()
 
 void WindowsWebViewUI::openSystemWebBrowser(String& url)
 {
-    ShellExecute(0, "open", url.buffer(), 0, 0, SW_SHOWNORMAL);
+    ShellExecuteA(0, "open", url.buffer(), 0, 0, SW_SHOWNORMAL);
 }
 
 uintptr_t WindowsWebViewUI::createStandaloneWindow()
@@ -160,11 +160,11 @@ BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam)
     GetWindowThreadProcessId(hWnd, &winProcId);
 
     if (winProcId == GetCurrentProcessId()) {
-        char text[256];
+        WCHAR text[256];
         text[0] = '\0';
-        GetWindowText(hWnd, (LPSTR)text, sizeof(text));
+        GetWindowText(hWnd, (LPWSTR)text, sizeof(text));
 
-        if (strstr(text, "Ableton Live") != 0) {
+        if (wcswcs(text, L"Ableton Live") != 0) {
             *((HWND *)lParam) = hWnd;
             return FALSE;
         }
