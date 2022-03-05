@@ -114,15 +114,15 @@ private:
     bool   fBoolean;
     double fNumber;
     String fString;
-    void*  fArray;
-    void*  fObject;
+    //void*  fArray;
+    //void*  fObject;
 
 };
 
 END_NAMESPACE_DISTRHO
 
-typedef std::vector<JSValue> JSArray;
-typedef std::unordered_map<const char*,JSValue> JSObject;
+typedef std::vector<DISTRHO::JSValue> JSArray;
+typedef std::unordered_map<const char*,DISTRHO::JSValue> JSObject;
 
 std::ostream& operator<<(std::ostream &os, const DISTRHO::JSValue &val);
 
