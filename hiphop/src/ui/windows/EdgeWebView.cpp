@@ -26,8 +26,8 @@
 #include <winuser.h>
 
 #include "extra/macro.h"
+#include "extra/JSValue.hpp"
 #include "extra/Path.hpp"
-#include "cJSON.h"
 
 #include "DistrhoPluginInfo.h"
 
@@ -268,37 +268,14 @@ HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
 
     LPWSTR jsonStr;
     ICoreWebView2WebMessageReceivedEventArgs_get_WebMessageAsJson(eventArgs, &jsonStr);
-    cJSON* jArgs = cJSON_Parse(TO_LPCSTR(jsonStr));
-    CoTaskMemFree(jsonStr);
+    JSValue value = JSValue::fromJSON(String(TO_LPCSTR(jsonStr)));
 
-    JSValue::array args;
-    
-    if (cJSON_IsArray(jArgs)) {
-        const int numArgs = cJSON_GetArraySize(jArgs);
-
-        if (numArgs > 0) {
-            for (int i = 0; i < numArgs; i++) {
-                const cJSON* jArg = cJSON_GetArrayItem(jArgs, i);
-
-                if (cJSON_IsFalse(jArg)) {
-                    args.push_back(JSValue(false));
-                } else if (cJSON_IsTrue(jArg)) {
-                    args.push_back(JSValue(true));
-                } else if (cJSON_IsNumber(jArg)) {
-                    args.push_back(JSValue(cJSON_GetNumberValue(jArg)));
-                } else if (cJSON_IsString(jArg)) {
-                    args.push_back(JSValue(cJSON_GetStringValue(jArg)));
-                } else {
-                    args.push_back(JSValue()); // null
-                }
-            }
-        }
+    if (value.getType() == JSValue::TypeArray) {
+        handleScriptMessage(value.getArray());
     }
 
-    cJSON_free(jArgs);
+    CoTaskMemFree(jsonStr);
 
-    handleScriptMessage(args);
-    
     return S_OK;
 }
 

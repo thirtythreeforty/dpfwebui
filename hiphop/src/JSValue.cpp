@@ -23,7 +23,7 @@
 USE_NAMESPACE_DISTRHO
 
 JSValue::JSValue() noexcept
-    : fType(TNull)
+    : fType(TypeNull)
     , fContainer(nullptr)
     , fContainerOwn(false)
     , fBoolean(false)
@@ -31,7 +31,7 @@ JSValue::JSValue() noexcept
 {}
 
 JSValue::JSValue(bool b) noexcept
-    : fType(TBoolean)
+    : fType(TypeBoolean)
     , fContainer(nullptr)
     , fContainerOwn(false)
     , fBoolean(b)
@@ -39,7 +39,7 @@ JSValue::JSValue(bool b) noexcept
 {}
 
 JSValue::JSValue(double d) noexcept
-    : fType(TNumber)
+    : fType(TypeNumber)
     , fContainer(nullptr)
     , fContainerOwn(false)
     , fBoolean(false)
@@ -47,7 +47,7 @@ JSValue::JSValue(double d) noexcept
 {}
 
 JSValue::JSValue(String s) noexcept
-    : fType(TString)
+    : fType(TypeString)
     , fContainer(nullptr)
     , fContainerOwn(false)
     , fBoolean(false)
@@ -56,7 +56,7 @@ JSValue::JSValue(String s) noexcept
 {}
 
 JSValue::JSValue(uint32_t i) noexcept
-    : fType(TNumber)
+    : fType(TypeNumber)
     , fContainer(nullptr)
     , fContainerOwn(false)
     , fBoolean(false)
@@ -64,7 +64,7 @@ JSValue::JSValue(uint32_t i) noexcept
 {}
 
 JSValue::JSValue(float f) noexcept
-    : fType(TNumber)
+    : fType(TypeNumber)
     , fContainer(nullptr)
     , fContainerOwn(false)
     , fBoolean(false)
@@ -72,7 +72,7 @@ JSValue::JSValue(float f) noexcept
 {}
 
 JSValue::JSValue(const char *s) noexcept
-    : fType(TString)
+    : fType(TypeString)
     , fContainer(nullptr)
     , fContainerOwn(false)
     , fBoolean(false)
@@ -81,7 +81,7 @@ JSValue::JSValue(const char *s) noexcept
 {}
 
 JSValue::JSValue(const array& a) noexcept
-    : fType(TArray)
+    : fType(TypeArray)
     , fContainer(static_cast<void*>(const_cast<array*>(&a)))
     , fContainerOwn(false)
     , fBoolean(false)
@@ -91,9 +91,9 @@ JSValue::JSValue(const array& a) noexcept
 JSValue::~JSValue()
 {
     if (fContainerOwn) {
-        if (fType == TArray) {
+        if (fType == TypeArray) {
             delete &getArray();
-        } else if (fType == TObject) {
+        } else if (fType == TypeObject) {
             delete &getObject();
         }
     }
@@ -101,7 +101,7 @@ JSValue::~JSValue()
 
 bool JSValue::isNull() const noexcept
 {
-    return fType == TNull;
+    return fType == TypeNull;
 }
 
 JSValue::type JSValue::getType() const noexcept
@@ -111,7 +111,7 @@ JSValue::type JSValue::getType() const noexcept
 
 bool JSValue::getBoolean() const
 {
-    if (fType != TBoolean) {
+    if (fType != TypeBoolean) {
         throw std::runtime_error("Value type is not boolean");
     }
 
@@ -120,7 +120,7 @@ bool JSValue::getBoolean() const
 
 double JSValue::getNumber() const
 {
-    if (fType != TNumber) {
+    if (fType != TypeNumber) {
         throw std::runtime_error("Value type is not number");
     }
 
@@ -129,7 +129,7 @@ double JSValue::getNumber() const
 
 String JSValue::getString() const
 {
-    if (fType != TString) {
+    if (fType != TypeString) {
         throw std::runtime_error("Value type is not string");
     }
 
@@ -138,12 +138,12 @@ String JSValue::getString() const
 
 JSValue::array& JSValue::getArray() const
 {
-    if (fType != TNull) {
-        if (fType != TArray) {
+    if (fType != TypeNull) {
+        if (fType != TypeArray) {
             throw std::runtime_error("Value type is not array");
         }
     } else {
-        fType = TArray;
+        fType = TypeArray;
         fContainer = static_cast<void*>(new array());
         fContainerOwn = true;
     }
@@ -153,12 +153,12 @@ JSValue::array& JSValue::getArray() const
 
 JSValue::object& JSValue::getObject() const
 {
-    if (fType != TNull) {
-        if (fType != TObject) {
+    if (fType != TypeNull) {
+        if (fType != TypeObject) {
             throw std::runtime_error("Value type is not object");
         }
     } else {
-        fType = TObject;
+        fType = TypeObject;
         fContainer = static_cast<void*>(new object());
         fContainerOwn = true;
     }
@@ -191,16 +191,16 @@ cJSON* JSValue::toCJSON() const noexcept
     cJSON* json;
 
     switch(fType) {
-        case TBoolean:
+        case TypeBoolean:
             json = fBoolean ? cJSON_CreateTrue() : cJSON_CreateFalse();
             break;
-        case TNumber:
+        case TypeNumber:
             json = cJSON_CreateNumber(fNumber);
             break;
-        case TString:
+        case TypeString:
             json = cJSON_CreateString(fString);
             break;
-        case TArray: {
+        case TypeArray: {
             json = cJSON_CreateArray();
             JSValue::array& array = getArray();
             for (JSValue::array::iterator it = array.begin(); it != array.end(); ++it) {
@@ -208,7 +208,7 @@ cJSON* JSValue::toCJSON() const noexcept
             }
             break;
         }
-        case TObject: {
+        case TypeObject: {
             json = cJSON_CreateObject();
             JSValue::object& object = getObject();
             for (JSValue::object::iterator it = object.begin(); it != object.end(); ++it) {
@@ -225,23 +225,23 @@ cJSON* JSValue::toCJSON() const noexcept
 }
 
 JSValue::JSValue(cJSON* json) noexcept
-    : fType(TNull)
+    : fType(TypeNull)
     , fContainer(nullptr)
     , fContainerOwn(false)
     , fBoolean(false)
     , fNumber(0)
 {
     if (cJSON_IsFalse(json)) {
-        fType = TBoolean;
+        fType = TypeBoolean;
         fBoolean = false;
     } else if (cJSON_IsTrue(json)) {
-        fType = TBoolean;
+        fType = TypeBoolean;
         fBoolean = true;
     } else if (cJSON_IsNumber(json)) {
-        fType = TNumber;
+        fType = TypeNumber;
         fNumber = cJSON_GetNumberValue(json);
     } else if (cJSON_IsString(json)) {
-        fType = TString;
+        fType = TypeString;
         fString = cJSON_GetStringValue(json);
     } else if (cJSON_IsArray(json)) {
         JSValue::array& array = getArray();

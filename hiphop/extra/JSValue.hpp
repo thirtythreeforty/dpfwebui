@@ -37,12 +37,12 @@ public:
     typedef std::unordered_map<const char*,JSValue> object;
 
     enum type {
-        TNull,
-        TBoolean,
-        TNumber,
-        TString,
-        TArray,
-        TObject
+        TypeNull,
+        TypeBoolean,
+        TypeNumber,
+        TypeString,
+        TypeArray,
+        TypeObject
     };
 
     // Constructors
