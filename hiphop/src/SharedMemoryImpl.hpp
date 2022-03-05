@@ -53,8 +53,8 @@ public:
             return false;
         }
 
-        SharedMemoryState a = getState(0);
-        SharedMemoryState b = getState(1);
+        SharedMemoryState& a = getState(0);
+        SharedMemoryState& b = getState(1);
 
         a.readFlag   = b.readFlag   = 1;
         a.dataOffset = b.dataOffset = 0;

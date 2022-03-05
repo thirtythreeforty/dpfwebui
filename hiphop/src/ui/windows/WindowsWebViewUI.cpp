@@ -29,7 +29,7 @@ float DISTRHO::getDisplayScaleFactor(WebViewUI* ui)
 {
     float k = 1.f;
 
-    const HMODULE shcore = LoadLibrary(L"Shcore.dll");
+    const HMODULE shcore = LoadLibraryA("Shcore.dll");
 
     if (shcore == nullptr) {
         return k;
@@ -160,11 +160,11 @@ BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam)
     GetWindowThreadProcessId(hWnd, &winProcId);
 
     if (winProcId == GetCurrentProcessId()) {
-        WCHAR text[256];
+        char text[256];
         text[0] = '\0';
-        GetWindowText(hWnd, (LPWSTR)text, sizeof(text));
+        GetWindowTextA(hWnd, (LPSTR)text, sizeof(text));
 
-        if (wcswcs(text, L"Ableton Live") != 0) {
+        if (strstr(text, "Ableton Live") != 0) {
             *((HWND *)lParam) = hWnd;
             return FALSE;
         }
