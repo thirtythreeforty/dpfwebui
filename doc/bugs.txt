@@ -16,8 +16,6 @@ MACOS
 WINDOWS
 -------
 
-- VST3 plugins UI not working on REAPER, work as expected on Carla.
-
 - WINWASMERBUG : WASM plugins crash on Carla and Live when running the Wasmer
   runtime. Work as expected on REAPER, Renoise and Ardour 7. Crash reproducible
   with both MinGW static lib and official MSVC wasmer.dll. No issues with WAMR.
