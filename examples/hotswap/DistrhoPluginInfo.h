@@ -14,6 +14,9 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/**
+   Shared memory size in bytes.@n
+ */
 #define HIPHOP_SHARED_MEMORY_SIZE 1048576 // 1 MiB
 
 /**

@@ -20,12 +20,12 @@
 #define UI_EX_HPP
 
 #include "DistrhoUI.hpp"
-#include "SharedMemoryImpl.hpp"
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 # if ! DISTRHO_PLUGIN_WANT_STATE
 #  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
 # endif
+# include "SharedMemoryImpl.hpp"
 #endif 
 
 START_NAMESPACE_DISTRHO

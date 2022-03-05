@@ -20,12 +20,12 @@
 #define PLUGIN_EX_HPP
 
 #include "DistrhoPlugin.hpp"
-#include "SharedMemoryImpl.hpp"
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 # if ! DISTRHO_PLUGIN_WANT_STATE
 #  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
 # endif
+# include "SharedMemoryImpl.hpp"
 #endif 
 
 START_NAMESPACE_DISTRHO
@@ -66,7 +66,7 @@ private:
     int fWebServerPort;
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    uint32_t fStateIndexShMemFiles;
+    uint32_t fStateIndexShMemFile;
     uint32_t fStateIndexShMemData;
     SharedMemoryImpl fMemory;
 #endif

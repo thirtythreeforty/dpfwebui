@@ -25,7 +25,7 @@
 START_NAMESPACE_DISTRHO
 
 // Total size 128 bytes
-struct SharedMemoryHeader
+struct SharedMemoryState
 {
     unsigned char readFlag; // atomic
     uint32_t      dataOffset;
@@ -33,7 +33,13 @@ struct SharedMemoryHeader
     char          token[119];
 };
 
-// This class wraps SharedMemory and adds a read state flag and metadata
+// Two states for full duplex usage
+struct SharedMemoryHeader
+{
+    SharedMemoryState state[2];
+};
+
+// This class wraps SharedMemory and adds a header
 template<class S, size_t N>
 class StatefulSharedMemory
 {
@@ -47,11 +53,13 @@ public:
             return false;
         }
 
-        SharedMemoryHeader *hdr = getHeaderPointer();
-        hdr->readFlag = 1;
-        hdr->dataOffset = 0;
-        hdr->dataSize = 0;
-        hdr->token[0] = '\0';
+        SharedMemoryState a = getState(0);
+        SharedMemoryState b = getState(1);
+
+        a.readFlag   = b.readFlag   = 1;
+        a.dataOffset = b.dataOffset = 0;
+        a.dataSize   = b.dataSize   = 0;
+        a.token[0]   = b.token[0]   = '\0';
 
         return true;
     }
@@ -79,29 +87,29 @@ public:
         return N * sizeof(S);
     }
 
-    bool isRead() const noexcept
+    bool isRead(int index) const noexcept
     {
-        return getHeaderPointer()->readFlag != 0;
+        return getState(index).readFlag != 0;
     }
 
-    void setRead() noexcept
+    void setRead(int index) noexcept
     {
-        getHeaderPointer()->readFlag = 1;
+        getState(index).readFlag = 1;
     }
 
-    const char* getToken() const noexcept
+    const char* getToken(int index) const noexcept
     {
-        return getHeaderPointer()->token;
+        return getState(index).token;
     }
 
-    size_t getDataOffset() const noexcept
+    size_t getDataOffset(int index) const noexcept
     {
-        return static_cast<size_t>(getHeaderPointer()->dataOffset);
+        return static_cast<size_t>(getState(index).dataOffset);
     }
 
-    size_t getDataSize() const noexcept
+    size_t getDataSize(int index) const noexcept
     {
-        return static_cast<size_t>(getHeaderPointer()->dataSize);
+        return static_cast<size_t>(getState(index).dataSize);
     }
 
     S* getDataPointer() const noexcept
@@ -109,43 +117,38 @@ public:
         return fImpl.getDataPointer() + sizeof(SharedMemoryHeader);
     }
 
-    // creator-side only
     const char* getDataFilename() const noexcept
     {
         return fImpl.getDataFilename();
     }
 
-    bool write(const S* data, size_t size, size_t offset, const char* token)
+    bool write(int index, const S* data, size_t size, size_t offset, const char* token)
     {
         if (size > (getSize() - offset)) {
             return false;
         }
         
-        SharedMemoryHeader *hdr = getHeaderPointer();
-
-        if (hdr == nullptr) {
-            return false;
-        }
+        SharedMemoryState& state = getState(index);
 
         std::memcpy(getDataPointer() + offset, data, sizeof(S) * size);
         
-        hdr->dataOffset = static_cast<uint32_t>(offset);
-        hdr->dataSize = static_cast<uint32_t>(size);
+        state.dataOffset = static_cast<uint32_t>(offset);
+        state.dataSize = static_cast<uint32_t>(size);
 
         if (token != nullptr) {
-            std::strcpy(hdr->token, token);
+            std::strcpy(state.token, token);
         } else {
-            hdr->token[0] = '\0';
+            state.token[0] = '\0';
         }
         
-        hdr->readFlag = 0; // do it last
+        state.readFlag = 0; // do it last
 
         return true;
     }
 private:
-    SharedMemoryHeader* getHeaderPointer() const noexcept
+    SharedMemoryState& getState(int index) const noexcept
     {
-        return reinterpret_cast<SharedMemoryHeader*>(fImpl.getDataPointer());
+        return reinterpret_cast<SharedMemoryHeader*>(fImpl.getDataPointer())->state[index];
     }
 
     SharedMemory<S,N> fImpl;
@@ -153,34 +156,10 @@ private:
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatefulSharedMemory)
 };
 
-// This struct wraps two instances of StatefulSharedMemory
-template<class S, size_t N>
-struct DuplexSharedMemory
-{
-    DuplexSharedMemory() {}
-    
-    // Convenience method
-    bool create()
-    {
-        if (! in.create()) {
-            return false;
-        }
+constexpr int kDirectionPluginToUI = 0;
+constexpr int kDirectionUIToPlugin = 1;
 
-        if (! out.create()) {
-            in.close();
-            return false;
-        }
-
-        return true;
-    }
-
-    StatefulSharedMemory<S,N> in;
-    StatefulSharedMemory<S,N> out;
-
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DuplexSharedMemory)
-};
-
-typedef DuplexSharedMemory<unsigned char,HIPHOP_SHARED_MEMORY_SIZE> SharedMemoryImpl;
+typedef StatefulSharedMemory<unsigned char,HIPHOP_SHARED_MEMORY_SIZE> SharedMemoryImpl;
 
 END_NAMESPACE_DISTRHO
 

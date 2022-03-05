@@ -28,9 +28,9 @@ UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
 bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
                              const char* token)
 {
-    if (fMemory.out.write(data, size, offset, token)) {
+    if (fMemory.write(kDirectionUIToPlugin, data, size, offset, token)) {
         // Notify Plugin instance there is new data available for reading
-        setState("_shmem_data", "");
+        setState("_shmem_data", ""/*arbitrary non-null*/);
         return true;
     } else {
         d_stderr2("Could not write shared memory (ui->plugin)");
@@ -56,10 +56,12 @@ void UIEx::uiIdle()
     // is not fast enough for visualizations a custom timer solution needs to be
     // implemented, or DPF modified so the uiIdle() frequency can be configured.
 
-    if (fMemory.in.isCreatedOrConnected() && ! fMemory.in.isRead()) {
-        sharedMemoryChanged(fMemory.in.getDataPointer() + fMemory.in.getDataOffset(),
-                            fMemory.in.getDataSize(), fMemory.in.getToken());
-        fMemory.in.setRead();
+    constexpr int idx = kDirectionPluginToUI;
+
+    if (fMemory.isCreatedOrConnected() && ! fMemory.isRead(idx)) {
+        sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(idx),
+                            fMemory.getDataSize(idx), fMemory.getToken(idx));
+        fMemory.setRead(idx);
     }
 }
 #endif
@@ -70,25 +72,11 @@ void UIEx::stateChanged(const char* key, const char* value)
     (void)key;
     (void)value;
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    if (std::strcmp(key, "_shmem_files") == 0) {
-        String val = String(value);
-
-        if (val.length() > 0) {
-            size_t sep = val.find(';');
-            String ui2p = String(val.buffer() + sep + 6);
-
-            if (fMemory.out.connect(ui2p) != nullptr) {
-                val.truncate(sep);
-                String p2ui = String(val.buffer() + 5);
-
-                if (fMemory.in.connect(p2ui) != nullptr) {
-                    sharedMemoryReady();
-                } else {
-                    d_stderr2("Could not connect to shared memory (ui->plugin)");
-                }
-            } else {
-                d_stderr2("Could not connect to shared memory (plugin->ui)");
-            }
+    if (std::strcmp(key, "_shmem_file") == 0) {
+        if (fMemory.connect(value) != nullptr) {
+            sharedMemoryReady();
+        } else {
+            d_stderr2("Could not connect to shared memory");
         }
     }
 #endif

@@ -18,7 +18,7 @@
 
 #include "extra/PluginEx.hpp"
 
-// This is horrible but __COUNTER__ alone cannot solve the problem
+// This is ugly but __COUNTER__ alone cannot solve the problem
 #if defined(HIPHOP_NETWORK_UI)
 # define COUNT_0 1
 #else
@@ -40,7 +40,7 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
     , fWebServerPort(0)
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    , fStateIndexShMemFiles(stateCount + __COUNTER__)
+    , fStateIndexShMemFile(stateCount + __COUNTER__)
     , fStateIndexShMemData(stateCount + __COUNTER__)
 #endif
 {}
@@ -58,16 +58,15 @@ void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateV
     }
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    if (index == fStateIndexShMemFiles) {
+    if (index == fStateIndexShMemFile) {
         // Plugin creates the shared memory and lets the UI know how to find it
         // by storing the filenames in internal state. UI->Plugin changes are
         // picked up asynchronously via the DPF state callback. Plugin->UI
         // changes are detected by polling the shared memory read state flag.
-        stateKey = "_shmem_files";
+        stateKey = "_shmem_file";
 
         if (fMemory.create()) {
-            defaultStateValue = String("p2ui:") + fMemory.out.getDataFilename()
-                            + String(";ui2p:") + fMemory.in.getDataFilename();
+            defaultStateValue = fMemory.getDataFilename();
             sharedMemoryReady();
         } else {
             defaultStateValue = "";
@@ -90,10 +89,11 @@ void PluginEx::setState(const char* key, const char* value)
     }
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    if ((std::strcmp(key, "_shmem_data") == 0) && ! fMemory.in.isRead()) {
-        sharedMemoryChanged(fMemory.in.getDataPointer() + fMemory.in.getDataOffset(),
-                            fMemory.in.getDataSize(), fMemory.in.getToken());
-        fMemory.in.setRead();
+    constexpr int idx = kDirectionUIToPlugin;
+    if ((std::strcmp(key, "_shmem_data") == 0) && ! fMemory.isRead(idx)) {
+        sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(idx),
+                            fMemory.getDataSize(idx), fMemory.getToken(idx));
+        fMemory.setRead(idx);
     }
 #endif
 }
@@ -103,7 +103,7 @@ void PluginEx::setState(const char* key, const char* value)
 bool PluginEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
                                  const char* token)
 {
-    if (fMemory.out.write(data, size, offset, token)) {
+    if (fMemory.write(kDirectionPluginToUI, data, size, offset, token)) {
         // UI picks up data periodically
         return true;
     } else {
