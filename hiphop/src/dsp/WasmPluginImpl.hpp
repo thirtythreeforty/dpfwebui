@@ -68,10 +68,10 @@ public:
     void run(const float** inputs, float** outputs, uint32_t frames) override;
 #endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) override;
     void loadWasmBinary(const unsigned char* data, size_t size);
-#endif // HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#endif // defined(HIPHOP_SHARED_MEMORY_SIZE)
 
     WasmValueVector getTimePosition(WasmValueVector params);
     WasmValueVector writeMidiEvent(WasmValueVector params);

@@ -22,7 +22,7 @@
 #include "DistrhoUI.hpp"
 #include "SharedMemoryImpl.hpp"
 
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 # if ! DISTRHO_PLUGIN_WANT_STATE
 #  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
 # endif
@@ -39,7 +39,7 @@ public:
     virtual ~UIEx() {}
 
 protected:
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
 
     bool writeSharedMemory(const unsigned char* data, size_t size, size_t offset = 0,
@@ -59,14 +59,14 @@ protected:
 #endif
     
     void uiIdle() override;
-#endif // HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#endif // defined(HIPHOP_SHARED_MEMORY_SIZE)
 
 #if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* key, const char* value) override;
 #endif
 
 private:
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     SharedMemoryImpl fMemory;
 #endif
 

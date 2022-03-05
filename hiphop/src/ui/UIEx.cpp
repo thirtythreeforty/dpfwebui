@@ -24,7 +24,7 @@ UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
     : UI(width, height, automaticallyScaleAndSetAsMinimumSize)
 {}
 
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
                              const char* token)
 {
@@ -47,9 +47,9 @@ void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
     writeSharedMemory(data, size, 0, "_wasm_bin");
 }
 #endif
-#endif // HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#endif // defined(HIPHOP_SHARED_MEMORY_SIZE)
 
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 void UIEx::uiIdle()
 {
     // ExternalWindow does not implement the IdleCallback methods. If uiIdle()
@@ -69,7 +69,7 @@ void UIEx::stateChanged(const char* key, const char* value)
 {
     (void)key;
     (void)value;
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     if (std::strcmp(key, "_shmem_files") == 0) {
         String val = String(value);
 

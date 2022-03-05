@@ -45,7 +45,7 @@ protected:
 #if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* key, const char* value) override;
 #endif
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     void sharedMemoryReady() override;
     void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) override;
 #endif

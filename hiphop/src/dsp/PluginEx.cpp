@@ -24,7 +24,7 @@
 #else
 # define COUNT_0 0
 #endif
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY // DistrhoPluginInfo.h
+#if defined(HIPHOP_SHARED_MEMORY_SIZE) // DistrhoPluginInfo.h
 # define COUNT_1 2
 #else
 # define COUNT_1 0
@@ -39,7 +39,7 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
     , fStateIndexWsPort(stateCount + __COUNTER__)
     , fWebServerPort(0)
 #endif
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     , fStateIndexShMemFiles(stateCount + __COUNTER__)
     , fStateIndexShMemData(stateCount + __COUNTER__)
 #endif
@@ -57,7 +57,7 @@ void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateV
         defaultStateValue = "-1";
     }
 #endif
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     if (index == fStateIndexShMemFiles) {
         // Plugin creates the shared memory and lets the UI know how to find it
         // by storing the filenames in internal state. UI->Plugin changes are
@@ -89,7 +89,7 @@ void PluginEx::setState(const char* key, const char* value)
         fWebServerPort = std::atoi(value);
     }
 #endif
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     if ((std::strcmp(key, "_shmem_data") == 0) && ! fMemory.in.isRead()) {
         sharedMemoryChanged(fMemory.in.getDataPointer() + fMemory.in.getDataOffset(),
                             fMemory.in.getDataSize(), fMemory.in.getToken());
@@ -99,7 +99,7 @@ void PluginEx::setState(const char* key, const char* value)
 }
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
-#if HIPHOP_PLUGIN_WANT_SHARED_MEMORY
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 bool PluginEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
                                  const char* token)
 {

@@ -22,8 +22,6 @@
 #include "distrho/extra/String.hpp"
 #include "SharedMemory.hpp"
 
-#define DEFAULT_SHMEM_SIZE 1048576 //1 MiB
-
 START_NAMESPACE_DISTRHO
 
 // Total size 128 bytes
@@ -182,7 +180,7 @@ struct DuplexSharedMemory
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DuplexSharedMemory)
 };
 
-typedef DuplexSharedMemory<unsigned char,DEFAULT_SHMEM_SIZE> SharedMemoryImpl;
+typedef DuplexSharedMemory<unsigned char,HIPHOP_SHARED_MEMORY_SIZE> SharedMemoryImpl;
 
 END_NAMESPACE_DISTRHO
 
