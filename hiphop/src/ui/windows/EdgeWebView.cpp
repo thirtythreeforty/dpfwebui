@@ -27,7 +27,7 @@
 
 #include "extra/macro.h"
 #include "extra/Path.hpp"
-#include "../cJSON.h"
+#include "cJSON.h"
 
 #include "DistrhoPluginInfo.h"
 
