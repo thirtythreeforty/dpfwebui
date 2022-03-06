@@ -22,6 +22,23 @@
 
 USE_NAMESPACE_DISTRHO
 
+/*
+  Example tree creation
+
+  JSValue root = JSValue::createObject();
+  JSValue::object& o = root.getObject();
+  o["key_1"] = 0.0;
+  o["key_1"] = "Hello world";
+
+  o["key_2"] = JSValue::createArray();
+  JSValue::array& a = o["key_2"].getArray();
+  a.push_back(1.0);
+  a.push_back(3.0);
+  a.push_back("test");
+
+  d_stderr("%s", root.toJSON().buffer());
+*/
+
 JSValue::JSValue() noexcept
     : fStorage(cJSON_CreateNull())
     , fContainer(nullptr)
@@ -187,7 +204,7 @@ JSValue::JSValue(cJSON* json, bool copy) noexcept
         cJSON_ArrayForEach(elem, json) {
             a->push_back(JSValue(elem, true/*copy*/));
         }
-    } else if (cJSON_IsArray(json)) {
+    } else if (cJSON_IsObject(json)) {
         object* o = new object();
         fContainer = static_cast<void*>(o);
         cJSON* elem;
@@ -202,13 +219,15 @@ void JSValue::cJSONConnectTree() noexcept
     if (isArray()) {
         JSValue::array& array = getArray();
         for (JSValue::array::iterator it = array.begin(); it != array.end(); ++it) {
-            cJSON_AddItemReferenceToArray(fStorage, it->fStorage);
+            //d_stderr("+ %p arr %p", it->fStorage, fStorage);
+            cJSON_AddItemToArray(fStorage, it->fStorage);
             it->cJSONConnectTree();
         }
     } else if (isObject()) {
         JSValue::object& object = getObject();
         for (JSValue::object::iterator it = object.begin(); it != object.end(); ++it) {
-            cJSON_AddItemReferenceToObject(fStorage, it->first.c_str(), it->second.fStorage);
+            //d_stderr("+ %p obj %p", it->second.fStorage, fStorage);
+            cJSON_AddItemToObject(fStorage, it->first.c_str(), it->second.fStorage);
             it->second.cJSONConnectTree();
         }
     }
@@ -218,15 +237,17 @@ void JSValue::cJSONDisconnectTree() noexcept
 {
     if (isArray()) {
         JSValue::array& array = getArray();
-        for (size_t i = 0, size = array.size(); i < size; ++i) {
-            cJSON_DetachItemFromArray(fStorage, i);
-            array[i].cJSONDisconnectTree();
+        for (JSValue::array::iterator it = array.begin(); it != array.end(); ++it) {
+            //d_stderr("- %p arr %p", it->fStorage, fStorage);
+            it->cJSONDisconnectTree();
+            cJSON_DetachItemViaPointer(fStorage, it->fStorage);
         }
     } else if (isObject()) {
         JSValue::object& object = getObject();
         for (JSValue::object::iterator it = object.begin(); it != object.end(); ++it) {
-            cJSON_DetachItemFromObject(fStorage, it->first.c_str());
+            //d_stderr("- %p obj %p", it->second.fStorage, fStorage);
             it->second.cJSONDisconnectTree();
+            cJSON_DetachItemViaPointer(fStorage, it->second.fStorage);
         }
     }
 }
@@ -244,6 +265,7 @@ void JSValue::clear() noexcept
     }
 
     if (fStorage != nullptr) {
+        //d_stderr("~ %p", fStorage);
         cJSON_Delete(fStorage);
         fStorage = nullptr;
     }
