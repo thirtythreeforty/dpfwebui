@@ -56,14 +56,6 @@ JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
     }
 }
 
-JSValue::JSValue(const vector& v) noexcept
-    : fImpl(cJSON_CreateArray())
-{
-    for (vector::const_iterator it = v.begin(); it != v.end(); ++it) {
-        push(*it);
-    }
-}
-
 JSValue::JSValue(const JSValue& v) noexcept
 {
     fImpl = cJSON_Duplicate(v.fImpl, true/*recurse*/);
@@ -85,6 +77,26 @@ JSValue JSValue::createArray() noexcept
 JSValue JSValue::createObject() noexcept
 {
     return JSValue(cJSON_CreateObject());
+}
+
+JSValue::JSValue(const vector& v) noexcept
+    : fImpl(cJSON_CreateArray())
+{
+    for (vector::const_iterator it = v.begin(); it != v.end(); ++it) {
+        push(*it);
+    }
+}
+
+JSValue::vector JSValue::toVector() noexcept
+{
+    vector v;
+    int size = cJSON_GetArraySize(fImpl);
+
+    for (int i = 0; i < size; ++i) {
+        v.push_back(JSValue(cJSON_Duplicate(cJSON_GetArrayItem(fImpl, i), true)));
+    }
+
+    return v;
 }
 
 JSValue::~JSValue()
@@ -138,6 +150,11 @@ double JSValue::getNumber() const noexcept
 String JSValue::getString() const noexcept
 {
     return String(cJSON_GetStringValue(fImpl));
+}
+
+int JSValue::getArraySize() const noexcept
+{
+    return cJSON_GetArraySize(fImpl);
 }
 
 JSValue JSValue::get(int idx) const noexcept

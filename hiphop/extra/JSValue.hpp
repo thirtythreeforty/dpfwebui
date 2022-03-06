@@ -43,9 +43,6 @@ public:
     JSValue(const char* s) noexcept;
     JSValue(std::initializer_list<JSValue> l) noexcept;
 
-    typedef std::vector<JSValue> vector;
-    JSValue(const vector& v) noexcept;
-
     // Copy constructor
     JSValue(const JSValue& v) noexcept;
 
@@ -55,6 +52,11 @@ public:
     // Factory methods
     static JSValue createArray() noexcept;
     static JSValue createObject() noexcept;
+
+    // Conversion from/to STL vector, this will be eventually removed.
+    typedef std::vector<JSValue> vector;
+    JSValue(const vector& v) noexcept;
+    vector toVector() noexcept;
 
     // Destructor
     ~JSValue();
@@ -70,6 +72,7 @@ public:
     bool    getBoolean() const noexcept;
     double  getNumber() const noexcept;
     String  getString() const noexcept;
+    int     getArraySize() const noexcept;
     JSValue get(int idx) const noexcept;
     JSValue get(const char* key) const noexcept;
 

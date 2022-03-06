@@ -24,6 +24,7 @@
 #define COBJMACROS
 
 #include <functional>
+#include <string>
 #include <vector>
 
 #include "WebView2.h"

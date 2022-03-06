@@ -271,7 +271,7 @@ HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
     JSValue value = JSValue::fromJSON(TO_LPCSTR(jsonStr));
 
     if (value.isArray()) {
-        handleScriptMessage(value.getArray());
+        handleScriptMessage(value.toVector());
     }
 
     CoTaskMemFree(jsonStr);
