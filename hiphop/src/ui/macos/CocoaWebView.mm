@@ -252,7 +252,7 @@ void CocoaWebView::onSize(uint width, uint height)
     }
 
     // Avoid clashing with macOS WebKit class JSValue by specifying namespace
-    DISTRHO::JSValue::array args;
+    DISTRHO::JSValue::vector args;
 
     for (id objcArg : (NSArray *)message.body) {
         if (CFGetTypeID(objcArg) == CFBooleanGetTypeID()) {

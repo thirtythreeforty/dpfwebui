@@ -118,7 +118,7 @@ void NetworkUI::uiIdle()
     fServer.process();
 }
 
-void NetworkUI::postMessage(const JSValue::array& args)
+void NetworkUI::postMessage(const JSValue::vector& args)
 {
     // TODO - broadcast to all clients
 
@@ -145,7 +145,7 @@ void NetworkUI::stateChanged(const char* key, const char* value)
 
 void NetworkUI::initHandlers()
 {
-    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue::array&) {
+    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue::vector&) {
         postMessage({"UI", "getPublicUrl", getPublicUrl()});
     });
 }

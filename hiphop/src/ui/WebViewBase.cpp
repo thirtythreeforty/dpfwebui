@@ -107,7 +107,7 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
     fHandler = handler;
 }
 
-void WebViewBase::postMessage(const JSValue::array& args)
+void WebViewBase::postMessage(const JSValue::vector& args)
 {
     // This method implements something like a "reverse postMessage()" aiming to
     // keep the bridge symmetrical. Global window.host is an EventTarget that
@@ -137,7 +137,7 @@ void WebViewBase::handleLoadFinished()
     }
 }
 
-void WebViewBase::handleScriptMessage(const JSValue::array& args)
+void WebViewBase::handleScriptMessage(const JSValue::vector& args)
 {
     if ((args.size() == 3) && (args[0].getString() == "console")) {
         if (fHandler != nullptr) {

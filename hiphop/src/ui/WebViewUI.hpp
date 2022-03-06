@@ -69,7 +69,7 @@ protected:
     void flushInitMessageQueue();
     void setKeyboardFocus(bool focus);
 
-    void postMessage(const JSValue::array& args) override;
+    void postMessage(const JSValue::vector& args) override;
 
     void uiIdle() override;
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -90,10 +90,10 @@ private:
     // WebViewEventHandler
 
     virtual void handleWebViewLoadFinished() override;
-    virtual void handleWebViewScriptMessage(const JSValue::array& args) override;
+    virtual void handleWebViewScriptMessage(const JSValue::vector& args) override;
     virtual void handleWebViewConsole(const String& tag, const String& text) override;
 
-    typedef std::vector<JSValue::array> InitMessageQueue;
+    typedef std::vector<JSValue::vector> InitMessageQueue;
 
     uint              fInitialWidth;
     uint              fInitialHeight;

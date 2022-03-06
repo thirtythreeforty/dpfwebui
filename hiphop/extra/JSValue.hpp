@@ -20,7 +20,6 @@
 #define JS_VALUE_HPP
 
 #include <initializer_list>
-#include <string>
 #include <vector>
 
 #include "distrho/extra/String.hpp"
@@ -32,8 +31,6 @@ START_NAMESPACE_DISTRHO
 class JSValue
 {
 public:
-    typedef std::vector<JSValue> array;
-
     // Constructors
     JSValue() noexcept;
     JSValue(bool b) noexcept;
@@ -44,8 +41,10 @@ public:
     JSValue(uint32_t i) noexcept;
     JSValue(float f) noexcept;
     JSValue(const char* s) noexcept;
-    JSValue(std::initializer_list<JSValue> v) noexcept;
-    JSValue(const array& a) noexcept;
+    JSValue(std::initializer_list<JSValue> l) noexcept;
+
+    typedef std::vector<JSValue> vector;
+    JSValue(const vector& v) noexcept;
 
     // Copy constructor
     JSValue(const JSValue& v) noexcept;

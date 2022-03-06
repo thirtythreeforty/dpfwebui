@@ -156,7 +156,7 @@ void WebViewUI::setKeyboardFocus(bool focus)
     fWebView->setKeyboardFocus(focus);
 }
 
-void WebViewUI::postMessage(const JSValue::array& args)
+void WebViewUI::postMessage(const JSValue::vector& args)
 {
     if (fMessageQueueReady) {
         fWebView->postMessage(args);
@@ -208,31 +208,31 @@ void WebViewUI::initHandlers()
 {
     // These handlers only make sense for the local web view
 
-    fHandler["getWidth"] = std::make_pair(0, [this](const JSValue::array&) {
+    fHandler["getWidth"] = std::make_pair(0, [this](const JSValue::vector&) {
         postMessage({"UI", "getWidth", static_cast<double>(getWidth())});
     });
 
-    fHandler["getHeight"] = std::make_pair(0, [this](const JSValue::array&) {
+    fHandler["getHeight"] = std::make_pair(0, [this](const JSValue::vector&) {
         postMessage({"UI", "getHeight", static_cast<double>(getHeight())});
     });
 
-    fHandler["isResizable"] = std::make_pair(0, [this](const JSValue::array&) {
+    fHandler["isResizable"] = std::make_pair(0, [this](const JSValue::vector&) {
         postMessage({"UI", "isResizable", isResizable()});
     });
 
-    fHandler["setWidth"] = std::make_pair(1, [this](const JSValue::array& args) {
+    fHandler["setWidth"] = std::make_pair(1, [this](const JSValue::vector& args) {
         sizeRequest([this, args]() {
             setWidth(static_cast<uint>(args[0].getNumber()));
         });
     });
 
-    fHandler["setHeight"] = std::make_pair(1, [this](const JSValue::array& args) {
+    fHandler["setHeight"] = std::make_pair(1, [this](const JSValue::vector& args) {
         sizeRequest([this, args]() {
             setHeight(static_cast<uint>(args[0].getNumber()));
         });
     });
 
-    fHandler["setSize"] = std::make_pair(2, [this](const JSValue::array& args) {
+    fHandler["setSize"] = std::make_pair(2, [this](const JSValue::vector& args) {
         sizeRequest([this, args]() {
             setSize(
                 static_cast<uint>(args[0].getNumber()), // width
@@ -241,23 +241,23 @@ void WebViewUI::initHandlers()
         });
     });
 
-    fHandler["getInitialWidth"] = std::make_pair(0, [this](const JSValue::array&) {
+    fHandler["getInitialWidth"] = std::make_pair(0, [this](const JSValue::vector&) {
         postMessage({"UI", "getInitialWidth", static_cast<double>(getInitialWidth())});
     });
 
-    fHandler["getInitialHeight"] = std::make_pair(0, [this](const JSValue::array&) {
+    fHandler["getInitialHeight"] = std::make_pair(0, [this](const JSValue::vector&) {
         postMessage({"UI", "getInitialHeight", static_cast<double>(getInitialHeight())});
     });
 
-    fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JSValue::array& args) {
+    fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JSValue::vector& args) {
         setKeyboardFocus(static_cast<bool>(args[0].getBoolean()));
     });
 
-    fHandler["flushInitMessageQueue"] = std::make_pair(0, [this](const JSValue::array&) {
+    fHandler["flushInitMessageQueue"] = std::make_pair(0, [this](const JSValue::vector&) {
         flushInitMessageQueue();
     });
 
-    fHandler["openSystemWebBrowser"] = std::make_pair(1, [this](const JSValue::array& args) {
+    fHandler["openSystemWebBrowser"] = std::make_pair(1, [this](const JSValue::vector& args) {
         String url = args[0].getString();
         openSystemWebBrowser(url);
     });
@@ -268,7 +268,7 @@ void WebViewUI::handleWebViewLoadFinished()
     onDocumentReady();
 }
 
-void WebViewUI::handleWebViewScriptMessage(const JSValue::array& args)
+void WebViewUI::handleWebViewScriptMessage(const JSValue::vector& args)
 {
     handleMessage(args);
 }

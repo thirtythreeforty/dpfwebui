@@ -20,6 +20,7 @@
 #define WEB_UI_BASE_HPP
 
 #include <functional>
+#include <string>
 #include <unordered_map>
 #include <utility>
 
@@ -50,12 +51,12 @@ protected:
     void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) override;
 #endif
 
-    virtual void postMessage(const JSValue::array& args) = 0;
-    virtual void onMessageReceived(const JSValue::array& args);
+    virtual void postMessage(const JSValue::vector& args) = 0;
+    virtual void onMessageReceived(const JSValue::vector& args);
 
-    void handleMessage(const JSValue::array& args);
+    void handleMessage(const JSValue::vector& args);
 
-    typedef std::function<void(const JSValue::array& args)> MessageHandler;
+    typedef std::function<void(const JSValue::vector& args)> MessageHandler;
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
 
