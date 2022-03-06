@@ -20,7 +20,6 @@
 #define JS_VALUE_HPP
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "distrho/extra/String.hpp"
@@ -33,7 +32,6 @@ class JSValue
 {
 public:
     typedef std::vector<JSValue> array;
-    typedef std::unordered_map<std::string,JSValue> object;
 
     // Constructors
     JSValue() noexcept;
@@ -61,40 +59,36 @@ public:
     ~JSValue();
 
     // Getters
-    bool    isNull() const noexcept;
-    bool    isBoolean() const noexcept;
+    bool isNull() const noexcept;
+    bool isBoolean() const noexcept;
+    bool isNumber() const noexcept;
+    bool isString() const noexcept;
+    bool isArray() const noexcept;
+    bool isObject() const noexcept;
+
     bool    getBoolean() const noexcept;
-    bool    isNumber() const noexcept;
     double  getNumber() const noexcept;
-    bool    isString() const noexcept;
     String  getString() const noexcept;
-    bool    isArray() const noexcept;
-    array&  getArray() const;
-    bool    isObject() const noexcept;
-    object& getObject() const;
+    JSValue get(int idx) const noexcept;
+    JSValue get(const char* key) const noexcept;
+
+    // Setters
+    void push(const JSValue& value);
+    void set(const char* key, const JSValue& value);
 
     // Type casting operators
     operator bool()   const { return getBoolean(); }
     operator double() const { return getNumber(); }
     operator String() const { return getString(); }
-    operator array()  const { return getArray(); }
-    operator object() const { return getObject(); }
 
     // Serialization/deserialization
     String toJSON(bool format = false) noexcept;
     static JSValue fromJSON(const char* jsonText) noexcept;
 
 private:
-    JSValue(cJSON* json, bool copy) noexcept;
+    JSValue(cJSON* impl) noexcept;
 
-    void cJSONConnectTree() noexcept;
-    void cJSONDisconnectTree() noexcept;
-
-    void clear() noexcept;
-    void copy(const JSValue& v) noexcept;
-
-    cJSON* fStorage;
-    void*  fContainer;
+    cJSON* fImpl;
 
 };
 
