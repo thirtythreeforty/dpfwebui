@@ -19,6 +19,7 @@
 #ifndef JS_VALUE_HPP
 #define JS_VALUE_HPP
 
+#include <initializer_list>
 #include <string>
 #include <vector>
 
@@ -43,6 +44,7 @@ public:
     JSValue(uint32_t i) noexcept;
     JSValue(float f) noexcept;
     JSValue(const char* s) noexcept;
+    JSValue(std::initializer_list<JSValue> v) noexcept;
     JSValue(const array& a) noexcept;
 
     // Copy constructor

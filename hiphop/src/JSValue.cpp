@@ -48,6 +48,14 @@ JSValue::JSValue(const char* s) noexcept
     : fImpl(cJSON_CreateString(s))
 {}
 
+JSValue::JSValue(std::initializer_list<JSValue> v) noexcept
+    : fImpl(cJSON_CreateArray())
+{
+    for (std::initializer_list<JSValue>::const_iterator it = v.begin(); it != v.end(); ++it) {
+        push(*it);
+    }
+}
+
 JSValue::JSValue(const array& a) noexcept
     : fImpl(cJSON_CreateArray())
 {
