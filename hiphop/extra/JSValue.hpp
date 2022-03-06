@@ -40,14 +40,17 @@ public:
     JSValue(bool b) noexcept;
     JSValue(double d) noexcept;
     JSValue(String s) noexcept;
-    JSValue(const JSValue& v);
 
     // Convenience constructors for plugin code
     JSValue(uint32_t i) noexcept;
     JSValue(float f) noexcept;
     JSValue(const char* s) noexcept;
+    JSValue(const array& a) noexcept;
 
-    // Assignment operators
+    // Copy constructor
+    JSValue(const JSValue& v) noexcept;
+
+    // Copy assignment
     JSValue& operator=(const JSValue& v);
 
     // Factory methods
@@ -81,9 +84,6 @@ public:
     String toJSON(bool format = false) noexcept;
     static JSValue fromJSON(const char* jsonText) noexcept;
 
-    // Helper method for plugin code
-    static String arrayToJSON(const array& a, bool format = false) noexcept;
-
 private:
     JSValue(cJSON* json, bool copy, bool createContainer) noexcept;
 
@@ -91,6 +91,7 @@ private:
     void cJSONDisconnectTree() noexcept;
 
     void clear() noexcept;
+    void copy(const JSValue& v) noexcept;
 
     cJSON* fStorage;
     void*  fContainer;
