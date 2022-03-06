@@ -67,7 +67,7 @@ JSValue::JSValue(const JSValue& v) noexcept
     copy(v);
 }
 
-JSValue& JSValue::operator=(const JSValue& v)
+JSValue& JSValue::operator=(const JSValue& v) noexcept
 {
     clear();
     copy(v);

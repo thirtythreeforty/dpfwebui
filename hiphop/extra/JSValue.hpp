@@ -51,7 +51,7 @@ public:
     JSValue(const JSValue& v) noexcept;
 
     // Copy assignment
-    JSValue& operator=(const JSValue& v);
+    JSValue& operator=(const JSValue& v) noexcept;
 
     // Factory methods
     static JSValue createArray() noexcept;
