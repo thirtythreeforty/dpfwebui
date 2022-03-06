@@ -19,7 +19,6 @@
 #ifndef JS_VALUE_HPP
 #define JS_VALUE_HPP
 
-#include <exception>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -34,62 +33,62 @@ class JSValue
 {
 public:
     typedef std::vector<JSValue> array;
-    typedef std::unordered_map<const char*,JSValue> object;
-
-    enum type {
-        TypeNull,
-        TypeBoolean,
-        TypeNumber,
-        TypeString,
-        TypeArray,
-        TypeObject
-    };
+    typedef std::unordered_map<std::string,JSValue> object;
 
     // Constructors
     JSValue() noexcept;
     JSValue(bool b) noexcept;
     JSValue(double d) noexcept;
     JSValue(String s) noexcept;
+    JSValue(const JSValue& v);
 
-    // Convenience constructors
+    // Convenience constructors for plugin code
     JSValue(uint32_t i) noexcept;
     JSValue(float f) noexcept;
-    JSValue(const char *s) noexcept;
-    JSValue(const array& a) noexcept;
+    JSValue(const char* s) noexcept;
+
+    // Factory methods
+    static JSValue createArray() noexcept;
+    static JSValue createObject() noexcept;
 
     // Destructor
     ~JSValue();
 
     // Getters
     bool    isNull() const noexcept;
-    type    getType() const noexcept;
-    bool    getBoolean() const;
-    double  getNumber() const;
-    String  getString() const;
+    bool    isBoolean() const noexcept;
+    bool    getBoolean() const noexcept;
+    bool    isNumber() const noexcept;
+    double  getNumber() const noexcept;
+    bool    isString() const noexcept;
+    String  getString() const noexcept;
+    bool    isArray() const noexcept;
     array&  getArray() const;
+    bool    isObject() const noexcept;
     object& getObject() const;
 
     // Type casting operators
-    operator bool() const noexcept { return fBoolean; }
-    operator double() const noexcept { return fNumber; }
-    operator String() const noexcept { return fString; }
-    operator array() noexcept { return getArray(); }
-    operator object() noexcept { return getObject(); }
+    operator bool()   const { return getBoolean(); }
+    operator double() const { return getNumber(); }
+    operator String() const { return getString(); }
+    operator array()  const { return getArray(); }
+    operator object() const { return getObject(); }
 
     // Serialization/deserialization
-    String toJSON(bool format = false);
-    static JSValue fromJSON(const String& jsonText);
+    String toJSON(bool format = false) noexcept;
+    static JSValue fromJSON(const char* jsonText) noexcept;
+
+    // Helper method for plugin code
+    static String arrayToJSON(const array& a, bool format = false) noexcept;
 
 private:
-    JSValue(cJSON* json) noexcept;
-    cJSON* toCJSON() const noexcept;
+    JSValue(cJSON* json, bool createContainer) noexcept;
 
-    mutable type  fType;
-    mutable void* fContainer;
-    mutable bool  fContainerOwn;
-    bool   fBoolean;
-    double fNumber;
-    String fString;
+    void cJSONConnectTree() noexcept;
+    void cJSONDisconnectTree() noexcept;
+
+    cJSON* fStorage;
+    void*  fContainer;
 
 };
 

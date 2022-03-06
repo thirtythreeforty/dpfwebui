@@ -23,239 +23,226 @@
 USE_NAMESPACE_DISTRHO
 
 JSValue::JSValue() noexcept
-    : fType(TypeNull)
+    : fStorage(cJSON_CreateNull())
     , fContainer(nullptr)
-    , fContainerOwn(false)
-    , fBoolean(false)
-    , fNumber(0)
 {}
 
 JSValue::JSValue(bool b) noexcept
-    : fType(TypeBoolean)
+    : fStorage(b ? cJSON_CreateTrue() : cJSON_CreateFalse())
     , fContainer(nullptr)
-    , fContainerOwn(false)
-    , fBoolean(b)
-    , fNumber(0)
 {}
 
 JSValue::JSValue(double d) noexcept
-    : fType(TypeNumber)
+    : fStorage(cJSON_CreateNumber(d))
     , fContainer(nullptr)
-    , fContainerOwn(false)
-    , fBoolean(false)
-    , fNumber(d)
 {}
 
 JSValue::JSValue(String s) noexcept
-    : fType(TypeString)
+    : fStorage(cJSON_CreateString(s))
     , fContainer(nullptr)
-    , fContainerOwn(false)
-    , fBoolean(false)
-    , fNumber(0)
-    , fString(s)
 {}
 
+JSValue::JSValue(const JSValue& v)
+{
+    if (v.isArray() || v.isObject()) {
+        throw std::runtime_error("Cannot copy values of type array or object");
+    }
+    fStorage = cJSON_Duplicate(v.fStorage, false);
+    fContainer = nullptr;
+}
+
 JSValue::JSValue(uint32_t i) noexcept
-    : fType(TypeNumber)
+    : fStorage(cJSON_CreateNumber(static_cast<double>(i)))
     , fContainer(nullptr)
-    , fContainerOwn(false)
-    , fBoolean(false)
-    , fNumber(static_cast<double>(i))
 {}
 
 JSValue::JSValue(float f) noexcept
-    : fType(TypeNumber)
+    : fStorage(cJSON_CreateNumber(static_cast<double>(f)))
     , fContainer(nullptr)
-    , fContainerOwn(false)
-    , fBoolean(false)
-    , fNumber(static_cast<double>(f))
 {}
 
-JSValue::JSValue(const char *s) noexcept
-    : fType(TypeString)
+JSValue::JSValue(const char* s) noexcept
+    : fStorage(cJSON_CreateString(s))
     , fContainer(nullptr)
-    , fContainerOwn(false)
-    , fBoolean(false)
-    , fNumber(0)
-    , fString(String(s))
 {}
 
-JSValue::JSValue(const array& a) noexcept
-    : fType(TypeArray)
-    , fContainer(static_cast<void*>(const_cast<array*>(&a)))
-    , fContainerOwn(false)
-    , fBoolean(false)
-    , fNumber(0)
-{}
+JSValue JSValue::createArray() noexcept
+{
+    return JSValue(cJSON_CreateArray(), true);
+}
+
+JSValue JSValue::createObject() noexcept
+{
+    return JSValue(cJSON_CreateObject(), true);
+}
 
 JSValue::~JSValue()
 {
-    if (fContainerOwn) {
-        if (fType == TypeArray) {
+    if (fContainer != nullptr) {
+        if (isArray()) {
             delete &getArray();
-        } else if (fType == TypeObject) {
+        } else if (isObject()) {
             delete &getObject();
         }
+
+        fContainer = nullptr;
+    }
+
+    if (fStorage != nullptr) {
+        cJSON_Delete(fStorage);
+        fStorage = nullptr;
     }
 }
 
 bool JSValue::isNull() const noexcept
 {
-    return fType == TypeNull;
+    return cJSON_IsNull(fStorage);
 }
 
-JSValue::type JSValue::getType() const noexcept
+bool JSValue::isBoolean() const noexcept
 {
-    return fType;
+    return cJSON_IsBool(fStorage);
 }
 
-bool JSValue::getBoolean() const
+bool JSValue::getBoolean() const noexcept
 {
-    if (fType != TypeBoolean) {
-        throw std::runtime_error("Value type is not boolean");
-    }
-
-    return fBoolean;
+    return cJSON_IsTrue(fStorage);
 }
 
-double JSValue::getNumber() const
+bool JSValue::isNumber() const noexcept
 {
-    if (fType != TypeNumber) {
-        throw std::runtime_error("Value type is not number");
-    }
-
-    return fNumber;
+    return cJSON_IsNumber(fStorage);
 }
 
-String JSValue::getString() const
+double JSValue::getNumber() const noexcept
 {
-    if (fType != TypeString) {
-        throw std::runtime_error("Value type is not string");
-    }
+    return cJSON_GetNumberValue(fStorage);
+}
 
-    return fString;
+bool JSValue::isString() const noexcept
+{
+    return cJSON_IsString(fStorage);
+}
+
+String JSValue::getString() const noexcept
+{
+    return String(cJSON_GetStringValue(fStorage));
+}
+
+bool JSValue::isArray() const noexcept
+{
+    return cJSON_IsArray(fStorage);
 }
 
 JSValue::array& JSValue::getArray() const
 {
-    if (fType != TypeNull) {
-        if (fType != TypeArray) {
-            throw std::runtime_error("Value type is not array");
-        }
-    } else {
-        fType = TypeArray;
-        fContainer = static_cast<void*>(new array());
-        fContainerOwn = true;
+    if (! isArray()) {
+        throw std::runtime_error("Value is not array");
     }
 
     return *reinterpret_cast<array*>(fContainer);
 }
 
+bool JSValue::isObject() const noexcept
+{
+    return cJSON_IsObject(fStorage);
+}
+
 JSValue::object& JSValue::getObject() const
 {
-    if (fType != TypeNull) {
-        if (fType != TypeObject) {
-            throw std::runtime_error("Value type is not object");
-        }
-    } else {
-        fType = TypeObject;
-        fContainer = static_cast<void*>(new object());
-        fContainerOwn = true;
+    if (! isObject()) {
+        throw std::runtime_error("Value is not object");
     }
 
     return *reinterpret_cast<object*>(fContainer);
 }
 
-String JSValue::toJSON(bool format)
+String JSValue::toJSON(bool format) noexcept
 {
-    cJSON* json = toCJSON();
-    char* s = format ? cJSON_Print(json) : cJSON_PrintUnformatted(json);
-    cJSON_Delete(json);
+    // Populate cJSON arrays and objects
+    cJSONConnectTree();
+
+    char* s = format ? cJSON_Print(fStorage) : cJSON_PrintUnformatted(fStorage);
     String jsonText = String(s);
     cJSON_free(s);
+
+    // Empty cJSON arrays and objects:
+    // - toJSON() could be called multiple times
+    // - Avoid double freeing in ~JSValue() because cJSON_Delete() is recursive,
+    //   cJSON objects lifetime must be only managed by its JSValue wrapper.
+    cJSONDisconnectTree();
 
     return jsonText;
 }
 
-JSValue JSValue::fromJSON(const String& jsonText)
+JSValue JSValue::fromJSON(const char* jsonText) noexcept
 {
-    cJSON* json = cJSON_Parse(jsonText);
-    JSValue value = JSValue(json);
-    cJSON_Delete(json);
-
-    return value;
+    return JSValue(cJSON_Parse(jsonText));
 }
 
-cJSON* JSValue::toCJSON() const noexcept
+String JSValue::arrayToJSON(const array& a, bool format) noexcept
 {
-    cJSON* json;
-
-    switch(fType) {
-        case TypeBoolean:
-            json = fBoolean ? cJSON_CreateTrue() : cJSON_CreateFalse();
-            break;
-        case TypeNumber:
-            json = cJSON_CreateNumber(fNumber);
-            break;
-        case TypeString:
-            json = cJSON_CreateString(fString);
-            break;
-        case TypeArray: {
-            json = cJSON_CreateArray();
-            JSValue::array& array = getArray();
-            for (JSValue::array::iterator it = array.begin(); it != array.end(); ++it) {
-                cJSON_AddItemToArray(json, it->toCJSON());
-            }
-            break;
-        }
-        case TypeObject: {
-            json = cJSON_CreateObject();
-            JSValue::object& object = getObject();
-            for (JSValue::object::iterator it = object.begin(); it != object.end(); ++it) {
-                cJSON_AddItemToObject(json, it->first, it->second.toCJSON());
-            }
-            break;
-        }
-        default:
-            json = cJSON_CreateNull();
-            break;
-    }
-
-    return json;
+    JSValue temp(cJSON_CreateArray(), false);
+    temp.fContainer = static_cast<void*>(const_cast<array*>(&a));
+    String jsonText = temp.toJSON(format);
+    temp.fContainer = nullptr;
+    return jsonText;
 }
 
-JSValue::JSValue(cJSON* json) noexcept
-    : fType(TypeNull)
+JSValue::JSValue(cJSON* json, bool createContainer) noexcept
+    : fStorage(json)
     , fContainer(nullptr)
-    , fContainerOwn(false)
-    , fBoolean(false)
-    , fNumber(0)
 {
-    if (cJSON_IsFalse(json)) {
-        fType = TypeBoolean;
-        fBoolean = false;
-    } else if (cJSON_IsTrue(json)) {
-        fType = TypeBoolean;
-        fBoolean = true;
-    } else if (cJSON_IsNumber(json)) {
-        fType = TypeNumber;
-        fNumber = cJSON_GetNumberValue(json);
-    } else if (cJSON_IsString(json)) {
-        fType = TypeString;
-        fString = cJSON_GetStringValue(json);
+    if (! createContainer) {
+        return;
+    }
+    if (cJSON_IsArray(json)) {
+        array* a = new array();
+        fContainer = static_cast<void*>(a);
+        cJSON* elem;
+        cJSON_ArrayForEach(elem, json) {
+            a->push_back(JSValue(elem));
+        }
     } else if (cJSON_IsArray(json)) {
+        object* o = new object();
+        fContainer = static_cast<void*>(o);
+        cJSON* elem;
+        cJSON_ArrayForEach(elem, json) {
+            (*o)[elem->string] = JSValue(elem);
+        }
+    }
+}
+
+void JSValue::cJSONConnectTree() noexcept
+{
+    if (isArray()) {
         JSValue::array& array = getArray();
-        cJSON* elem;
-        cJSON_ArrayForEach(elem, json) {
-            array.push_back(JSValue(elem));
+        for (JSValue::array::iterator it = array.begin(); it != array.end(); ++it) {
+            cJSON_AddItemReferenceToArray(fStorage, it->fStorage);
+            it->cJSONConnectTree();
         }
-    } else if (cJSON_IsObject(json)) {
+    } else if (isObject()) {
         JSValue::object& object = getObject();
-        cJSON* elem;
-        cJSON_ArrayForEach(elem, json) {
-            object[elem->string] = JSValue(elem);
+        for (JSValue::object::iterator it = object.begin(); it != object.end(); ++it) {
+            cJSON_AddItemReferenceToObject(fStorage, it->first.c_str(), it->second.fStorage);
+            it->second.cJSONConnectTree();
         }
-    } else {
-        // null
+    }
+}
+
+void JSValue::cJSONDisconnectTree() noexcept
+{
+    if (isArray()) {
+        JSValue::array& array = getArray();
+        for (size_t i = 0, size = array.size(); i < size; ++i) {
+            cJSON_DetachItemFromArray(fStorage, i);
+            array[i].cJSONDisconnectTree();
+        }
+    } else if (isObject()) {
+        JSValue::object& object = getObject();
+        for (JSValue::object::iterator it = object.begin(); it != object.end(); ++it) {
+            cJSON_DetachItemFromObject(fStorage, it->first.c_str());
+            it->second.cJSONDisconnectTree();
+        }
     }
 }
