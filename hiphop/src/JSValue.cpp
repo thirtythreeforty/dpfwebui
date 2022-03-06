@@ -47,7 +47,7 @@ JSValue::JSValue(const JSValue& v)
     if (v.isArray() || v.isObject()) {
         throw std::runtime_error("Cannot copy values of type array or object");
     }
-    fStorage = cJSON_Duplicate(v.fStorage, false);
+    fStorage = cJSON_Duplicate(v.fStorage, false/*recurse*/);
     fContainer = nullptr;
 }
 
@@ -66,32 +66,33 @@ JSValue::JSValue(const char* s) noexcept
     , fContainer(nullptr)
 {}
 
+JSValue& JSValue::operator=(const JSValue& v)
+{
+    if (v.isArray() || v.isObject()) {
+        throw std::runtime_error("Cannot copy values of type array or object");
+    }
+    
+    clear();
+
+    fStorage = cJSON_Duplicate(v.fStorage, false/*recurse*/);
+    fContainer = nullptr;
+
+    return *this;
+}
+
 JSValue JSValue::createArray() noexcept
 {
-    return JSValue(cJSON_CreateArray(), true);
+    return JSValue(cJSON_CreateArray(), false/*copy*/, true/*createContainer*/);
 }
 
 JSValue JSValue::createObject() noexcept
 {
-    return JSValue(cJSON_CreateObject(), true);
+    return JSValue(cJSON_CreateObject(), false/*copy*/, true/*createContainer*/);
 }
 
 JSValue::~JSValue()
 {
-    if (fContainer != nullptr) {
-        if (isArray()) {
-            delete &getArray();
-        } else if (isObject()) {
-            delete &getObject();
-        }
-
-        fContainer = nullptr;
-    }
-
-    if (fStorage != nullptr) {
-        cJSON_Delete(fStorage);
-        fStorage = nullptr;
-    }
+    clear();
 }
 
 bool JSValue::isNull() const noexcept
@@ -177,20 +178,20 @@ String JSValue::toJSON(bool format) noexcept
 
 JSValue JSValue::fromJSON(const char* jsonText) noexcept
 {
-    return JSValue(cJSON_Parse(jsonText));
+    return JSValue(cJSON_Parse(jsonText), true/*copy*/, true/*createContainer*/);
 }
 
 String JSValue::arrayToJSON(const array& a, bool format) noexcept
 {
-    JSValue temp(cJSON_CreateArray(), false);
+    JSValue temp(cJSON_CreateArray(), false/*copy*/, false/*createContainer*/);
     temp.fContainer = static_cast<void*>(const_cast<array*>(&a));
     String jsonText = temp.toJSON(format);
     temp.fContainer = nullptr;
     return jsonText;
 }
 
-JSValue::JSValue(cJSON* json, bool createContainer) noexcept
-    : fStorage(json)
+JSValue::JSValue(cJSON* json, bool copy, bool createContainer) noexcept
+    : fStorage(copy ? cJSON_Duplicate(json, true/*recurse*/) : json)
     , fContainer(nullptr)
 {
     if (! createContainer) {
@@ -201,14 +202,14 @@ JSValue::JSValue(cJSON* json, bool createContainer) noexcept
         fContainer = static_cast<void*>(a);
         cJSON* elem;
         cJSON_ArrayForEach(elem, json) {
-            a->push_back(JSValue(elem));
+            a->push_back(JSValue(elem, true, true));
         }
     } else if (cJSON_IsArray(json)) {
         object* o = new object();
         fContainer = static_cast<void*>(o);
         cJSON* elem;
         cJSON_ArrayForEach(elem, json) {
-            (*o)[elem->string] = JSValue(elem);
+            (*o)[elem->string] = JSValue(elem, true, true);
         }
     }
 }
@@ -244,5 +245,23 @@ void JSValue::cJSONDisconnectTree() noexcept
             cJSON_DetachItemFromObject(fStorage, it->first.c_str());
             it->second.cJSONDisconnectTree();
         }
+    }
+}
+
+void JSValue::clear() noexcept
+{
+    if (fContainer != nullptr) {
+        if (isArray()) {
+            delete &getArray();
+        } else if (isObject()) {
+            delete &getObject();
+        }
+
+        fContainer = nullptr;
+    }
+
+    if (fStorage != nullptr) {
+        cJSON_Delete(fStorage);
+        fStorage = nullptr;
     }
 }

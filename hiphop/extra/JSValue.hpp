@@ -47,6 +47,9 @@ public:
     JSValue(float f) noexcept;
     JSValue(const char* s) noexcept;
 
+    // Assignment operators
+    JSValue& operator=(const JSValue& v);
+
     // Factory methods
     static JSValue createArray() noexcept;
     static JSValue createObject() noexcept;
@@ -82,10 +85,12 @@ public:
     static String arrayToJSON(const array& a, bool format = false) noexcept;
 
 private:
-    JSValue(cJSON* json, bool createContainer) noexcept;
+    JSValue(cJSON* json, bool copy, bool createContainer) noexcept;
 
     void cJSONConnectTree() noexcept;
     void cJSONDisconnectTree() noexcept;
+
+    void clear() noexcept;
 
     cJSON* fStorage;
     void*  fContainer;

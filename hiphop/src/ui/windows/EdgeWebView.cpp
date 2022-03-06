@@ -268,9 +268,9 @@ HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
 
     LPWSTR jsonStr;
     ICoreWebView2WebMessageReceivedEventArgs_get_WebMessageAsJson(eventArgs, &jsonStr);
-    JSValue value = JSValue::fromJSON(String(TO_LPCSTR(jsonStr)));
+    JSValue value = JSValue::fromJSON(TO_LPCSTR(jsonStr));
 
-    if (value.getType() == JSValue::TypeArray) {
+    if (value.isArray()) {
         handleScriptMessage(value.getArray());
     }
 
