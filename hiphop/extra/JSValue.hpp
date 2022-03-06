@@ -85,7 +85,7 @@ public:
     static JSValue fromJSON(const char* jsonText) noexcept;
 
 private:
-    JSValue(cJSON* json, bool copy, bool createContainer) noexcept;
+    JSValue(cJSON* json, bool copy) noexcept;
 
     void cJSONConnectTree() noexcept;
     void cJSONDisconnectTree() noexcept;
