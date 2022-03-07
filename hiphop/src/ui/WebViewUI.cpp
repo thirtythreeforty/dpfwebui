@@ -107,13 +107,13 @@ void WebViewUI::load()
 {
     if (fWebView != nullptr) {
 #if defined(HIPHOP_NETWORK_UI) 
-# if ! DISTRHO_PLUGIN_WANT_STATE
-        // State is needed for reusing the web server port during the plugin
-        // lifetime. Note that the local webview still uses the native bridge
-        // for messaging instead of WebSockets when loading document via HTTP.
-        String url = getLocalUrl();
-        fWebView->navigate(url);
-# endif
+        if ((! DISTRHO_PLUGIN_WANT_STATE) || isStandalone()) {
+            // State is needed for reusing the web server port during the plugin
+            // lifetime. Note that the local webview still uses the native bridge
+            // for messaging instead of WebSockets when loading document via HTTP.
+            String url = getLocalUrl();
+            fWebView->navigate(url);
+        }
 #else
         String url = "file://" + Path::getPluginLibrary() + HTML_INDEX_PATH;
         fWebView->navigate(url);

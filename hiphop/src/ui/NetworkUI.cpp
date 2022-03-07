@@ -60,13 +60,13 @@ NetworkUI::NetworkUI(uint width, uint height)
 
     initHandlers();
 
-#if ! DISTRHO_PLUGIN_WANT_STATE
-    // Port is not remembered when state support is disabled
-    fPort = findAvailablePort();
-    if (fPort != -1) {
-        initServer();
+    if ((! DISTRHO_PLUGIN_WANT_STATE) || isStandalone()) {
+        // Port is not remembered when state support is disabled
+        fPort = findAvailablePort();
+        if (fPort != -1) {
+            initServer();
+        }
     }
-#endif
 }
 
 NetworkUI::~NetworkUI()
