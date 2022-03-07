@@ -102,6 +102,15 @@ void WebViewBase::setPrintTraffic(bool printTraffic)
     fPrintTraffic = printTraffic;
 }
 
+void WebViewBase::setEnvironmentBool(const char* key, bool value)
+{
+    // Mostly used for allowing JavaScript code to detect unavailable features
+    // in some web view implementations. window.host.env is merged into
+    // DISTRHO.env by dpf.js to keep all environment info in a single place.
+    String js = String("window.host.env.") + key + "=" + (value ? "true" : "false") + ";";
+    injectScript(js);
+}
+
 void WebViewBase::setEventHandler(WebViewEventHandler* handler)
 {
     fHandler = handler;

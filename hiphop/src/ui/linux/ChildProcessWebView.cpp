@@ -111,20 +111,13 @@ ChildProcessWebView::ChildProcessWebView()
 
     injectHostObjectScripts();
 
-    // Allow JavaScript code to detect some unavailable features.
-    // window.host.env is merged into DISTRHO.env by dpf.js to keep all
-    // environment information in a single place.
-    String js = String(
-        // LXDRAGDROPBUG : No drag and drop on both GTK and CEF web views
-        "window.host.env.noDragAndDrop = true;"
+    setEnvironmentBool("noDragAndDrop", true);
 #if defined(HIPHOP_LINUX_WEBVIEW_GTK)
-        // WKGTKRESIZEBUG : Broken vw/vh/vmin/vmax CSS units
-        "window.host.env.noCSSViewportUnits = true;"
-        // No touch events for <input type="range"> elements
-        "window.host.env.noRangeInputTouch = true;"
+    // WKGTKRESIZEBUG : Broken vw/vh/vmin/vmax CSS units
+    setEnvironmentBool("noCSSViewportUnits", true);
+    // No touch events for <input type="range"> elements
+    setEnvironmentBool("noRangeInputTouch", true);
 #endif
-    );
-    injectScript(js);
 
     fIpc->write(OP_INJECT_SHIMS);
 }

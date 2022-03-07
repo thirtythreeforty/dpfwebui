@@ -57,6 +57,7 @@ public:
     void setKeyboardFocus(bool focus);
 
     void setPrintTraffic(bool printTraffic);
+    void setEnvironmentBool(const char* key, bool value);
     void setEventHandler(WebViewEventHandler* handler);
     
     void postMessage(const JSValue& args);
