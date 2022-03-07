@@ -41,7 +41,7 @@ WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor
     , fInitialWidth(widthCssPx)
     , fInitialHeight(heightCssPx)
     , fBackgroundColor(backgroundColor)
-    , fMessageQueueReady(false)
+    , fJsUiReady(false)
     , fUiBlockQueued(false)
     , fPlatformWindow(0)
     , fWebView(nullptr)
@@ -136,19 +136,15 @@ void WebViewUI::injectScript(String& source)
     }
 }
 
-void WebViewUI::flushInitMessageQueue()
+void WebViewUI::ready()
 {
-    if (fMessageQueueReady) {
-        return;
-    }
+    fJsUiReady = true;
 
-    fMessageQueueReady = true;
-
-    for (InitMessageQueue::iterator it = fInitMessageQueue.begin(); it != fInitMessageQueue.end(); ++it) {
+    for (MessageBuffer::iterator it = fMessageBuffer.begin(); it != fMessageBuffer.end(); ++it) {
         fWebView->postMessage(*it);
     }
     
-    fInitMessageQueue.clear();
+    fMessageBuffer.clear();
 }
 
 void WebViewUI::setKeyboardFocus(bool focus)
@@ -158,10 +154,10 @@ void WebViewUI::setKeyboardFocus(bool focus)
 
 void WebViewUI::postMessage(const JSValue& args)
 {
-    if (fMessageQueueReady) {
+    if (fJsUiReady) {
         fWebView->postMessage(args);
     } else {
-        fInitMessageQueue.push_back(args);
+        fMessageBuffer.push_back(args);
     }
 }
 
@@ -253,8 +249,8 @@ void WebViewUI::initHandlers()
         setKeyboardFocus(static_cast<bool>(args[0].getBoolean()));
     });
 
-    fHandler["flushInitMessageQueue"] = std::make_pair(0, [this](const JSValue&) {
-        flushInitMessageQueue();
+    fHandler["ready"] = std::make_pair(0, [this](const JSValue&) {
+        ready();
     });
 
     fHandler["openSystemWebBrowser"] = std::make_pair(1, [this](const JSValue& args) {

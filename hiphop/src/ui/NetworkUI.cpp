@@ -152,6 +152,10 @@ void NetworkUI::initHandlers()
     fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&) {
         postMessage({"UI", "getPublicUrl", getPublicUrl()});
     });
+
+    fHandler["ping"] = std::make_pair(0, [this](const JSValue&) {
+        postMessage({"UI", "pong"});
+    });
 }
 
 void NetworkUI::initServer()

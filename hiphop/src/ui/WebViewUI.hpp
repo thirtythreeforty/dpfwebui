@@ -68,7 +68,7 @@ protected:
     void runScript(String& source);
     void injectScript(String& source);
 
-    void flushInitMessageQueue();
+    void ready();
     void setKeyboardFocus(bool focus);
 
     void postMessage(const JSValue& args) override;
@@ -95,17 +95,17 @@ private:
     virtual void handleWebViewScriptMessage(const JSValue& args) override;
     virtual void handleWebViewConsole(const String& tag, const String& text) override;
 
-    typedef std::vector<JSValue> InitMessageQueue;
+    typedef std::vector<JSValue> MessageBuffer;
 
-    uint             fInitialWidth;
-    uint             fInitialHeight;
-    uint32_t         fBackgroundColor;
-    bool             fMessageQueueReady;
-    bool             fUiBlockQueued;
-    uintptr_t        fPlatformWindow;
-    WebViewBase*     fWebView;
-    UiBlock          fUiBlock;
-    InitMessageQueue fInitMessageQueue;
+    uint          fInitialWidth;
+    uint          fInitialHeight;
+    uint32_t      fBackgroundColor;
+    bool          fJsUiReady;
+    bool          fUiBlockQueued;
+    uintptr_t     fPlatformWindow;
+    WebViewBase*  fWebView;
+    UiBlock       fUiBlock;
+    MessageBuffer fMessageBuffer;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebViewUI)
 

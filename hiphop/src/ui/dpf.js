@@ -20,24 +20,6 @@ const DISTRHO = (() => {
 
 class UI {
 
-    constructor() {
-        this._resolve = {};
-
-        if (DISTRHO.env.webview) {
-            this._initLocalMessageChannel();
-
-            // Call WebUI::flushInitMessageQueue() to receive any UI message
-            // generated while the web view was still loading. Since this
-            // involves message passing, it will not cause any UI methods to be
-            // triggered synchronously and it is safe to indirectly call from
-            // super() in subclass constructors.
-            this._call('flushInitMessageQueue');
-
-        } else if (DISTRHO.env.network) {
-            this._initNetworkMessageChannel();
-        }
-    }
-
     // uint UI::getWidth()
     async getWidth() {
         return this._callAndExpectReply('getWidth');
@@ -148,7 +130,11 @@ class UI {
         if (DISTRHO.env.webview) {
             window.host.postMessage(args);
         } else if (DISTRHO.env.network) {
-            console.log(`TODO: WebSockets postMessage(${args})`);
+            if (this._socket.readyState == WebSocket.OPEN) {
+                this._socket.send(JSON.stringify(args));
+            } else {
+                console.log(`Cannot send message, socket state is ${this._socket.readyState}.`);
+            }
         } else {
             console.log(`stub: postMessage(${args})`);
         }
@@ -190,9 +176,77 @@ class UI {
         return this._callAndExpectReply('getPublicUrl');
     }
 
-    // Helper for decoding received shared memory data
-    _sharedMemoryChanged(b64Data /*String*/, token /*String*/) {
-        this.sharedMemoryChanged(base64DecToArr(b64Data), token);
+    // Returns measured latency in milliseconds
+    get latency() {
+        return this._latency;
+    }
+
+}
+
+//
+// Class split in two for clarity, UI implements the public interface only.
+//
+class UIImpl extends UI {
+
+    constructor() {
+        super();
+
+        this._resolve = {};
+        this._socket = null;
+        this._latency = 0;
+        this._pingSendTime = 0;
+
+        if (DISTRHO.env.webview) {
+            this._initLocalMessageChannel();
+
+            // Call WebUI::ready() to let the host know the JS UI has completed
+            // setting up. This causes the initialization message buffer to be
+            // flushed so any messages generated while the web view was still
+            // loading can be processed. Since this involves message passing, it
+            // will not cause any UI methods to be triggered synchronously and
+            // is safe to indirectly call from super() in subclass constructors.
+            this._call('ready');
+
+        } else if (DISTRHO.env.network) {
+            this._initNetworkMessageChannel();
+        }
+    }
+
+    // Initialize native C++/JS message channel for the local webview
+    _initLocalMessageChannel() {
+        window.host.addMessageListener(this._messageReceived.bind(this));
+    }
+
+    // Initialize WebSockets-based message channel for network clients
+    _initNetworkMessageChannel() {
+        const reconnectPeriod = 3;
+        const pingPeriod = 10;
+
+        let reconnectTimer = null;
+        let pingTimer = null;
+
+        const open = () => {
+            this._socket = new WebSocket(`ws://${document.location.host}`);
+
+            this._socket.addEventListener('open', (ev) => {
+                console.log('UI: connected');
+                clearInterval(reconnectTimer);
+                pingTimer = setInterval(this._ping.bind(this), 1000 * pingPeriod);
+            });
+
+            this._socket.addEventListener('close', (ev) => {
+                console.log(`UI: reconnecting in ${reconnectPeriod} sec...`);
+                clearInterval(pingTimer);
+                clearInterval(reconnectTimer);
+                reconnectTimer = setInterval(open, 1000 * reconnectPeriod);
+            });
+
+            this._socket.addEventListener('message', (ev) => {
+                this._messageReceived(JSON.parse(ev.data));
+            });
+        };
+
+        open();
     }
 
     // Helper for calling UI methods
@@ -212,60 +266,95 @@ class UI {
         });
     }
 
-    // Initialize native C++/JS message channel for the local webview
-    _initLocalMessageChannel() {
-        window.host.addMessageListener((args) => {
-            if (args[0] != 'UI') {
-                this.messageReceived(args); // passthrough
-                return;
-            }
+    // Send a ping message to measure latency
+    _ping() {
+        this._pingSendTime = (new Date).getTime();
+        this._call('ping');
+    }
 
-            const method = args[1];
-            args = args.slice(2);
+    // Compute latency when response to ping is received
+    _pong() {
+        this._latency = (new Date).getTime() - this._pingSendTime;
+    }
 
-            if (method in this._resolve) {
-                this._resolve[method][0](...args); // fulfill promise
-                delete this._resolve[method];
-            } else {
-                this[method](...args); // call method
+    // Handle incoming message
+    _messageReceived(args) {
+        console.log(args);
+        if (args[0] != 'UI') {
+            this.messageReceived(args); // passthrough
+            return;
+        }
+
+        const method = args[1];
+        args = args.slice(2);
+
+        if (method in this._resolve) {
+            this._resolve[method][0](...args); // fulfill promise
+            delete this._resolve[method];
+        } else {
+            this[method](...args); // call method
+        }
+    }
+
+    // Helper for decoding received shared memory data
+    _sharedMemoryChanged(b64Data /*String*/, token /*String*/) {
+        this.sharedMemoryChanged(base64DecToArr(b64Data), token);
+    }
+
+}
+
+//
+// Static initialization
+//
+class UIHelper {
+
+    static applyUiTweaks() {
+        // Disable context menu
+        window.addEventListener('contextmenu', (ev) => {
+            ev.preventDefault()
+        });
+
+        // Disable print
+        window.addEventListener('keydown', (ev) => { 
+            if ((ev.key == 'p') && (ev.ctrlKey || ev.metaKey)) {
+                ev.preventDefault();
             }
         });
+
+        const style = (css) => {
+            document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
+        };
+
+        style('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
+        style('body { user-select: none; -webkit-user-select: none; }'); // disable selection
+        style('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
+        style('body { overflow: hidden; }'); // disable overflow
     }
 
-    // Initialize WebSockets-based message channel for network clients
-    _initNetworkMessageChannel() {
-        
-        // TODO
+    static buildEnvObject() {
+        let env = {
+            network: window.location.protocol.indexOf('http') == 0
+        };
 
-    }
-
-}
-
-
-//
-// Basic setup so the web UI behaves more like a native UI 
-//
-function applyUiTweaks() {
-    window.oncontextmenu = (e) => e.preventDefault(); // disable context menu
-
-    window.onkeydown = (e) => { 
-        if ((e.key == 'p') && (e.ctrlKey || e.metaKey)) {
-            e.preventDefault(); // disable print
+        if (window.host !== undefined) {
+            env.webview = true;
+            if (window.host.env) {
+                Object.assign(env, window.host.env);
+                delete window.host.env;
+            }
+        } else {
+            env.webview = false;
         }
-    };
+        
+        return Object.freeze(env);
+    }
 
-    const style = (css) => {
-        document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
-    };
-
-    style('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
-    style('body { user-select: none; -webkit-user-select: none; }'); // disable selection
-    style('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
-    style('body { overflow: hidden; }'); // disable overflow
 }
 
-applyUiTweaks();
-
+//
+// Basic setup to make the web UI behave a bit more like a native UI 
+//
+UIHelper.applyUiTweaks();
 
 //
 // Return namespace, see const DISTRHO = ... definition above.
@@ -279,25 +368,7 @@ applyUiTweaks();
 //    }
 // }
 //
-function buildEnvObject() {
-    let env = {
-        network: window.location.protocol.indexOf('http') == 0
-    };
-
-    if (window.host !== undefined) {
-        env.webview = true;
-        if (window.host.env) {
-            Object.assign(env, window.host.env);
-            delete window.host.env;
-        }
-    } else {
-        env.webview = false;
-    }
-    
-    return Object.freeze(env);
-}
-
-return { UI: UI, env: buildEnvObject() };
+return { UI: UIImpl, env: UIHelper.buildEnvObject() };
 
 
 /*\
