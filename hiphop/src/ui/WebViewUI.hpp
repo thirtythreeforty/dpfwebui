@@ -97,15 +97,15 @@ private:
 
     typedef std::vector<JSValue> InitMessageQueue;
 
-    uint              fInitialWidth;
-    uint              fInitialHeight;
-    uint32_t          fBackgroundColor;
-    bool              fMessageQueueReady;
-    bool              fUiBlockQueued;
-    uintptr_t         fPlatformWindow;
-    WebViewBase*      fWebView;
-    UiBlock           fUiBlock;
-    InitMessageQueue  fInitMessageQueue;
+    uint             fInitialWidth;
+    uint             fInitialHeight;
+    uint32_t         fBackgroundColor;
+    bool             fMessageQueueReady;
+    bool             fUiBlockQueued;
+    uintptr_t        fPlatformWindow;
+    WebViewBase*     fWebView;
+    UiBlock          fUiBlock;
+    InitMessageQueue fInitMessageQueue;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebViewUI)
 

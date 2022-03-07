@@ -19,8 +19,11 @@ HIPHOP_WASM_MODE ?= aot
 # WebAssembly System Interface only available for Wasmer
 HIPHOP_WASM_WASI ?= false
 
-# Enable built-in websockets server and load content over HTTPS [WIP]
+# [WIP] Enable built-in websockets server and load content over HTTP
 HIPHOP_NETWORK_UI ?= false
+
+# [WIP] Enable HTTPS and secure WebSockets
+HIPHOP_NETWORK_SSL ?= false
 
 # Automatically inject dpf.js when loading content from file://
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
@@ -300,14 +303,20 @@ BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
 endif
 
 ifeq ($(HIPHOP_NETWORK_UI),true)
-BASE_FLAGS += -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH) -I$(MBEDTLS_PATH)/include
-LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib  -L$(MBEDTLS_BUILD_PATH)
+BASE_FLAGS += -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
+LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
+ifeq ($(HIPHOP_NETWORK_SSL), true)
+BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
+LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH)
+endif
 ifeq ($(WINDOWS),true)
 LINK_FLAGS += -lwebsockets_static
 else
 LINK_FLAGS += -lwebsockets
 endif
+ifeq ($(HIPHOP_NETWORK_SSL), true)
 LINK_FLAGS += -lmbedtls -lmbedcrypto -lmbedx509
+endif
 ifeq ($(LINUX),true)
 LINK_FLAGS += -lcap
 endif
@@ -583,6 +592,7 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
+ifeq ($(HIPHOP_NETWORK_SSL), true)
 MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
 MBEDTLS_GIT_TAG = v3.0.0  # LWS build fails for 3.1.0 (Feb 2022)
 MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
@@ -605,6 +615,7 @@ $(MBEDTLS_PATH):
 			$(MBEDTLS_GIT_URL)
 endif
 endif
+endif
 
 # ------------------------------------------------------------------------------
 # Dependency - Clone and build libwebsockets
@@ -617,8 +628,13 @@ LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
 LWS_BUILD_PATH = ${LWS_PATH}/build
 LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
 
-LWS_CMAKE_ARGS = -DLWS_WITH_SHARED=0 -DLWS_WITHOUT_TESTAPPS=1 -DLWS_WITH_MBEDTLS=1 \
-                 -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
+LWS_CMAKE_ARGS = -DLWS_WITH_SHARED=0 -DLWS_WITHOUT_TESTAPPS=1
+ifeq ($(HIPHOP_NETWORK_SSL),true)
+LWS_CMAKE_ARGS += -DLWS_WITH_SSL=1 -DLWS_WITH_MBEDTLS=1 \
+                  -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
+else
+LWS_CMAKE_ARGS += -DLWS_WITH_SSL=0
+endif
 
 ifeq ($(WINDOWS),true)
 LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets_static.a

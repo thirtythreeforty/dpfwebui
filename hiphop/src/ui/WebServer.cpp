@@ -72,6 +72,7 @@ void WebServer::init(int port, const char* jsInjectTarget, const char* jsInjectT
     fContextInfo.gid       = -1;
     fContextInfo.user      = this;
 
+#if defined(HIPHOP_NETWORK_SSL)
     // SSL (WIP)
     // https://github.com/warmcat/libwebsockets/blob/main/READMEs/README.test-apps.md
     // cp -rp ./scripts/client-ca /tmp
@@ -83,6 +84,7 @@ void WebServer::init(int port, const char* jsInjectTarget, const char* jsInjectT
     //fContextInfo.ssl_cert_filepath        = "/tmp/client-ca/server.pem";
     //fContextInfo.ssl_private_key_filepath = "/tmp/client-ca/server.key";
     //fContextInfo.ssl_ca_filepath          = "/tmp/client-ca/ca.pem";
+#endif
 
     fContext = lws_create_context(&fContextInfo);
 }

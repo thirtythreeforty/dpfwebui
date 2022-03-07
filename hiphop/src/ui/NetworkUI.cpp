@@ -35,9 +35,13 @@
 
 #include "NetworkUI.hpp"
 
-#define FIRST_PORT        49152 // first in dynamic/private range
-#define TRANSFER_PROTOCOL "http"
-#define LOG_TAG           "NetworkUI"
+#define LOG_TAG "NetworkUI"
+#if defined(HIPHOP_NETWORK_SSL)
+# define TRANSFER_PROTOCOL "https"
+#else
+# define TRANSFER_PROTOCOL "http"
+#endif
+#define FIRST_PORT 49152 // first in dynamic/private range
 
 USE_NAMESPACE_DISTRHO
 
