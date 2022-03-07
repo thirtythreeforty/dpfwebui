@@ -142,19 +142,19 @@ class UI {
         return this._callAndExpectReply('getInitialHeight');
     }
 
-    // Non-DPF method for sending a message to the web host
+    // Non-DPF method for sending a message to the host
     // void WebViewUI::postMessage(const JSValue& args)
     postMessage(...args) {
         if (DISTRHO.env.webview) {
             window.host.postMessage(args);
         } else if (DISTRHO.env.network) {
-            // TODO
+            console.log(`TODO: WebSockets postMessage(${args})`);
         } else {
             console.log(`stub: postMessage(${args})`);
         }
     }
 
-    // Non-DPF callback method for receiving messages from the web host
+    // Non-DPF callback method for receiving messages from the host
     // void WebViewUI::webMessageReceived(const JSValue& args)
     messageReceived(args) {
         // default empty implementation
@@ -283,14 +283,17 @@ function buildEnvObject() {
     let env = {
         network: window.location.protocol.indexOf('http') == 0
     };
+
     if (window.host !== undefined) {
-        env = window.host.env || {};
         env.webview = true;
-        delete window.host.env;
+        if (window.host.env) {
+            Object.assign(env, window.host.env);
+            delete window.host.env;
+        }
     } else {
-        env = {};
         env.webview = false;
     }
+    
     return Object.freeze(env);
 }
 
