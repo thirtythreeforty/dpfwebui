@@ -19,6 +19,8 @@
 #ifndef WEBVIEW_UI_HPP
 #define WEBVIEW_UI_HPP
 
+#include <vector>
+
 #include "WebUIBase.hpp"
 #include "WebViewBase.hpp"
 
@@ -69,7 +71,7 @@ protected:
     void flushInitMessageQueue();
     void setKeyboardFocus(bool focus);
 
-    void postMessage(const JSValue::vector& args) override;
+    void postMessage(const JSValue& args) override;
 
     void uiIdle() override;
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -90,10 +92,10 @@ private:
     // WebViewEventHandler
 
     virtual void handleWebViewLoadFinished() override;
-    virtual void handleWebViewScriptMessage(const JSValue::vector& args) override;
+    virtual void handleWebViewScriptMessage(const JSValue& args) override;
     virtual void handleWebViewConsole(const String& tag, const String& text) override;
 
-    typedef std::vector<JSValue::vector> InitMessageQueue;
+    typedef std::vector<JSValue> InitMessageQueue;
 
     uint              fInitialWidth;
     uint              fInitialHeight;

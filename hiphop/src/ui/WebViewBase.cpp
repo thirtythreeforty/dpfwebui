@@ -107,12 +107,12 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
     fHandler = handler;
 }
 
-void WebViewBase::postMessage(const JSValue::vector& args)
+void WebViewBase::postMessage(const JSValue& args)
 {
     // This method implements something like a "reverse postMessage()" aiming to
     // keep the bridge symmetrical. Global window.host is an EventTarget that
     // can be listened for messages.
-    String payload = JSValue(args).toJSON();
+    String payload = args.toJSON();
 
     if (fPrintTraffic) {
         d_stderr("cpp->js : %s", payload.buffer());
@@ -137,15 +137,15 @@ void WebViewBase::handleLoadFinished()
     }
 }
 
-void WebViewBase::handleScriptMessage(const JSValue::vector& args)
+void WebViewBase::handleScriptMessage(const JSValue& args)
 {
-    if ((args.size() == 3) && (args[0].getString() == "console")) {
+    if ((args.getArraySize() == 3) && (args[0].getString() == "console")) {
         if (fHandler != nullptr) {
             fHandler->handleWebViewConsole(args[1].getString(), args[2].getString());
         }
     } else {
         if (fPrintTraffic) {
-            d_stderr("cpp<-js : %s", JSValue(args).toJSON().buffer());
+            d_stderr("cpp<-js : %s", args.toJSON().buffer());
         }
         
         if (fHandler != nullptr) {

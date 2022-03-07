@@ -51,12 +51,12 @@ protected:
     void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) override;
 #endif
 
-    virtual void postMessage(const JSValue::vector& args) = 0;
-    virtual void onMessageReceived(const JSValue::vector& args);
+    virtual void postMessage(const JSValue& args) = 0;
+    virtual void onMessageReceived(const JSValue& args);
 
-    void handleMessage(const JSValue::vector& args);
+    void handleMessage(const JSValue& args);
 
-    typedef std::function<void(const JSValue::vector& args)> MessageHandler;
+    typedef std::function<void(const JSValue& args)> MessageHandler;
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
 

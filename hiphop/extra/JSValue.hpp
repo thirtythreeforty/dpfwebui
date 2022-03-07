@@ -20,7 +20,6 @@
 #define JS_VALUE_HPP
 
 #include <initializer_list>
-#include <vector>
 
 #include "distrho/extra/String.hpp"
 
@@ -43,20 +42,13 @@ public:
     JSValue(const char* s) noexcept;
     JSValue(std::initializer_list<JSValue> l) noexcept;
 
-    // Copy constructor
+    // Copy semantics
     JSValue(const JSValue& v) noexcept;
-
-    // Copy assignment
     JSValue& operator=(const JSValue& v) noexcept;
 
     // Factory methods
     static JSValue createArray() noexcept;
     static JSValue createObject() noexcept;
-
-    // Conversion from/to STL vector, this will be eventually removed.
-    typedef std::vector<JSValue> vector;
-    JSValue(const vector& v) noexcept;
-    vector toVector() noexcept;
 
     // Destructor
     ~JSValue();
@@ -73,20 +65,25 @@ public:
     double  getNumber() const noexcept;
     String  getString() const noexcept;
     int     getArraySize() const noexcept;
-    JSValue get(int idx) const noexcept;
-    JSValue get(const char* key) const noexcept;
+    JSValue getArrayItem(int idx) const noexcept;
+    JSValue getObjectItem(const char* key) const noexcept;
+    JSValue operator[](int idx) const noexcept;
+    JSValue operator[](const char* key) const noexcept;
 
     // Setters
-    void push(const JSValue& value);
-    void set(const char* key, const JSValue& value);
+    void pushArrayItem(const JSValue& value) noexcept;
+    void setObjectItem(const char* key, const JSValue& value) noexcept;
+
+    // Operations on arrays
+    JSValue sliceArray(int start, int end = -1) const noexcept;
 
     // Type casting operators
-    operator bool()   const { return getBoolean(); }
-    operator double() const { return getNumber(); }
-    operator String() const { return getString(); }
+    operator bool()   const noexcept { return getBoolean(); }
+    operator double() const noexcept { return getNumber(); }
+    operator String() const noexcept { return getString(); }
 
     // Serialization/deserialization
-    String toJSON(bool format = false) noexcept;
+    String toJSON(bool format = false) const noexcept;
     static JSValue fromJSON(const char* jsonText) noexcept;
 
 private:

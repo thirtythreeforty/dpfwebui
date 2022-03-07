@@ -41,8 +41,6 @@
 
 #define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.webkit.messageHandlers.host.postMessage(args);"
 
-USE_NAMESPACE_DISTRHO
-
 @interface DistrhoWebView: WKWebView
 @property (readonly, nonatomic) CocoaWebView* cppView;
 @property (readonly, nonatomic) NSView* pluginRootView;
@@ -51,6 +49,8 @@ USE_NAMESPACE_DISTRHO
 @interface DistrhoWebViewDelegate: NSObject<WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler>
 @property (assign, nonatomic) CocoaWebView *cppView;
 @end
+
+USE_NAMESPACE_DISTRHO
 
 CocoaWebView::CocoaWebView()
 {
@@ -243,6 +243,9 @@ void CocoaWebView::onSize(uint width, uint height)
     [openPanel release];
 }
 
+// Avoid clashing with macOS WebKit class JSValue by explicitly stating namespace
+typedef DISTRHO::JSValue JS_Value;
+
 - (void)userContentController:(WKUserContentController *)controller didReceiveScriptMessage:(WKScriptMessage *)message
 {
     (void)controller;
@@ -251,18 +254,17 @@ void CocoaWebView::onSize(uint width, uint height)
         return;
     }
 
-    // Avoid clashing with macOS WebKit class JSValue by specifying namespace
-    DISTRHO::JSValue::vector args;
+    JS_Value args = JS_Value::createArray();
 
     for (id objcArg : (NSArray *)message.body) {
         if (CFGetTypeID(objcArg) == CFBooleanGetTypeID()) {
-            args.push_back(DISTRHO::JSValue(static_cast<bool>([objcArg boolValue])));
+            args.pushArrayItem(static_cast<bool>([objcArg boolValue]));
         } else if ([objcArg isKindOfClass:[NSNumber class]]) {
-            args.push_back(DISTRHO::JSValue([objcArg doubleValue]));
+            args.pushArrayItem([objcArg doubleValue]);
         } else if ([objcArg isKindOfClass:[NSString class]]) {
-            args.push_back(DISTRHO::JSValue([objcArg cStringUsingEncoding:NSUTF8StringEncoding]));
+            args.pushArrayItem([objcArg cStringUsingEncoding:NSUTF8StringEncoding]);
         } else {
-            args.push_back(DISTRHO::JSValue()); // null
+            args.pushArrayItem(JS_Value()); // null
         }
     }
 

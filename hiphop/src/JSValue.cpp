@@ -52,19 +52,19 @@ JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
     : fImpl(cJSON_CreateArray())
 {
     for (std::initializer_list<JSValue>::const_iterator it = l.begin(); it != l.end(); ++it) {
-        push(*it);
+        pushArrayItem(*it);
     }
 }
 
 JSValue::JSValue(const JSValue& v) noexcept
 {
-    fImpl = cJSON_Duplicate(v.fImpl, true/*recurse*/);
+    fImpl = cJSON_Duplicate(v.fImpl, true);
 }
 
 JSValue& JSValue::operator=(const JSValue& v) noexcept
 {
     cJSON_Delete(fImpl);
-    fImpl = cJSON_Duplicate(v.fImpl, true/*recurse*/);
+    fImpl = cJSON_Duplicate(v.fImpl, true);
 
     return *this;
 }
@@ -77,26 +77,6 @@ JSValue JSValue::createArray() noexcept
 JSValue JSValue::createObject() noexcept
 {
     return JSValue(cJSON_CreateObject());
-}
-
-JSValue::JSValue(const vector& v) noexcept
-    : fImpl(cJSON_CreateArray())
-{
-    for (vector::const_iterator it = v.begin(); it != v.end(); ++it) {
-        push(*it);
-    }
-}
-
-JSValue::vector JSValue::toVector() noexcept
-{
-    vector v;
-    int size = cJSON_GetArraySize(fImpl);
-
-    for (int i = 0; i < size; ++i) {
-        v.push_back(JSValue(cJSON_Duplicate(cJSON_GetArrayItem(fImpl, i), true)));
-    }
-
-    return v;
 }
 
 JSValue::~JSValue()
@@ -157,27 +137,66 @@ int JSValue::getArraySize() const noexcept
     return cJSON_GetArraySize(fImpl);
 }
 
-JSValue JSValue::get(int idx) const noexcept
+JSValue JSValue::getArrayItem(int idx) const noexcept
 {
     return JSValue(cJSON_Duplicate(cJSON_GetArrayItem(fImpl, idx), true));
 }
 
-JSValue JSValue::get(const char* key) const noexcept
+JSValue JSValue::getObjectItem(const char* key) const noexcept
 {
     return JSValue(cJSON_Duplicate(cJSON_GetObjectItem(fImpl, key), true));
 }
 
-void JSValue::push(const JSValue& value)
+JSValue JSValue::operator[](int idx) const noexcept
+{
+    return getArrayItem(idx);
+}
+
+JSValue JSValue::operator[](const char* key) const noexcept
+{
+    return getObjectItem(key);
+}
+
+void JSValue::pushArrayItem(const JSValue& value) noexcept
 {
     cJSON_AddItemToArray(fImpl, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSValue::set(const char* key, const JSValue& value)
+void JSValue::setObjectItem(const char* key, const JSValue& value) noexcept
 {
     cJSON_AddItemToObject(fImpl, key, cJSON_Duplicate(value.fImpl, true));
 }
 
-String JSValue::toJSON(bool format) noexcept
+JSValue JSValue::sliceArray(int start, int end) const noexcept
+{
+    JSValue arr = createArray();
+
+    if (! isArray()) {
+        return arr;
+    }
+
+    if ((start < 0) || (start == end)) {
+        return arr;
+    }
+
+    const int size = getArraySize();
+
+    if (start >= size) {
+        return arr;
+    }
+
+    if ((end < 0)/*def value*/ || (end > size)) {
+        end = size;
+    }
+
+    for (int i = start; i < end; ++i) {
+        arr.pushArrayItem(getArrayItem(i));
+    }
+
+    return arr;
+}
+
+String JSValue::toJSON(bool format) const noexcept
 {
     char* s = format ? cJSON_Print(fImpl) : cJSON_PrintUnformatted(fImpl);
     String jsonText = String(s);
