@@ -232,6 +232,7 @@ class UIImpl extends UI {
                 console.log('UI: connected');
                 clearInterval(reconnectTimer);
                 pingTimer = setInterval(this._ping.bind(this), 1000 * pingPeriod);
+                this._ping();
             });
 
             this._socket.addEventListener('close', (ev) => {
