@@ -34,120 +34,121 @@ const pluginInstance = new PluginImpl
 // single place (index.ts) and also to make sure all declared functions show up
 // in the module imports table.
 
-declare function _get_samplerate(): f32
-declare function _get_time_position(): void
-declare function _write_midi_event(): bool
+declare function get_samplerate(): f32
+declare function get_time_position(): void
+declare function write_midi_event(): bool
 
-// Re-export host functions including glue code to support dpf.ts
+// Host functions dealing with primitives can be simply re-exported, functions
+// dealing with complex types need translation. Hide complexity from dpf.ts .
 
-export { _get_samplerate as glue_get_samplerate }
+export { get_samplerate as _get_samplerate }
 
-export function glue_write_midi_event(midiEvent: DISTRHO.MidiEvent): bool {
+export function _write_midi_event(midiEvent: DISTRHO.MidiEvent): bool {
     let midiOffset: i32 = 0
-    raw_midi_events.setUint32(midiOffset, midiEvent.frame, /* LE */ true)
+    raw_midi_events.setUint32(midiOffset, midiEvent.frame, /*LE*/true)
     midiOffset += 4
-    raw_midi_events.setUint32(midiOffset, midiEvent.data.length, /* LE */ true)
+    raw_midi_events.setUint32(midiOffset, midiEvent.data.length, /*LE*/true)
     midiOffset += 4
     for (let i = 0; i < midiEvent.data.length; ++i) {
         raw_midi_events.setUint8(midiOffset, midiEvent.data[i])
         midiOffset++
     }
-    return _write_midi_event()
+    return write_midi_event()
 }
 
-export function glue_get_time_position(): DISTRHO.TimePosition {
-    _get_time_position()
+export function _get_time_position(): DISTRHO.TimePosition {
+    get_time_position()
     let pos = new DISTRHO.TimePosition
     pos.playing = <bool>_rw_int32_0
     pos.frame = _rw_int64_0
     return pos
 }
 
-// Keep _get_label(), _get_maker() and _get_license() as function exports. They
+// Keep get_label(), get_maker() and get_license() as function exports. They
 // could be replaced with globals initialized to these function return values
 // for simpler implementation, but in the future index.ts will be automatically
 // injected into the Wasm VM (just like done with dpf.js for the web view) and
 // plugin implementations moved to "linked modules". Under such scheme the
 // guarantee that pluginInstance is already init'd at this point no longer holds.
 
-export function _get_label(): ArrayBuffer {
-    return _wtf16_to_c_string(pluginInstance.getLabel())
+export function get_label(): ArrayBuffer {
+    return wtf16_to_c_string(pluginInstance.getLabel())
 }
 
-export function _get_maker(): ArrayBuffer {
-    return _wtf16_to_c_string(pluginInstance.getMaker())
+export function get_maker(): ArrayBuffer {
+    return wtf16_to_c_string(pluginInstance.getMaker())
 }
 
-export function _get_license(): ArrayBuffer {
-    return _wtf16_to_c_string(pluginInstance.getLicense())
+export function get_license(): ArrayBuffer {
+    return wtf16_to_c_string(pluginInstance.getLicense())
 }
 
-export function _get_version(): u32 {
+export function get_version(): u32 {
     return pluginInstance.getVersion()
 }
 
-export function _get_unique_id(): i64 {
+export function get_unique_id(): i64 {
     return pluginInstance.getUniqueId()
 }
 
 // See explanation below for the odd value return convention
     
-export function _init_parameter(index: u32): void {
+export function init_parameter(index: u32): void {
     const parameter = new DISTRHO.Parameter
     pluginInstance.initParameter(index, parameter)
 
     _rw_int32_0 = parameter.hints
-    _ro_string_0 = _wtf16_to_c_string(parameter.name)
+    _ro_string_0 = wtf16_to_c_string(parameter.name)
     _rw_float32_0 = parameter.ranges.def
     _rw_float32_1 = parameter.ranges.min
     _rw_float32_2 = parameter.ranges.max
 }
 
-export function _get_parameter_value(index: u32): f32 {
+export function get_parameter_value(index: u32): f32 {
     return pluginInstance.getParameterValue(index)
 }
 
-export function _set_parameter_value(index: u32, value: f32): void {
+export function set_parameter_value(index: u32, value: f32): void {
     pluginInstance.setParameterValue(index, value)
 }
 
-export function _init_program_name(index: u32): ArrayBuffer {
+export function init_program_name(index: u32): ArrayBuffer {
     let programName = new DISTRHO.String
     pluginInstance.initProgramName(index, programName)
-    return _wtf16_to_c_string(programName.value)
+    return wtf16_to_c_string(programName.value)
 }
 
-export function _load_program(index: u32): void {
+export function load_program(index: u32): void {
     pluginInstance.loadProgram(index)
 }
 
-export function _init_state(index: u32): void {
+export function init_state(index: u32): void {
     let stateKey = new DISTRHO.String
     let defaultStateValue = new DISTRHO.String
 
     pluginInstance.initState(index, stateKey, defaultStateValue)
 
-    _ro_string_0 = _wtf16_to_c_string(stateKey.value)
-    _ro_string_1 = _wtf16_to_c_string(defaultStateValue.value)
+    _ro_string_0 = wtf16_to_c_string(stateKey.value)
+    _ro_string_1 = wtf16_to_c_string(defaultStateValue.value)
 }
 
-export function _set_state(key: ArrayBuffer, value: ArrayBuffer): void {
-    pluginInstance.setState(_c_to_wtf16_string(key), _c_to_wtf16_string(value))
+export function set_state(key: ArrayBuffer, value: ArrayBuffer): void {
+    pluginInstance.setState(c_to_wtf16_string(key), c_to_wtf16_string(value))
 }
 
-export function _get_state(key: ArrayBuffer): ArrayBuffer {
-    return _wtf16_to_c_string(pluginInstance.getState(_c_to_wtf16_string(key)))
+export function get_state(key: ArrayBuffer): ArrayBuffer {
+    return wtf16_to_c_string(pluginInstance.getState(c_to_wtf16_string(key)))
 }
 
-export function _activate(): void {
+export function activate(): void {
     pluginInstance.activate()
 }
 
-export function _deactivate(): void {
+export function deactivate(): void {
     pluginInstance.deactivate()
 }
 
-export function _run(frames: u32, midiEventCount: u32): void {
+export function run(frames: u32, midiEventCount: u32): void {
     let inputs: Float32Array[] = []
 
     for (let i: i32 = 0; i < _rw_num_inputs; ++i) {
@@ -231,11 +232,11 @@ export let _rw_string_1 = new ArrayBuffer(MAX_STRING_BYTES)
 
 // Functions for converting between AssemblyScript and C strings
 
-export function _wtf16_to_c_string(s: string): ArrayBuffer {
-    return String.UTF8.encode(s, /* null terminated */ true)
+export function wtf16_to_c_string(s: string): ArrayBuffer {
+    return String.UTF8.encode(s, /*null terminated*/true)
 }
 
-export function _c_to_wtf16_string(s: ArrayBuffer): string {
+export function c_to_wtf16_string(s: ArrayBuffer): string {
     const nullPos = Uint8Array.wrap(s).indexOf(0)
     return String.UTF8.decode(s.slice(0, nullPos))
 }

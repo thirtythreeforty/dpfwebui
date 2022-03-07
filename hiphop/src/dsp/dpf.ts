@@ -19,7 +19,7 @@
 // This file attempts to mimic the C++ public plugin interfaces. Low level
 // interactions with the host are strictly confined to index.ts .
 
-import { glue_get_samplerate, glue_get_time_position, glue_write_midi_event } from './index'
+import { _get_samplerate, _get_time_position, _write_midi_event } from './index'
 
 export default namespace DISTRHO {
 
@@ -85,17 +85,17 @@ export default namespace DISTRHO {
         
         // double Plugin::getSampleRate()
         getSampleRate(): f32 {
-            return glue_get_samplerate()
+            return _get_samplerate()
         }
 
         // const TimePosition& Plugin::getTimePosition()
         getTimePosition(): TimePosition {
-            return glue_get_time_position()
+            return _get_time_position()
         }
 
         // bool writeMidiEvent(const MidiEvent& midiEvent)
         writeMidiEvent(midiEvent: MidiEvent): bool {
-            return glue_write_midi_event(midiEvent)
+            return _write_midi_event(midiEvent)
         }
 
     }

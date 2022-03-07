@@ -414,16 +414,16 @@ own void WasmRuntime::toCValueTypeVector(WasmValueKindVector kinds, own wasm_val
 
 const char* WasmRuntime::WTF16ToCString(const WasmValue& wPtr)
 {
-    if (fModuleExports.find("_wtf16_to_c_string") == fModuleExports.end()) {
+    if (fModuleExports.find("wtf16_to_c_string") == fModuleExports.end()) {
         throw wasm_module_exception("Wasm module does not export function _wtf16_to_c_string");
     }
 
-    return callFunctionReturnCString("_wtf16_to_c_string", { wPtr });
+    return callFunctionReturnCString("wtf16_to_c_string", { wPtr });
 }
 
 WasmValue WasmRuntime::CToWTF16String(const char* s)
 {
-    if (fModuleExports.find("_c_to_wtf16_string") == fModuleExports.end()) {
+    if (fModuleExports.find("c_to_wtf16_string") == fModuleExports.end()) {
         throw wasm_module_exception("Wasm module does not export function _c_to_wtf16_string");
     }
 
@@ -431,7 +431,7 @@ WasmValue WasmRuntime::CToWTF16String(const char* s)
 
     copyCStringToMemory(wPtr, s);
 
-    return callFunctionReturnSingleValue("_c_to_wtf16_string", { wPtr });
+    return callFunctionReturnSingleValue("c_to_wtf16_string", { wPtr });
 }
 
 #if defined(HIPHOP_WASM_RUNTIME_WAMR)

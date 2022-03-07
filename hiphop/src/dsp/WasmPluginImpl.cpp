@@ -65,7 +65,7 @@ const char* WasmPlugin::getLabel() const
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        return fRuntime->callFunctionReturnCString("_get_label");
+        return fRuntime->callFunctionReturnCString("get_label");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
 
@@ -79,7 +79,7 @@ const char* WasmPlugin::getMaker() const
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        return fRuntime->callFunctionReturnCString("_get_maker");
+        return fRuntime->callFunctionReturnCString("get_maker");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
 
@@ -93,7 +93,7 @@ const char* WasmPlugin::getLicense() const
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        return fRuntime->callFunctionReturnCString("_get_license");
+        return fRuntime->callFunctionReturnCString("get_license");
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
 
@@ -107,7 +107,7 @@ uint32_t WasmPlugin::getVersion() const
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        return fRuntime->callFunctionReturnSingleValue("_get_version").of.i32;
+        return fRuntime->callFunctionReturnSingleValue("get_version").of.i32;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
 
@@ -121,7 +121,7 @@ int64_t WasmPlugin::getUniqueId() const
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        return fRuntime->callFunctionReturnSingleValue("_get_unique_id").of.i64;
+        return fRuntime->callFunctionReturnSingleValue("get_unique_id").of.i64;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
 
@@ -135,7 +135,7 @@ void WasmPlugin::initParameter(uint32_t index, Parameter& parameter)
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        fRuntime->callFunction("_init_parameter", { MakeI32(index) });
+        fRuntime->callFunction("init_parameter", { MakeI32(index) });
         parameter.hints      = fRuntime->getGlobal("_rw_int32_0").of.i32;
         parameter.name       = fRuntime->getGlobalAsCString("_ro_string_0");
         parameter.ranges.def = fRuntime->getGlobal("_rw_float32_0").of.f32;
@@ -152,7 +152,7 @@ float WasmPlugin::getParameterValue(uint32_t index) const
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        return fRuntime->callFunctionReturnSingleValue("_get_parameter_value",
+        return fRuntime->callFunctionReturnSingleValue("get_parameter_value",
             { MakeI32(index) }).of.f32;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
@@ -167,7 +167,7 @@ void WasmPlugin::setParameterValue(uint32_t index, float value)
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        fRuntime->callFunction("_set_parameter_value", { MakeI32(index), MakeF32(value) });
+        fRuntime->callFunction("set_parameter_value", { MakeI32(index), MakeF32(value) });
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -180,7 +180,7 @@ void WasmPlugin::initProgramName(uint32_t index, String& programName)
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        programName = fRuntime->callFunctionReturnCString("_init_program_name", { MakeI32(index) });
+        programName = fRuntime->callFunctionReturnCString("init_program_name", { MakeI32(index) });
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -192,7 +192,7 @@ void WasmPlugin::loadProgram(uint32_t index)
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        fRuntime->callFunction("_load_program", { MakeI32(index) });
+        fRuntime->callFunction("load_program", { MakeI32(index) });
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -208,7 +208,7 @@ void WasmPlugin::initState(uint32_t index, String& stateKey, String& defaultStat
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        fRuntime->callFunction("_init_state", { MakeI32(index) });
+        fRuntime->callFunction("init_state", { MakeI32(index) });
         const char* key = fRuntime->getGlobalAsCString("_ro_string_0");
         const char* val = fRuntime->getGlobalAsCString("_ro_string_1");
 
@@ -234,7 +234,7 @@ void WasmPlugin::setState(const char* key, const char* value)
         fRuntime->copyCStringToMemory(wkey, key);
         const WasmValue wval = fRuntime->getGlobal("_rw_string_1");
         fRuntime->copyCStringToMemory(wval, value);
-        fRuntime->callFunction("_set_state", { wkey, wval });
+        fRuntime->callFunction("set_state", { wkey, wval });
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }
@@ -249,7 +249,7 @@ String WasmPlugin::getState(const char* key) const
 
         const WasmValue wkey = fRuntime->getGlobal("_rw_string_0");
         fRuntime->copyCStringToMemory(wkey, key);
-        const char* val = fRuntime->callFunctionReturnCString("_get_state", { wkey });
+        const char* val = fRuntime->callFunctionReturnCString("get_state", { wkey });
 
         return String(val);
     } catch (const std::exception& ex) {
@@ -268,7 +268,7 @@ void WasmPlugin::activate()
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        fRuntime->callFunction("_activate");
+        fRuntime->callFunction("activate");
         fActive = true;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
@@ -281,7 +281,7 @@ void WasmPlugin::deactivate()
         CHECK_INSTANCE();
         SCOPED_RUNTIME_LOCK();
 
-        fRuntime->callFunction("_deactivate");
+        fRuntime->callFunction("deactivate");
         fActive = false;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
@@ -326,7 +326,7 @@ void WasmPlugin::deactivate()
             midiBlock += midiEvents[i].size;
         }
 
-        fRuntime->callFunction("_run", { MakeI32(frames), MakeI32(midiEventCount) });
+        fRuntime->callFunction("run", { MakeI32(frames), MakeI32(midiEventCount) });
 
         audioBlock = reinterpret_cast<float32_t *>(fRuntime->getMemory(
             fRuntime->getGlobal("_rw_output_block")));
@@ -366,11 +366,11 @@ void WasmPlugin::loadWasmBinary(const unsigned char* data, size_t size)
     // This has no effect on the host parameters but might be needed by the
     // plugin code to properly initialize.
     for (uint32_t i = 0; i < 128; ++i) {
-        fRuntime->callFunction("_init_parameter", { MakeI32(i) });
+        fRuntime->callFunction("init_parameter", { MakeI32(i) });
     }
 
     if (fActive) {
-        fRuntime->callFunction("_activate");
+        fRuntime->callFunction("activate");
     }
 }
 #endif // defined(HIPHOP_SHARED_MEMORY_SIZE)
@@ -436,15 +436,15 @@ void WasmPlugin::onModuleLoad()
 {
     WasmFunctionMap hostFunc;
 
-    hostFunc["_get_samplerate"] = { {}, { WASM_F32 }, [this](WasmValueVector) -> WasmValueVector {
+    hostFunc["get_samplerate"] = { {}, { WASM_F32 }, [this](WasmValueVector) -> WasmValueVector {
         return { MakeF32(getSampleRate()) };
     }};
 
-    hostFunc["_get_time_position"] = { {}, {}, 
+    hostFunc["get_time_position"] = { {}, {}, 
         std::bind(&WasmPlugin::getTimePosition, this, std::placeholders::_1)
     };
 
-    hostFunc["_write_midi_event"] = { {}, { WASM_I32 }, 
+    hostFunc["write_midi_event"] = { {}, { WASM_I32 }, 
         std::bind(&WasmPlugin::writeMidiEvent, this, std::placeholders::_1)
     };
 
