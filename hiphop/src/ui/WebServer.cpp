@@ -102,7 +102,7 @@ void WebServer::injectScript(String& script)
     fInjectedScripts.push_back(script);
 }
 
-void WebServer::process()
+void WebServer::serve()
 {
     // Avoid blocking on some platforms by passing timeout=-1
     // https://github.com/warmcat/libwebsockets/issues/1735

@@ -119,7 +119,7 @@ String NetworkUI::getPublicUrl()
 
 void NetworkUI::uiIdle()
 {
-    fServer.process();
+    fServer.serve();
 }
 
 void NetworkUI::postMessage(const JSValue& args)

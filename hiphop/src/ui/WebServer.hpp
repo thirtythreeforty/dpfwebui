@@ -38,7 +38,7 @@ public:
 
     virtual void injectScript(String& script);
 
-    void process();
+    void serve();
 
 private:
     static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
