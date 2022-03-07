@@ -22,34 +22,42 @@ USE_NAMESPACE_DISTRHO
 
 JSValue::JSValue() noexcept
     : fImpl(cJSON_CreateNull())
+    , fOwn(true)
 {}
 
 JSValue::JSValue(bool b) noexcept
     : fImpl(b ? cJSON_CreateTrue() : cJSON_CreateFalse())
+    , fOwn(true)
 {}
 
 JSValue::JSValue(double d) noexcept
     : fImpl(cJSON_CreateNumber(d))
+    , fOwn(true)
 {}
 
 JSValue::JSValue(String s) noexcept
     : fImpl(cJSON_CreateString(s))
+    , fOwn(true)
 {}
 
 JSValue::JSValue(uint32_t i) noexcept
     : fImpl(cJSON_CreateNumber(static_cast<double>(i)))
+    , fOwn(true)
 {}
 
 JSValue::JSValue(float f) noexcept
     : fImpl(cJSON_CreateNumber(static_cast<double>(f)))
+    , fOwn(true)
 {}
 
 JSValue::JSValue(const char* s) noexcept
     : fImpl(cJSON_CreateString(s))
+    , fOwn(true)
 {}
 
 JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
     : fImpl(cJSON_CreateArray())
+    , fOwn(true)
 {
     for (std::initializer_list<JSValue>::const_iterator it = l.begin(); it != l.end(); ++it) {
         pushArrayItem(*it);
@@ -57,34 +65,63 @@ JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
 }
 
 JSValue::JSValue(const JSValue& v) noexcept
-{
-    fImpl = cJSON_Duplicate(v.fImpl, true);
-}
+    : fImpl(cJSON_Duplicate(v.fImpl, true/*recurse*/))
+    , fOwn(true)
+{}
 
 JSValue& JSValue::operator=(const JSValue& v) noexcept
 {
-    cJSON_Delete(fImpl);
-    fImpl = cJSON_Duplicate(v.fImpl, true);
+    if (fOwn) {
+        cJSON_Delete(fImpl);
+    }
+
+    fImpl = cJSON_Duplicate(v.fImpl, true/*recurse*/);
+    fOwn = true;
 
     return *this;
 }
 
+JSValue::JSValue(JSValue&& v) noexcept
+{
+    fImpl = v.fImpl;
+    fOwn = v.fOwn;
+    v.fImpl = nullptr;
+    v.fOwn = false;
+}
+
+JSValue& JSValue::operator=(JSValue&& v) noexcept
+{
+    if (this != &v) {
+        if (fOwn) {
+            cJSON_Delete(fImpl);
+        }
+
+        fImpl = v.fImpl;
+        fOwn = v.fOwn;
+        v.fImpl = nullptr;
+        v.fOwn = false;
+    }
+
+   return *this;
+}
+
 JSValue JSValue::createArray() noexcept
 {
-    return JSValue(cJSON_CreateArray());
+    return JSValue(cJSON_CreateArray(), true/*own*/);
 }
 
 JSValue JSValue::createObject() noexcept
 {
-    return JSValue(cJSON_CreateObject());
+    return JSValue(cJSON_CreateObject(), true/*own*/);
 }
 
 JSValue::~JSValue()
 {
-    if (fImpl != nullptr) {
+    if (fOwn && (fImpl != nullptr)) {
         cJSON_Delete(fImpl);
-        fImpl = nullptr;
     }
+
+    fImpl = nullptr;
 }
 
 bool JSValue::isNull() const noexcept
@@ -139,12 +176,12 @@ int JSValue::getArraySize() const noexcept
 
 JSValue JSValue::getArrayItem(int idx) const noexcept
 {
-    return JSValue(cJSON_Duplicate(cJSON_GetArrayItem(fImpl, idx), true));
+    return JSValue(cJSON_GetArrayItem(fImpl, idx), false/*own*/);
 }
 
 JSValue JSValue::getObjectItem(const char* key) const noexcept
 {
-    return JSValue(cJSON_Duplicate(cJSON_GetObjectItem(fImpl, key), true));
+    return JSValue(cJSON_GetObjectItem(fImpl, key), false/*own*/);
 }
 
 JSValue JSValue::operator[](int idx) const noexcept
@@ -159,12 +196,12 @@ JSValue JSValue::operator[](const char* key) const noexcept
 
 void JSValue::pushArrayItem(const JSValue& value) noexcept
 {
-    cJSON_AddItemToArray(fImpl, cJSON_Duplicate(value.fImpl, true));
+    cJSON_AddItemToArray(fImpl, cJSON_Duplicate(value.fImpl, true/*recurse*/));
 }
 
 void JSValue::setObjectItem(const char* key, const JSValue& value) noexcept
 {
-    cJSON_AddItemToObject(fImpl, key, cJSON_Duplicate(value.fImpl, true));
+    cJSON_AddItemToObject(fImpl, key, cJSON_Duplicate(value.fImpl, true/*recurse*/));
 }
 
 JSValue JSValue::sliceArray(int start, int end) const noexcept
@@ -207,9 +244,10 @@ String JSValue::toJSON(bool format) const noexcept
 
 JSValue JSValue::fromJSON(const char* jsonText) noexcept
 {
-    return JSValue(cJSON_Parse(jsonText));
+    return JSValue(cJSON_Parse(jsonText), true/*own*/);
 }
 
-JSValue::JSValue(cJSON* impl) noexcept
+JSValue::JSValue(cJSON* impl, bool own) noexcept
     : fImpl(impl)
+    , fOwn(own)
 {}

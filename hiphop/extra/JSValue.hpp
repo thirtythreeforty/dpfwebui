@@ -42,9 +42,11 @@ public:
     JSValue(const char* s) noexcept;
     JSValue(std::initializer_list<JSValue> l) noexcept;
 
-    // Copy semantics
+    // Copy and move semantics
     JSValue(const JSValue& v) noexcept;
     JSValue& operator=(const JSValue& v) noexcept;
+    JSValue(JSValue&& v) noexcept;
+    JSValue& operator=(JSValue&& v) noexcept;
 
     // Factory methods
     static JSValue createArray() noexcept;
@@ -87,9 +89,10 @@ public:
     static JSValue fromJSON(const char* jsonText) noexcept;
 
 private:
-    JSValue(cJSON* impl) noexcept;
+    JSValue(cJSON* impl, bool own) noexcept;
 
     cJSON* fImpl;
+    bool   fOwn;
 
 };
 
