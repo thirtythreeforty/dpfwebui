@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-class TeleplugExampleUI extends DISTRHO.UI {
+class TeleFxExampleUI extends DISTRHO.UI {
 
     constructor() {
         super();

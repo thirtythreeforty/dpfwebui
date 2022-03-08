@@ -20,18 +20,18 @@
 
 START_NAMESPACE_DISTRHO
 
-class TeleplugExamplePlugin : public PluginEx
+class TeleFxExamplePlugin : public PluginEx
 {
 public:
-    TeleplugExamplePlugin()
+    TeleFxExamplePlugin()
         : PluginEx(0 /*parameters*/, 0 /*programs*/, 0 /*states*/)
     {}
 
-    ~TeleplugExamplePlugin() {}
+    ~TeleFxExamplePlugin() {}
 
     const char* getLabel() const override
     {
-        return "Teleplug";
+        return "TeleFX";
     }
 
     const char* getMaker() const override
@@ -51,7 +51,7 @@ public:
 
     int64_t getUniqueId() const override
     {
-        return d_cconst('H', 'H', 't', 'p');
+        return d_cconst('H', 'H', 't', 'f');
     }
 
     void initParameter(uint32_t index, Parameter& parameter) override
@@ -93,13 +93,13 @@ public:
 
 private:
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TeleplugExamplePlugin)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TeleFxExamplePlugin)
 
 };
 
 Plugin* createPlugin()
 {
-    return new TeleplugExamplePlugin;
+    return new TeleFxExamplePlugin;
 }
 
 END_NAMESPACE_DISTRHO

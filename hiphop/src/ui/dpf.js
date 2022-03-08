@@ -417,7 +417,7 @@ UIHelperPrivate.applyUiTweaks();
 //
 return {
     UI: UIImpl,
-    UIHelper: UIHelper
+    UIHelper: UIHelper,
     env: UIHelperPrivate.buildEnvObject()
 };
 
