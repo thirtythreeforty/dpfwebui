@@ -10,25 +10,25 @@ DPF_TARGET_DIR ?= bin
 # Location for object files
 DPF_BUILD_DIR ?= build
 
-# WebAssembly runtime library <wamr|wasmer>
+# WebAssembly runtime library [ wamr | wasmer ]
 HIPHOP_WASM_RUNTIME ?= wamr
 
-# WebAssembly execution mode - WAMR <aot|interp>, Wasmer <jit>
+# WebAssembly execution mode - WAMR [ aot | interp ], Wasmer [ jit ]
 HIPHOP_WASM_MODE ?= aot
 
 # WebAssembly System Interface only available for Wasmer
 HIPHOP_WASM_WASI ?= false
 
-# [WIP] Enable built-in websockets server and load content over HTTP
+# (WIP) Enable built-in websockets server and load content over HTTP
 HIPHOP_NETWORK_UI ?= false
 
-# [WIP] Enable HTTPS and secure WebSockets
+# (WIP) Enable HTTPS and secure WebSockets
 HIPHOP_NETWORK_SSL ?= false
 
 # Automatically inject dpf.js when loading content from file://
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
 
-# Web view implementation on Linux <gtk|cef>
+# Web view implementation on Linux [ gtk | cef ]
 HIPHOP_LINUX_WEBVIEW ?= gtk
 
 # Universal build only available for non-network web UI and Wasmer DSP
@@ -38,6 +38,9 @@ HIPHOP_MACOS_UNIVERSAL ?= false
 # Support macOS down to High Sierra when WKWebView was introduced. This setting
 # must be enabled when compiling on newer systems otherwise plugins will crash.
 HIPHOP_MACOS_OLD ?= false
+
+# Build a rough and incomplete JACK application for development purposes
+HIPHOP_MACOS_DEV_STANDALONE ?= false
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
@@ -347,6 +350,19 @@ TARGETS += info
 
 info:
 	@echo "Building $(NAME)"
+
+# ------------------------------------------------------------------------------
+# Development - JACK-based application
+
+ifeq ($(HIPHOP_MACOS_DEV_STANDALONE),true)
+ifeq ($(MACOS),true)
+ifeq ($(HAVE_JACK),true)
+ifeq ($(HAVE_OPENGL),true)
+TARGETS += jack
+endif
+endif
+endif
+endif
 
 # ------------------------------------------------------------------------------
 # Dependency - Build DPF Graphics Library

@@ -10,7 +10,7 @@
 NAME = d_hotswap
 
 # --------------------------------------------------------------
-# Project version, used for generating unique symbol names
+# Project version for generating unique symbol names
 
 HIPHOP_PROJECT_VERSION = 1
 
@@ -44,12 +44,6 @@ include ../../Makefile.plugins.mk
 
 # --------------------------------------------------------------
 # Enable all possible plugin types
-
-ifeq ($(MACOS),true)
-ifeq ($(HAVE_JACK),true)
-TARGETS += jack
-endif
-endif
 
 TARGETS += lv2_sep vst vst3
 
