@@ -16,15 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "DistrhoPlugin.hpp"
+#include "extra/PluginEx.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class TeleplugExamplePlugin : public Plugin
+class TeleplugExamplePlugin : public PluginEx
 {
 public:
     TeleplugExamplePlugin()
-        : Plugin(0 /*parameters*/, 0 /*programs*/, 0 /*states*/)
+        : PluginEx(0 /*parameters*/, 0 /*programs*/, 0 /*states*/)
     {}
 
     ~TeleplugExamplePlugin() {}
@@ -80,32 +80,6 @@ public:
         // TODO
 
     }
-
-#if DISTRHO_PLUGIN_WANT_STATE
-    void initState(uint32_t index, String& stateKey, String& defaultStateValue) override
-    {
-        // unused
-        (void)index;
-        (void)stateKey;
-        (void)defaultStateValue;
-    }
-
-    void setState(const char* key, const char* value) override
-    {
-        // unused
-        (void)key;
-        (void)value;
-    }
-
-#if DISTRHO_PLUGIN_WANT_FULL_STATE
-    String getState(const char* key) const override
-    {
-        // unused
-        (void)key;
-        return String();
-    }
-#endif // DISTRHO_PLUGIN_WANT_FULL_STATE
-#endif // DISTRHO_PLUGIN_WANT_STATE
 
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {

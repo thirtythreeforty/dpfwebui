@@ -280,7 +280,6 @@ class UIImpl extends UI {
 
     // Handle incoming message
     _messageReceived(args) {
-        console.log(args);
         if (args[0] != 'UI') {
             this.messageReceived(args); // passthrough
             return;

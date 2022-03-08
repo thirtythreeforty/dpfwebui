@@ -109,22 +109,25 @@ LIB_DIR_VST2_MACOS = $(DPF_TARGET_DIR)/$(NAME).vst/Contents/Resources
 LIB_DIR_NOBUNDLE = $(DPF_TARGET_DIR)/$(NAME)-lib
 
 # ------------------------------------------------------------------------------
-# Add optional support for AssemblyScript DSP
+# Support some features missing from DPF like shared memory
+
+HIPHOP_FILES_DSP = PluginEx.cpp
+HIPHOP_FILES_UI  = UIEx.cpp
+
+# ------------------------------------------------------------------------------
+# Optional support for AssemblyScript DSP
 
 ifeq ($(WASM_DSP),true)
-HIPHOP_FILES_DSP  = PluginEx.cpp \
+HIPHOP_FILES_DSP += PluginEx.cpp \
                     WasmPluginImpl.cpp \
                     WasmRuntime.cpp
-
-FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/dsp/%)
 endif
 
 # ------------------------------------------------------------------------------
-# Add optional support for web UI
+# Optional support for web UI
 
 ifeq ($(WEB_UI),true)
-HIPHOP_FILES_UI  = UIEx.cpp \
-                   WebUIBase.cpp \
+HIPHOP_FILES_UI += WebUIBase.cpp \
                    WebViewBase.cpp \
                    WebViewUI.cpp \
                    ../JSValue.cpp \
@@ -148,9 +151,10 @@ HIPHOP_FILES_UI += windows/WindowsWebViewUI.cpp \
                    windows/EdgeWebView.cpp \
                    windows/WebView2EventHandler.cpp
 endif
-
-FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/ui/%)
 endif
+
+FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/dsp/%)
+FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/ui/%)
 
 # ------------------------------------------------------------------------------
 # Optional support for macOS universal binaries, keep this before DPF include.
