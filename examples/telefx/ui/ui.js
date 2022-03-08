@@ -38,11 +38,16 @@ class TeleFxExampleUI extends DISTRHO.UI {
                     this.openSystemWebBrowser(url);
                 });
             });
-        } else {
+        } else if (DISTRHO.env.network) {
             // Content to display in external web clients
             const hello = document.createElement('div');
             hello.innerText = 'Hello external client';
             main.appendChild(hello);
+        } else {
+            // Content to display in DOS [Directly Open Source] mode ;)
+            const error = document.createElement('div');
+            error.innerText = 'This program cannot be run in DOS mode';
+            main.appendChild(error);
         }
 
         document.body.style.visibility = 'visible';
