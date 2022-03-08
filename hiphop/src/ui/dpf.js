@@ -141,8 +141,18 @@ class UI {
     }
 
     // Non-DPF callback method for receiving messages from the host
-    // void WebViewUI::webMessageReceived(const JSValue& args)
+    // void WebUIBase::onMessageReceived(const JSValue& args)
     messageReceived(args) {
+        // default empty implementation
+    }
+
+    // Non-DPF local callback that fires when the message channel is open
+    messageChannelOpen() {
+        // default empty implementation
+    }
+
+    // Non-DPF local callback that fires when the message channel is closed
+    messageChannelClosed() {
         // default empty implementation
     }
 
@@ -176,7 +186,7 @@ class UI {
         return this._callAndExpectReply('getPublicUrl');
     }
 
-    // Returns measured latency in milliseconds
+    // Non-DPF local getter that returns measured latency in milliseconds
     get latency() {
         return this._latency;
     }
@@ -215,6 +225,7 @@ class UIImpl extends UI {
     // Initialize native C++/JS message channel for the local webview
     _initLocalMessageChannel() {
         window.host.addMessageListener(this._messageReceived.bind(this));
+        this.messageChannelOpen();
     }
 
     // Initialize WebSockets-based message channel for network clients
@@ -233,6 +244,7 @@ class UIImpl extends UI {
                 clearInterval(reconnectTimer);
                 pingTimer = setInterval(this._ping.bind(this), 1000 * pingPeriod);
                 this._ping();
+                this.messageChannelOpen();
             });
 
             this._socket.addEventListener('close', (ev) => {
@@ -240,6 +252,7 @@ class UIImpl extends UI {
                 clearInterval(pingTimer);
                 clearInterval(reconnectTimer);
                 reconnectTimer = setInterval(open, 1000 * reconnectPeriod);
+                this.messageChannelClosed();
             });
 
             this._socket.addEventListener('message', (ev) => {
@@ -304,9 +317,42 @@ class UIImpl extends UI {
 }
 
 //
-// Static initialization
+// Public utility functions
 //
 class UIHelper {
+
+    static enableDisconnectionModal(ui) {
+        // Monkey patch UI message channel callbacks
+        const openUiCallback = ui.messageChannelOpen;
+        const closedUiCallback = ui.messageChannelClosed;
+
+        ui.messageChannelOpen = () => {
+            openUiCallback();
+
+            // TODO
+            console.log('TODO : hide disconnection modal');
+        };
+
+        ui.messageChannelClosed = () => {
+            closedUiCallback();
+
+            // TODO
+            console.log('TODO : show disconnection modal');
+        };
+    }
+
+    static showQRCodeModal() {
+
+        // TODO
+
+    }
+
+}
+
+//
+// Private utility functions
+//
+class UIHelperPrivate {
 
     static applyUiTweaks() {
         // Disable context menu
@@ -354,13 +400,14 @@ class UIHelper {
 //
 // Basic setup to make the web UI behave a bit more like a native UI 
 //
-UIHelper.applyUiTweaks();
+UIHelperPrivate.applyUiTweaks();
 
 //
 // Return namespace, see const DISTRHO = ... definition above.
 //
 // DISTRHO {
-//    UI:  class        Base class for UIs, approximately matches C++ version.
+//    UI:       class   Base class for UIs, approximately mirrors C++ version.
+//    UIHelper: class   Web browser oriented utility functions
 //    env: {            Information about the environment
 //       network: bool  True when document loaded via HTTP
 //       webview: bool  True when running in the plugin web view
@@ -369,8 +416,9 @@ UIHelper.applyUiTweaks();
 // }
 //
 return {
-    UI:  UIImpl,
-    env: UIHelper.buildEnvObject()
+    UI: UIImpl,
+    UIHelper: UIHelper
+    env: UIHelperPrivate.buildEnvObject()
 };
 
 

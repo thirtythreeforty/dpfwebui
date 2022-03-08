@@ -21,9 +21,13 @@ class TeleplugExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
+        // Automatically display a modal view when message channel closes
+        DISTRHO.UIHelper.enableDisconnectionModal(this);
+
         const main = document.getElementById('main'); 
 
         if (DISTRHO.env.webview) {
+            // Content to display in the plugin embedded web view
             const openBrowser = document.createElement('a');
             main.appendChild(openBrowser);
 
@@ -35,6 +39,7 @@ class TeleplugExampleUI extends DISTRHO.UI {
                 });
             });
         } else {
+            // Content to display in external web clients
             const hello = document.createElement('div');
             hello.innerText = 'Hello external client';
             main.appendChild(hello);
