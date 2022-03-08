@@ -341,7 +341,13 @@ class UIHelper {
         };
     }
 
-    static showQRCodeModal() {
+    static getQRCodeHtml(ui) {
+
+        // TODO
+
+    }
+
+    static showQRCodeModal(ui) {
 
         // TODO
 
@@ -408,6 +414,7 @@ UIHelperPrivate.applyUiTweaks();
 // DISTRHO {
 //    UI:       class   Base class for UIs, approximately mirrors C++ version.
 //    UIHelper: class   Web browser oriented utility functions
+//    Base64:   object  Base64 codec from MDN
 //    env: {            Information about the environment
 //       network: bool  True when document loaded via HTTP
 //       webview: bool  True when running in the plugin web view
@@ -418,9 +425,15 @@ UIHelperPrivate.applyUiTweaks();
 return {
     UI: UIImpl,
     UIHelper: UIHelper,
+    Base64: {
+        encode: base64EncArr,
+        decode: base64DecToArr
+    },
     env: UIHelperPrivate.buildEnvObject()
 };
 
+
+// Copy and pasted vendor code
 
 /*\
 |*|

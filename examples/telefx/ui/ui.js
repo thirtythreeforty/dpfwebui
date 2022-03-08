@@ -21,7 +21,7 @@ class TeleFxExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
-        // Automatically display a modal view when message channel closes
+        // Automatically display a modal view when connection is lost
         DISTRHO.UIHelper.enableDisconnectionModal(this);
 
         const main = document.getElementById('main'); 
@@ -38,11 +38,13 @@ class TeleFxExampleUI extends DISTRHO.UI {
                     this.openSystemWebBrowser(url);
                 });
             });
+
         } else if (DISTRHO.env.network) {
             // Content to display in external web clients
             const hello = document.createElement('div');
             hello.innerText = 'Hello external client';
             main.appendChild(hello);
+
         } else {
             // Content to display in Directly Open Source mode ;)
             const error = document.createElement('div');
@@ -51,6 +53,8 @@ class TeleFxExampleUI extends DISTRHO.UI {
         }
 
         document.body.style.visibility = 'visible';
+
+        console.log(DISTRHO.Base64.encode([0,1,2]));
     }
 
 }
