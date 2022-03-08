@@ -44,7 +44,7 @@ class TeleFxExampleUI extends DISTRHO.UI {
             hello.innerText = 'Hello external client';
             main.appendChild(hello);
         } else {
-            // Content to display in DOS [Directly Open Source] mode ;)
+            // Content to display in Directly Open Source mode ;)
             const error = document.createElement('div');
             error.innerText = 'This program cannot be run in DOS mode';
             main.appendChild(error);

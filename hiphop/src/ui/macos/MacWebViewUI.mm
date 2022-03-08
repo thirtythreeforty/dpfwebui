@@ -74,7 +74,9 @@ uintptr_t MacWebViewUI::createStandaloneWindow()
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     [NSApp activateIgnoringOtherApps:YES];
 
-    CGRect contentRect = NSMakeRect(0, 0, (CGFloat)getWidth(), (CGFloat)getHeight());
+    CGFloat k = [NSScreen mainScreen].backingScaleFactor;
+
+    CGRect contentRect = NSMakeRect(0, 0, (CGFloat)getWidth() / k, (CGFloat)getHeight() / k);
     NSWindowStyleMask styleMask = NSWindowStyleMaskClosable | NSWindowStyleMaskResizable | NSWindowStyleMaskTitled;
     NSWindow* window = [[NSWindow alloc] initWithContentRect:contentRect
                                                    styleMask:styleMask
