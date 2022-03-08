@@ -23,10 +23,10 @@ HIPHOP_AS_DSP_PATH = dsp
 # Files to build
 
 FILES_DSP = \
-    AsToneExamplePlugin.cpp
+    ASToneExamplePlugin.cpp
 
 FILES_UI  = \
-    AsToneExampleUI.cpp \
+    ASToneExampleUI.cpp \
     ui/Blendish.cpp
 
 # --------------------------------------------------------------

@@ -20,7 +20,7 @@ import DISTRHO from './dpf'
 
 const PI_2: f32 = Mathf.PI * 2
 
-export default class AsToneExamplePlugin extends DISTRHO.Plugin implements DISTRHO.PluginInterface {
+export default class ASToneExamplePlugin extends DISTRHO.Plugin implements DISTRHO.PluginInterface {
 
     private samplerate: f32
     private frequency: f32

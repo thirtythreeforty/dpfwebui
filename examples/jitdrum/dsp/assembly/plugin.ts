@@ -21,7 +21,7 @@ import DISTRHO from './dpf'
 const PUNCH: f32 = 4.0
 const DECAY: f32 = 10.0
 
-export default class JitDrumExamplePlugin extends DISTRHO.Plugin implements DISTRHO.PluginInterface {
+export default class JITDrumExamplePlugin extends DISTRHO.Plugin implements DISTRHO.PluginInterface {
 
     private sr: f32 // samplerate
     private t: i32  // frames since note start

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-class JitDrumExampleUI extends DISTRHO.UI {
+class JITDrumExampleUI extends DISTRHO.UI {
 
     constructor() {
         super();

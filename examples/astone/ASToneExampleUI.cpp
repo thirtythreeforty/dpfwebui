@@ -23,10 +23,10 @@
 
 START_NAMESPACE_DISTRHO
 
-class AsToneExampleUI : public UI, public KnobEventHandler::Callback
+class ASToneExampleUI : public UI, public KnobEventHandler::Callback
 {
 public:
-    AsToneExampleUI()
+    ASToneExampleUI()
         : UI(240 /*width*/, 160 /*height*/)
         , fBlendish(this)
         , fKnob(&fBlendish)
@@ -47,7 +47,7 @@ public:
         fKnob.setCallback(this);
     }
 
-    ~AsToneExampleUI() {}
+    ~ASToneExampleUI() {}
 
     void knobDragStarted(SubWidget*) override {}
     void knobDragFinished(SubWidget*) override {}
@@ -73,13 +73,13 @@ private:
     BlendishSubWidgetSharedContext fBlendish;
     BlendishKnob fKnob;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AsToneExampleUI)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ASToneExampleUI)
 
 };
 
 UI* createUI()
 {
-    return new AsToneExampleUI;
+    return new ASToneExampleUI;
 }
 
 END_NAMESPACE_DISTRHO

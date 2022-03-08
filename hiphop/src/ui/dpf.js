@@ -369,7 +369,10 @@ UIHelper.applyUiTweaks();
 //    }
 // }
 //
-return { UI: UIImpl, env: UIHelper.buildEnvObject() };
+return {
+    UI:  UIImpl,
+    env: UIHelper.buildEnvObject()
+};
 
 
 /*\

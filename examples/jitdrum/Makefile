@@ -28,10 +28,10 @@ HIPHOP_WEB_UI_PATH = ui
 # Files to build
 
 FILES_DSP = \
-    JitDrumExamplePlugin.cpp
+    JITDrumExamplePlugin.cpp
 
 FILES_UI  = \
-    JitDrumExampleUI.cpp
+    JITDrumExampleUI.cpp
 
 # --------------------------------------------------------------
 # Do some magic
