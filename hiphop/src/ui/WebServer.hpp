@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include <limits.h>
 #include <libwebsockets.h>
 
 #include "distrho/extra/LeakDetector.hpp"
