@@ -4,9 +4,11 @@ html {
 
 body {
     height: 100%;
-    margin: 20px;
-    color: #fff;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
     background-color: #000;
+    color: #fff;
 }
 
 a {
@@ -14,5 +16,6 @@ a {
 }
 
 #main {
+    height: 100%;
     font-family: monospace;
 }

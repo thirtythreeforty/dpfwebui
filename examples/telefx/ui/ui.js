@@ -21,31 +21,26 @@ class TeleFxExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
+        const env = DISTRHO.env, helper = DISTRHO.UIHelper;
+
         // Automatically display a modal view when connection is lost
-        DISTRHO.UIHelper.enableDisconnectionModal(this);
+        helper.enableDisconnectionModal(this);
 
         const main = document.getElementById('main'); 
 
-        if (DISTRHO.env.webview) {
+        if (env.webview) {
             // Content to display in the plugin embedded web view
-            const openBrowser = document.createElement('a');
-            main.appendChild(openBrowser);
-
-            this.getPublicUrl().then((url) => {
-                openBrowser.href = '#'; // make it look like a link
-                openBrowser.innerText = url;
-                openBrowser.addEventListener('click', (ev) => {
-                    this.openSystemWebBrowser(url);
-                });
+            helper.getQRCodeElement(this).then((el) => {
+                main.appendChild(el);
             });
 
-        } else if (DISTRHO.env.network) {
+        } else if (env.network) {
             // Content to display in external web clients
             const hello = document.createElement('div');
             hello.innerText = 'Hello external client';
             main.appendChild(hello);
 
-        } else {
+        } else if (env.dev) {
             // Content to display in Directly Open Source mode ;)
             const error = document.createElement('div');
             error.innerText = 'This program cannot be run in DOS mode';
@@ -53,8 +48,6 @@ class TeleFxExampleUI extends DISTRHO.UI {
         }
 
         document.body.style.visibility = 'visible';
-
-        console.log(DISTRHO.Base64.encode([0,1,2]));
     }
 
 }
