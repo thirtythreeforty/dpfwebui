@@ -118,8 +118,7 @@ HIPHOP_FILES_UI  = UIEx.cpp
 # Optional support for AssemblyScript DSP
 
 ifeq ($(WASM_DSP),true)
-HIPHOP_FILES_DSP += PluginEx.cpp \
-                    WasmPluginImpl.cpp \
+HIPHOP_FILES_DSP += WasmPluginImpl.cpp \
                     WasmRuntime.cpp
 endif
 
