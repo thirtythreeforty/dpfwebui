@@ -233,7 +233,8 @@ class UIImpl extends UI {
     // Initialize native C++/JS message channel for the embedded web view
     _initNativeMessageChannel() {
         window.host.addMessageListener(this._messageReceived.bind(this));
-        this.messageChannelOpen();
+        // Make sure subclass constructor completed before firing callback
+        setTimeout(this.messageChannelOpen.bind(this), 0);
     }
 
     // Initialize WebSockets-based message channel for network clients
@@ -336,8 +337,8 @@ class UIHelper {
 
     static enableDisconnectionModal(ui) {
         // Monkey patch UI message channel callbacks
-        const openUiCallback = ui.messageChannelOpen;
-        const closedUiCallback = ui.messageChannelClosed;
+        const openUiCallback = ui.messageChannelOpen.bind(ui);
+        const closedUiCallback = ui.messageChannelClosed.bind(ui);
 
         ui.messageChannelOpen = () => {
             openUiCallback();

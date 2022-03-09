@@ -26,13 +26,8 @@ class TeleFxExampleUI extends DISTRHO.UI {
             return res;
         }, {});
 
-        this.helper = DISTRHO.UIHelper;
-        
         // Automatically display a modal view when connection is lost
-        this.helper.enableDisconnectionModal(this);
-
-        // Set fixed size for remote clients
-        this.helper.setElementToPluginUISize(this.dom.main, this);
+        DISTRHO.UIHelper.enableDisconnectionModal(this);
         
         // Setup view to suit environment
         if (DISTRHO.env.plugin) {
@@ -46,8 +41,12 @@ class TeleFxExampleUI extends DISTRHO.UI {
         document.body.style.visibility = 'visible';
     }
 
+    messageChannelOpen() {
+        DISTRHO.UIHelper.setElementToPluginUISize(this.dom.main, this);
+    }
+
     setupForPluginEmbeddedWebview() {
-        this.helper.getQRCodeElement(this).then((qr) => {
+        DISTRHO.UIHelper.getQRCodeElement(this).then((qr) => {
             this.dom.qr.appendChild(qr);
         });
     }
