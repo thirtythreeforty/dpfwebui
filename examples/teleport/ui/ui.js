@@ -35,7 +35,7 @@ class TeleportExampleUI extends DISTRHO.UI {
         if (env.plugin) {
             this._setupForPluginEmbeddedWebview();
         } else {
-            this.dom.overscan.style.background = '#101010';
+            this.dom.overscan.style.background = 'rgba(0,0,0,0.5)';
             this.dom.main.removeChild(this.dom.pop);
             this.dom.main.removeChild(this.dom.qr);
 

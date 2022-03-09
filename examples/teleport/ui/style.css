@@ -31,6 +31,7 @@ a {
     font-family: monospace;
     font-size: 1.25em;
     color: #fff;
+    background: #802020;
 }
 
 #pop {
@@ -49,11 +50,10 @@ a {
 #control {
     flex: 1;
     padding: 10px;
-    background: #802020;
 }
 
 #qr {
     height: 40%;
     padding: 10px;
-    background: #802020;
+    background: rgba(0,0,0,0.5);
 }
