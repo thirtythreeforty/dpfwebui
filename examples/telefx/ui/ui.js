@@ -31,14 +31,14 @@ class TeleFxExampleUI extends DISTRHO.UI {
         // Automatically display a modal view when connection is lost
         this.helper.enableDisconnectionModal(this);
 
-        // Set fixed size for external clients
+        // Set fixed size for remote clients
         this.helper.setElementToPluginUISize(this.dom.main, this);
         
         // Setup view to suit environment
-        if (DISTRHO.env.webview) {
+        if (DISTRHO.env.plugin) {
             this.setupForPluginEmbeddedWebview();
-        } else if (DISTRHO.env.network) {
-            this.setupForExternalWebClients();
+        } else if (DISTRHO.env.remote) {
+            this.setupForRemoteWebClient();
         } else if (DISTRHO.env.dev) {
             this.setupForDevelopment();
         }
@@ -52,8 +52,8 @@ class TeleFxExampleUI extends DISTRHO.UI {
         });
     }
 
-    setupForExternalWebClients() {
-        const msg = document.createTextNode('Hello external client');
+    setupForRemoteWebClient() {
+        const msg = document.createTextNode('Hello remote client');
         this.dom.fx.appendChild(msg);
         this.dom.main.removeChild(this.dom.qr);
     }

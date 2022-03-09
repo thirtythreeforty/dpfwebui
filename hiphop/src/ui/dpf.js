@@ -131,9 +131,9 @@ class UI {
     // Non-DPF method for sending a message to the host
     // void WebViewUI::postMessage(const JSValue& args)
     postMessage(...args) {
-        if (DISTRHO.env.webview) {
+        if (DISTRHO.env.plugin) {
             window.host.postMessage(args);
-        } else if (DISTRHO.env.network) {
+        } else if (DISTRHO.env.remote) {
             if (this._socket.readyState == WebSocket.OPEN) {
                 this._socket.send(JSON.stringify(args));
             } else {
@@ -214,8 +214,8 @@ class UIImpl extends UI {
         this._latency = 0;
         this._pingSendTime = 0;
 
-        if (DISTRHO.env.webview) {
-            this._initLocalMessageChannel();
+        if (DISTRHO.env.plugin) {
+            this._initNativeMessageChannel();
 
             // Call WebUI::ready() to let the host know the JS UI has completed
             // setting up. This causes the initialization message buffer to be
@@ -225,19 +225,19 @@ class UIImpl extends UI {
             // is safe to indirectly call from super() in subclass constructors.
             this._call('ready');
 
-        } else if (DISTRHO.env.network) {
-            this._initNetworkMessageChannel();
+        } else if (DISTRHO.env.remote) {
+            this._initSocketMessageChannel();
         }
     }
 
-    // Initialize native C++/JS message channel for the local webview
-    _initLocalMessageChannel() {
+    // Initialize native C++/JS message channel for the embedded web view
+    _initNativeMessageChannel() {
         window.host.addMessageListener(this._messageReceived.bind(this));
         this.messageChannelOpen();
     }
 
     // Initialize WebSockets-based message channel for network clients
-    _initNetworkMessageChannel() {
+    _initSocketMessageChannel() {
         const reconnectPeriod = 3;
         const pingPeriod = 10;
 
@@ -428,21 +428,26 @@ class UIHelperPrivate {
     }
 
     static buildEnvObject() {
-        let env = {
-            network: window.location.protocol.indexOf('http') == 0
-        };
+        // Determine the running environment. This information could be prepared
+        // on the native side and then 1) injected into the webview, or 2)
+        // injected into dpf.js before it is served (so it also works for remote
+        // clients). But that adds unnecessary complexity, just use heuristics.
+        let env = {};
 
         if (window.host !== undefined) {
-            env.webview = true;
+            env.plugin = true;
             if (window.host.env) {
                 Object.assign(env, window.host.env);
                 delete window.host.env;
             }
         } else {
-            env.webview = false;
+            env.plugin = false;
         }
 
-        env.dev = !env.network && !env.webview;
+        const http = window.location.protocol.indexOf('http') == 0;
+
+        env.remote = !env.plugin && http;
+        env.dev = !env.plugin && !http;
         
         return Object.freeze(env);
     }
@@ -971,9 +976,9 @@ if (!env.dev) {
 //    QRCode      class   QR generator https://github.com/papnkukn/qrcode-svg
 //    Base64      object  Base64 codec from MDN
 //    env                 Information about the environment
-//       network  bool    True when document loaded via HTTP
-//       webview  bool    True when running in the plugin web view
-//       dev      bool    True when loading from file & not running in web view
+//       plugin   bool    True when running in plugin embedded web view
+//       remote   bool    True when running in external client (HTTP)
+//       dev      bool    True for external client non-HTTP (ie. open index.html)
 //       ...              Additional fields defined by web views
 // }
 //
