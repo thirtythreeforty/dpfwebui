@@ -15,6 +15,14 @@ a {
     color: #fff;
 }
 
+#background {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #808080;
+}
+
 #main {
     display: flex;
     flex-direction: column;
@@ -24,13 +32,13 @@ a {
 }
 
 #fx {
-    height: 60%;
-    padding: 5px;
-    background: #202020;
+    flex: 1;
+    padding: 10px;
+    background: #802020;
 }
 
 #qr {
-    flex: 1;
-    padding: 5px;
+    height: 40%;
+    padding: 10px;
     background: #000;
 }

@@ -330,12 +330,12 @@ class UIImpl extends UI {
 //
 class UIHelper {
 
-    static async setElementToPluginUISize(el, ui) {
-        el.style.width = await ui.getInitWidth() + 'px';
-        el.style.height = await ui.getInitHeight() + 'px';
+    static async setElementToPluginUISize(ui, el, w, h) {
+        el.style.width = (w || 1) * await ui.getInitWidth() + 'px';
+        el.style.height = (h || 1) * await ui.getInitHeight() + 'px';
     }
 
-    static enableDisconnectionModal(ui) {
+    static enableDisconnectionModal(ui, target) {
         // Monkey patch UI message channel callbacks
         const openUiCallback = ui.messageChannelOpen.bind(ui);
         const closedUiCallback = ui.messageChannelClosed.bind(ui);
@@ -355,7 +355,7 @@ class UIHelper {
         };
     }
 
-    static showQRCodeModal(ui) {
+    static showQRCodeModal(ui, target) {
 
         // TODO
 

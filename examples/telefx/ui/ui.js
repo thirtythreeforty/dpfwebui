@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+const env = DISTRHO.env, helper = DISTRHO.UIHelper;
+
 class TeleFxExampleUI extends DISTRHO.UI {
 
     constructor() {
@@ -27,37 +29,50 @@ class TeleFxExampleUI extends DISTRHO.UI {
         }, {});
 
         // Automatically display a modal view when connection is lost
-        DISTRHO.UIHelper.enableDisconnectionModal(this);
+        helper.enableDisconnectionModal(this);
         
         // Setup view to suit environment
-        if (DISTRHO.env.plugin) {
-            this.setupForPluginEmbeddedWebview();
-        } else if (DISTRHO.env.remote) {
-            this.setupForRemoteWebClient();
-        } else if (DISTRHO.env.dev) {
-            this.setupForDevelopment();
+        if (env.plugin) {
+            this._setupForPluginEmbeddedWebview();
+        } else if (env.remote) {
+            this._setupForRemoteWebClient();
+        } else if (env.dev) {
+            this._setupForDevelopment();
         }
-
-        document.body.style.visibility = 'visible';
     }
 
     messageChannelOpen() {
-        DISTRHO.UIHelper.setElementToPluginUISize(this.dom.main, this);
+        const w = env.plugin ? 1 : 0.6;
+
+        // FIXME - message channel still not implemented
+        if (!env.plugin) {
+            this.dom.main.style.width = '480px';
+            this.dom.main.style.height = w * 320 + 'px';
+            document.body.style.visibility = 'visible';
+            return;
+        }
+
+        helper.setElementToPluginUISize(this, this.dom.main, 1, w).then(() => {
+            document.body.style.visibility = 'visible';
+        });
     }
 
-    setupForPluginEmbeddedWebview() {
-        DISTRHO.UIHelper.getQRCodeElement(this).then((qr) => {
+    _setupForPluginEmbeddedWebview() {
+        const msg = document.createTextNode('Hello DAW');
+        this.dom.fx.appendChild(msg);
+
+        helper.getQRCodeElement(this).then((qr) => {
             this.dom.qr.appendChild(qr);
         });
     }
 
-    setupForRemoteWebClient() {
+    _setupForRemoteWebClient() {
         const msg = document.createTextNode('Hello remote client');
         this.dom.fx.appendChild(msg);
         this.dom.main.removeChild(this.dom.qr);
     }
 
-    setupForDevelopment() {
+    _setupForDevelopment() {
         // Directly Open Source mode ;)
         const msg = document.createTextNode('This program cannot be run in DOS mode');
         this.dom.fx.appendChild(msg);
