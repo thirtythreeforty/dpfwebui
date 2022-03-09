@@ -251,7 +251,7 @@ class UIImpl extends UI {
         const open = () => {
             this._socket = new WebSocket(`ws://${document.location.host}`);
 
-            this._socket.addEventListener('open', (ev) => {
+            this._socket.addEventListener('open', (_) => {
                 console.log('UI: connected');
                 clearInterval(reconnectTimer);
                 pingTimer = setInterval(this._ping.bind(this), 1000 * pingPeriod);
@@ -259,7 +259,7 @@ class UIImpl extends UI {
                 this.messageChannelOpen();
             });
 
-            this._socket.addEventListener('close', (ev) => {
+            this._socket.addEventListener('close', (_) => {
                 console.log(`UI: reconnecting in ${reconnectPeriod} sec...`);
                 clearInterval(pingTimer);
                 clearInterval(reconnectTimer);
@@ -267,7 +267,7 @@ class UIImpl extends UI {
                 this.messageChannelClosed();
             });
 
-            this._socket.addEventListener('message', (ev) => {
+            this._socket.addEventListener('message', (_) => {
                 this._messageReceived(JSON.parse(ev.data));
             });
         };
@@ -282,12 +282,11 @@ class UIImpl extends UI {
 
     // Helper for supporting synchronous calls using promises
     _callAndExpectReply(method, ...args) {
-        if (method in this._resolve) {
-            this._resolve[method][1](); // reject previous
+        if (this._resolve[method] === undefined) {
+            this._resolve[method] = [];
         }
-        
         return new Promise((resolve, reject) => {
-            this._resolve[method] = [resolve, reject];
+            this._resolve[method].push({resolve: resolve, reject: reject});
             this._call(method, ...args);
         });
     }
@@ -314,8 +313,10 @@ class UIImpl extends UI {
         args = args.slice(2);
 
         if (method in this._resolve) {
-            this._resolve[method][0](...args); // fulfill promise
-            delete this._resolve[method];
+            for (let callback of this._resolve[method]) {
+                callback.resolve(...args);
+            }
+            this._resolve[method] = [];
         } else {
             this[method](...args); // call method
         }
@@ -351,6 +352,11 @@ class UIHelper {
         };
 
         ui.messageChannelClosed = () => {
+            for (let callback of this._resolve[method]) {
+                callback.reject(...args);
+            }
+            this._resolve[method] = [];
+
             closedUiCallback();
 
             // TODO
@@ -370,7 +376,11 @@ class UIHelper {
         opt.fontSize = opt.fontSize || opt.size / 8;
 
         const url = await ui.getPublicUrl();
+        const el = document.createElement('div');
+        el.setAttribute('href', url);
+        el.style.height = '100%';
 
+        const dir = opt.vertical ? 'column' : 'row';
         const qr = new QRCode({
             content: url,
             padding: 1,
@@ -378,27 +388,46 @@ class UIHelper {
             height: opt.size
         }).svg();
 
-        const dir = opt.vertical ? 'column' : 'row';
-
-        const html = `
-            <div style="display:flex;flex-direction:${dir};align-items:center;justify-content:space-evenly;height:100%;">
-                <a href="#">${qr}</a>
+        el.innerHTML =
+           `<div style="display:flex;flex-direction:${dir};align-items:center;justify-content:space-evenly;height:100%;">
+                ${qr}
                 <div style="font-family:monospace;font-size:${opt.fontSize}px;">
                     <a href='#'>${url}</a>
                 </div>
-            </div>
-        `;
+            </div>`;
 
-        const el = document.createElement('div');
-        el.innerHTML = html;
-        el.style.height = '100%';
+        el.querySelector('a').addEventListener('click', (_) => {
+            ui.openSystemWebBrowser(url);
+        });
+
+        return el;
+    }
+
+    static async getMirrorElement(ui, opt) {
+        opt = opt || {};
+        opt.size = opt.size || 24;
+        opt.padding = opt.padding || opt.size / 3;
+        opt.fill = opt.fill || '#fff';
+
+        const el = document.createElement('a');
+        el.style.position = 'absolute';
+        el.style.top = opt.padding + 'px';
+        el.style.right = opt.padding + 'px';
+
+        el.innerHTML =
+            `<svg width="${opt.size}px" height="${opt.size}px" viewBox="0 0 ${opt.size} ${opt.size}" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1,18 L1,21 L4,21 C4,19.34 2.66,18 1,18 L1,18 Z M1,14 L1,16 C3.76,16 6,18.24 6,21 L8,21 C8,17.13 4.87,14 1,14 L1,14 Z M1,10 L1,12 C5.97,12 10,16.03 10,21 L12,21 C12,14.92 7.07,10 1,10 L1,10 Z M21,3 L3,3 C1.9,3 1,3.9 1,5 L1,8 L3,8 L3,5 L21,5 L21,19 L14,19 L14,21 L21,21 C22.1,21 23,20.1 23,19 L23,5 C23,3.9 22.1,3 21,3 L21,3 Z"></path>
+            </svg>`;
+
+        el.querySelectorAll('path').forEach((path) => {
+            path.style.fill = opt.fill;
+        });
+
+        const url = await ui.getPublicUrl();
         el.setAttribute('href', url);
-
-        for (let i = 0; i < 2; i++) {
-            el.querySelectorAll('a')[i].addEventListener('click', (ev) => {
-                ui.openSystemWebBrowser(url);
-            });
-        }
+        el.addEventListener('click', (_) => {
+            ui.openSystemWebBrowser(url);
+        });
 
         return el;
     }

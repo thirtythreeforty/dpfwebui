@@ -24,7 +24,6 @@ a {
 }
 
 #main {
-    position: relative;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -32,19 +31,6 @@ a {
     font-size: 1.25em;
     color: #fff;
     background: #802020;
-}
-
-#pop {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 37px;
-    height: 37px;
-    cursor: pointer;
-}
-
-#pop path {
-    fill: rgba(255,255,255,0.9);
 }
 
 #control {

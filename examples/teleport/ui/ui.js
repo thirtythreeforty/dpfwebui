@@ -23,7 +23,7 @@ class TeleportExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
-        this.dom = ['overscan', 'main', 'pop', 'qr', 'control'].reduce((res, id) => {
+        this.dom = ['overscan', 'main', 'qr', 'control'].reduce((res, id) => {
             res[id] = document.getElementById(id);
             return res;
         }, {});
@@ -36,7 +36,6 @@ class TeleportExampleUI extends DISTRHO.UI {
             this._setupForPluginEmbeddedWebview();
         } else {
             this.dom.overscan.style.background = 'rgba(0,0,0,0.5)';
-            this.dom.main.removeChild(this.dom.pop);
             this.dom.main.removeChild(this.dom.qr);
 
             if (env.remote) {
@@ -67,12 +66,12 @@ class TeleportExampleUI extends DISTRHO.UI {
         const msg = document.createTextNode('Hello DAW');
         this.dom.control.appendChild(msg);
 
-        helper.getQRCodeElement(this).then((qr) => {
-            this.dom.qr.appendChild(qr);
+        helper.getQRCodeElement(this).then((el) => {
+            this.dom.qr.appendChild(el);
+        });
 
-            this.dom.pop.addEventListener('click', (ev) => {
-                this.openSystemWebBrowser(qr.getAttribute('href'));
-            });
+        helper.getMirrorElement(this).then((el) => {
+            this.dom.control.appendChild(el);
         });
     }
 
