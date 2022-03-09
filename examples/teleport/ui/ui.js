@@ -23,7 +23,7 @@ class TeleportExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
-        this.dom = ['main', 'pop', 'control', 'qr'].reduce((res, id) => {
+        this.dom = ['overscan', 'main', 'pop', 'qr', 'control'].reduce((res, id) => {
             res[id] = document.getElementById(id);
             return res;
         }, {});
@@ -35,8 +35,9 @@ class TeleportExampleUI extends DISTRHO.UI {
         if (env.plugin) {
             this._setupForPluginEmbeddedWebview();
         } else {
-            this.dom.main.removeChild(this.dom.qr);
+            this.dom.overscan.style.background = '#101010';
             this.dom.main.removeChild(this.dom.pop);
+            this.dom.main.removeChild(this.dom.qr);
 
             if (env.remote) {
                 this._setupForRemoteWebClient();

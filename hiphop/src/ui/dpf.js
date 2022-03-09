@@ -367,6 +367,7 @@ class UIHelper {
     static async getQRCodeElement(ui, opt) {
         opt = opt || {};
         opt.size = opt.size || 96;
+        opt.fontSize = opt.fontSize || opt.size / 8;
 
         const url = await ui.getPublicUrl();
 
@@ -382,7 +383,7 @@ class UIHelper {
         const html = `
             <div style="display:flex;flex-direction:${dir};align-items:center;justify-content:space-evenly;height:100%;">
                 <a href="#">${qr}</a>
-                <div style="font-family:monospace;">
+                <div style="font-family:monospace;font-size:${opt.fontSize}px;">
                     <a href='#'>${url}</a>
                 </div>
             </div>

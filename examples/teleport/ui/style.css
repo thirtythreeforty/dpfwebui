@@ -9,18 +9,18 @@ html {
 body {
     height: 100%;
     margin: 0;
+    background: #802020;
 }
 
 a {
     color: #fff;
 }
 
-#background {
+#overscan {
     height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #101010;
 }
 
 #main {
@@ -29,6 +29,7 @@ a {
     flex-direction: column;
     height: 100%;
     font-family: monospace;
+    font-size: 1.25em;
     color: #fff;
 }
 
@@ -42,7 +43,7 @@ a {
 }
 
 #pop path {
-    fill: rgba(255,255,255,0.5);
+    fill: rgba(255,255,255,0.9);
 }
 
 #control {
@@ -54,5 +55,5 @@ a {
 #qr {
     height: 40%;
     padding: 10px;
-    background: #000;
+    background: #802020;
 }
