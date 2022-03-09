@@ -22,8 +22,10 @@
 
 USE_NAMESPACE_DISTRHO
 
-WebUIBase::WebUIBase(uint width, uint height)
-    : UIEx(width, height)
+WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float displayScaleFactor)
+    : UIEx(displayScaleFactor * widthCssPx, displayScaleFactor * heightCssPx)
+    , fUnscaledInitWidth(widthCssPx)
+    , fUnscaledInitHeight(heightCssPx)
 {
     initHandlers();
 }
@@ -101,6 +103,14 @@ void WebUIBase::handleMessage(const JSValue& args)
 
 void WebUIBase::initHandlers()
 {
+    fHandler["getInitWidth"] = std::make_pair(0, [this](const JSValue&) {
+        postMessage({"UI", "getInitWidth", static_cast<double>(getUnscaledInitWidth())});
+    });
+
+    fHandler["getInitHeight"] = std::make_pair(0, [this](const JSValue&) {
+        postMessage({"UI", "getInitHeight", static_cast<double>(getUnscaledInitHeight())});
+    });
+
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
     fHandler["sendNote"] = std::make_pair(3, [this](const JSValue& args) {
         sendNote(

@@ -32,14 +32,10 @@ USE_NAMESPACE_DISTRHO
 // the parent native window only becomes available later on UI lifecycle, scale
 // factor for secondary displays cannot be determined on UI construction.
 // VST3/Mac plugins on secondary displays might open with wrong dimensions.
-#define MAIN_DISPLAY_SCALE_FACTOR() getDisplayScaleFactor(0)
 
 WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor,
                      bool /*startLoading*/)
-    : WebViewUIBase(MAIN_DISPLAY_SCALE_FACTOR() * widthCssPx,
-                    MAIN_DISPLAY_SCALE_FACTOR() * heightCssPx)
-    , fInitialWidth(widthCssPx)
-    , fInitialHeight(heightCssPx)
+    : WebViewUIBase(widthCssPx, heightCssPx, getDisplayScaleFactor(0/*main display*/))
     , fBackgroundColor(backgroundColor)
     , fJsUiReady(false)
     , fUiBlockQueued(false)
@@ -92,8 +88,8 @@ void WebViewUI::setWebView(WebViewBase* webView)
     // factor. Then adjust window size so it correctly wraps web content on
     // high density displays, known as Retina or HiDPI.
     const float k = getDisplayScaleFactor(this);
-    const uint width = static_cast<uint>(k * static_cast<float>(fInitialWidth));
-    const uint height = static_cast<uint>(k * static_cast<float>(fInitialHeight));
+    const uint width = static_cast<uint>(k * static_cast<float>(getUnscaledInitWidth()));
+    const uint height = static_cast<uint>(k * static_cast<float>(getUnscaledInitHeight()));
 
     fWebView->setParent(fPlatformWindow);
     fWebView->setBackgroundColor(fBackgroundColor);
@@ -235,14 +231,6 @@ void WebViewUI::initHandlers()
                 static_cast<uint>(args[1].getNumber())  // height
             );
         });
-    });
-
-    fHandler["getInitialWidth"] = std::make_pair(0, [this](const JSValue&) {
-        postMessage({"UI", "getInitialWidth", static_cast<double>(getInitialWidth())});
-    });
-
-    fHandler["getInitialHeight"] = std::make_pair(0, [this](const JSValue&) {
-        postMessage({"UI", "getInitialHeight", static_cast<double>(getInitialHeight())});
     });
 
     fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JSValue& args) {

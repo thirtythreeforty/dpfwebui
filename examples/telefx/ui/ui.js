@@ -21,33 +21,48 @@ class TeleFxExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
-        const env = DISTRHO.env, helper = DISTRHO.UIHelper;
+        this.dom = ['main', 'fx', 'qr'].reduce((res, id) => {
+            res[id] = document.getElementById(id);
+            return res;
+        }, {});
 
+        this.helper = DISTRHO.UIHelper;
+        
         // Automatically display a modal view when connection is lost
-        helper.enableDisconnectionModal(this);
+        this.helper.enableDisconnectionModal(this);
 
-        const main = document.getElementById('main'); 
-
-        if (env.webview) {
-            // Content to display in the plugin embedded web view
-            helper.getQRCodeElement(this).then((el) => {
-                main.appendChild(el);
-            });
-
-        } else if (env.network) {
-            // Content to display in external web clients
-            const hello = document.createElement('div');
-            hello.innerText = 'Hello external client';
-            main.appendChild(hello);
-
-        } else if (env.dev) {
-            // Content to display in Directly Open Source mode ;)
-            const error = document.createElement('div');
-            error.innerText = 'This program cannot be run in DOS mode';
-            main.appendChild(error);
+        // Set fixed size for external clients
+        this.helper.setElementToPluginUISize(this.dom.main, this);
+        
+        // Setup view to suit environment
+        if (DISTRHO.env.webview) {
+            this.setupForPluginEmbeddedWebview();
+        } else if (DISTRHO.env.network) {
+            this.setupForExternalWebClients();
+        } else if (DISTRHO.env.dev) {
+            this.setupForDevelopment();
         }
 
         document.body.style.visibility = 'visible';
+    }
+
+    setupForPluginEmbeddedWebview() {
+        this.helper.getQRCodeElement(this).then((qr) => {
+            this.dom.qr.appendChild(qr);
+        });
+    }
+
+    setupForExternalWebClients() {
+        const msg = document.createTextNode('Hello external client');
+        this.dom.fx.appendChild(msg);
+        this.dom.main.removeChild(this.dom.qr);
+    }
+
+    setupForDevelopment() {
+        // Directly Open Source mode ;)
+        const msg = document.createTextNode('This program cannot be run in DOS mode');
+        this.dom.fx.appendChild(msg);
+        this.dom.main.removeChild(this.dom.qr);
     }
 
 }

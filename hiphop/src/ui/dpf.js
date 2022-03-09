@@ -117,15 +117,15 @@ class UI {
     }
 
     // Non-DPF method that returns the UI width at initialization time
-    // uint WebViewUI::getInitialWidth()
-    async getInitialWidth() {
-        return this._callAndExpectReply('getInitialWidth');
+    // uint WebViewUI::getUnscaledInitWidth()
+    async getInitWidth() {
+        return this._callAndExpectReply('getInitWidth');
     }
 
     // Non-DPF method that returns the UI height at initialization time
-    // uint WebViewUI::getInitialHeight()
-    async getInitialHeight() {
-        return this._callAndExpectReply('getInitialHeight');
+    // uint WebViewUI::getUnscaledInitHeight()
+    async getInitHeight() {
+        return this._callAndExpectReply('getInitHeight');
     }
 
     // Non-DPF method for sending a message to the host
@@ -329,6 +329,11 @@ class UIImpl extends UI {
 //
 class UIHelper {
 
+    static async setElementToPluginUISize(el, ui) {
+        el.style.width = await ui.getInitWidth() + 'px';
+        el.style.height = await ui.getInitHeight() + 'px';
+    }
+
     static enableDisconnectionModal(ui) {
         // Monkey patch UI message channel callbacks
         const openUiCallback = ui.messageChannelOpen;
@@ -349,19 +354,26 @@ class UIHelper {
         };
     }
 
-    static async getQRCodeElement(ui, size, vertical) {
-        size = size || 192;
+    static showQRCodeModal(ui) {
+
+        // TODO
+
+    }
+
+    static async getQRCodeElement(ui, opt) {
+        opt = opt || {};
+        opt.size = opt.size || 96;
 
         const url = await ui.getPublicUrl();
 
         const qr = new QRCode({
             content: url,
-            width: size,
-            height: size,
-            padding: 1
+            padding: 1,
+            width: opt.size,
+            height: opt.size
         }).svg();
 
-        const dir = vertical ? 'column' : 'row';
+        const dir = opt.vertical ? 'column' : 'row';
 
         const html = `
             <div style="display:flex;flex-direction:${dir};align-items:center;justify-content:space-evenly;height:100%;">
@@ -383,12 +395,6 @@ class UIHelper {
         }
 
         return el;
-    }
-
-    static showQRCodeModal(ui) {
-
-        // TODO
-
     }
 
 }

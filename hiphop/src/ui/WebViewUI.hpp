@@ -49,9 +49,6 @@ public:
     typedef std::function<void()> UiBlock;
 
     void queue(const UiBlock& block);
-    
-    uint getInitialWidth() const { return fInitialWidth; }
-    uint getInitialHeight() const { return fInitialHeight; }
 
     uintptr_t getPlatformWindow() const { return fPlatformWindow; }
 
@@ -97,8 +94,6 @@ private:
 
     typedef std::vector<JSValue> MessageBuffer;
 
-    uint          fInitialWidth;
-    uint          fInitialHeight;
     uint32_t      fBackgroundColor;
     bool          fJsUiReady;
     bool          fUiBlockQueued;

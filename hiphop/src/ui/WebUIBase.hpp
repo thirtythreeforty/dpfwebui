@@ -32,11 +32,14 @@ START_NAMESPACE_DISTRHO
 class WebUIBase : public UIEx
 {
 public:
-    WebUIBase(uint width = 0, uint height = 0);
+    WebUIBase(uint widthCssPx, uint heightCssPx, float displayScaleFactor = 1.0);
     virtual ~WebUIBase() {}
 
 protected:
     void uiIdle() override {}
+
+    uint getUnscaledInitWidth() const { return fUnscaledInitWidth; }
+    uint getUnscaledInitHeight() const { return fUnscaledInitHeight; }
 
     void sizeChanged(uint width, uint height) override;
     void parameterChanged(uint32_t index, float value) override;
@@ -64,6 +67,9 @@ protected:
 
 private:
     void initHandlers();
+
+    uint fUnscaledInitWidth;
+    uint fUnscaledInitHeight;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 
