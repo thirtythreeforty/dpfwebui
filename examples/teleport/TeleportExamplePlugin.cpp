@@ -20,14 +20,14 @@
 
 START_NAMESPACE_DISTRHO
 
-class TeleFxExamplePlugin : public PluginEx
+class TeleportExamplePlugin : public PluginEx
 {
 public:
-    TeleFxExamplePlugin()
+    TeleportExamplePlugin()
         : PluginEx(0 /*parameters*/, 0 /*programs*/, 0 /*states*/)
     {}
 
-    ~TeleFxExamplePlugin() {}
+    ~TeleportExamplePlugin() {}
 
     const char* getLabel() const override
     {
@@ -93,13 +93,13 @@ public:
 
 private:
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TeleFxExamplePlugin)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TeleportExamplePlugin)
 
 };
 
 Plugin* createPlugin()
 {
-    return new TeleFxExamplePlugin;
+    return new TeleportExamplePlugin;
 }
 
 END_NAMESPACE_DISTRHO

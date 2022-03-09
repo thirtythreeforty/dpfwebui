@@ -227,6 +227,9 @@ class UIImpl extends UI {
 
         } else if (DISTRHO.env.remote) {
             this._initSocketMessageChannel();
+            
+        } else if (DISTRHO.env.dev) {
+            setTimeout(this.messageChannelOpen.bind(this), 0);
         }
     }
 
@@ -388,6 +391,7 @@ class UIHelper {
         const el = document.createElement('div');
         el.innerHTML = html;
         el.style.height = '100%';
+        el.setAttribute('href', url);
 
         for (let i = 0; i < 2; i++) {
             el.querySelectorAll('a')[i].addEventListener('click', (ev) => {

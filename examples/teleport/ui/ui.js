@@ -18,12 +18,12 @@
 
 const env = DISTRHO.env, helper = DISTRHO.UIHelper;
 
-class TeleFxExampleUI extends DISTRHO.UI {
+class TeleportExampleUI extends DISTRHO.UI {
 
     constructor() {
         super();
 
-        this.dom = ['main', 'fx', 'qr'].reduce((res, id) => {
+        this.dom = ['main', 'pop', 'control', 'qr'].reduce((res, id) => {
             res[id] = document.getElementById(id);
             return res;
         }, {});
@@ -34,10 +34,15 @@ class TeleFxExampleUI extends DISTRHO.UI {
         // Setup view to suit environment
         if (env.plugin) {
             this._setupForPluginEmbeddedWebview();
-        } else if (env.remote) {
-            this._setupForRemoteWebClient();
-        } else if (env.dev) {
-            this._setupForDevelopment();
+        } else {
+            this.dom.main.removeChild(this.dom.qr);
+            this.dom.main.removeChild(this.dom.pop);
+
+            if (env.remote) {
+                this._setupForRemoteWebClient();
+            } else if (env.dev) {
+                this._setupForDevelopment();
+            }
         }
     }
 
@@ -59,24 +64,26 @@ class TeleFxExampleUI extends DISTRHO.UI {
 
     _setupForPluginEmbeddedWebview() {
         const msg = document.createTextNode('Hello DAW');
-        this.dom.fx.appendChild(msg);
+        this.dom.control.appendChild(msg);
 
         helper.getQRCodeElement(this).then((qr) => {
             this.dom.qr.appendChild(qr);
+
+            this.dom.pop.addEventListener('click', (ev) => {
+                this.openSystemWebBrowser(qr.getAttribute('href'));
+            });
         });
     }
 
     _setupForRemoteWebClient() {
         const msg = document.createTextNode('Hello remote client');
-        this.dom.fx.appendChild(msg);
-        this.dom.main.removeChild(this.dom.qr);
+        this.dom.control.appendChild(msg);
     }
 
     _setupForDevelopment() {
         // Directly Open Source mode ;)
         const msg = document.createTextNode('This program cannot be run in DOS mode');
-        this.dom.fx.appendChild(msg);
-        this.dom.main.removeChild(this.dom.qr);
+        this.dom.control.appendChild(msg);
     }
 
 }
