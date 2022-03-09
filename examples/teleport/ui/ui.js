@@ -69,10 +69,6 @@ class TeleportExampleUI extends DISTRHO.UI {
         helper.getQRCodeElement(this).then((el) => {
             this.dom.qr.appendChild(el);
         });
-
-        helper.getMirrorElement(this).then((el) => {
-            this.dom.control.appendChild(el);
-        });
     }
 
     _setupForRemoteWebClient() {
