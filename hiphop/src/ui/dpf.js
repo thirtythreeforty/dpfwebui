@@ -364,10 +364,48 @@ class UIHelper {
         };
     }
 
-    static showQRCodeModal(ui, target) {
+    static async showQRCodeModal(ui, target) {
+        target = target || document.body;
 
-        // TODO
+        const el = document.createElement('div');
+        Object.assign(el.style, {
+            position: 'absolute',
+            top: '0px',
+            left: '0px',
+            width: '100%',
+            height: '100%',
+            background: '#000'
+        });
 
+        const qr = await UIHelper.getQRCodeElement(ui);
+        el.appendChild(qr);
+
+        const btn = document.createElement('a');
+        el.appendChild(btn);
+        btn.innerHTML = 'OK';
+        btn.href = '#';
+
+        Object.assign(btn.style, {
+            position: 'absolute',
+            margin: 'auto',
+            left: '0px',
+            right: '0px',
+            bottom: '24px',
+            width: '72px',
+            height: '36px',
+            padding: '8px',
+            fontSize: '16px',
+            fontFamily: 'monospace',
+            textAlign: 'center',
+            textDecoration: 'none',
+            color: '#fff',
+            border: 'solid 1px #fff',
+            borderRadius: '2px',
+        });
+
+        target.appendChild(el);
+
+        btn.addEventListener('click', (_) => target.removeChild(el));
     }
 
     static async getQRCodeElement(ui, opt) {
@@ -441,7 +479,7 @@ class UIHelper {
 //
 class UIHelperPrivate {
 
-    static applyUiTweaks() {
+    static applyUITweaks() {
         // Disable context menu
         window.addEventListener('contextmenu', (ev) => {
             ev.preventDefault()
@@ -1001,7 +1039,7 @@ const env = UIHelperPrivate.buildEnvObject();
 // Basic setup to make the web UI behave a bit more like a native UI 
 //
 if (!env.dev) {
-    UIHelperPrivate.applyUiTweaks();
+    UIHelperPrivate.applyUITweaks();
 }
 
 //

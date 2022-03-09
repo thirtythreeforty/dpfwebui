@@ -23,7 +23,7 @@ class TeleportExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
-        this.dom = ['overscan', 'main', 'qr', 'control'].reduce((res, id) => {
+        this.dom = ['overscan', 'main', 'control', 'qr'].reduce((res, id) => {
             res[id] = document.getElementById(id);
             return res;
         }, {});
@@ -47,6 +47,7 @@ class TeleportExampleUI extends DISTRHO.UI {
     }
 
     messageChannelOpen() {
+        //helper.showQRCodeModal(this);
         const w = env.plugin ? 1 : 0.6;
 
         // FIXME - message channel still not implemented
@@ -63,7 +64,7 @@ class TeleportExampleUI extends DISTRHO.UI {
     }
 
     _setupForPluginEmbeddedWebview() {
-        const msg = document.createTextNode('Hello DAW');
+        const msg = document.createTextNode('UI running in embedded web view');
         this.dom.control.appendChild(msg);
 
         helper.getQRCodeElement(this).then((el) => {
@@ -72,7 +73,7 @@ class TeleportExampleUI extends DISTRHO.UI {
     }
 
     _setupForRemoteWebClient() {
-        const msg = document.createTextNode('Hello remote client');
+        const msg = document.createTextNode('UI running in remote client');
         this.dom.control.appendChild(msg);
     }
 
