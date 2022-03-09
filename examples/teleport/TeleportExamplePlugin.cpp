@@ -31,7 +31,7 @@ public:
 
     const char* getLabel() const override
     {
-        return "TeleFX";
+        return "Teleport";
     }
 
     const char* getMaker() const override
