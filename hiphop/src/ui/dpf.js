@@ -253,18 +253,23 @@ class UIImpl extends UI {
 
             this._socket.addEventListener('open', (_) => {
                 console.log('UI: connected');
+
                 clearInterval(reconnectTimer);
                 pingTimer = setInterval(this._ping.bind(this), 1000 * pingPeriod);
                 this._ping();
+                
                 this.messageChannelOpen();
             });
 
             this._socket.addEventListener('close', (_) => {
                 console.log(`UI: reconnecting in ${reconnectPeriod} sec...`);
+
+                this._cancelAllRequests();
+                this.messageChannelClosed();
+
                 clearInterval(pingTimer);
                 clearInterval(reconnectTimer);
                 reconnectTimer = setInterval(open, 1000 * reconnectPeriod);
-                this.messageChannelClosed();
             });
 
             this._socket.addEventListener('message', (_) => {
@@ -327,6 +332,17 @@ class UIImpl extends UI {
         this.sharedMemoryChanged(base64DecToArr(b64Data), token);
     }
 
+    // Reject all pending promises on channel disconnection
+    _cancelAllRequests() {
+        for (let method in this._resolve) {
+            for (let callback of this._resolve[method]) {
+                callback.reject(...args);
+            }
+
+            this._resolve[method] = [];
+        }
+    }
+
 }
 
 //
@@ -352,11 +368,6 @@ class UIHelper {
         };
 
         ui.messageChannelClosed = () => {
-            for (let callback of this._resolve[method]) {
-                callback.reject(...args);
-            }
-            this._resolve[method] = [];
-
             closedUiCallback();
 
             // TODO
