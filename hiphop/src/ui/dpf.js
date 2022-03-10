@@ -1076,7 +1076,7 @@ if (!env.dev) {
 }
 
 //
-// Return namespace, see const DISTRHO = ... definition above.
+// Return namespace, see const DISTRHO definition at the beginning of this file.
 //
 // DISTRHO {
 //    UI          class   Base class for UIs, approximately mirrors C++ version.

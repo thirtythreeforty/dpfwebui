@@ -46,15 +46,14 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
 {}
 
 #if DISTRHO_PLUGIN_WANT_STATE
-void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateValue)
+void PluginEx::initState(uint32_t index, State& state)
 {
     (void)index;
-    (void)stateKey;
-    (void)defaultStateValue;
+    (void)state;
 #if defined(HIPHOP_NETWORK_UI)
     if (index == fStateIndexWsPort) {
-        stateKey = "_ws_port";
-        defaultStateValue = "-1";
+        state.key = "_ws_port";
+        state.defaultValue = "-1";
     }
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
@@ -63,18 +62,18 @@ void PluginEx::initState(uint32_t index, String& stateKey, String& defaultStateV
         // by storing the filenames in internal state. UI->Plugin changes are
         // picked up asynchronously via the DPF state callback. Plugin->UI
         // changes are detected by polling the shared memory read state flag.
-        stateKey = "_shmem_file";
+        state.key = "_shmem_file";
 
         if (fMemory.create()) {
-            defaultStateValue = fMemory.getDataFilename();
+            state.defaultValue = fMemory.getDataFilename();
             sharedMemoryReady();
         } else {
-            defaultStateValue = "";
+            state.defaultValue = "";
             d_stderr2("Could not create shared memory");
         }
     } else if (index == fStateIndexShMemData) {
-        stateKey = "_shmem_data";
-        defaultStateValue = "";
+        state.key = "_shmem_data";
+        state.defaultValue = "";
     }
 #endif
 }

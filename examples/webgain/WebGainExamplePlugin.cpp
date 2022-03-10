@@ -97,7 +97,7 @@ public:
     }
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    void initState(uint32_t index, String& stateKey, String& defaultStateValue) override
+    void initState(uint32_t index, State& state) override
     {
         // unused
         (void)index;

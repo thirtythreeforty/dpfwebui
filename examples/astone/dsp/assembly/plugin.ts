@@ -106,7 +106,7 @@ export default class ASToneExamplePlugin extends DISTRHO.Plugin implements DISTR
         // empty implementation
     }
 
-    initState(index: u32, stateKey: DISTRHO.String, defaultStateValue: DISTRHO.String): void {
+    initState(index: u32, state: DISTRHO.State): void {
         // empty implementation
     }
 

@@ -200,9 +200,9 @@ void WasmPlugin::loadProgram(uint32_t index)
 #endif // DISTRHO_PLUGIN_WANT_PROGRAMS
 
 #if DISTRHO_PLUGIN_WANT_STATE
-void WasmPlugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
+void WasmPlugin::initState(uint32_t index, State& state)
 {
-    PluginEx::initState(index, stateKey, defaultStateValue);
+    PluginEx::initState(index, state);
     
     try {
         CHECK_INSTANCE();
@@ -210,13 +210,17 @@ void WasmPlugin::initState(uint32_t index, String& stateKey, String& defaultStat
 
         fRuntime->callFunction("init_state", { MakeI32(index) });
         const char* key = fRuntime->getGlobalAsCString("_ro_string_0");
-        const char* val = fRuntime->getGlobalAsCString("_ro_string_1");
 
         // Do not overwrite PluginEx internal states
-        if (std::strlen(key) > 0) {
-            stateKey = key;
-            defaultStateValue = val;
+        if (std::strlen(key) == 0) {
+            return;
         }
+
+        state.key          = key;
+        state.defaultValue = fRuntime->getGlobalAsCString("_ro_string_1");
+        state.label        = fRuntime->getGlobalAsCString("_ro_string_2");
+        state.description  = fRuntime->getGlobalAsCString("_ro_string_3");
+        state.hints        = fRuntime->getGlobal("_rw_int32_0").of.i32;
     } catch (const std::exception& ex) {
         d_stderr2(ex.what());
     }

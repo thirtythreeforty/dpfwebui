@@ -60,8 +60,8 @@ export default namespace DISTRHO {
         // void Plugin::loadProgram(uint32_t index)
         loadProgram(index: u32): void
 
-        // void Plugin::initState(uint32_t index, String& stateKey, String& defaultStateValue)
-        initState(index: u32, stateKey: String, defaultStateValue: String): void
+        // void Plugin::initState(uint32_t index, State& state)
+        initState(index: u32, state: State): void
 
         // void Plugin::setState(const char* key, const char* value)
         setState(key: string, value: string): void
@@ -115,6 +115,17 @@ export default namespace DISTRHO {
         def: f32
         min: f32
         max: f32
+
+    }
+
+    // struct DISTRHO::State
+    export class State {
+
+        hints: u32
+        key: string = ''
+        defaultValue: string = ''
+        label: string = ''
+        description: string = ''
 
     }
 

@@ -123,13 +123,14 @@ export function load_program(index: u32): void {
 }
 
 export function init_state(index: u32): void {
-    let stateKey = new DISTRHO.String
-    let defaultStateValue = new DISTRHO.String
+    const state = new DISTRHO.State
+    pluginInstance.initState(index, state)
 
-    pluginInstance.initState(index, stateKey, defaultStateValue)
-
-    _ro_string_0 = wtf16_to_c_string(stateKey.value)
-    _ro_string_1 = wtf16_to_c_string(defaultStateValue.value)
+    _rw_int32_0 = state.hints
+    _ro_string_0 = wtf16_to_c_string(state.key)
+    _ro_string_1 = wtf16_to_c_string(state.defaultValue)
+    _ro_string_2 = wtf16_to_c_string(state.label)
+    _ro_string_3 = wtf16_to_c_string(state.description)
 }
 
 export function set_state(key: ArrayBuffer, value: ArrayBuffer): void {
@@ -222,6 +223,8 @@ export let _rw_float64_2: f64
 export let _rw_float64_3: f64
 export let _ro_string_0: ArrayBuffer
 export let _ro_string_1: ArrayBuffer
+export let _ro_string_2: ArrayBuffer
+export let _ro_string_3: ArrayBuffer
 
 // These are useful for passing strings from host to Wasm
 

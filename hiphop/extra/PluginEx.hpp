@@ -39,7 +39,7 @@ public:
     virtual ~PluginEx() {}
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    void initState(uint32_t index, String& stateKey, String& defaultStateValue) override;
+    void initState(uint32_t index, State& state) override;
     void setState(const char* key, const char* value) override;
 #endif
 

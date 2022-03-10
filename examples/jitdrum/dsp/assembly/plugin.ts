@@ -98,7 +98,7 @@ export default class JITDrumExamplePlugin extends DISTRHO.Plugin implements DIST
         // empty implementation
     }
 
-    initState(index: u32, stateKey: DISTRHO.String, defaultStateValue: DISTRHO.String): void {
+    initState(index: u32, state: DISTRHO.State): void {
         // empty implementation
     }
 
