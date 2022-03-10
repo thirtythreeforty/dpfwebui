@@ -516,7 +516,7 @@ class UIHelperPrivate {
             ev.preventDefault()
         });
 
-        // Disable print
+        // Disable print key shortcut
         window.addEventListener('keydown', (ev) => { 
             if ((ev.key == 'p') && (ev.ctrlKey || ev.metaKey)) {
                 ev.preventDefault();
@@ -537,7 +537,9 @@ class UIHelperPrivate {
         // Determine the running environment. This information could be prepared
         // on the native side and then 1) injected into the webview, or 2)
         // injected into dpf.js before it is served (so it also works for remote
-        // clients). But that adds unnecessary complexity, just use heuristics.
+        // clients). But the simplicity of the client-side heuristics below far
+        // outweighs the complexity of the aforementioned server-side solution,
+        // with equal results in practice.
         let env = {};
 
         if (window.host !== undefined) {

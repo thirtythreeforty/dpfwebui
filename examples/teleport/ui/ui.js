@@ -49,7 +49,7 @@ class TeleportExampleUI extends DISTRHO.UI {
     messageChannelOpen() {
         const w = env.plugin ? 1 : 0.6;
 
-        // FIXME - message channel still not implemented
+        // FIXME - WS message channel still not implemented
         if (!env.plugin) {
             this.dom.main.style.width = '480px';
             this.dom.main.style.height = w * 320 + 'px';
