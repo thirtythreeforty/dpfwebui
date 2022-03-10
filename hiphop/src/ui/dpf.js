@@ -350,29 +350,65 @@ class UIImpl extends UI {
 //
 class UIHelper {
 
-    static async setElementToPluginUISize(ui, el, w, h) {
-        el.style.width = (w || 1) * await ui.getInitWidth() + 'px';
-        el.style.height = (h || 1) * await ui.getInitHeight() + 'px';
-    }
-
-    static enableDisconnectionModal(ui, target) {
+    static enableOfflineModal(ui) {
         // Monkey patch UI message channel callbacks
         const openUiCallback = ui.messageChannelOpen.bind(ui);
         const closedUiCallback = ui.messageChannelClosed.bind(ui);
 
         ui.messageChannelOpen = () => {
-            openUiCallback();
+            if (ui._offlineModal) {
+                document.body.removeChild(ui._offlineModal);
+                delete ui._offlineModal;
+            }
 
-            // TODO
-            console.log('TODO : hide disconnection modal');
+            openUiCallback();
         };
 
         ui.messageChannelClosed = () => {
             closedUiCallback();
 
-            // TODO
-            console.log('TODO : show disconnection modal');
+            if (! ui._offlineModal) {
+                ui._offlineModal = this.getOfflineModalElement();
+                document.body.appendChild(ui._offlineModal);
+            }
         };
+    }
+
+    static getOfflineModalElement() {
+        const html =
+            `<div style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 10;
+                background: rgba(0,0,0,0.75)">
+                <svg
+                   xmlns="http://www.w3.org/2000/svg"
+                   width="96"
+                   height="96"
+                   viewBox="0 0 400 400"
+                   version="1.1">
+                  <g
+                     style="fill:#fff;stroke:#fff;stroke-width:2.23000002"
+                     transform="translate(183.604,196.39599)">
+                    <path
+                        style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:Sans;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;stroke:none;stroke-width:2.23000002;marker:none;enable-background:accumulate"
+                        d="m -116.9899,106.24536 31.819808,31.8198 236.310532,-236.310518 -31.81982,-31.819802 z" />
+                    <circle
+                        style="fill:none;stroke-width:44.59999847"
+                        r="171.304"
+                        cy="4"
+                        cx="16" />
+                  </g>
+                </svg>
+            </div>`;
+
+        return document.createRange().createContextualFragment(html).firstChild;
     }
 
     static getMirrorButtonElement(ui, opt) {
@@ -385,16 +421,14 @@ class UIHelper {
             `<div style="
                 position: absolute;
                 top: ${opt.padding}px;
-                right: ${opt.padding}px;
-            ">
+                right: ${opt.padding}px;">
                 <a href='#'>
                     <svg
                         width="${opt.size}px"
                         height="${opt.size}px"
                         viewBox="0 0 ${opt.size} ${opt.size}"
                         version="1.1"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
+                        xmlns="http://www.w3.org/2000/svg">
                         <path
                             fill="${opt.fill}"
                             d="M1,18 L1,21 L4,21 C4,19.34 2.66,18 1,18 L1,18 Z M1,14 L1,16 C3.76,16 6,18.24 6,21 L8,21 C8,17.13 4.87,14 1,14 L1,14 Z M1,10 L1,12 C5.97,12 10,16.03 10,21 L12,21 C12,14.92 7.07,10 1,10 L1,10 Z M21,3 L3,3 C1.9,3 1,3.9 1,5 L1,8 L3,8 L3,5 L21,5 L21,19 L14,19 L14,21 L21,21 C22.1,21 23,20.1 23,19 L23,5 C23,3.9 22.1,3 21,3 L21,3 Z">
@@ -422,35 +456,34 @@ class UIHelper {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                position: absolute;
+                position: fixed;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: #000;
-            ">
+                z-index: 10;
+                background: #000;">
                 <div style="width:100%;height:70%;"></div>
-                <div style="flex:1;">
-                    <a href="#" style="
-                        position: absolute;
-                        bottom: 16px;
-                        right: 16px;
-                        width: ${4.5 * opt.fontSize}px;
-                        height: ${2.25 * opt.fontSize}px;
-                        padding: ${0.5 * opt.fontSize}px;
-                        font-size: ${opt.fontSize}px;
-                        font-family: monospace;
-                        text-align: center;
-                        text-decoration: none;
-                        color: #fff;
-                        border-width: 1px;
-                        border-style: solid;
-                        border-color: #fff;
-                        border-radius: 2px
-                    ">
+                <a href="#" style="
+                    position: absolute;
+                    right: 16px;
+                    bottom: 16px;
+                    width: ${4.5 * opt.fontSize}px;
+                    height: ${2.25 * opt.fontSize}px;
+                    padding: ${0.5 * opt.fontSize}px;
+                    font-size: ${opt.fontSize}px;
+                    font-family: monospace;
+                    text-align: center;
+                    text-decoration: none;
+                    color: #fff;
+                    border-width: 1px;
+                    border-style: solid;
+                    border-color: #fff;
+                    border-radius: 2px">
+                    <span>
                         OK
-                    </a>
-                </div>
+                    </span>
+                </a>
             </div>`;
 
         const el = document.createRange().createContextualFragment(html).firstChild;
@@ -484,13 +517,11 @@ class UIHelper {
                 flex-direction: ${opt.vertical ? 'column' : 'row'};
                 align-items: center;
                 justify-content: space-evenly;
-                height: 100%;
-            ">
+                height: 100%;">
                 ${qrSvg}
                 <div style="
                     font-family: monospace;
-                    font-size: ${opt.fontSize}px;
-                ">
+                    font-size: ${opt.fontSize}px;">
                     <a href='#'>${url}</a>
                 </div>
             </div>`;
@@ -503,6 +534,11 @@ class UIHelper {
         });
 
         return el;
+    }
+
+    static async setElementToPluginUISize(ui, el, w, h) {
+        el.style.width = (w || 1) * await ui.getInitWidth() + 'px';
+        el.style.height = (h || 1) * await ui.getInitHeight() + 'px';
     }
 
 }

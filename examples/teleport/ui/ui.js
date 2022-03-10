@@ -24,7 +24,7 @@ class TeleportExampleUI extends DISTRHO.UI {
         super();
 
         // Automatically display a modal view when connection is lost
-        helper.enableDisconnectionModal(this);
+        helper.enableOfflineModal(this);
         
         // Setup view to suit environment
         if (env.plugin) {
