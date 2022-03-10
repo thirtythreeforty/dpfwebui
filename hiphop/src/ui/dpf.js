@@ -364,48 +364,51 @@ class UIHelper {
         };
     }
 
-    static async showQRCodeModal(ui, target) {
-        target = target || document.body;
+    static async showQRCodeModal(ui, opt) {
+        opt = opt || {};
+        opt.target = opt.target || document.body;
+        opt.fontSize = opt.fontSize || 16;
 
-        const el = document.createElement('div');
-        Object.assign(el.style, {
-            position: 'absolute',
-            top: '0px',
-            left: '0px',
-            width: '100%',
-            height: '100%',
-            background: '#000'
+        const html =
+            `<div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #000;
+            ">
+                <a href="#" style="
+                    position: absolute;
+                    margin: auto;
+                    left: 0;
+                    right: 0;
+                    bottom: 24px;
+                    width: ${4.5 * opt.fontSize}px;
+                    height: ${2.25 * opt.fontSize}px;
+                    padding: ${0.5 * opt.fontSize}px;
+                    font-size: ${opt.fontSize}px;
+                    font-family: monospace;
+                    text-align: center;
+                    text-decoration: none;
+                    color: #fff;
+                    border-width: 1px;
+                    border-style: solid;
+                    border-color: #fff;
+                    border-radius: 2px
+                ">
+                    OK
+                </a>
+            </div>`;
+
+        const el = document.createRange().createContextualFragment(html).firstChild;
+        el.appendChild(await this.getQRCodeElement(ui));
+        
+        el.querySelector('a').addEventListener('click', (_) => {
+            opt.target.removeChild(el);
         });
 
-        const qr = await UIHelper.getQRCodeElement(ui);
-        el.appendChild(qr);
-
-        const btn = document.createElement('a');
-        el.appendChild(btn);
-        btn.innerHTML = 'OK';
-        btn.href = '#';
-
-        Object.assign(btn.style, {
-            position: 'absolute',
-            margin: 'auto',
-            left: '0px',
-            right: '0px',
-            bottom: '24px',
-            width: '72px',
-            height: '36px',
-            padding: '8px',
-            fontSize: '16px',
-            fontFamily: 'monospace',
-            textAlign: 'center',
-            textDecoration: 'none',
-            color: '#fff',
-            border: 'solid 1px #fff',
-            borderRadius: '2px',
-        });
-
-        target.appendChild(el);
-
-        btn.addEventListener('click', (_) => target.removeChild(el));
+        opt.target.appendChild(el);
     }
 
     static async getQRCodeElement(ui, opt) {
@@ -414,28 +417,36 @@ class UIHelper {
         opt.fontSize = opt.fontSize || opt.size / 8;
 
         const url = await ui.getPublicUrl();
-        const el = document.createElement('div');
-        el.setAttribute('href', url);
-        el.style.height = '100%';
 
-        const dir = opt.vertical ? 'column' : 'row';
-        const qr = new QRCode({
+        const qrSvg = new QRCode({
             content: url,
             padding: 1,
             width: opt.size,
             height: opt.size
         }).svg();
 
-        el.innerHTML =
-           `<div style="display:flex;flex-direction:${dir};align-items:center;justify-content:space-evenly;height:100%;">
-                ${qr}
-                <div style="font-family:monospace;font-size:${opt.fontSize}px;">
+        const html =
+           `<div data-url="${url}" style="
+                display: flex;
+                flex-direction: ${opt.vertical ? 'column' : 'row'};
+                align-items: center;
+                justify-content: space-evenly;
+                height: 100%;
+            ">
+                ${qrSvg}
+                <div style="
+                    font-family: monospace;
+                    font-size: ${opt.fontSize}px;
+                ">
                     <a href='#'>${url}</a>
                 </div>
             </div>`;
 
+        const el = document.createRange().createContextualFragment(html).firstChild;
+        el.style.height = '100%';
+        
         el.querySelector('a').addEventListener('click', (_) => {
-            ui.openSystemWebBrowser(url);
+            ui.openSystemWebBrowser(el.getAttribute('data-url'));
         });
 
         return el;
@@ -447,24 +458,33 @@ class UIHelper {
         opt.padding = opt.padding || opt.size / 3;
         opt.fill = opt.fill || '#fff';
 
-        const el = document.createElement('div');
-        el.style.position = 'absolute';
-        el.style.top = opt.padding + 'px';
-        el.style.right = opt.padding + 'px';
+        const html =
+            `<div style="
+                position: absolute;
+                top: ${opt.padding}px;
+                right: ${opt.padding}px;
+            ">
+                <a href='#'>
+                    <svg
+                        width="${opt.size}px"
+                        height="${opt.size}px"
+                        viewBox="0 0 ${opt.size} ${opt.size}"
+                        version="1.1"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            fill="${opt.fill}"
+                            d="M1,18 L1,21 L4,21 C4,19.34 2.66,18 1,18 L1,18 Z M1,14 L1,16 C3.76,16 6,18.24 6,21 L8,21 C8,17.13 4.87,14 1,14 L1,14 Z M1,10 L1,12 C5.97,12 10,16.03 10,21 L12,21 C12,14.92 7.07,10 1,10 L1,10 Z M21,3 L3,3 C1.9,3 1,3.9 1,5 L1,8 L3,8 L3,5 L21,5 L21,19 L14,19 L14,21 L21,21 C22.1,21 23,20.1 23,19 L23,5 C23,3.9 22.1,3 21,3 L21,3 Z">
+                        </path>
+                    </svg>
+                </a>
+            </div>`;
 
-        el.innerHTML =
-            `<a href='#'>
-                <svg width="${opt.size}px" height="${opt.size}px" viewBox="0 0 ${opt.size} ${opt.size}" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1,18 L1,21 L4,21 C4,19.34 2.66,18 1,18 L1,18 Z M1,14 L1,16 C3.76,16 6,18.24 6,21 L8,21 C8,17.13 4.87,14 1,14 L1,14 Z M1,10 L1,12 C5.97,12 10,16.03 10,21 L12,21 C12,14.92 7.07,10 1,10 L1,10 Z M21,3 L3,3 C1.9,3 1,3.9 1,5 L1,8 L3,8 L3,5 L21,5 L21,19 L14,19 L14,21 L21,21 C22.1,21 23,20.1 23,19 L23,5 C23,3.9 22.1,3 21,3 L21,3 Z"></path>
-                </svg>
-            </a>`;
-
-        el.querySelectorAll('path').forEach((path) => {
-            path.style.fill = opt.fill;
-        });
+        const el = document.createRange().createContextualFragment(html).firstChild;
 
         const url = await ui.getPublicUrl();
-        el.setAttribute('href', url);
+        el.setAttribute('data-url', url);
+
         el.querySelector('a').addEventListener('click', (_) => {
             ui.openSystemWebBrowser(url);
         });

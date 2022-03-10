@@ -47,7 +47,6 @@ class TeleportExampleUI extends DISTRHO.UI {
     }
 
     messageChannelOpen() {
-        //helper.showQRCodeModal(this);
         const w = env.plugin ? 1 : 0.6;
 
         // FIXME - message channel still not implemented
