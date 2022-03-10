@@ -859,7 +859,12 @@ COPY_FRAMEWORK_JS = false
 else
 COPY_FRAMEWORK_JS = true
 FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
+endif
 
+# https://unix.stackexchange.com/questions/178235/how-is-cp-f-different-from-cp-remove-destination
+CP_JS_ARGS = -f
+ifeq ($(LINUX),true)
+CP_JS_ARGS += --remove-destination
 endif
 
 lib_ui:
@@ -867,22 +872,22 @@ lib_ui:
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp -f $(FRAMEWORK_JS_PATH) $(LIB_DIR_LV2)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_LV2)/ui \
 		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp -f $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST3)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST3)/ui \
 		) || true
 	@($(TEST_VST2_MACOS) \
 		&& mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp -f $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST2_MACOS)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST2_MACOS)/ui \
 		) || true
 	@($(TEST_NOBUNDLE) \
 		&& mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp -f $(FRAMEWORK_JS_PATH) $(LIB_DIR_NOBUNDLE)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_NOBUNDLE)/ui \
 		) || true
 
 clean: clean_lib
