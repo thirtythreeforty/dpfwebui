@@ -23,11 +23,6 @@ class TeleportExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
-        this.dom = ['overscan', 'main', 'control', 'qr'].reduce((res, id) => {
-            res[id] = document.getElementById(id);
-            return res;
-        }, {});
-
         // Automatically display a modal view when connection is lost
         helper.enableDisconnectionModal(this);
         
@@ -35,8 +30,7 @@ class TeleportExampleUI extends DISTRHO.UI {
         if (env.plugin) {
             this._setupForPluginEmbeddedWebview();
         } else {
-            this.dom.overscan.style.background = 'rgba(0,0,0,0.5)';
-            this.dom.main.removeChild(this.dom.qr);
+            document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
 
             if (env.remote) {
                 this._setupForRemoteWebClient();
@@ -47,39 +41,39 @@ class TeleportExampleUI extends DISTRHO.UI {
     }
 
     messageChannelOpen() {
-        const w = env.plugin ? 1 : 0.6;
+        const main = document.getElementById('main');
 
         // FIXME - WS message channel still not implemented
         if (!env.plugin) {
-            this.dom.main.style.width = '480px';
-            this.dom.main.style.height = w * 320 + 'px';
+            main.style.width = '480px';
+            main.style.height = '192px';
             document.body.style.visibility = 'visible';
             return;
         }
 
-        helper.setElementToPluginUISize(this, this.dom.main, 1, w).then(() => {
+        helper.setElementToPluginUISize(this, main).then(() => {
             document.body.style.visibility = 'visible';
         });
     }
 
     _setupForPluginEmbeddedWebview() {
-        const msg = document.createTextNode('UI running in embedded web view');
-        this.dom.control.appendChild(msg);
+        const main = document.getElementById('main');
 
-        helper.getQRCodeElement(this).then((el) => {
-            this.dom.qr.appendChild(el);
-        });
+        let msg = document.createTextNode('UI running in embedded web view');
+        main.appendChild(msg);
+
+        main.appendChild(helper.getMirrorButtonElement(this));
     }
 
     _setupForRemoteWebClient() {
         const msg = document.createTextNode('UI running in remote client');
-        this.dom.control.appendChild(msg);
+        document.getElementById('main').appendChild(msg);
     }
 
     _setupForDevelopment() {
         // Directly Open Source mode ;)
         const msg = document.createTextNode('This program cannot be run in DOS mode');
-        this.dom.control.appendChild(msg);
+        document.getElementById('main').appendChild(msg);
     }
 
 }

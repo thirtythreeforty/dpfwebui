@@ -375,6 +375,43 @@ class UIHelper {
         };
     }
 
+    static getMirrorButtonElement(ui, opt) {
+        opt = opt || {};
+        opt.size = opt.size || 24;
+        opt.padding = opt.padding || opt.size / 3;
+        opt.fill = opt.fill || '#fff';
+
+        const html =
+            `<div style="
+                position: absolute;
+                top: ${opt.padding}px;
+                right: ${opt.padding}px;
+            ">
+                <a href='#'>
+                    <svg
+                        width="${opt.size}px"
+                        height="${opt.size}px"
+                        viewBox="0 0 ${opt.size} ${opt.size}"
+                        version="1.1"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            fill="${opt.fill}"
+                            d="M1,18 L1,21 L4,21 C4,19.34 2.66,18 1,18 L1,18 Z M1,14 L1,16 C3.76,16 6,18.24 6,21 L8,21 C8,17.13 4.87,14 1,14 L1,14 Z M1,10 L1,12 C5.97,12 10,16.03 10,21 L12,21 C12,14.92 7.07,10 1,10 L1,10 Z M21,3 L3,3 C1.9,3 1,3.9 1,5 L1,8 L3,8 L3,5 L21,5 L21,19 L14,19 L14,21 L21,21 C22.1,21 23,20.1 23,19 L23,5 C23,3.9 22.1,3 21,3 L21,3 Z">
+                        </path>
+                    </svg>
+                </a>
+            </div>`;
+
+        const el = document.createRange().createContextualFragment(html).firstChild;
+
+        el.querySelector('a').addEventListener('click', (_) => {
+            this.showQRCodeModal(ui);
+        });
+
+        return el;
+    }
+
     static async showQRCodeModal(ui, opt) {
         opt = opt || {};
         opt.target = opt.target || document.body;
@@ -382,6 +419,9 @@ class UIHelper {
 
         const html =
             `<div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -389,35 +429,37 @@ class UIHelper {
                 height: 100%;
                 background: #000;
             ">
-                <a href="#" style="
-                    position: absolute;
-                    margin: auto;
-                    left: 0;
-                    right: 0;
-                    bottom: 24px;
-                    width: ${4.5 * opt.fontSize}px;
-                    height: ${2.25 * opt.fontSize}px;
-                    padding: ${0.5 * opt.fontSize}px;
-                    font-size: ${opt.fontSize}px;
-                    font-family: monospace;
-                    text-align: center;
-                    text-decoration: none;
-                    color: #fff;
-                    border-width: 1px;
-                    border-style: solid;
-                    border-color: #fff;
-                    border-radius: 2px
-                ">
-                    OK
-                </a>
+                <div style="width:100%;height:70%;"></div>
+                <div style="flex:1;">
+                    <a href="#" style="
+                        position: absolute;
+                        bottom: 16px;
+                        right: 16px;
+                        width: ${4.5 * opt.fontSize}px;
+                        height: ${2.25 * opt.fontSize}px;
+                        padding: ${0.5 * opt.fontSize}px;
+                        font-size: ${opt.fontSize}px;
+                        font-family: monospace;
+                        text-align: center;
+                        text-decoration: none;
+                        color: #fff;
+                        border-width: 1px;
+                        border-style: solid;
+                        border-color: #fff;
+                        border-radius: 2px
+                    ">
+                        OK
+                    </a>
+                </div>
             </div>`;
 
         const el = document.createRange().createContextualFragment(html).firstChild;
-        el.appendChild(await this.getQRCodeElement(ui));
-        
+
         el.querySelector('a').addEventListener('click', (_) => {
             opt.target.removeChild(el);
         });
+
+        el.querySelector('div').appendChild(await this.getQRCodeElement(ui));
 
         opt.target.appendChild(el);
     }
@@ -458,46 +500,6 @@ class UIHelper {
         
         el.querySelector('a').addEventListener('click', (_) => {
             ui.openSystemWebBrowser(el.getAttribute('data-url'));
-        });
-
-        return el;
-    }
-
-    static async getMirrorElement(ui, opt) {
-        opt = opt || {};
-        opt.size = opt.size || 24;
-        opt.padding = opt.padding || opt.size / 3;
-        opt.fill = opt.fill || '#fff';
-
-        const html =
-            `<div style="
-                position: absolute;
-                top: ${opt.padding}px;
-                right: ${opt.padding}px;
-            ">
-                <a href='#'>
-                    <svg
-                        width="${opt.size}px"
-                        height="${opt.size}px"
-                        viewBox="0 0 ${opt.size} ${opt.size}"
-                        version="1.1"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            fill="${opt.fill}"
-                            d="M1,18 L1,21 L4,21 C4,19.34 2.66,18 1,18 L1,18 Z M1,14 L1,16 C3.76,16 6,18.24 6,21 L8,21 C8,17.13 4.87,14 1,14 L1,14 Z M1,10 L1,12 C5.97,12 10,16.03 10,21 L12,21 C12,14.92 7.07,10 1,10 L1,10 Z M21,3 L3,3 C1.9,3 1,3.9 1,5 L1,8 L3,8 L3,5 L21,5 L21,19 L14,19 L14,21 L21,21 C22.1,21 23,20.1 23,19 L23,5 C23,3.9 22.1,3 21,3 L21,3 Z">
-                        </path>
-                    </svg>
-                </a>
-            </div>`;
-
-        const el = document.createRange().createContextualFragment(html).firstChild;
-
-        const url = await ui.getPublicUrl();
-        el.setAttribute('data-url', url);
-
-        el.querySelector('a').addEventListener('click', (_) => {
-            ui.openSystemWebBrowser(url);
         });
 
         return el;
