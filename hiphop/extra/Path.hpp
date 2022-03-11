@@ -79,8 +79,7 @@ struct Path
         }
 
         return path + "/" + PathSubdirectory::nonBundleLibrary;
-#endif
-#if DISTRHO_OS_MAC
+#elif DISTRHO_OS_MAC
         String path = String(getBinaryFilename());
         path.truncate(path.rfind('/'));
 
@@ -93,8 +92,7 @@ struct Path
         }
 
         return path + "/" + PathSubdirectory::nonBundleLibrary;
-#endif
-#if DISTRHO_OS_WINDOWS
+#elif DISTRHO_OS_WINDOWS
         String path = String(getBinaryFilename());
         path.truncate(path.rfind('\\'));
 
@@ -125,8 +123,7 @@ struct Path
         mkdir(path, 0777);
 
         return path;
-#endif
-#if DISTRHO_OS_MAC
+#elif DISTRHO_OS_MAC
         // Getting system directories without calling Objective-C
         // https://zameermanji.com/blog/2021/7/7/getting-standard-macos-directories/
         // https://www.manpagez.com/man/3/sysdir/
@@ -148,8 +145,7 @@ struct Path
         mkdir(path, 0777);
 
         return path;
-#endif
-#if DISTRHO_OS_WINDOWS
+#elif DISTRHO_OS_WINDOWS
         // Get path inside user files folder: C:\Users\< USERNAME >\AppData\Local\PluginName\cache
         char dataPath[MAX_PATH];
         const HRESULT result = SHGetFolderPathA(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_DEFAULT, dataPath);

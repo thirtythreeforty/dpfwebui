@@ -21,6 +21,7 @@
 
 #include "WebUIBase.hpp"
 #include "WebServer.hpp"
+#include "Zeroconf.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -49,6 +50,7 @@ private:
 
     int       fPort;
     WebServer fServer;
+    Zeroconf  fZeroconf;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkUI)
 

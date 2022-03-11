@@ -161,7 +161,11 @@ void NetworkUI::initHandlers()
 void NetworkUI::initServer()
 {
     fServer.init(fPort);
-    d_stderr(LOG_TAG " : server up @ %s", getPublicUrl().buffer());
+    
+    String url = getPublicUrl();
+    fZeroconf.publish(url);
+
+    d_stderr(LOG_TAG " : server up @ %s", url.buffer());
 }
 
 int NetworkUI::findAvailablePort()
