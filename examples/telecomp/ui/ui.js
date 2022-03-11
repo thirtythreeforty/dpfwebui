@@ -23,7 +23,7 @@ class TelecompExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
-        // Automatically display a modal view when connection is lost
+        // Automatically display a modal view when connection is lost.
         helper.enableOfflineModal(this);
         
         // Setup view to suit environment
@@ -51,6 +51,8 @@ class TelecompExampleUI extends DISTRHO.UI {
             return;
         }
 
+        // Do not let the UI take up all available space on a web browser,
+        // and also workaround WKGTKRESIZEBUG (bugs.txt) for modals in web view.
         helper.setElementToPluginUISize(this, main).then(() => {
             document.body.style.visibility = 'visible';
         });
@@ -62,7 +64,9 @@ class TelecompExampleUI extends DISTRHO.UI {
         let msg = document.createTextNode('UI running in embedded web view');
         main.appendChild(msg);
 
-        main.appendChild(helper.getMirrorButtonElement(this));
+        // Default modal target document.body won't work for WebKitGTK because
+        // body has fixed arbitrary dimensions, target #main instead.
+        main.appendChild(helper.getMirrorButtonElement(this, {modal: {target: main}}));
     }
 
     _setupForRemoteWebClient() {

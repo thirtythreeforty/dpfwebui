@@ -350,14 +350,17 @@ class UIImpl extends UI {
 //
 class UIHelper {
 
-    static enableOfflineModal(ui) {
+    static enableOfflineModal(ui, opt) {
+        opt = opt || {};
+        opt.target = opt.target || document.body;
+
         // Monkey patch UI message channel callbacks
         const openUiCallback = ui.messageChannelOpen.bind(ui);
         const closedUiCallback = ui.messageChannelClosed.bind(ui);
 
         ui.messageChannelOpen = () => {
             if (ui._offlineModal) {
-                document.body.removeChild(ui._offlineModal);
+                opt.target.removeChild(ui._offlineModal);
                 delete ui._offlineModal;
             }
 
@@ -369,18 +372,19 @@ class UIHelper {
 
             if (! ui._offlineModal) {
                 ui._offlineModal = this.getOfflineModalElement();
-                document.body.appendChild(ui._offlineModal);
+                opt.target.appendChild(ui._offlineModal);
             }
         };
     }
 
     static getOfflineModalElement() {
+        // Position for modals should be fixed but not working for WebKitGTK.
         const html =
             `<div style="
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                position: fixed;
+                position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
@@ -440,7 +444,7 @@ class UIHelper {
         const el = document.createRange().createContextualFragment(html).firstChild;
 
         el.querySelector('a').addEventListener('click', (_) => {
-            this.showQRCodeModal(ui);
+            this.showQRCodeModal(ui, opt.modal);
         });
 
         return el;
@@ -456,7 +460,7 @@ class UIHelper {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                position: fixed;
+                position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
