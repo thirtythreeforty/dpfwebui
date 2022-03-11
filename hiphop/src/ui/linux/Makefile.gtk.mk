@@ -9,16 +9,8 @@ LXHELPER_SRC = gtk_helper.c \
 
 LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_PATH)/%.o)
 
-LXHELPER_CPPFLAGS = -I$(HIPHOP_INC_PATH) \
+LXHELPER_CPPFLAGS = -I. -I$(HIPHOP_INC_PATH) \
 					$(shell $(PKG_CONFIG) --cflags gtk+-3.0 webkit2gtk-4.0)
-
-ifneq ($(HIPHOP_MAX_GTK_WEBVIEW_WIDTH),)                                             
-ifneq ($(HIPHOP_MAX_GTK_WEBVIEW_HEIGHT),) 
-LXHELPER_CPPFLAGS += -DHIPHOP_MAX_GTK_WEBVIEW_WIDTH=$(HIPHOP_MAX_GTK_WEBVIEW_WIDTH)
-LXHELPER_CPPFLAGS += -DHIPHOP_MAX_GTK_WEBVIEW_HEIGHT=$(HIPHOP_MAX_GTK_WEBVIEW_HEIGHT) 
-endif
-endif
-
 LXHELPER_LDFLAGS = -lpthread -lX11 \
 				   $(shell $(PKG_CONFIG) --libs gtk+-3.0 webkit2gtk-4.0)
 

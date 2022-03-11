@@ -62,7 +62,6 @@ class TeleCompExampleUI extends DISTRHO.UI {
         }
 
         // Do not let the UI take up all available space in a web browser,
-        // and also workaround WKGTKRESIZEBUG (bugs.txt) for modals in web view.
         helper.setSizeToUIInitSize(this, main).then(() => {
             document.body.style.visibility = 'visible';
         });
@@ -74,14 +73,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
         let msg = document.createTextNode('UI running in embedded web view');
         main.appendChild(msg);
 
-        // Default modal target document.body won't work for WebKitGTK because
-        // body has fixed arbitrary dimensions, target #main instead.
-        main.appendChild(helper.getMirrorButtonElement(this, {
-            fill: '#000',
-            modal: {
-                target: main
-            }
-        }));
+        main.appendChild(helper.getMirrorButtonElement(this, {fill: '#000'}));
     }
 
     _setupForRemoteWebClient() {

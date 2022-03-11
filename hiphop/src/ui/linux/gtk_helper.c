@@ -29,13 +29,19 @@
 #include "ipc.h"
 #include "ipc_message.h"
 
-// WKGTKRESIZEBUG : webview created with a fixed maximum size, see comprehensive
-// explanation in realize(). Plugins that do not change their UI size during
-// runtime might want to set these values in DistrhoPluginInfo.h to ensure CSS
-// viewport dimensions (vw/vw/vmin/vmax) are relative to some known fixed values.
-#if !defined(HIPHOP_MAX_GTK_WEBVIEW_WIDTH) || !defined(HIPHOP_MAX_GTK_WEBVIEW_HEIGHT)
-#define HIPHOP_MAX_GTK_WEBVIEW_WIDTH 1536
-#define HIPHOP_MAX_GTK_WEBVIEW_HEIGHT 1536
+#include "DistrhoPluginInfo.h"
+
+// WKGTKRESIZEBUG : webview created with fixed size, see comprehensive
+// explanation in realize(). Resizable plugins need DISTRHO_UI_USER_RESIZABLE=1
+// in DistrhoPluginInfo.h and optionally HIPHOP_GTK_WEBVIEW_WIDTH/HEIGHT to set
+// the maximum size and also ensure viewport dimensions (vw/vw/vmin/vmax) are
+// relative to some known fixed values. Non-resizable plugins should set
+// DISTRHO_UI_USER_RESIZABLE=0 and the webview will be set to the init UI size.
+#if DISTRHO_UI_USER_RESIZABLE
+# if !defined(HIPHOP_GTK_WEBVIEW_WIDTH) || !defined(HIPHOP_GTK_WEBVIEW_HEIGHT)
+#  define HIPHOP_GTK_WEBVIEW_WIDTH  1536
+#  define HIPHOP_GTK_WEBVIEW_HEIGHT 1536
+# endif
 #endif
 
 // CSS touch-action based approach seems to be failing for WebKitGTK. Looks like a bug.
@@ -149,12 +155,16 @@ static float get_gtk_scale_factor()
 
 static void realize(context_t *ctx, const msg_win_cfg_t *config)
 {
-    // Create a native container window of arbitrary maximum size
-    int max_width = ctx->scaleFactor * HIPHOP_MAX_GTK_WEBVIEW_WIDTH;
-    int max_height = ctx->scaleFactor * HIPHOP_MAX_GTK_WEBVIEW_HEIGHT;
-
+    // Create a native container window
+#if DISTRHO_UI_USER_RESIZABLE
+    int width = ctx->scaleFactor * HIPHOP_GTK_WEBVIEW_WIDTH;
+    int height = ctx->scaleFactor * HIPHOP_GTK_WEBVIEW_HEIGHT;
+#else
+    int width = ctx->scaleFactor * config->size.width;
+    int height = ctx->scaleFactor * config->size.height;
+#endif
     ctx->container = XCreateSimpleWindow(ctx->display, (Window)config->parent, 0, 0,
-                                        max_width, max_height, 0, 0, 0);
+                                         width, height, 0, 0, 0);
     XSync(ctx->display, False);
 
     // Wrap container in a GDK window. Web view text input colored focus boxes
@@ -168,10 +178,10 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
     // will not cause its contents to resize anymore. The issue is probably
     // related to the GdkWindow wrapping a X11 window and not emitting Glib
     // events like configure-event. The workaround consists in creating the
-    // window with a predetermined max size and using JavaScript to resize the
-    // DOM instead of resizing the window natively. It is an ugly solution that
+    // window with a predetermined max size and using JavaScript to resize HTML
+    // body instead of resizing the window natively. It is an ugly solution that
     // works. Note this renders viewport based units useless (vw/vh/vmin/vmax). 
-    gtk_window_resize(ctx->window, max_width, max_height);
+    gtk_window_resize(ctx->window, width, height);
 
     ctx->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
     g_signal_connect(ctx->webView, "load-changed", G_CALLBACK(web_view_load_changed_cb), ctx);
