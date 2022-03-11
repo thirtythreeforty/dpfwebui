@@ -478,7 +478,7 @@ class UIHelper {
                     position: absolute;
                     right: 16px;
                     bottom: 16px;
-                    width: ${4.5 * opt.fontSize}px;
+                    width: ${5 * opt.fontSize}px;
                     height: ${2.25 * opt.fontSize}px;
                     padding: ${0.5 * opt.fontSize}px;
                     font-size: ${opt.fontSize}px;
@@ -490,10 +490,16 @@ class UIHelper {
                     border-style: solid;
                     border-color: #fff;
                     border-radius: 2px">
+                    <style>div[data-dpf-id=ok]:active {
+                        background: #fff;
+                    }</style>
+                    <style>div[data-dpf-id=ok]:active > span {
+                        color: #000;
+                    }</style>
                     <span>
                         OK
                     </span>
-                </a>
+                </div>
             </div>`;
 
         const el = document.createRange().createContextualFragment(html).firstChild;
