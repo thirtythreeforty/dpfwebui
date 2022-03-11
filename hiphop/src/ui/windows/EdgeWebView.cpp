@@ -221,6 +221,10 @@ HRESULT EdgeWebView::handleWebView2ControllerCompleted(HRESULT result,
     ICoreWebView2_add_NavigationCompleted(fView, fHandler, nullptr);
     ICoreWebView2_add_WebMessageReceived(fView, fHandler, nullptr);
 
+    ICoreWebView2Settings* settings;
+    ICoreWebView2_get_Settings(fView, &settings);
+    ICoreWebView2Settings_put_IsStatusBarEnabled(settings, false);
+
     // Run pending requests
 
     onSize(getWidth(), getHeight());

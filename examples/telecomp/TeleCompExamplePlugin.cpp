@@ -20,10 +20,10 @@
 
 START_NAMESPACE_DISTRHO
 
-class TelecompExamplePlugin : public ZamCompX2Plugin
+class TeleCompExamplePlugin : public ZamCompX2Plugin
 {
 public:
-    TelecompExamplePlugin()
+    TeleCompExamplePlugin()
         : ZamCompX2Plugin()
     {}
 
@@ -59,13 +59,13 @@ public:
 
 private:
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TelecompExamplePlugin)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TeleCompExamplePlugin)
 
 };
 
 Plugin* createPlugin()
 {
-    return new TelecompExamplePlugin;
+    return new TeleCompExamplePlugin;
 }
 
 END_NAMESPACE_DISTRHO
