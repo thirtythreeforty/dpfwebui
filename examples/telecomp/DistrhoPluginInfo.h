@@ -19,13 +19,13 @@
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NAME "Teleport"
+#define DISTRHO_PLUGIN_NAME "TeleCompressor"
 
 /**
    Number of audio inputs the plugin has.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NUM_INPUTS 0
+#define DISTRHO_PLUGIN_NUM_INPUTS 3
 
 /**
    Number of audio outputs the plugin has.
@@ -37,7 +37,7 @@
    The plugin URI when exporting in LV2 format.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/teleport"
+#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/telecomp"
 
 /**
    Wherever the plugin has a custom %UI.
@@ -92,7 +92,7 @@
    @see Plugin::initProgramName(uint32_t, String&)
    @see Plugin::loadProgram(uint32_t)
  */
-#define DISTRHO_PLUGIN_WANT_PROGRAMS 0
+#define DISTRHO_PLUGIN_WANT_PROGRAMS 1
 
 /**
    Wherever the plugin uses internal non-parameter data.

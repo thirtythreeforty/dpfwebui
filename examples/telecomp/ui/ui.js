@@ -18,7 +18,7 @@
 
 const env = DISTRHO.env, helper = DISTRHO.UIHelper;
 
-class TeleportExampleUI extends DISTRHO.UI {
+class TelecompExampleUI extends DISTRHO.UI {
 
     constructor() {
         super();

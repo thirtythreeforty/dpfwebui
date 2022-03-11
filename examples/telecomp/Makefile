@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = d_teleport
+NAME = d_telecomp
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names
@@ -28,16 +28,17 @@ HIPHOP_NETWORK_UI = true
 # Files to build
 
 FILES_DSP = \
-    TeleportExamplePlugin.cpp
+    TeleCompExamplePlugin.cpp \
+    ZamCompX2Plugin.cpp
 
 FILES_UI  = \
-    TeleportExampleUI.cpp
+    TeleCompExampleUI.cpp
 
 # --------------------------------------------------------------
 # Do some magic
 
 DPF_TARGET_DIR = ../../bin
-DPF_BUILD_DIR = ../../build/teleport/1/2
+DPF_BUILD_DIR = ../../build/telecomp/1/2
 
 include ../../Makefile.plugins.mk
 
