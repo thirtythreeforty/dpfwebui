@@ -24,7 +24,7 @@
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NAME "Hot Swap"
+#define DISTRHO_PLUGIN_NAME "HotSwap"
 
 /**
    Number of audio inputs the plugin has.

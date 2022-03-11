@@ -23,7 +23,7 @@ import DISTRHO from './dpf'
 export default class HotSwapExamplePlugin extends DISTRHO.Plugin implements DISTRHO.PluginInterface {
 
     getLabel(): string {
-        return 'Hot Swap'
+        return 'HotSwap'
     }
 
     getMaker(): string {
