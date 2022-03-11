@@ -9,3 +9,4 @@ Library|Author|License
 [Base64](https://developer.mozilla.org/en-US/docs/Glossary/Base64)|MDN contributors|CC
 [event-target](https://github.com/ungap/event-target)|Andrea Giammarchi|ISC
 [qrcode-svg](https://github.com/papnkukn/qrcode-svg)|Kazuhiko Arase|MIT
+[ZamCompX2](https://github.com/zamaudio/zam-plugins)|Damien Zammit|GPL 2.0
