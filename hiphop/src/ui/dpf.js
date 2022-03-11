@@ -22,12 +22,12 @@ class UI {
 
     // uint UI::getWidth()
     async getWidth() {
-        return this._callAndExpectReply('getWidth');
+        return this._callAndExpectReply('getWidth', false);
     }
 
     // uint UI::getHeight()
     async getHeight() {
-        return this._callAndExpectReply('getHeight');
+        return this._callAndExpectReply('getHeight', false);
     }
 
     // void UI::setWidth(uint width)
@@ -42,7 +42,7 @@ class UI {
 
     // bool UI::isResizable()
     async isResizable() {
-        return this._callAndExpectReply('isResizable');
+        return this._callAndExpectReply('isResizable', true);
     }
 
     // void UI::setSize(uint width, uint height)
@@ -97,7 +97,7 @@ class UI {
    
     // bool ExternalWindow::isStandalone()
     async isStandalone() {
-        return this._callAndExpectReply('isStandalone');
+        return this._callAndExpectReply('isStandalone', true);
     }
 
     // Non-DPF method for grabbing or releasing the keyboard focus
@@ -119,13 +119,13 @@ class UI {
     // Non-DPF method that returns the UI width at initialization time
     // uint WebViewUI::getUnscaledInitWidth()
     async getInitWidth() {
-        return this._callAndExpectReply('getInitWidth');
+        return this._callAndExpectReply('getInitWidth', true);
     }
 
     // Non-DPF method that returns the UI height at initialization time
     // uint WebViewUI::getUnscaledInitHeight()
     async getInitHeight() {
-        return this._callAndExpectReply('getInitHeight');
+        return this._callAndExpectReply('getInitHeight', true);
     }
 
     // Non-DPF method for sending a message to the host
@@ -190,7 +190,7 @@ class UI {
         if (DISTRHO.env.dev) {
             return document.location.href;
         } else {
-            return this._callAndExpectReply('getPublicUrl');
+            return this._callAndExpectReply('getPublicUrl', true);
         }
     }
 
@@ -210,6 +210,7 @@ class UIImpl extends UI {
         super();
 
         this._resolve = {};
+        this._cache = {};
         this._socket = null;
         this._latency = 0;
         this._pingSendTime = 0;
@@ -286,7 +287,10 @@ class UIImpl extends UI {
     }
 
     // Helper for supporting synchronous calls using promises
-    _callAndExpectReply(method, ...args) {
+    _callAndExpectReply(method, cache, ...args) {
+        if (cache && (method in this._cache)) {
+            return new Promise((resolve, _) => resolve(...this._cache[method]));
+        }
         if (this._resolve[method] === undefined) {
             this._resolve[method] = [];
         }
@@ -316,6 +320,8 @@ class UIImpl extends UI {
 
         const method = args[1];
         args = args.slice(2);
+
+        this._cache[method] = args;
 
         if (method in this._resolve) {
             for (let callback of this._resolve[method]) {
