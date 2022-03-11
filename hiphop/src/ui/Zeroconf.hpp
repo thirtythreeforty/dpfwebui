@@ -32,8 +32,6 @@
 
 #include "src/DistrhoDefines.h"
 
-#define SERVICE_TYPE "_http._tcp"
-
 #if DISTRHO_OS_LINUX
 extern char **environ;
 #endif
@@ -64,12 +62,12 @@ public:
         return fPublished;
     }
 
-    void publish(const char* name, int port) noexcept
+    void publish(const char* name, const char* type, int port) noexcept
     {
 #if DISTRHO_OS_LINUX
         char sport[10];
         std::sprintf(sport, "%d", port);
-        const char *argv[] = {"avahi-publish", "-s", name, SERVICE_TYPE, sport, nullptr};
+        const char *argv[] = {"avahi-publish", "-s", name, type, sport, nullptr};
         const int status = posix_spawnp(&fPid, "avahi-publish", nullptr/*file_actions*/,
             nullptr/*attrp*/, const_cast<char* const*>(argv), environ);
         if (status == 0) {
@@ -77,7 +75,7 @@ public:
         }
 #elif DISTRHO_OS_MAC
         DNSServiceErrorType err = DNSServiceRegister(&fService, 0/*flags*/,
-            kDNSServiceInterfaceIndexAny, name, SERVICE_TYPE, nullptr/*domain*/,
+            kDNSServiceInterfaceIndexAny, name, type, nullptr/*domain*/,
             nullptr/*host*/, htons(port), 0/*txtLen*/, nullptr/*txtRecord*/,
             nullptr/*callBack*/, nullptr/*context*/);
         if (err == kDNSServiceErr_NoError) {
@@ -111,7 +109,6 @@ public:
 #elif DISTRHO_OS_WINDOWS
 
         // TODO
-        // if (Windows < 10) return
 
 #endif
     }
