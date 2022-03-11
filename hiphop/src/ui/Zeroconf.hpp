@@ -19,7 +19,16 @@
 #ifndef ZEROCONF_HPP
 #define ZEROCONF_HPP
 
-#include "distrho/extra/String.hpp"
+#if DISTRHO_OS_LINUX
+    // TODO
+#elif DISTRHO_OS_MAC
+# include <dns_sd.h>
+# include <arpa/inet.h>
+#elif DISTRHO_OS_WINDOWS
+    // TODO
+#endif
+
+#include "src/DistrhoDefines.h"
 
 START_NAMESPACE_DISTRHO
 
@@ -28,6 +37,7 @@ class Zeroconf
 public:
     Zeroconf()
         : fPublished(false)
+        , fImpl(nullptr)
     {}
 
     ~Zeroconf()
@@ -40,19 +50,21 @@ public:
         return fPublished;
     }
 
-    void publish(String& url) noexcept // TODO - args?
+    void publish(const char* name, int port) noexcept // TODO - args?
     {
-        (void)url;
 #if DISTRHO_OS_LINUX
 
         // TODO
         // https://linux.die.net/man/1/avahi-publish
 
 #elif DISTRHO_OS_MAC
-
-        // TODO
-        // https://developer.apple.com/library/archive/samplecode/DNSSDObjects/Introduction/Intro.html
-
+    DNSServiceErrorType err = DNSServiceRegister(&fImpl, 0/*flags*/,
+        kDNSServiceInterfaceIndexAny, name, "_http._tcp", nullptr/*domain*/,
+        nullptr/*host*/, htons(port), 0/*txtLen*/, nullptr/*txtRecord*/,
+        nullptr/*callBack*/, nullptr/*context*/);
+    if (err == kDNSServiceErr_NoError) {
+        fPublished = true;
+    }
 #elif DISTRHO_OS_WINDOWS
 
         // TODO
@@ -63,22 +75,22 @@ public:
         // https://stackoverflow.com/questions/66474722/use-multicast-dns-when-network-cable-is-unplugged
 
 #endif
+        if (! fPublished) {
+            d_stderr2("Zeroconf : failed publish()");
+        }
     }
 
     void unpublish() noexcept
     {
-        if (! fPublished) {
-            return;
-        }
-
 #if DISTRHO_OS_LINUX
 
         // TODO
 
 #elif DISTRHO_OS_MAC
-
-        // TODO
-
+        if (fImpl != nullptr) {
+            DNSServiceRefDeallocate(fImpl);
+            fImpl = nullptr;
+        }
 #elif DISTRHO_OS_WINDOWS
 
         // TODO
@@ -89,6 +101,13 @@ public:
 
 private:
     bool fPublished;
+#if DISTRHO_OS_LINUX
+    // TODO
+#elif DISTRHO_OS_MAC
+    DNSServiceRef fImpl;
+#elif DISTRHO_OS_WINDOWS
+    // TODO
+#endif
 
 };
 

@@ -163,7 +163,7 @@ void NetworkUI::initServer()
     fServer.init(fPort);
     
     String url = getPublicUrl();
-    fZeroconf.publish(url);
+    fZeroconf.publish(DISTRHO_PLUGIN_NAME, fPort);
 
     d_stderr(LOG_TAG " : server up @ %s", url.buffer());
 }
