@@ -20,7 +20,9 @@
 #define ZEROCONF_HPP
 
 #if DISTRHO_OS_LINUX
-    // TODO
+# include <cstdio>
+# include <signal.h>
+# include <spawn.h>
 #elif DISTRHO_OS_MAC
 # include <dns_sd.h>
 # include <arpa/inet.h>
@@ -30,6 +32,12 @@
 
 #include "src/DistrhoDefines.h"
 
+#define SERVICE_TYPE "_http._tcp"
+
+#if DISTRHO_OS_LINUX
+extern char **environ;
+#endif
+
 START_NAMESPACE_DISTRHO
 
 class Zeroconf
@@ -37,7 +45,13 @@ class Zeroconf
 public:
     Zeroconf()
         : fPublished(false)
-        , fImpl(nullptr)
+#if DISTRHO_OS_LINUX
+        , fPid(0)
+#elif DISTRHO_OS_MAC
+        , fService(nullptr)
+#elif DISTRHO_OS_WINDOWS
+    // TODO
+#endif
     {}
 
     ~Zeroconf()
@@ -50,27 +64,29 @@ public:
         return fPublished;
     }
 
-    void publish(const char* name, int port) noexcept // TODO - args?
+    void publish(const char* name, int port) noexcept
     {
 #if DISTRHO_OS_LINUX
-
-        // TODO
-        // https://linux.die.net/man/1/avahi-publish
-
+        char sport[10];
+        std::sprintf(sport, "%d", port);
+        const char *argv[] = {"avahi-publish", "-s", name, SERVICE_TYPE, sport, nullptr};
+        const int status = posix_spawnp(&fPid, "avahi-publish", nullptr/*file_actions*/,
+            nullptr/*attrp*/, const_cast<char* const*>(argv), environ);
+        if (status == 0) {
+            fPublished = true;
+        }
 #elif DISTRHO_OS_MAC
-    DNSServiceErrorType err = DNSServiceRegister(&fImpl, 0/*flags*/,
-        kDNSServiceInterfaceIndexAny, name, "_http._tcp", nullptr/*domain*/,
-        nullptr/*host*/, htons(port), 0/*txtLen*/, nullptr/*txtRecord*/,
-        nullptr/*callBack*/, nullptr/*context*/);
-    if (err == kDNSServiceErr_NoError) {
-        fPublished = true;
-    }
+        DNSServiceErrorType err = DNSServiceRegister(&fService, 0/*flags*/,
+            kDNSServiceInterfaceIndexAny, name, SERVICE_TYPE, nullptr/*domain*/,
+            nullptr/*host*/, htons(port), 0/*txtLen*/, nullptr/*txtRecord*/,
+            nullptr/*callBack*/, nullptr/*context*/);
+        if (err == kDNSServiceErr_NoError) {
+            fPublished = true;
+        }
 #elif DISTRHO_OS_WINDOWS
 
         // TODO
-
         // if (Windows < 10) return
-
         // https://docs.microsoft.com/en-us/windows/win32/api/windns/nf-windns-dnsserviceregister
         // https://stackoverflow.com/questions/66474722/use-multicast-dns-when-network-cable-is-unplugged
 
@@ -83,13 +99,14 @@ public:
     void unpublish() noexcept
     {
 #if DISTRHO_OS_LINUX
-
-        // TODO
-
+        if (fPid != 0) {
+            kill(fPid, SIGTERM);
+            fPid = 0;
+        }
 #elif DISTRHO_OS_MAC
-        if (fImpl != nullptr) {
-            DNSServiceRefDeallocate(fImpl);
-            fImpl = nullptr;
+        if (fService != nullptr) {
+            DNSServiceRefDeallocate(fService);
+            fService = nullptr;
         }
 #elif DISTRHO_OS_WINDOWS
 
@@ -102,9 +119,9 @@ public:
 private:
     bool fPublished;
 #if DISTRHO_OS_LINUX
-    // TODO
+    pid_t fPid;
 #elif DISTRHO_OS_MAC
-    DNSServiceRef fImpl;
+    DNSServiceRef fService;
 #elif DISTRHO_OS_WINDOWS
     // TODO
 #endif

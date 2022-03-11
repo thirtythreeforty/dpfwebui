@@ -81,9 +81,9 @@ ChildProcessWebView::ChildProcessWebView()
     fIpcThread->startThread();
 
     char rfd[10];
-    sprintf(rfd, "%d", fPipeFd[0][0]);
+    std::sprintf(rfd, "%d", fPipeFd[0][0]);
     char wfd[10];
-    sprintf(wfd, "%d", fPipeFd[1][1]);
+    std::sprintf(wfd, "%d", fPipeFd[1][1]);
     
     String libPath = Path::getPluginLibrary();
     posix_spawn_file_actions_t fa;
@@ -91,9 +91,10 @@ ChildProcessWebView::ChildProcessWebView()
     posix_spawn_file_actions_addchdir_np(&fa, libPath);
 
     String helperPath = libPath + "/ui-helper";
-    const char *argv[] = { helperPath, rfd, wfd, 0 };
+    const char *argv[] = {helperPath, rfd, wfd, nullptr};
 
-    const int status = posix_spawnp(&fPid, helperPath, &fa, 0, (char* const*)argv, environ);
+    const int status = posix_spawnp(&fPid, helperPath, &fa, 0, const_cast<char* const*>(argv),
+                                    environ);
 
     if (status != 0) {
         d_stderr("Could not spawn helper child process - %s", strerror(errno));
