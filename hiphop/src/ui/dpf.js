@@ -532,7 +532,7 @@ class UIHelper {
                 <div style="
                     font-family: monospace;
                     font-size: ${opt.fontSize}px;">
-                    <a href='#'>${url}</a>
+                    <a href="#"" style="color:#fff">${url}</a>
                 </div>
             </div>`;
 

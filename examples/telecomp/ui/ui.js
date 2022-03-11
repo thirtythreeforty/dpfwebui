@@ -18,6 +18,14 @@
 
 const env = DISTRHO.env, helper = DISTRHO.UIHelper;
 
+// Colors
+// attack #800000
+// release #008001
+// threshold #feff00
+// ratio #1500ff
+// knee #ff00ff
+// slew #ff02ff
+
 class TeleCompExampleUI extends DISTRHO.UI {
 
     constructor() {
@@ -68,7 +76,12 @@ class TeleCompExampleUI extends DISTRHO.UI {
 
         // Default modal target document.body won't work for WebKitGTK because
         // body has fixed arbitrary dimensions, target #main instead.
-        main.appendChild(helper.getMirrorButtonElement(this, {modal: {target: main}}));
+        main.appendChild(helper.getMirrorButtonElement(this, {
+            fill: '#000',
+            modal: {
+                target: main
+            }
+        }));
     }
 
     _setupForRemoteWebClient() {
