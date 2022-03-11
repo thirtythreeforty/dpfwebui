@@ -153,6 +153,10 @@ void NetworkUI::initHandlers()
         postMessage({"UI", "getPublicUrl", getPublicUrl()});
     });
 
+    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&) {
+        postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()});
+    });
+
     fHandler["ping"] = std::make_pair(0, [this](const JSValue&) {
         postMessage({"UI", "pong"});
     });

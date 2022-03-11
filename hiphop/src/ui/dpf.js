@@ -194,6 +194,12 @@ class UI {
         }
     }
 
+    // Non-DPF method to check whether the plugin is published for DNS-SD
+    // bool Zeroconf::isPublished()
+    async isZeroconfPublished() {
+        return this._callAndExpectReply('isZeroconfPublished', true);
+    }
+
     // Non-DPF local getter for approximate network latency in milliseconds
     get latency() {
         return this._latency;
@@ -518,6 +524,7 @@ class UIHelper {
         opt.fontSize = opt.fontSize || opt.size / 8;
 
         const url = await ui.getPublicUrl();
+        const pub = await ui.isZeroconfPublished();
 
         const qrSvg = new QRCode({
             content: url,
@@ -537,7 +544,13 @@ class UIHelper {
                 <div style="
                     font-family: monospace;
                     font-size: ${opt.fontSize}px;">
-                    <a href="#"" style="color:#fff">${url}</a>
+                    <div>
+                        <a href="#" style="color:#fff">${url}</a>
+                    </div>
+                    <br>
+                    <div style="color:#fff">
+                        DNS-SD: ${pub ? 'on' : 'off'}
+                    </div>
                 </div>
             </div>`;
 
