@@ -23,7 +23,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
     constructor() {
         super();
 
-        // Automatically display a modal view when connection is lost.
+        // Automatically display a modal view when connection is lost
         helper.enableOfflineModal(this);
         
         // Setup view to suit environment
@@ -47,13 +47,15 @@ class TeleCompExampleUI extends DISTRHO.UI {
         if (!env.plugin) {
             main.style.width = '480px';
             main.style.height = '192px';
+            document.body.style.minWidth = '480px';
+            document.body.style.minHeight = '192px';
             document.body.style.visibility = 'visible';
             return;
         }
 
-        // Do not let the UI take up all available space on a web browser,
+        // Do not let the UI take up all available space in a web browser,
         // and also workaround WKGTKRESIZEBUG (bugs.txt) for modals in web view.
-        helper.setElementToPluginUISize(this, main).then(() => {
+        helper.setSizeToUIInitSize(this, main).then(() => {
             document.body.style.visibility = 'visible';
         });
     }

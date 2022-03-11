@@ -546,9 +546,17 @@ class UIHelper {
         return el;
     }
 
-    static async setElementToPluginUISize(ui, el, w, h) {
-        el.style.width = (w || 1) * await ui.getInitWidth() + 'px';
-        el.style.height = (h || 1) * await ui.getInitHeight() + 'px';
+    static async setSizeToUIInitSize(ui, el) {
+        el = el || document.body;
+
+        const w = await ui.getInitWidth();
+        const h = await ui.getInitHeight();
+
+        el.style.width = w + 'px';
+        el.style.height = h + 'px';
+
+        document.body.style.minWidth = w + 'px';
+        document.body.style.minHeight = h + 'px';
     }
 
 }
