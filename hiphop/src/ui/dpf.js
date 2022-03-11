@@ -432,7 +432,7 @@ class UIHelper {
                 position: absolute;
                 top: ${opt.padding}px;
                 right: ${opt.padding}px;">
-                <a href='#'>
+                <a href='#' style="cursor:default;">
                     <svg
                         width="${opt.size}px"
                         height="${opt.size}px"
@@ -473,8 +473,8 @@ class UIHelper {
                 height: 100%;
                 z-index: 10;
                 background: #000;">
-                <div style="width:100%;height:70%;"></div>
-                <a href="#" style="
+                <div data-dpf-id="qr" style="width:100%;height:70%;"></div>
+                <div data-dpf-id="ok" style="
                     position: absolute;
                     right: 16px;
                     bottom: 16px;
@@ -497,12 +497,11 @@ class UIHelper {
             </div>`;
 
         const el = document.createRange().createContextualFragment(html).firstChild;
+        el.querySelector('[data-dpf-id=qr]').appendChild(await this.getQRCodeElement(ui));
 
-        el.querySelector('a').addEventListener('click', (_) => {
+        el.querySelector('[data-dpf-id=ok]').addEventListener('click', (_) => {
             opt.target.removeChild(el);
         });
-
-        el.querySelector('div').appendChild(await this.getQRCodeElement(ui));
 
         opt.target.appendChild(el);
     }
@@ -583,6 +582,7 @@ class UIHelperPrivate {
             document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
         };
 
+        style('*:not(a) { cursor: default; }'); // disable I-beam for text
         style('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
         style('body { user-select: none; -webkit-user-select: none; }'); // disable selection
         style('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
