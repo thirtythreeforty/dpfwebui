@@ -72,7 +72,20 @@ NOTES FOR WINDOWS
    Official instructions for building the DLL can be found [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/doc/build_wamr.md).
 
 
-6. The official binary distribution of Wasmer requires MSVC. To overcome this
+6. Building the WAMR compiler (wamrc) on MinGW requires CMake from pacman
+   package 'mingw-w64-x86_64-cmake', CMake from package 'cmake' will not work.
+   Updating all MinGW packages before installation is also recommended.
+
+   ```Bash
+   pacman -R cmake
+   pacman -Syu
+   pacman -S mingw-w64-x86_64-cmake
+   ```
+
+   More details [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/doc/build_wamr.md#MinGW)
+
+
+7. The official binary distribution of Wasmer requires MSVC. To overcome this
    problem the Makefile downloads a custom build that is compatible with MinGW.
    If rebuilding Wasmer from source is needed, these are the steps:
 
@@ -95,7 +108,7 @@ NOTES FOR WINDOWS
    Live and Carla.
 
 
-7. Instructions on how to build libwasmer.a with debug symbols can be found here
+8. Instructions on how to build libwasmer.a with debug symbols can be found here
    https://github.com/wasmerio/wasmer/issues/2571
 
    ```Bash
