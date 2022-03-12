@@ -813,7 +813,7 @@ HIPHOP_TARGET += $(WASM_BINARY_PATH)
 
 ifeq ($(CPU_I386_OR_X86_64),true)
 # https://github.com/bytecodealliance/wasm-micro-runtime/issues/1022
-WAMRC_ARGS = --cpu=skylake
+WAMRC_ARGS = --cpu=sandybridge
 endif
 
 $(WASM_BINARY_PATH): $(WASM_BYTECODE_PATH)
