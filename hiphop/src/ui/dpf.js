@@ -408,8 +408,7 @@ class UIHelper {
                    xmlns="http://www.w3.org/2000/svg"
                    width="96"
                    height="96"
-                   viewBox="0 0 400 400"
-                   version="1.1">
+                   viewBox="0 0 400 400">
                   <g
                      style="fill:#fff;stroke:#fff;stroke-width:2.23000002"
                      transform="translate(183.604,196.39599)">
@@ -436,16 +435,16 @@ class UIHelper {
 
         const html =
             `<div
-                style="
-                position: absolute;
+                style="position: absolute;
                 top: ${opt.margin}px;
-                right: ${opt.margin}px;">
-                <a href='#' style="cursor:default;">
+                right: ${opt.margin}px;
+                width: ${opt.size}px;
+                height: ${opt.size}px;">
+                <a href="#" style="cursor:default;">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        version="1.1"
-                        width="${opt.size}px"
-                        height="${opt.size}px"
+                        width="${opt.size}"
+                        height="${opt.size}"
                         viewBox="0 0 24 24">
                         <path
                             fill="${opt.fill}"
@@ -489,7 +488,11 @@ class UIHelper {
                     padding-top: 8px;
                     padding-right: 8px;
                     cursor: default;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="28"
+                        height="28"
+                        viewBox="0 0 24 24">
                         <g id="close">
                             <path id="x" fill="#fff" d="M18.717 6.697l-1.414-1.414-5.303 5.303-5.303-5.303-1.414 1.414 5.303 5.303-5.303 5.303 1.414 1.414 5.303-5.303 5.303 5.303 1.414-1.414-5.303-5.303z"/>
                         </g>

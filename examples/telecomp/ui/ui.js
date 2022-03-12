@@ -61,7 +61,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
             return;
         }
 
-        // Do not let the UI take up all available space in a web browser,
+        // Do not let the UI take up all available space in a web browser
         helper.setSizeToUIInitSize(this, main).then(() => {
             document.body.style.visibility = 'visible';
         });
