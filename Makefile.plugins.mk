@@ -441,7 +441,9 @@ ifeq ($(HIPHOP_WASM_MODE),aot)
 TARGETS += $(WAMRC_BIN_PATH)
 endif
 
-$(WAMR_LIB_PATH): $(WAMR_PATH)/README.md
+WAMR_REPO = $(WAMR_PATH)/README.md
+
+$(WAMR_LIB_PATH): $(WAMR_REPO)
 	@echo "Building WAMR static library"
 	@mkdir -p $(WAMR_BUILD_PATH) && cd $(WAMR_BUILD_PATH) \
 		&& cmake .. $(WAMR_CMAKE_ARGS) && cmake --build . --config $(WAMR_BUILD_CONFIG)
@@ -451,11 +453,11 @@ $(WAMRC_BIN_PATH): $(WAMR_LLVM_LIB_PATH)
 	@mkdir -p $(WAMRC_BUILD_PATH) && cd $(WAMRC_BUILD_PATH) \
 		&& cmake .. $(WAMRC_CMAKE_ARGS) && cmake --build .
 
-$(WAMR_LLVM_LIB_PATH):
+$(WAMR_LLVM_LIB_PATH): $(WAMR_REPO)
 	@echo "Building LLVM"
 	@$(WAMR_PATH)/build-scripts/build_llvm.py
 
-$(WAMR_PATH)/README.md:
+$(WAMR_REPO):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) \
 		&& git -C $(WAMR_PATH) reset --hard 4bdeb90
