@@ -412,11 +412,9 @@ endif
 ifeq ($(WINDOWS),true)
 # Use the C version of invokeNative() instead of ASM until MinGW build is fixed.
 WAMR_LLVM_LIB_PATH = ${WAMR_PATH}/core/deps/llvm/win32build/lib/libLLVMCore.a
-WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1 \
-                   -DWAMR_BUILD_LIB_PTHREAD=1
+WAMR_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
 WAMRC_BIN_PATH = $(WAMRC_PATH)/build/wamrc.exe
-WAMRC_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1 \
-                    -DWAMR_BUILD_LIB_PTHREAD=1
+WAMRC_CMAKE_ARGS += -G"Unix Makefiles" -DWAMR_BUILD_INVOKE_NATIVE_GENERAL=1
 endif
 
 ifeq ($(SKIP_STRIPPING),true)
