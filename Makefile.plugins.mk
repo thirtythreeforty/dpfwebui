@@ -460,7 +460,7 @@ $(WAMR_LLVM_LIB_PATH): $(WAMR_REPO)
 $(WAMR_REPO):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) \
-		&& git -C $(WAMR_PATH) reset --hard 4bdeb90
+		&& git -C $(WAMR_PATH) reset --hard 7a0ec1c
 	#@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
 endif
 endif
