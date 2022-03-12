@@ -392,7 +392,8 @@ class UIHelper {
     static getOfflineModalElement() {
         // Position for modals should be fixed but not working for WebKitGTK.
         const html =
-            `<div style="
+            `<div 
+                style="
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -430,21 +431,22 @@ class UIHelper {
     static getMirrorButtonElement(ui, opt) {
         opt = opt || {};
         opt.size = opt.size || 24;
-        opt.padding = opt.padding || opt.size / 3;
+        opt.margin = opt.margin || opt.size / 3;
         opt.fill = opt.fill || '#fff';
 
         const html =
-            `<div style="
+            `<div
+                style="
                 position: absolute;
-                top: ${opt.padding}px;
-                right: ${opt.padding}px;">
+                top: ${opt.margin}px;
+                right: ${opt.margin}px;">
                 <a href='#' style="cursor:default;">
                     <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        version="1.1"
                         width="${opt.size}px"
                         height="${opt.size}px"
-                        viewBox="0 0 ${opt.size} ${opt.size}"
-                        version="1.1"
-                        xmlns="http://www.w3.org/2000/svg">
+                        viewBox="0 0 24 24">
                         <path
                             fill="${opt.fill}"
                             d="M1,18 L1,21 L4,21 C4,19.34 2.66,18 1,18 L1,18 Z M1,14 L1,16 C3.76,16 6,18.24 6,21 L8,21 C8,17.13 4.87,14 1,14 L1,14 Z M1,10 L1,12 C5.97,12 10,16.03 10,21 L12,21 C12,14.92 7.07,10 1,10 L1,10 Z M21,3 L3,3 C1.9,3 1,3.9 1,5 L1,8 L3,8 L3,5 L21,5 L21,19 L14,19 L14,21 L21,21 C22.1,21 23,20.1 23,19 L23,5 C23,3.9 22.1,3 21,3 L21,3 Z">
@@ -465,54 +467,44 @@ class UIHelper {
     static async showQRCodeModal(ui, opt) {
         opt = opt || {};
         opt.target = opt.target || document.body;
-        opt.fontSize = opt.fontSize || 16;
 
         const html =
-            `<div style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
+            `<div
+                style="
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                z-index: 10;
-                background: #000;">
-                <div data-dpf-id="qr" style="width:100%;height:70%;"></div>
-                <div data-dpf-id="ok" style="
+                background: #000;
+                z-index: 10;">
+                <a
+                    href="#"
+                    style="
                     position: absolute;
-                    right: 16px;
-                    bottom: 16px;
-                    width: ${5 * opt.fontSize}px;
-                    height: ${2.25 * opt.fontSize}px;
-                    padding: ${0.5 * opt.fontSize}px;
-                    font-size: ${opt.fontSize}px;
-                    font-family: monospace;
-                    text-align: center;
-                    text-decoration: none;
-                    color: #fff;
-                    border-width: 1px;
-                    border-style: solid;
-                    border-color: #fff;
-                    border-radius: 2px">
-                    <style>div[data-dpf-id=ok]:active {
-                        background: #fff;
-                    }</style>
-                    <style>div[data-dpf-id=ok]:active > span {
-                        color: #000;
-                    }</style>
-                    <span>
-                        OK
-                    </span>
+                    top: 0;
+                    right: 0;
+                    width: 36x;
+                    height: 36px;
+                    padding-top: 8px;
+                    padding-right: 8px;
+                    cursor: default;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
+                        <g id="close">
+                            <path id="x" fill="#fff" d="M18.717 6.697l-1.414-1.414-5.303 5.303-5.303-5.303-1.414 1.414 5.303 5.303-5.303 5.303 1.414 1.414 5.303-5.303 5.303 5.303 1.414-1.414-5.303-5.303z"/>
+                        </g>
+                    </svg>
+                </a>
                 </div>
             </div>`;
 
         const el = document.createRange().createContextualFragment(html).firstChild;
-        el.querySelector('[data-dpf-id=qr]').appendChild(await this.getQRCodeElement(ui));
+        el.appendChild(await this.getQRCodeElement(ui));
 
-        el.querySelector('[data-dpf-id=ok]').addEventListener('click', (_) => {
-            opt.target.removeChild(el);
+        el.querySelectorAll('a').forEach((a) => {
+            a.addEventListener('click', (_) => {
+                opt.target.removeChild(el);
+            });
         });
 
         opt.target.appendChild(el);
@@ -534,23 +526,28 @@ class UIHelper {
         }).svg();
 
         const html =
-           `<div data-url="${url}" style="
+           `<div
+                data-url="${url}"
+                style="
                 display: flex;
                 flex-direction: ${opt.vertical ? 'column' : 'row'};
                 align-items: center;
                 justify-content: space-evenly;
                 height: 100%;">
                 ${qrSvg}
-                <div style="
+                <div
+                    style="
+                    display: flex;
+                    flex-direction: column;
                     font-family: monospace;
                     font-size: ${opt.fontSize}px;">
-                    <div>
-                        <a href="#" style="color:#fff">${url}</a>
-                    </div>
+                    <a href="#" style="color:#fff">
+                        ${url}
+                    </a>
                     <br>
-                    <div style="color:#fff">
+                    <span style="color:#fff">
                         DNS-SD: ${pub ? 'on' : 'off'}
-                    </div>
+                    </span>
                 </div>
             </div>`;
 
@@ -558,7 +555,7 @@ class UIHelper {
         el.style.height = '100%';
         
         el.querySelector('a').addEventListener('click', (_) => {
-            ui.openSystemWebBrowser(el.getAttribute('data-url'));
+            ui.openSystemWebBrowser(url);
         });
 
         return el;
