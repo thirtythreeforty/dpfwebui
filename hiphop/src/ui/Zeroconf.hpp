@@ -65,10 +65,11 @@ public:
     void publish(const char* name, const char* type, int port) noexcept
     {
 #if DISTRHO_OS_LINUX
+        const char* const bin = "avahi-publish";
         char sport[10];
         std::sprintf(sport, "%d", port);
-        const char *argv[] = {"avahi-publish", "-s", name, type, sport, nullptr};
-        const int status = posix_spawnp(&fPid, "avahi-publish", nullptr/*file_actions*/,
+        const char *argv[] = {bin, "-s", name, type, sport, nullptr};
+        const int status = posix_spawnp(&fPid, bin, nullptr/*file_actions*/,
             nullptr/*attrp*/, const_cast<char* const*>(argv), environ);
         if (status == 0) {
             fPublished = true;
