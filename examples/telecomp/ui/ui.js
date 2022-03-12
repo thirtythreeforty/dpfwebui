@@ -49,6 +49,15 @@ class TeleCompExampleUI extends DISTRHO.UI {
     }
 
     messageChannelOpen() {
+        if (env.plugin) {
+            // There is a discrepancy between native unscaled initial dimensions
+            // "A" (WebUIBase::fUnscaledInitWidth/Height) and "B" CSS dimensions
+            // on Windows Edge WebView2, being A = ~1.05 * B. Setting the main
+            // element size is not necessary for the embedded web view though.
+            document.body.style.visibility = 'visible';
+            return;
+        }
+
         const main = document.getElementById('main');
 
         // FIXME - WS message channel still not implemented
