@@ -84,6 +84,7 @@ uintptr_t WebViewBase::getParent()
 void WebViewBase::setParent(uintptr_t parent)
 {
     fParent = parent;
+    onSetParent(parent);
 }
 
 bool WebViewBase::getKeyboardFocus()

@@ -46,6 +46,7 @@ public:
 
 protected:
     void onSize(uint width, uint height) override;
+    void onSetParent(uintptr_t parent) override;
 
 private:
     void* fBackground;

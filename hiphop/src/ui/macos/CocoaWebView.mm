@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,13 +92,15 @@ CocoaWebView::~CocoaWebView()
 
 float CocoaWebView::getScaleFactor()
 {
+    if (fNsWebView.window == nil) {
+        return 1.f;
+    }
+    
     return fNsWebView.window.backingScaleFactor;
 }
 
 void CocoaWebView::realize()
 {
-    [(NSView *)getParent() addSubview:fNsBackground];
-
     onSize(getWidth(), getHeight());
     
     @try {
@@ -157,6 +159,11 @@ void CocoaWebView::onSize(uint width, uint height)
     frame = [fNsBackground.window convertRectFromBacking:frame]; // convert DPF coords. to AppKit
     frame.origin = fNsBackground.frame.origin; // keep position, for example REAPER sets it
     fNsBackground.frame = frame;
+}
+
+void CocoaWebView::onSetParent(uintptr_t parent)
+{
+    [(NSView *)parent addSubview:fNsBackground];
 }
 
 @implementation DistrhoWebView

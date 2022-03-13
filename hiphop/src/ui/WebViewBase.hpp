@@ -71,6 +71,7 @@ public:
 protected:
     virtual void onSize(uint width, uint height) = 0;
     virtual void onKeyboardFocus(bool focus) { (void)focus; };
+    virtual void onSetParent(uintptr_t parent) { (void)parent; };
 
     void injectHostObjectScripts();
     

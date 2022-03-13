@@ -76,6 +76,8 @@ void WebViewUI::setWebView(WebViewBase* webView)
 
     // Cannot call virtual method createStandaloneWindow() from constructor.
     fPlatformWindow = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
+    fWebView->setParent(fPlatformWindow);
+    fWebView->setBackgroundColor(fBackgroundColor);
 
     // Convert CSS pixels to native pixels following the web view scale factor.
     // Then adjust window size so it correctly wraps web content on high density
@@ -83,9 +85,6 @@ void WebViewUI::setWebView(WebViewBase* webView)
     const float k = fWebView->getScaleFactor();
     const uint width = static_cast<uint>(k * static_cast<float>(getUnscaledInitWidth()));
     const uint height = static_cast<uint>(k * static_cast<float>(getUnscaledInitHeight()));
-
-    fWebView->setParent(fPlatformWindow);
-    fWebView->setBackgroundColor(fBackgroundColor);
     fWebView->setSize(width, height);
     fWebView->realize();
 
