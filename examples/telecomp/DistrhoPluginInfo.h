@@ -15,6 +15,12 @@
  */
 
 /**
+   Publish UI URL using DNS-SD, also known as Zeroconf or Bonjour.
+   @note Feature requires avahi-publish on Linux. Works on Windows 10 or newer.
+ */
+#define HIPHOP_UI_PUBLISH_DNSSD 1
+
+/**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.

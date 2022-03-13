@@ -155,7 +155,12 @@ void NetworkUI::initHandlers()
     });
 
     fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&) {
-        postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()});
+#if HIPHOP_UI_PUBLISH_DNSSD
+        const bool published = fZeroconf.isPublished();
+#else
+        const bool published = false;
+#endif
+        postMessage({"UI", "isZeroconfPublished", published});
     });
 
     fHandler["ping"] = std::make_pair(0, [this](const JSValue&) {
@@ -166,11 +171,10 @@ void NetworkUI::initHandlers()
 void NetworkUI::initServer()
 {
     fServer.init(fPort);
-    
-    String url = getPublicUrl();
+#if HIPHOP_UI_PUBLISH_DNSSD
     fZeroconf.publish(DISTRHO_PLUGIN_NAME, SERVICE_TYPE, fPort);
-
-    d_stderr(LOG_TAG " : server up @ %s", url.buffer());
+#endif
+    d_stderr(LOG_TAG " : server up @ %s", getPublicUrl().buffer());
 }
 
 int NetworkUI::findAvailablePort()

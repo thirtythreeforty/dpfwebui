@@ -21,7 +21,9 @@
 
 #include "WebUIBase.hpp"
 #include "WebServer.hpp"
-#include "Zeroconf.hpp"
+#if HIPHOP_UI_PUBLISH_DNSSD
+# include "Zeroconf.hpp"
+#endif
 
 START_NAMESPACE_DISTRHO
 
@@ -50,7 +52,9 @@ private:
 
     int       fPort;
     WebServer fServer;
+#if HIPHOP_UI_PUBLISH_DNSSD
     Zeroconf  fZeroconf;
+#endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkUI)
 
