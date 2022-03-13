@@ -347,7 +347,7 @@ void WasmPlugin::deactivate()
     }
 }
 
-#if defined(HIPHOP_SHARED_MEMORY_SIZE)
+#if HIPHOP_SHARED_MEMORY_SIZE
 void WasmPlugin::sharedMemoryChanged(const unsigned char* data, size_t size, const char* token)
 {
     if (std::strcmp(token, "_wasm_bin") == 0) {
@@ -377,7 +377,7 @@ void WasmPlugin::loadWasmBinary(const unsigned char* data, size_t size)
         fRuntime->callFunction("activate");
     }
 }
-#endif // defined(HIPHOP_SHARED_MEMORY_SIZE)
+#endif // HIPHOP_SHARED_MEMORY_SIZE
 
 WasmValueVector WasmPlugin::getTimePosition(WasmValueVector params)
 {
