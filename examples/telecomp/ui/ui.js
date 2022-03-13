@@ -49,24 +49,27 @@ class TeleCompExampleUI extends DISTRHO.UI {
     }
 
     messageChannelOpen() {
-        if (!env.plugin) {
-            // Do not let the UI take up all available space in a web browser
-            const main = document.getElementById('main');
-
-            // FIXME - WS message channel still not implemented
-            if (!env.plugin) {
-                main.style.width = '480px';
-                main.style.height = '192px';
-                document.body.style.minWidth = '480px';
-                document.body.style.minHeight = '192px';
-                document.body.style.visibility = 'visible';
-                return;
-            }
-
-            helper.setSizeToUIInitSize(this, main).then(() => {
-                document.body.style.visibility = 'visible';
-            });
+        if (env.plugin) {
+            document.body.style.visibility = 'visible';
+            return;
         }
+        
+        // Do not let the UI take up all available space in a web browser
+        const main = document.getElementById('main');
+
+        // FIXME - WS message channel still not implemented
+        if (!env.plugin) {
+            main.style.width = '480px';
+            main.style.height = '192px';
+            document.body.style.minWidth = '480px';
+            document.body.style.minHeight = '192px';
+            document.body.style.visibility = 'visible';
+            return;
+        }
+
+        helper.setSizeToUIInitSize(this, main).then(() => {
+            document.body.style.visibility = 'visible';
+        });
     }
 
     _setupForPluginEmbeddedWebview() {

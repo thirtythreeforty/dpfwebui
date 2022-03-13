@@ -387,6 +387,8 @@ void CefHelper::setKeyboardFocus(bool keyboardFocus)
 
 float CefHelper::getX11ScaleFactor()
 {
+    // FIXME - find out value used by Chromium / Firefox
+    
     XrmInitialize();
 
     if (char* const rms = XResourceManagerString(fDisplay)) {
