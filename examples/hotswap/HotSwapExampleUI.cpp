@@ -20,5 +20,5 @@
 
 UI* DISTRHO::createUI()
 {
-    return new WebUI(320 /*width*/, 240 /*height*/, 0xB6D4EFFF /*background*/);
+    return new WebUI(200 /*width*/, 180 /*height*/, 0xB6D4EFFF /*background*/);
 }
