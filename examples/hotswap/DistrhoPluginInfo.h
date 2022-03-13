@@ -20,6 +20,12 @@
 #define HIPHOP_SHARED_MEMORY_SIZE 1048576 // 1 MiB
 
 /**
+   Enable WebAssembly System Interface (WASI).
+   @note This feature is only available for the Wasmer runtime.
+ */
+#define HIPHOP_PLUGIN_WASM_WASI 0
+
+/**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.

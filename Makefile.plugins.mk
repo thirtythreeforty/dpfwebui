@@ -16,9 +16,6 @@ HIPHOP_WASM_RUNTIME ?= wamr
 # WebAssembly execution mode - WAMR [ aot | interp ], Wasmer [ jit ]
 HIPHOP_WASM_MODE ?= aot
 
-# WebAssembly System Interface only available for Wasmer
-HIPHOP_WASM_WASI ?= false
-
 # (WIP) Enable built-in websockets server and load content over HTTP
 HIPHOP_NETWORK_UI ?= false
 
@@ -248,13 +245,6 @@ WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
 else
 $(error Only JIT mode is supported for Wasmer)
 endif
-endif
-
-ifeq ($(HIPHOP_WASM_WASI),true)
-ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-$(error WAMR C API does not support WASI)
-endif
-BASE_FLAGS += -DHIPHOP_WASM_WASI
 endif
 
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)

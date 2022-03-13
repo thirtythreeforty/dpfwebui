@@ -30,6 +30,12 @@
 
 #include "WasmCApi.hpp"
 
+#if defined(HIPHOP_WASM_RUNTIME_WAMR)
+# if HIPHOP_PLUGIN_WASM_WASI
+#  error WAMR C API does not support WASI
+# endif
+#endif
+
 #define MakeI32(x) WASM_I32_VAL(static_cast<int32_t>(x))
 #define MakeI64(x) WASM_I64_VAL(static_cast<int64_t>(x))
 #define MakeF32(x) WASM_F32_VAL(static_cast<float32_t>(x))
@@ -98,7 +104,7 @@ private:
     wasm_extern_vec_t  fExportsVec;
     WasmFunctionVector fHostFunctions;
     WasmExternMap      fModuleExports;
-#if defined(HIPHOP_ENABLE_WASI)
+#if HIPHOP_PLUGIN_WASM_WASI
     wasi_env_t*        fWasiEnv;
 #endif
 

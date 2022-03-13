@@ -30,7 +30,7 @@ WasmRuntime::WasmRuntime()
     , fStore(nullptr)
     , fModule(nullptr)
     , fInstance(nullptr)
-#if defined(HIPHOP_ENABLE_WASI)
+#if HIPHOP_PLUGIN_WASM_WASI
     , fWasiEnv(nullptr)
 #endif
 {
@@ -146,7 +146,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
 
     char name[MAX_STRING_SIZE];
 
-#if defined(HIPHOP_ENABLE_WASI)
+#if HIPHOP_PLUGIN_WASM_WASI
     // Build a map of WASI imports
     // Call to wasi_get_imports() fails because of missing host imports, use
     // wasi_get_unordered_imports() https://github.com/wasmerio/wasmer/issues/2450
@@ -191,7 +191,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
         name[wn->size] = '\0';
         importIndex[name] = i;
 
-#if defined(HIPHOP_ENABLE_WASI)
+#if HIPHOP_PLUGIN_WASM_WASI
         if (wasiImportIndex.find(name) != wasiImportIndex.end()) {
             const wasmer_named_extern_t* ne = wasiImports.data[wasiImportIndex[name]];
             imports.data[i] = const_cast<wasm_extern_t *>(wasmer_named_extern_unwrap(ne));
@@ -209,7 +209,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
 
     fLib.wasm_importtype_vec_delete(&importTypes);
 
-#if defined(HIPHOP_ENABLE_WASI)
+#if HIPHOP_PLUGIN_WASM_WASI
     if (!moduleNeedsWasi) {
         throw wasm_module_exception("WASI is enabled but module is not WASI compliant");
     }
@@ -251,7 +251,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
         throw wasm_runtime_exception("wasm_instance_new() failed");
     }
     
-#if defined(HIPHOP_ENABLE_WASI)
+#if HIPHOP_PLUGIN_WASM_WASI
     wasm_func_t* wasiStart = wasi_get_start_function(fInstance);
     
     if (wasiStart == nullptr) {
@@ -287,7 +287,7 @@ void WasmRuntime::destroyInstance()
         fModule = nullptr;
     }
 
-#if defined(HIPHOP_ENABLE_WASI)
+#if HIPHOP_PLUGIN_WASM_WASI
     if (fWasiEnv != nullptr) {
         wasi_env_delete(fWasiEnv);
         fWasiEnv = nullptr;
