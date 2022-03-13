@@ -30,9 +30,6 @@
 
 START_NAMESPACE_DISTRHO
 
-class WebViewUI;
-float getDisplayScaleFactor(WebViewUI* ui); // see [Platform]WebViewuI
-
 #if defined(HIPHOP_NETWORK_UI)
 typedef NetworkUI WebViewUIBase; // https:// + WebSockets messaging
 #else
@@ -43,7 +40,7 @@ class WebViewUI : public WebViewUIBase, private WebViewEventHandler
 {
 public:
     WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
-        bool startLoading = true);
+        bool startLoading = true, float initScaleFactor = 1.0);
     virtual ~WebViewUI();
 
     typedef std::function<void()> UiBlock;

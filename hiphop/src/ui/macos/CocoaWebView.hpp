@@ -32,7 +32,8 @@ class CocoaWebView : public WebViewBase
 public:
     CocoaWebView();
     virtual ~CocoaWebView();
-
+    
+    float getScaleFactor() override;
     void realize() override;
     void navigate(String& url) override;
     void runScript(String& source) override;

@@ -90,6 +90,11 @@ CocoaWebView::~CocoaWebView()
     [fNsBackground release];
 }
 
+float CocoaWebView::getScaleFactor()
+{
+    return fNsWebView.window.backingScaleFactor;
+}
+
 void CocoaWebView::realize()
 {
     [(NSView *)getParent() addSubview:fNsBackground];

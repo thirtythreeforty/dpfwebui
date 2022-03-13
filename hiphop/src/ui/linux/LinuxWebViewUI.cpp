@@ -23,17 +23,6 @@
 
 USE_NAMESPACE_DISTRHO
 
-float DISTRHO::getDisplayScaleFactor(WebViewUI* ui)
-{
-    if (ui == nullptr) {
-        return 1.f;
-    }
-
-    ChildProcessWebView* webview = static_cast<ChildProcessWebView*>(ui->getWebView());
-
-    return webview->getDisplayScaleFactor();
-}
-
 LinuxWebViewUI::LinuxWebViewUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
     : WebViewUI(baseWidth, baseHeight, backgroundColor)

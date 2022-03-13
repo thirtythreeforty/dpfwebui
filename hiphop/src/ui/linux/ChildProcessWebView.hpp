@@ -38,8 +38,7 @@ public:
     ChildProcessWebView();
     virtual ~ChildProcessWebView();
 
-    float getDisplayScaleFactor() { return fDisplayScaleFactor; }
-
+    float getScaleFactor() override;
     void realize() override;
     void navigate(String& url) override;
     void runScript(String& source) override;
@@ -61,7 +60,7 @@ private:
     IpcChannel* fIpc;
     Thread*     fIpcThread;
     bool        fChildInit;
-    float       fDisplayScaleFactor;
+    float       fScaleFactor;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChildProcessWebView)
 

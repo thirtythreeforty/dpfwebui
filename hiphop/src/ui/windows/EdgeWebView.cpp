@@ -145,6 +145,54 @@ EdgeWebView::~EdgeWebView()
     }
 }
 
+float EdgeWebView::getScaleFactor()
+{
+    float k = 1.f;
+
+    const HMODULE shcore = LoadLibraryA("Shcore.dll");
+
+    if (shcore == nullptr) {
+        return k;
+    }
+
+    typedef HRESULT (*PFN_GetProcessDpiAwareness)(HANDLE hProc, PROCESS_DPI_AWARENESS *pValue);
+    typedef HRESULT (*PFN_GetScaleFactorForMonitor)(HMONITOR hMon, DEVICE_SCALE_FACTOR *pScale);
+
+# if defined(__GNUC__) && (__GNUC__ >= 9)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wcast-function-type"
+# endif
+    const PFN_GetProcessDpiAwareness GetProcessDpiAwareness
+        = (PFN_GetProcessDpiAwareness)GetProcAddress(shcore, "GetProcessDpiAwareness");
+    const PFN_GetScaleFactorForMonitor GetScaleFactorForMonitor
+        = (PFN_GetScaleFactorForMonitor)GetProcAddress(shcore, "GetScaleFactorForMonitor");
+# if defined(__GNUC__) && (__GNUC__ >= 9)
+#  pragma GCC diagnostic pop
+# endif
+
+    PROCESS_DPI_AWARENESS dpiAware;
+
+    if ((GetProcessDpiAwareness != nullptr) && (GetScaleFactorForMonitor != nullptr)
+            && (SUCCEEDED(GetProcessDpiAwareness(0, &dpiAware)))
+            && (dpiAware != PROCESS_DPI_UNAWARE)) {
+
+        // https://devblogs.microsoft.com/oldnewthing/20070809-00/?p=25643
+        const HMONITOR hMon = ui != nullptr ?
+              MonitorFromWindow((HWND)ui->getPlatformWindow(), MONITOR_DEFAULTTOPRIMARY)
+            : MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
+
+        DEVICE_SCALE_FACTOR scaleFactor;
+
+        if (SUCCEEDED(GetScaleFactorForMonitor(hMon, &scaleFactor))) {
+            k = static_cast<float>(scaleFactor) / 100.f;
+        }
+    }
+
+    FreeLibrary(shcore);
+
+    return k;
+}
+
 void EdgeWebView::realize()
 {
     SetParent(fHelperHwnd, reinterpret_cast<HWND>(getParent()));

@@ -26,16 +26,9 @@
 
 USE_NAMESPACE_DISTRHO
 
-// DPF implementation of VST3 on macOS needs the DISTRHO::UI constructor to be
-// called with already scaled dimensions because the later setSize() request in
-// setWebView() is ignored; see https://github.com/DISTRHO/DPF/issues/359. Since
-// the parent native window only becomes available later on UI lifecycle, scale
-// factor for secondary displays cannot be determined on UI construction.
-// VST3/Mac plugins on secondary displays might open with wrong dimensions.
-
 WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor,
-                     bool /*startLoading*/)
-    : WebViewUIBase(widthCssPx, heightCssPx, getDisplayScaleFactor(0/*main display*/))
+                     bool /*startLoading*/, float initScaleFactor)
+    : WebViewUIBase(widthCssPx, heightCssPx, initScaleFactor)
     , fBackgroundColor(backgroundColor)
     , fJsUiReady(false)
     , fUiBlockQueued(false)
@@ -84,10 +77,10 @@ void WebViewUI::setWebView(WebViewBase* webView)
     // Cannot call virtual method createStandaloneWindow() from constructor.
     fPlatformWindow = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
 
-    // Convert CSS pixels to native pixels following the system display scale
-    // factor. Then adjust window size so it correctly wraps web content on
-    // high density displays, known as Retina or HiDPI.
-    const float k = getDisplayScaleFactor(this);
+    // Convert CSS pixels to native pixels following the web view scale factor.
+    // Then adjust window size so it correctly wraps web content on high density
+    // displays, known as Retina or HiDPI.
+    const float k = fWebView->getScaleFactor();
     const uint width = static_cast<uint>(k * static_cast<float>(getUnscaledInitWidth()));
     const uint height = static_cast<uint>(k * static_cast<float>(getUnscaledInitHeight()));
 

@@ -32,7 +32,7 @@ START_NAMESPACE_DISTRHO
 class WebUIBase : public UIEx
 {
 public:
-    WebUIBase(uint widthCssPx, uint heightCssPx, float displayScaleFactor = 1.0);
+    WebUIBase(uint widthCssPx, uint heightCssPx, float initScaleFactor = 1.0);
     virtual ~WebUIBase() {}
 
 protected:

@@ -55,7 +55,7 @@ ChildProcessWebView::ChildProcessWebView()
     , fIpc(nullptr)
     , fIpcThread(nullptr)
     , fChildInit(false)
-    , fDisplayScaleFactor(1.f)
+    , fScaleFactor(1.f)
 {
     fDisplay = XOpenDisplay(0);
 
@@ -163,6 +163,11 @@ ChildProcessWebView::~ChildProcessWebView()
     XCloseDisplay(fDisplay);
 }
 
+float ChildProcessWebView::getScaleFactor()
+{
+    return fScaleFactor;
+}
+
 void ChildProcessWebView::realize()
 {
     const ::Window parent = (::Window)getParent();
@@ -243,7 +248,7 @@ void ChildProcessWebView::ipcReadCallback(const tlv_t& packet)
 
 void ChildProcessWebView::handleInit(float displayScaleFactor)
 {
-    fDisplayScaleFactor = displayScaleFactor;
+    fScaleFactor = displayScaleFactor;
     fChildInit = true;
 }
 

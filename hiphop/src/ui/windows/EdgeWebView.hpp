@@ -55,6 +55,7 @@ public:
     EdgeWebView();
     virtual ~EdgeWebView();
 
+    float getScaleFactor() override;
     void realize() override;
     void navigate(String& url) override;
     void runScript(String& source) override;
