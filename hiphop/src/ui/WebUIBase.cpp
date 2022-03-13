@@ -124,7 +124,7 @@ void WebUIBase::initHandlers()
     fHandler["editParameter"] = std::make_pair(2, [this](const JSValue& args) {
         editParameter(
             static_cast<uint32_t>(args[0].getNumber()), // index
-            static_cast<bool>(args[1].getBoolean())        // started
+            static_cast<bool>(args[1].getBoolean())     // started
         );
     });
 

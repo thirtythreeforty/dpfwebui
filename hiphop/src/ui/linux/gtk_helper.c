@@ -132,6 +132,9 @@ int main(int argc, char* argv[])
 
 static float get_gtk_scale_factor()
 {
+    // FIXME - returned value still does not match Chromium or Firefox
+    //         rasterization factor
+
     // Favor system-wide setting, this is set for example by updating display
     // scale in Gnome Shell's settings and possibly by other window managers.
     // It can be also controlled by setting the environment variable GDK_SCALE.
@@ -157,11 +160,11 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
 {
     // Create a native container window
 #if DISTRHO_UI_USER_RESIZABLE
-    int width = ctx->scaleFactor * HIPHOP_GTK_WEBVIEW_WIDTH;
-    int height = ctx->scaleFactor * HIPHOP_GTK_WEBVIEW_HEIGHT;
+    int width = HIPHOP_GTK_WEBVIEW_WIDTH;
+    int height = HIPHOP_GTK_WEBVIEW_HEIGHT;
 #else
-    int width = ctx->scaleFactor * config->size.width;
-    int height = ctx->scaleFactor * config->size.height;
+    int width = config->size.width;
+    int height = config->size.height;
 #endif
     ctx->container = XCreateSimpleWindow(ctx->display, (Window)config->parent, 0, 0,
                                          width, height, 0, 0, 0);

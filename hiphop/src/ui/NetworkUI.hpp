@@ -30,7 +30,7 @@ START_NAMESPACE_DISTRHO
 class NetworkUI : public WebUIBase
 {
 public:
-    NetworkUI(uint widthCssPx, uint heightCssPx, float displayScaleFactor = 1.0);
+    NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactor = 1.0);
     virtual ~NetworkUI();
 
     String getLocalUrl();

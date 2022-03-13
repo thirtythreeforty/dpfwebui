@@ -148,6 +148,8 @@ EdgeWebView::~EdgeWebView()
 
 float EdgeWebView::getScaleFactor()
 {
+    // FIXME - use the appropriate method for this
+    // https://docs.microsoft.com/en-us/dotnet/api/microsoft.web.webview2.core.corewebview2controller.rasterizationscale?view=webview2-dotnet-1.0.1150.38
     float k = 1.f;
 
     const HMODULE shcore = LoadLibraryA("Shcore.dll");

@@ -49,31 +49,24 @@ class TeleCompExampleUI extends DISTRHO.UI {
     }
 
     messageChannelOpen() {
-        if (env.plugin) {
-            // There is a discrepancy between native unscaled initial dimensions
-            // "A" (WebUIBase::fUnscaledInitWidth/Height) and "B" CSS dimensions
-            // on Windows Edge WebView2, being A = ~1.05 * B. Setting the main
-            // element size is not necessary for the embedded web view though.
-            document.body.style.visibility = 'visible';
-            return;
-        }
-
-        const main = document.getElementById('main');
-
-        // FIXME - WS message channel still not implemented
         if (!env.plugin) {
-            main.style.width = '480px';
-            main.style.height = '192px';
-            document.body.style.minWidth = '480px';
-            document.body.style.minHeight = '192px';
-            document.body.style.visibility = 'visible';
-            return;
-        }
+            // Do not let the UI take up all available space in a web browser
+            const main = document.getElementById('main');
 
-        // Do not let the UI take up all available space in a web browser
-        helper.setSizeToUIInitSize(this, main).then(() => {
-            document.body.style.visibility = 'visible';
-        });
+            // FIXME - WS message channel still not implemented
+            if (!env.plugin) {
+                main.style.width = '480px';
+                main.style.height = '192px';
+                document.body.style.minWidth = '480px';
+                document.body.style.minHeight = '192px';
+                document.body.style.visibility = 'visible';
+                return;
+            }
+
+            helper.setSizeToUIInitSize(this, main).then(() => {
+                document.body.style.visibility = 'visible';
+            });
+        }
     }
 
     _setupForPluginEmbeddedWebview() {
