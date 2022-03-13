@@ -148,8 +148,11 @@ EdgeWebView::~EdgeWebView()
 
 float EdgeWebView::getScaleFactor()
 {
-    // FIXME - use the appropriate method for this
-    // https://docs.microsoft.com/en-us/dotnet/api/microsoft.web.webview2.core.corewebview2controller.rasterizationscale?view=webview2-dotnet-1.0.1150.38
+    // ICoreWebView2Controller3_get_RasterizationScale() always returns 1.
+    // Using it would also require to add a view-ready callback to update the
+    // web view and plugin UI sizes because WebView2 initialization is async,
+    // creating a visual glitch that is less desirable than relying on an
+    // imperfect method of determining scaling factor (but at least sync).
     float k = 1.f;
 
     const HMODULE shcore = LoadLibraryA("Shcore.dll");
