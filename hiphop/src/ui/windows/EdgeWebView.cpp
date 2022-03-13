@@ -23,6 +23,7 @@
 #include <locale>
 #include <sstream>
 #include <shellapi.h>
+#include <shellscalingapi.h>
 #include <winuser.h>
 
 #include "extra/macro.h"
@@ -177,9 +178,7 @@ float EdgeWebView::getScaleFactor()
             && (dpiAware != PROCESS_DPI_UNAWARE)) {
 
         // https://devblogs.microsoft.com/oldnewthing/20070809-00/?p=25643
-        const HMONITOR hMon = ui != nullptr ?
-              MonitorFromWindow((HWND)ui->getPlatformWindow(), MONITOR_DEFAULTTOPRIMARY)
-            : MonitorFromPoint({0, 0}, MONITOR_DEFAULTTOPRIMARY);
+        const HMONITOR hMon = MonitorFromWindow((HWND)getParent(), MONITOR_DEFAULTTOPRIMARY);
 
         DEVICE_SCALE_FACTOR scaleFactor;
 

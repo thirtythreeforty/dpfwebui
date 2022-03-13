@@ -74,7 +74,6 @@ void WebViewUI::setWebView(WebViewBase* webView)
     fWebView->injectScript(js);
 #endif
 
-    // Cannot call virtual method createStandaloneWindow() from constructor.
     fPlatformWindow = isStandalone() ? createStandaloneWindow() : getParentWindowHandle();
     fWebView->setParent(fPlatformWindow);
     fWebView->setBackgroundColor(fBackgroundColor);
