@@ -41,6 +41,7 @@
 #else
 # define TRANSFER_PROTOCOL "http"
 #endif
+#define SERVICE_TYPE "_http._tcp"
 #define FIRST_PORT 49152 // first in dynamic/private range
 
 USE_NAMESPACE_DISTRHO
@@ -167,7 +168,7 @@ void NetworkUI::initServer()
     fServer.init(fPort);
     
     String url = getPublicUrl();
-    fZeroconf.publish(DISTRHO_PLUGIN_NAME, "_http._tcp", fPort);
+    fZeroconf.publish(DISTRHO_PLUGIN_NAME, SERVICE_TYPE, fPort);
 
     d_stderr(LOG_TAG " : server up @ %s", url.buffer());
 }
