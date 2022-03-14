@@ -19,12 +19,14 @@
 #include <errno.h>
 
 #include "LinuxWebViewUI.hpp"
+#include "scaling.h"
 
 USE_NAMESPACE_DISTRHO
 
 LinuxWebViewUI::LinuxWebViewUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : WebViewUI(baseWidth, baseHeight, backgroundColor)
+    : WebViewUI(baseWidth, baseHeight, backgroundColor,
+                /*VST3 quirk*/device_pixel_ratio())
 {
     if (!shouldCreateWebView()) {
         return;

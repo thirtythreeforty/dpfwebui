@@ -20,30 +20,32 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <X11/Xlib.h>
 #include <X11/Xresource.h>
 
 #include "scaling.h"
 
-float device_pixel_ratio(Display* display)
+float device_pixel_ratio()
 {
     // Simulate Chromium device pixel ratio https://wiki.debian.org/MonitorDPI
     // Chromium will use the ratio between Xft/DPI (as set through XSETTINGS)
     // and the DPI reported by the X server (through xdpyinfo) as a scaling
     // factor to be used. GTK scale factor is also taken in account by Chromium.
 
-    return xft_dpi(display) / display_dpi(display) * gtk_env_scale();
+    return xft_dpi() / display_dpi() * gtk_env_scale();
 }
 
-float xft_dpi(Display* display)
+float xft_dpi()
 {
+    Display* display = XOpenDisplay(NULL);
     XrmInitialize();
 
-    char* rms;
+    char* rms = XResourceManagerString(display);
 
-    if (rms = XResourceManagerString(display)) {
-        XrmDatabase sdb;
+    if (rms != NULL) {
+        XrmDatabase sdb = XrmGetStringDatabase(rms);
 
-        if (sdb = XrmGetStringDatabase(rms)) {
+        if (sdb != NULL) {
             char* type = NULL;
             XrmValue ret;
 
@@ -62,8 +64,9 @@ float xft_dpi(Display* display)
     return 96.f;
 }
 
-float display_dpi(Display* display)
+float display_dpi()
 {
+    Display* display = XOpenDisplay(NULL);
     return ((float)(DisplayWidth(display, 0)) * 25.4f /*mm to inch*/)
          / ((float)(DisplayWidthMM(display, 0)));
 }

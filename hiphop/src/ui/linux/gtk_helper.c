@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
     // completely useless. Reset GTK scaling after capturing env values and
     // before gtk_init(), so scaling can be controlled manually later via zoom.
     // Warning: window.devicePixelRatio will always return 1.0 .
-    ctx.pixelRatio = device_pixel_ratio(ctx.display);
+    ctx.pixelRatio = device_pixel_ratio();
     unsetenv("GDK_SCALE");
     // Text also follows Xft.dpi, counteract effect by re-setting GDK_DPI_SCALE.
     char temp[8];

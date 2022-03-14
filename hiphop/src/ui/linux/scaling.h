@@ -19,15 +19,13 @@
 #ifndef SCALING_H
 #define SCALING_H
 
-#include <X11/Xlib.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-float device_pixel_ratio(Display* display);
-float xft_dpi(Display* display);
-float display_dpi(Display *display);
+float device_pixel_ratio();
+float xft_dpi();
+float display_dpi();
 float gtk_env_scale();
 
 #ifdef __cplusplus

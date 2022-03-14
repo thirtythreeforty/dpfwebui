@@ -136,7 +136,8 @@ ifeq ($(LINUX),true)
 HIPHOP_FILES_UI += linux/LinuxWebViewUI.cpp \
                    linux/ChildProcessWebView.cpp \
                    linux/IpcChannel.cpp \
-                   linux/ipc.c
+                   linux/ipc.c \
+                   linux/scaling.c
 endif
 ifeq ($(MACOS),true)
 HIPHOP_FILES_UI += macos/MacWebViewUI.mm \
