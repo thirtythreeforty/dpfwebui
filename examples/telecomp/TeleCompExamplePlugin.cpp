@@ -29,7 +29,7 @@ public:
 
     const char* getLabel() const noexcept override
     {
-        return "TeleCompressor";
+        return "TeleComp";
     }
 
     const char* getDescription() const noexcept override

@@ -25,7 +25,7 @@
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NAME "TeleCompressor"
+#define DISTRHO_PLUGIN_NAME "TeleComp"
 
 /**
    Number of audio inputs the plugin has.
