@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PIXEL_RATIO_H
-#define PIXEL_RATIO_H
+#ifndef SCALING_H
+#define SCALING_H
 
 #include <X11/Xlib.h>
 
@@ -25,10 +25,13 @@
 extern "C" {
 #endif
 
-float getDevicePixelRatio(Display* display, float tkScaleFactor);
+float device_pixel_ratio(Display* display);
+float xft_dpi(Display* display);
+float display_dpi(Display *display);
+float gtk_env_scale();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // PIXEL_RATIO_H
+#endif  // SCALING_H

@@ -28,7 +28,7 @@
 
 #include "ipc.h"
 #include "ipc_message.h"
-#include "pixel_ratio.h"
+#include "scaling.h"
 
 #include "DistrhoPluginInfo.h"
 
@@ -52,8 +52,9 @@
 
 typedef struct {
     ipc_t*         ipc;
-    msg_win_size_t size;
     Display*       display;
+    float          pixelRatio;
+    msg_win_size_t size;
     Window         container;
     GtkWindow*     window;
     WebKitWebView* webView;
@@ -98,26 +99,31 @@ int main(int argc, char* argv[])
 
     ctx.ipc = ipc_init(&conf);
 
-    gdk_set_allowed_backends("x11");
-    gtk_init(0, NULL);
-
     ctx.display = XOpenDisplay(NULL);
-
     if (ctx.display == NULL) {
         fprintf(stderr, "Cannot open display");
         return -1;
     }
 
+    // WebKitGTK uses environment variables to scale text only, leaving out
+    // images and px values. Not sure that is a bug or a feature but it is
+    // completely useless. Reset GTK scaling after capturing env values and
+    // before gtk_init(), so scaling can be controlled manually later via zoom.
+    // Warning: window.devicePixelRatio will always return 1.0 .
+    ctx.pixelRatio = device_pixel_ratio(ctx.display);
+    unsetenv("GDK_SCALE");
+    // Text also follows Xft.dpi, counteract effect by re-setting GDK_DPI_SCALE.
+    char temp[8];
+    sprintf(temp, "%.2f", 96.f / xft_dpi(ctx.display));
+    setenv("GDK_DPI_SCALE", temp, 1);
+
+    gdk_set_allowed_backends("x11");
+    gtk_init(0, NULL);
+
     channel = g_io_channel_unix_new(conf.fd_r);    
     g_io_add_watch(channel, G_IO_IN|G_IO_ERR|G_IO_HUP, ipc_read_cb, &ctx);
 
-    // gtk_widget_get_scale_factor() seems to return same value as env variable
-    // GDK_SCALE. Controlled by Gnome Shell's settings and possibly other WMs.
-    GtkWidget *dummy = gtk_widget_new(GTK_TYPE_WINDOW, NULL);
-    float k = (float)gtk_widget_get_scale_factor(dummy);
-    gtk_widget_destroy(dummy);
-    float dpr = getDevicePixelRatio(ctx.display, k);
-    ipc_write_simple(&ctx, OP_HANDLE_INIT, &dpr, sizeof(dpr));
+    ipc_write_simple(&ctx, OP_HANDLE_INIT, &ctx.pixelRatio, sizeof(ctx.pixelRatio));
 
     gtk_main();
 
@@ -165,6 +171,8 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
     gtk_window_resize(ctx->window, width, height);
 
     ctx->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
+    webkit_web_view_set_zoom_level(ctx->webView, ctx->pixelRatio);
+
     g_signal_connect(ctx->webView, "load-changed", G_CALLBACK(web_view_load_changed_cb), ctx);
     g_signal_connect(ctx->webView, "key-press-event", G_CALLBACK(web_view_keypress_cb), ctx);
     WebKitUserContentManager *manager = webkit_web_view_get_user_content_manager(ctx->webView);
@@ -219,6 +227,9 @@ static void apply_size(const context_t *ctx)
 
     // WKGTKRESIZEBUG : does not result in webview contents size update
     //gtk_window_resize(ctx->window, width, height);
+
+    width = (unsigned)((float)width / ctx->pixelRatio);
+    height = (unsigned)((float)height / ctx->pixelRatio);
 
     char js[1024];
 
@@ -304,7 +315,7 @@ static void web_view_load_changed_cb(WebKitWebView *view, WebKitLoadEvent event,
             apply_size(ctx);
             gtk_widget_show_all(GTK_WIDGET(ctx->window));
             ipc_write_simple(ctx, OP_HANDLE_LOAD_FINISHED, NULL, 0);
-            //usleep(20000); // 20ms -- prevents flicker, why?
+            usleep(20000); // 20ms -- prevents flicker, why?
             break;
         default:
             break;

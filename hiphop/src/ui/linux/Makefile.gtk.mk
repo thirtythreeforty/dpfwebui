@@ -6,7 +6,7 @@
 
 LXHELPER_SRC = gtk_helper.c \
 			   ipc.c \
-			   pixel_ratio.c
+			   scaling.c
 
 LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_PATH)/%.o)
 

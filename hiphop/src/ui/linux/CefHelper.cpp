@@ -25,7 +25,7 @@
 
 #include "distrho/extra/sofd/libsofd.h"
 #include "extra/Path.hpp"
-#include "pixel_ratio.h"
+#include "scaling.h"
 
 #define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.hostPostMessage(args);"
 
@@ -120,7 +120,7 @@ int CefHelper::run(const CefMainArgs& args)
     CefInitialize(args, settings, this, nullptr);
 
     // Let parent process know child is ready
-    const float dpr = getDevicePixelRatio(fDisplay, 1.f);
+    const float dpr = device_pixel_ratio(fDisplay);
     fIpc->write(OP_HANDLE_INIT, &dpr, sizeof(dpr));
 
     runMainLoop();
@@ -235,7 +235,7 @@ void CefHelper::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> f
                             TransitionType transitionType)
 {
     // Chromium weird scaling https://magpcss.org/ceforum/viewtopic.php?t=11491
-    const float zoomLevel = std::log(getDevicePixelRatio(fDisplay, 1.f)) / std::log(1.2f);
+    const float zoomLevel = std::log(device_pixel_ratio(fDisplay)) / std::log(1.2f);
     browser->GetHost()->SetZoomLevel(zoomLevel);
 }
 
@@ -270,7 +270,7 @@ bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser, CefDialogHandler::Fi
         return true;
     }
 
-    const double scaleFactor = std::ceil(static_cast<double>(getDevicePixelRatio(fDisplay, 1.f)));
+    const double scaleFactor = std::ceil(static_cast<double>(device_pixel_ratio(fDisplay)));
     if (x_fib_show(fDisplay, 0 /*parent*/, 0, 0, scaleFactor) != 0) {
         callback->Cancel();
         return true;

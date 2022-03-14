@@ -22,22 +22,26 @@
 
 #include <X11/Xresource.h>
 
-#include "pixel_ratio.h"
+#include "scaling.h"
 
-float getDevicePixelRatio(Display* display, float tkScaleFactor)
+float device_pixel_ratio(Display* display)
 {
     // Simulate Chromium device pixel ratio https://wiki.debian.org/MonitorDPI
     // Chromium will use the ratio between Xft/DPI (as set through XSETTINGS)
     // and the DPI reported by the X server (through xdpyinfo) as a scaling
-    // factor to be used.
+    // factor to be used. GTK scale factor is also taken in account by Chromium.
 
+    return xft_dpi(display) / display_dpi(display) * gtk_env_scale();
+}
+
+float xft_dpi(Display* display)
+{
     XrmInitialize();
 
-    float xftDpi = 96.f;
     char* rms;
 
     if (rms = XResourceManagerString(display)) {
-    	XrmDatabase sdb;
+        XrmDatabase sdb;
 
         if (sdb = XrmGetStringDatabase(rms)) {
             char* type = NULL;
@@ -46,36 +50,39 @@ float getDevicePixelRatio(Display* display, float tkScaleFactor)
             if (XrmGetResource(sdb, "Xft.dpi", "String", &type, &ret)
                     && (ret.addr != NULL) && (type != NULL)
                     && (strncmp("String", type, 6) == 0)) {
-            	float dpi = atof(ret.addr);
+                float dpi = atof(ret.addr);
+
                 if (dpi > 0) {
-                    xftDpi = dpi;
+                    return dpi;
                 }
             }
         }
     }
 
-    // X display DPI value as returned by xdpyinfo
+    return 96.f;
+}
 
-    float dpyDpi = ((float)(DisplayWidth(display, 0)) * 25.4f /*mm to inch*/)
-                 / ((float)(DisplayWidthMM(display, 0)));
+float display_dpi(Display* display)
+{
+    return ((float)(DisplayWidth(display, 0)) * 25.4f /*mm to inch*/)
+         / ((float)(DisplayWidthMM(display, 0)));
+}
 
-    // Toolkit scale factor is also taken in account by Chromium.
+float gtk_env_scale()
+{
+    const char* s = getenv("GDK_SCALE");
+    int d;
 
-    if (tkScaleFactor == 1.f) {
-	    const char* s = getenv("GDK_SCALE");
-	    int d;
+    if ((s != 0) && (sscanf(s, "%d", &d) == 1)) {
+        return (float)d;
+    } else {
+        s = getenv("GDK_DPI_SCALE");
+        float f;
 
-	    if ((s != 0) && (sscanf(s, "%d", &d) == 1)) {
-	        tkScaleFactor = (float)d;
-	    } else {
-		    s = getenv("GDK_DPI_SCALE");
-		    float f;
+        if ((s != 0) && (sscanf(s, "%f", &f) == 1)) {
+            return f;
+        }
+    }
 
-		    if ((s != 0) && (sscanf(s, "%f", &f) == 1)) {
-		        tkScaleFactor = f;
-		    }
-		}
-	}
-
-    return tkScaleFactor * xftDpi / dpyDpi;
+    return 1.f;
 }
