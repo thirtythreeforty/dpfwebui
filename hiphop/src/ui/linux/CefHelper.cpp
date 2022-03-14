@@ -270,6 +270,7 @@ bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser, CefDialogHandler::Fi
         return true;
     }
 
+    // Web view scaling value is too small for libSOFD, bump it up.
     const double scaleFactor = std::ceil(static_cast<double>(device_pixel_ratio(fDisplay)));
     if (x_fib_show(fDisplay, 0 /*parent*/, 0, 0, scaleFactor) != 0) {
         callback->Cancel();

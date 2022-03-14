@@ -104,8 +104,7 @@ void WasmRuntime::load(const char* modulePath)
         throw wasm_module_exception("Error reading module file");
     }
 
-    // WINWASMERBUG : Following call crashes some hosts on Windows when using
-    //                the Wasmer runtime, does not affect WAMR. See bugs.txt.
+    // Following call crashes some DAWs on Windows when running Wasmer runtime.
     fModule = fLib.wasm_module_new(fStore, &moduleBytes);
     fLib.wasm_byte_vec_delete(&moduleBytes);
 

@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@
 
 #include "DistrhoPluginInfo.h"
 
-// WKGTKRESIZEBUG : webview created with fixed size, see comprehensive
-// explanation in realize(). Resizable plugins need DISTRHO_UI_USER_RESIZABLE=1
-// in DistrhoPluginInfo.h and optionally HIPHOP_GTK_WEBVIEW_WIDTH/HEIGHT to set
-// the maximum size and also ensure viewport dimensions (vw/vw/vmin/vmax) are
+// Web view created with fixed size, see comprehensive explanation in realize().
+// Resizable plugins need DISTRHO_UI_USER_RESIZABLE=1 in DistrhoPluginInfo.h and
+// optionally HIPHOP_GTK_WEBVIEW_WIDTH / HIPHOP_GTK_WEBVIEW_HEIGHT to set the
+// maximum size and also ensure viewport dimensions (vw/vw/vmin/vmax) are
 // relative to some known fixed values. Non-resizable plugins should set
-// DISTRHO_UI_USER_RESIZABLE=0 and the webview will be set to the init UI size.
+// DISTRHO_UI_USER_RESIZABLE=0 and the web view will be set to the init UI size.
 #if DISTRHO_UI_USER_RESIZABLE
 # if !defined(HIPHOP_GTK_WEBVIEW_WIDTH) || !defined(HIPHOP_GTK_WEBVIEW_HEIGHT)
 #  define HIPHOP_GTK_WEBVIEW_WIDTH  1536
@@ -161,13 +161,13 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
     ctx->window = GTK_WINDOW(gtk_widget_new(GTK_TYPE_WINDOW, NULL));
     g_signal_connect(ctx->window, "realize", G_CALLBACK(gtk_widget_set_window), gdkWindow);
 
-    // WKGTKRESIZEBUG : After the web view becomes visible, gtk_window_resize()
-    // will not cause its contents to resize anymore. The issue is probably
-    // related to the GdkWindow wrapping a X11 window and not emitting Glib
-    // events like configure-event. The workaround consists in creating the
-    // window with a predetermined max size and using JavaScript to resize HTML
-    // body instead of resizing the window natively. It is an ugly solution that
-    // works. Note this renders viewport based units useless (vw/vh/vmin/vmax). 
+    // After the web view becomes visible, gtk_window_resize() will not cause
+    // its contents to resize anymore. The issue is probably related to the
+    // GdkWindow wrapping a X11 window and not emitting Glib events like
+    // configure-event. The workaround consists in creating the window with a
+    // predetermined max size and using JavaScript to resize HTML body instead
+    // of resizing the window natively. It is an ugly solution that works.
+    // Note this renders viewport based units useless (vw/vh/vmin/vmax). 
     gtk_window_resize(ctx->window, width, height);
 
     ctx->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
@@ -225,7 +225,7 @@ static void apply_size(const context_t *ctx)
         return;
     }
 
-    // WKGTKRESIZEBUG : does not result in webview contents size update
+    // Does not result in webview contents size update
     //gtk_window_resize(ctx->window, width, height);
 
     width = (unsigned)((float)width / ctx->pixelRatio);

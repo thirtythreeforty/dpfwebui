@@ -112,11 +112,16 @@ ChildProcessWebView::ChildProcessWebView()
 
     injectHostObjectScripts();
 
+    // No drag and drop for GTK or CEF
     setEnvironmentBool("noDragAndDrop", true);
 #if defined(HIPHOP_LINUX_WEBVIEW_GTK)
-    // WKGTKRESIZEBUG : Broken vw/vh/vmin/vmax CSS units
+# if defined DISTRHO_UI_USER_RESIZABLE && (!defined(HIPHOP_GTK_WEBVIEW_WIDTH) || !defined(HIPHOP_GTK_WEBVIEW_HEIGHT))
+    // vw/vh/vmin/vmax units are relative to fixed size when UI is resizable
     setEnvironmentBool("noCSSViewportUnits", true);
-    // No touch events for <input type="range"> elements
+# endif
+    // window.devicePixelRatio returns fixed 1.0 value
+    setEnvironmentBool("noDevicePixelRatio", true);
+    // <input type="range"> elements do not react to touches
     setEnvironmentBool("noRangeInputTouch", true);
 #endif
 
@@ -165,6 +170,7 @@ ChildProcessWebView::~ChildProcessWebView()
 
 float ChildProcessWebView::getDevicePixelRatio()
 {
+    // Determined by child processes
     return fDevicePixelRatio;
 }
 
