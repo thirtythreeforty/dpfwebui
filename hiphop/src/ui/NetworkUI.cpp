@@ -50,6 +50,10 @@ NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactorFor
     : WebUIBase(widthCssPx, heightCssPx, initScaleFactorForVST3)
     , fPort(0)
 {
+    if (isDryRun()) {
+        return;
+    }
+
 #if defined(DISTRHO_OS_WINDOWS)
     WSADATA wsaData;
     int rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -133,6 +137,10 @@ void NetworkUI::postMessage(const JSValue& args)
 #if DISTRHO_PLUGIN_WANT_STATE
 void NetworkUI::stateChanged(const char* key, const char* value)
 {
+    if (isDryRun()) {
+        return;
+    }
+
     if (std::strcmp(key, "_ws_port") == 0) {
         fPort = std::atoi(value);
         if (fPort == -1) {

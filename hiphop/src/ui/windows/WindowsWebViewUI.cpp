@@ -30,7 +30,7 @@ WindowsWebViewUI::WindowsWebViewUI(uint baseWidth, uint baseHeight,
                 /*initScaleFactorForVST3*/EdgeWebView::getMonitorScaleFactor(0))
     , fHostHWnd(0)
 {
-    if (!shouldCreateWebView()) {
+    if (isDryRun()) {
         return;
     }
 

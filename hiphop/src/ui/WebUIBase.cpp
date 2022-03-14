@@ -30,6 +30,13 @@ WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initScaleFactorFor
     initHandlers();
 }
 
+bool WebUIBase::isDryRun()
+{
+    // When running as a plugin the UI ctor/dtor can be repeatedly called with
+    // no parent window available, avoid allocating resources in such cases.
+    return ! isStandalone() && (getParentWindowHandle() == 0);
+}
+
 void WebUIBase::sizeChanged(uint width, uint height)
 {
     UIEx::sizeChanged(width, height);

@@ -28,7 +28,7 @@ LinuxWebViewUI::LinuxWebViewUI(uint baseWidth, uint baseHeight,
     : WebViewUI(baseWidth, baseHeight, backgroundColor,
                 /*initScaleFactorForVST3*/device_pixel_ratio())
 {
-    if (!shouldCreateWebView()) {
+    if (isDryRun()) {
         return;
     }
 

@@ -57,13 +57,6 @@ void WebViewUI::queue(const UiBlock& block)
     fUiBlockQueued = true;
 }
 
-bool WebViewUI::shouldCreateWebView()
-{
-    // When running as a plugin the UI ctor/dtor can be repeatedly called with
-    // no parent window available, do not create the web view in such cases.
-    return isStandalone() || (getParentWindowHandle() != 0);
-}
-
 void WebViewUI::setWebView(WebViewBase* webView)
 {
     fWebView = webView;

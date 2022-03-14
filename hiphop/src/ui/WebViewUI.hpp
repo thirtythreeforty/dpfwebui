@@ -54,7 +54,6 @@ public:
     virtual void openSystemWebBrowser(String& url) = 0;
 
 protected:
-    bool shouldCreateWebView();
     void setWebView(WebViewBase* webView);
 
     void load();

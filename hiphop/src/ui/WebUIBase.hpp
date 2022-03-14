@@ -38,6 +38,8 @@ public:
 protected:
     void uiIdle() override {}
 
+    bool isDryRun();
+    
     uint getUnscaledInitWidth() const { return fUnscaledInitWidth; }
     uint getUnscaledInitHeight() const { return fUnscaledInitHeight; }
 

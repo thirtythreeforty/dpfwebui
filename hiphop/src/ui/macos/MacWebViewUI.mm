@@ -30,7 +30,7 @@ MacWebViewUI::MacWebViewUI(uint baseWidth, uint baseHeight,
                 /*initScaleFactorForVST3*/[NSScreen mainScreen].backingScaleFactor)
     , fWindow(0)
 {
-    if (!shouldCreateWebView()) {
+    if (isDryRun()) {
         return;
     }
 
