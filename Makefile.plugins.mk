@@ -450,9 +450,10 @@ $(WAMR_LLVM_LIB_PATH): $(WAMR_REPO)
 
 $(WAMR_REPO):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
-	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) \
-		&& git -C $(WAMR_PATH) reset --hard 7a0ec1c
-	#@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
+	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL)
+	@git -C $(WAMR_PATH) reset --hard 7a0ec1c
+	@git -C $(WAMR_PATH) apply $(abspath $(HIPHOP_ROOT_PATH))/patch/WAMR_PR1044.diff 2>/dev/null)
+	@#git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
 endif
 endif
 
