@@ -40,7 +40,7 @@ class WebViewUI : public WebViewUIBase, private WebViewEventHandler
 {
 public:
     WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor, 
-        float initScaleFactor = 1.0);
+        float initScaleFactorForVST3);
     virtual ~WebViewUI();
 
     typedef std::function<void()> UiBlock;

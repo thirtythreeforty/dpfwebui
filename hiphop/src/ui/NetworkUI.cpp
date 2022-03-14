@@ -46,8 +46,8 @@
 
 USE_NAMESPACE_DISTRHO
 
-NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactor)
-    : WebUIBase(widthCssPx, heightCssPx, initScaleFactor)
+NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3)
+    : WebUIBase(widthCssPx, heightCssPx, initScaleFactorForVST3)
     , fPort(0)
 {
 #if defined(DISTRHO_OS_WINDOWS)

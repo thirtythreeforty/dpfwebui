@@ -33,8 +33,8 @@ USE_NAMESPACE_DISTRHO
 // factor for the display containing the web view cannot be determined on UI
 // construction. Plugins on secondary displays might open with wrong dimensions.
 WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor,
-                     float initScaleFactor)
-    : WebViewUIBase(widthCssPx, heightCssPx, initScaleFactor)
+                     float initScaleFactorForVST3)
+    : WebViewUIBase(widthCssPx, heightCssPx, initScaleFactorForVST3)
     , fBackgroundColor(backgroundColor)
     , fJsUiReady(false)
     , fUiBlockQueued(false)
@@ -86,7 +86,8 @@ void WebViewUI::setWebView(WebViewBase* webView)
 
     // Convert CSS pixels to native pixels following the web view pixel ratio.
     // Then adjust window size so it correctly wraps web content on high density
-    // displays, known as Retina or HiDPI.
+    // displays, known as Retina or HiDPI. WebViewBase::getDevicePixelRatio()
+    // needs a parent window to be set because scaling can vary across displays.
     const float k = fWebView->getDevicePixelRatio();
     const uint width = static_cast<uint>(k * static_cast<float>(getUnscaledInitWidth()));
     const uint height = static_cast<uint>(k * static_cast<float>(getUnscaledInitHeight()));

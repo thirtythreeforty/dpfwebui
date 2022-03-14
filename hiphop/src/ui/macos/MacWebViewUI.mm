@@ -27,7 +27,7 @@ USE_NAMESPACE_DISTRHO
 MacWebViewUI::MacWebViewUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
     : WebViewUI(baseWidth, baseHeight, backgroundColor,
-                /*VST3 quirk*/[NSScreen mainScreen].backingScaleFactor)
+                /*initScaleFactorForVST3*/[NSScreen mainScreen].backingScaleFactor)
     , fWindow(0)
 {
     if (!shouldCreateWebView()) {

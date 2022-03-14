@@ -26,7 +26,7 @@ USE_NAMESPACE_DISTRHO
 LinuxWebViewUI::LinuxWebViewUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
     : WebViewUI(baseWidth, baseHeight, backgroundColor,
-                /*VST3 quirk*/device_pixel_ratio())
+                /*initScaleFactorForVST3*/device_pixel_ratio())
 {
     if (!shouldCreateWebView()) {
         return;
