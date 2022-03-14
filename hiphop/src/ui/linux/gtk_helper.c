@@ -216,11 +216,6 @@ static void apply_size(const context_t *ctx)
     if ((width == 0) || (height == 0)) {
         return;
     }
- 
-    // WebKitGTK uses this value for setting window.devicePixelRatio
-    gint k = gtk_widget_get_scale_factor(GTK_WIDGET(ctx->webView));
-    width /= k;
-    height /= k;
 
     // WKGTKRESIZEBUG : does not result in webview contents size update
     //gtk_window_resize(ctx->window, width, height);
@@ -309,7 +304,7 @@ static void web_view_load_changed_cb(WebKitWebView *view, WebKitLoadEvent event,
             apply_size(ctx);
             gtk_widget_show_all(GTK_WIDGET(ctx->window));
             ipc_write_simple(ctx, OP_HANDLE_LOAD_FINISHED, NULL, 0);
-            usleep(20000); // 20ms -- prevents flicker, why?
+            //usleep(20000); // 20ms -- prevents flicker, why?
             break;
         default:
             break;
