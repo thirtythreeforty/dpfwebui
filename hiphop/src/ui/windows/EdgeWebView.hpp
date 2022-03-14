@@ -55,6 +55,8 @@ public:
     EdgeWebView();
     virtual ~EdgeWebView();
 
+    static float getMonitorScaleFactor(HWND hWnd);
+
     float getDevicePixelRatio() override;
     
     void realize() override;

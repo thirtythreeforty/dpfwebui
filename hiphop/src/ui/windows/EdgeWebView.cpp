@@ -146,17 +146,11 @@ EdgeWebView::~EdgeWebView()
     }
 }
 
-float EdgeWebView::getDevicePixelRatio()
+float EdgeWebView::getMonitorScaleFactor(HWND hWnd)
 {
-    // ICoreWebView2Controller3_get_RasterizationScale() always returns 1.
-    // Using it would also require to add a view-ready callback to update the
-    // web view and plugin UI sizes because WebView2 initialization is async,
-    // creating a visual glitch that is less desirable than relying on an
-    // imperfect method of determining scaling factor (but at least sync).
     float k = 1.f;
 
     const HMODULE shcore = LoadLibraryA("Shcore.dll");
-
     if (shcore == nullptr) {
         return k;
     }
@@ -181,12 +175,14 @@ float EdgeWebView::getDevicePixelRatio()
     if ((GetProcessDpiAwareness != nullptr) && (GetScaleFactorForMonitor != nullptr)
             && (SUCCEEDED(GetProcessDpiAwareness(0, &dpiAware)))
             && (dpiAware != PROCESS_DPI_UNAWARE)) {
-
-        // https://devblogs.microsoft.com/oldnewthing/20070809-00/?p=25643
-        const HMONITOR hMon = MonitorFromWindow((HWND)getParent(), MONITOR_DEFAULTTOPRIMARY);
+        HMONITOR hMon;
+        if (hWnd == 0) {
+            hMon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY);
+        } else {
+            hMon = MonitorFromPoint({ 0, 0 }, MONITOR_DEFAULTTOPRIMARY);
+        }
 
         DEVICE_SCALE_FACTOR scaleFactor;
-
         if (SUCCEEDED(GetScaleFactorForMonitor(hMon, &scaleFactor))) {
             k = static_cast<float>(scaleFactor) / 100.f;
         }
@@ -195,6 +191,16 @@ float EdgeWebView::getDevicePixelRatio()
     FreeLibrary(shcore);
 
     return k;
+}
+
+float EdgeWebView::getDevicePixelRatio()
+{
+    // ICoreWebView2Controller3_get_RasterizationScale() always returns 1.
+    // Using it would also require to add a view-ready callback to update the
+    // web view and plugin UI sizes because WebView2 initialization is async,
+    // creating a visual glitch that is less desirable than relying on an
+    // imperfect method of determining scaling factor (but at least sync).
+    return getMonitorScaleFactor(reinterpret_cast<HWND>(getParent()));
 }
 
 void EdgeWebView::realize()

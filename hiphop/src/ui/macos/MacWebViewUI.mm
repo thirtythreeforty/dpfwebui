@@ -24,13 +24,6 @@
 
 USE_NAMESPACE_DISTRHO
 
-// DPF implementation of VST3 on macOS needs the DISTRHO::UI constructor to be
-// called with already scaled dimensions because the setSize() request in
-// WebViewUI::setWebView() is ignored https://github.com/DISTRHO/DPF/issues/359
-// Since the parent native window only becomes available later on UI lifecycle,
-// scale factor for secondary displays cannot be determined on UI construction.
-// VST3/Mac plugins on secondary displays might open with wrong dimensions.
-
 MacWebViewUI::MacWebViewUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
     : WebViewUI(baseWidth, baseHeight, backgroundColor,
