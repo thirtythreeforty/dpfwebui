@@ -17,7 +17,6 @@
  */
 
 #include <errno.h>
-#include <X11/Xresource.h>
 
 #include "LinuxWebViewUI.hpp"
 

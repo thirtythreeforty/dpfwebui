@@ -146,7 +146,7 @@ EdgeWebView::~EdgeWebView()
     }
 }
 
-float EdgeWebView::getScaleFactor()
+float EdgeWebView::getDevicePixelRatio()
 {
     // ICoreWebView2Controller3_get_RasterizationScale() always returns 1.
     // Using it would also require to add a view-ready callback to update the

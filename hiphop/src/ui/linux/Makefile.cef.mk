@@ -40,6 +40,7 @@ $(CEF_WRAPPER_LIB):
 LXHELPER_SRC = CefHelper.cpp \
 			   IpcChannel.cpp \
 			   ipc.c \
+			   pixel_ratio.c \
 			   ../../../../dpf/distrho/extra/sofd/libsofd.c
 
 LXHELPER_OBJ = $(LXHELPER_SRC:%=$(LXHELPER_BUILD_PATH)/ui/linux/%.o)

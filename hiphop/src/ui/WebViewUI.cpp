@@ -78,10 +78,10 @@ void WebViewUI::setWebView(WebViewBase* webView)
     fWebView->setParent(fPlatformWindow);
     fWebView->setBackgroundColor(fBackgroundColor);
 
-    // Convert CSS pixels to native pixels following the web view scale factor.
+    // Convert CSS pixels to native pixels following the web view pixel ratio.
     // Then adjust window size so it correctly wraps web content on high density
     // displays, known as Retina or HiDPI.
-    const float k = fWebView->getScaleFactor();
+    const float k = fWebView->getDevicePixelRatio();
     const uint width = static_cast<uint>(k * static_cast<float>(getUnscaledInitWidth()));
     const uint height = static_cast<uint>(k * static_cast<float>(getUnscaledInitHeight()));
     fWebView->setSize(width, height);

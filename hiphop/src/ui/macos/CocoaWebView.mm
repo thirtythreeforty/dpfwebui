@@ -90,7 +90,7 @@ CocoaWebView::~CocoaWebView()
     [fNsBackground release];
 }
 
-float CocoaWebView::getScaleFactor()
+float CocoaWebView::getDevicePixelRatio()
 {
     if (fNsWebView.window == nil) {
         return 1.f;

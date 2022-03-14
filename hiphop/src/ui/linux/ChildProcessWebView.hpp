@@ -38,7 +38,8 @@ public:
     ChildProcessWebView();
     virtual ~ChildProcessWebView();
 
-    float getScaleFactor() override;
+    float getDevicePixelRatio() override;
+    
     void realize() override;
     void navigate(String& url) override;
     void runScript(String& source) override;
@@ -50,7 +51,7 @@ protected:
 
 private:
     void ipcReadCallback(const tlv_t& message);
-    void handleInit(float displayScaleFactor);
+    void handleInit(float devicePixelRatio);
     void handleHelperScriptMessage(const char *payload, int payloadSize);
 
     ::Display*  fDisplay;
@@ -59,8 +60,7 @@ private:
     pid_t       fPid;
     IpcChannel* fIpc;
     Thread*     fIpcThread;
-    bool        fChildInit;
-    float       fScaleFactor;
+    float       fDevicePixelRatio;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChildProcessWebView)
 

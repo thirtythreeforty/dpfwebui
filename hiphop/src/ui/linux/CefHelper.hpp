@@ -90,9 +90,6 @@ private:
     void setSize(const msg_win_size_t* size);
     void setKeyboardFocus(bool keyboardFocus);
 
-    float getX11ScaleFactor();
-
-    float       fScaleFactor;
     bool        fRunMainLoop;
     IpcChannel* fIpc;
     ::Display*  fDisplay;

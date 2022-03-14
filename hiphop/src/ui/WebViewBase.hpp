@@ -62,7 +62,8 @@ public:
     
     void postMessage(const JSValue& args);
 
-    virtual float getScaleFactor() = 0;
+    virtual float getDevicePixelRatio() = 0;
+    
     virtual void realize() = 0;
     virtual void navigate(String& url) = 0;
     virtual void runScript(String& source) = 0;

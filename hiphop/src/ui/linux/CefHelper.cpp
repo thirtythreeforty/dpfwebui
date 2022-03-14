@@ -20,12 +20,12 @@
 
 #include <sstream>
 
-#include <X11/Xresource.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XInput2.h>
 
 #include "distrho/extra/sofd/libsofd.h"
 #include "extra/Path.hpp"
+#include "pixel_ratio.h"
 
 #define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.hostPostMessage(args);"
 
@@ -55,8 +55,7 @@ int main(int argc, char* argv[])
 }
 
 CefHelper::CefHelper()
-    : fScaleFactor(1.f)
-    , fRunMainLoop(false)
+    : fRunMainLoop(false)
     , fIpc(nullptr)
     , fDisplay(nullptr)
     , fContainer(0)
@@ -120,8 +119,9 @@ int CefHelper::run(const CefMainArgs& args)
     // Initialize CEF for the browser process
     CefInitialize(args, settings, this, nullptr);
 
-    fScaleFactor = getX11ScaleFactor();
-    fIpc->write(OP_HANDLE_INIT, &fScaleFactor, sizeof(fScaleFactor));
+    // Let parent process know child is ready
+    const float dpr = getDevicePixelRatio(fDisplay, 1.f);
+    fIpc->write(OP_HANDLE_INIT, &dpr, sizeof(dpr));
 
     runMainLoop();
 
@@ -235,7 +235,7 @@ void CefHelper::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> f
                             TransitionType transitionType)
 {
     // Chromium weird scaling https://magpcss.org/ceforum/viewtopic.php?t=11491
-    const float zoomLevel = std::log(fScaleFactor) / std::log(1.2f);
+    const float zoomLevel = std::log(getDevicePixelRatio(fDisplay, 1.f)) / std::log(1.2f);
     browser->GetHost()->SetZoomLevel(zoomLevel);
 }
 
@@ -270,7 +270,8 @@ bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser, CefDialogHandler::Fi
         return true;
     }
 
-    if (x_fib_show(fDisplay, 0 /*parent*/, 0, 0, static_cast<double>(fScaleFactor)) != 0) {
+    const double scaleFactor = std::ceil(static_cast<double>(getDevicePixelRatio(fDisplay, 1.f)));
+    if (x_fib_show(fDisplay, 0 /*parent*/, 0, 0, scaleFactor) != 0) {
         callback->Cancel();
         return true;
     }
@@ -383,30 +384,6 @@ void CefHelper::setKeyboardFocus(bool keyboardFocus)
     } else {
         XIUngrabDevice(fDisplay, XIAllMasterDevices, CurrentTime);
     }
-}
-
-float CefHelper::getX11ScaleFactor()
-{
-    // FIXME - find out value used by Chromium / Firefox
-    
-    XrmInitialize();
-
-    if (char* const rms = XResourceManagerString(fDisplay)) {
-        if (const XrmDatabase sdb = XrmGetStringDatabase(rms)) {
-            char* type = nullptr;
-            XrmValue ret;
-
-            if (XrmGetResource(sdb, "Xft.dpi", "String", &type, &ret)
-                    && (ret.addr != nullptr) && (type != nullptr)
-                    && (std::strncmp("String", type, 6) == 0)) {
-                if (const float dpi = std::atof(ret.addr)) {
-                    return dpi / 96.f;
-                }
-            }
-        }
-    }
-
-    return 1.f;
 }
 
 CefSubprocess::CefSubprocess()

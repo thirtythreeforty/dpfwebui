@@ -54,8 +54,7 @@ ChildProcessWebView::ChildProcessWebView()
     , fPid(-1)
     , fIpc(nullptr)
     , fIpcThread(nullptr)
-    , fChildInit(false)
-    , fScaleFactor(1.f)
+    , fDevicePixelRatio(0)
 {
     fDisplay = XOpenDisplay(0);
 
@@ -102,12 +101,13 @@ ChildProcessWebView::ChildProcessWebView()
     }
 
     // Busy-wait for init up to 5s
-    for (int i = 0; (i < 500) && !fChildInit; i++) {
+    for (int i = 0; (i < 500) && (fDevicePixelRatio == 0); i++) {
         usleep(10000L); // 10ms
     }
 
-    if (!fChildInit) {
+    if (fDevicePixelRatio == 0) {
         d_stderr("Timeout waiting for UI helper init - %s", strerror(errno));
+        fDevicePixelRatio = 1.f;
     }
 
     injectHostObjectScripts();
@@ -163,9 +163,9 @@ ChildProcessWebView::~ChildProcessWebView()
     XCloseDisplay(fDisplay);
 }
 
-float ChildProcessWebView::getScaleFactor()
+float ChildProcessWebView::getDevicePixelRatio()
 {
-    return fScaleFactor;
+    return fDevicePixelRatio;
 }
 
 void ChildProcessWebView::realize()
@@ -182,7 +182,8 @@ void ChildProcessWebView::realize()
 
     // A colored top view is also needed to avoid initial flicker on REAPER
     // because the child process takes non-zero time to start
-    fBackground = XCreateSimpleWindow(fDisplay, parent, 0, 0, getWidth(), getHeight(), 0, 0, 0);
+    fBackground = XCreateSimpleWindow(fDisplay, parent, 0, 0,
+                                        getWidth(), getHeight(), 0, 0, 0);
     XMapWindow(fDisplay, fBackground);
     XSetWindowBackground(fDisplay, fBackground, color);
     XClearWindow(fDisplay, fBackground);
@@ -246,13 +247,13 @@ void ChildProcessWebView::ipcReadCallback(const tlv_t& packet)
     }
 }
 
-void ChildProcessWebView::handleInit(float displayScaleFactor)
+void ChildProcessWebView::handleInit(float devicePixelRatio)
 {
-    fScaleFactor = displayScaleFactor;
-    fChildInit = true;
+    fDevicePixelRatio = devicePixelRatio;
 }
 
-void ChildProcessWebView::handleHelperScriptMessage(const char *payload, int payloadSize)
+void ChildProcessWebView::handleHelperScriptMessage(const char *payload,
+                                                    int payloadSize)
 {
     // Should validate payload is never read past payloadSize 
     JSValue args = JSValue::createArray();
