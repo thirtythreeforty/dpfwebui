@@ -65,7 +65,7 @@ class ExampleUI extends DISTRHO.UI {
 }
 ```
 
-The complete UI interface is defined [here](https://github.com/lucianoiam/hiphop/blob/master/src/ui/dpf.js).
+The complete UI interface is defined [here](https://github.com/lucianoiam/hiphop/blob/master/hiphop/src/ui/dpf.js).
 
 ### Example AssemblyScript DSP code
 
@@ -94,7 +94,7 @@ export default class ExamplePlugin extends DISTRHO.Plugin implements DISTRHO.Plu
 }
 ```
 
-The complete plugin interface is defined [here](https://github.com/lucianoiam/hiphop/blob/master/src/dsp/dpf.ts).
+The complete plugin interface is defined [here](https://github.com/lucianoiam/hiphop/blob/master/hiphop/src/dsp/dpf.ts).
 
 ### Plugin implementations
 
