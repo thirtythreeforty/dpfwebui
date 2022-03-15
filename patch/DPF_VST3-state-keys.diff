@@ -1,0 +1,30 @@
+diff --git a/distrho/src/DistrhoPluginVST3.cpp b/distrho/src/DistrhoPluginVST3.cpp
+index 62a23165..8033483a 100644
+--- a/distrho/src/DistrhoPluginVST3.cpp
++++ b/distrho/src/DistrhoPluginVST3.cpp
+@@ -2345,8 +2345,8 @@ private:
+         DISTRHO_SAFE_ASSERT_RETURN(attrlist != nullptr,);
+ 
+         v3_cpp_obj(attrlist)->set_int(attrlist, "__dpf_msg_target__", 2);
+-        v3_cpp_obj(attrlist)->set_int(attrlist, "key:length", std::strlen(key));
+-        v3_cpp_obj(attrlist)->set_int(attrlist, "value:length", std::strlen(value));
++        v3_cpp_obj(attrlist)->set_int(attrlist, "key:length", std::strlen(key) + 1);
++        v3_cpp_obj(attrlist)->set_int(attrlist, "value:length", std::strlen(value) + 1);
+         v3_cpp_obj(attrlist)->set_string(attrlist, "key", ScopedUTF16String(key));
+         v3_cpp_obj(attrlist)->set_string(attrlist, "value", ScopedUTF16String(value));
+         v3_cpp_obj(fConnectionFromCtrlToView)->notify(fConnectionFromCtrlToView, message);
+diff --git a/distrho/src/DistrhoUIVST3.cpp b/distrho/src/DistrhoUIVST3.cpp
+index 90a393c6..b8828acb 100644
+--- a/distrho/src/DistrhoUIVST3.cpp
++++ b/distrho/src/DistrhoUIVST3.cpp
+@@ -730,8 +730,8 @@ private:
+         DISTRHO_SAFE_ASSERT_RETURN(attrlist != nullptr,);
+ 
+         v3_cpp_obj(attrlist)->set_int(attrlist, "__dpf_msg_target__", 1);
+-        v3_cpp_obj(attrlist)->set_int(attrlist, "key:length", std::strlen(key));
+-        v3_cpp_obj(attrlist)->set_int(attrlist, "value:length", std::strlen(value));
++        v3_cpp_obj(attrlist)->set_int(attrlist, "key:length", std::strlen(key) + 1);
++        v3_cpp_obj(attrlist)->set_int(attrlist, "value:length", std::strlen(value) + 1);
+         v3_cpp_obj(attrlist)->set_string(attrlist, "key", ScopedUTF16String(key));
+         v3_cpp_obj(attrlist)->set_string(attrlist, "value", ScopedUTF16String(value));
+         v3_cpp_obj(fConnection)->notify(fConnection, message);
