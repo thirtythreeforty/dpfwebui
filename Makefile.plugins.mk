@@ -380,7 +380,7 @@ endif
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
-#WAMR_GIT_TAG = set this after PR #1000 gets included in a new release
+#WAMR_GIT_TAG = set this after our PRs get included in a new release
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
 WAMR_BUILD_PATH = ${WAMR_PATH}/build-$(HIPHOP_WASM_MODE)
 WAMR_LIB_PATH = $(WAMR_BUILD_PATH)/libvmlib.a
@@ -451,8 +451,7 @@ $(WAMR_LLVM_LIB_PATH): $(WAMR_REPO)
 $(WAMR_REPO):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL)
-	@git -C $(WAMR_PATH) reset --hard 7a0ec1c
-	@git -C $(WAMR_PATH) apply $(abspath $(HIPHOP_ROOT_PATH))/patch/WAMR_PR1044.diff 2>/dev/null)
+	@git -C $(WAMR_PATH) reset --hard 21d8913
 	@#git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
 endif
 endif
