@@ -522,7 +522,7 @@ class UIHelper {
 
         const qrSvg = new QRCode({
             content: url,
-            padding: 1,
+            padding: 4,
             width: opt.size,
             height: opt.size
         }).svg();
