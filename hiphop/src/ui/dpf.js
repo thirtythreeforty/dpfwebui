@@ -18,7 +18,7 @@
 
 const DISTRHO = (() => {
 
-class UI {
+class UI extends UIBase() {
 
     // uint UI::getWidth()
     async getWidth() {
@@ -208,13 +208,12 @@ class UI {
 }
 
 //
-// Class split in two for clarity, UI implements the public interface only.
+// JavaScript does not implement forward class declarations.
+// Trick for keeping public interface UI at top of this file.
 //
-class UIImpl extends UI {
+function UIBase() { return class {
 
     constructor() {
-        super();
-
         this._resolve = {};
         this._cache = {};
         this._socket = null;
@@ -355,7 +354,7 @@ class UIImpl extends UI {
         }
     }
 
-}
+}/*class*/ }/*function*/
 
 //
 // Public utility functions
@@ -1166,7 +1165,7 @@ if (!env.dev) {
 // }
 //
 return {
-    UI: UIImpl,
+    UI: UI,
     UIHelper: UIHelper,
     QRCode: QRCode,
     Base64: {
