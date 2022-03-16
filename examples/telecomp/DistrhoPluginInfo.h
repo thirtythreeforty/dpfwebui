@@ -16,7 +16,7 @@
 
 /**
    Publish UI URL using DNS-SD, also known as Zeroconf or Bonjour.
-   @note Feature requires avahi-publish on Linux. Works on Windows 10 or newer.
+   @note Requires avahi-publish on Linux, Windows 10 or newer, works out of the box on macOS.
  */
 #define HIPHOP_UI_PUBLISH_DNSSD 1
 
