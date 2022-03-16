@@ -17,7 +17,7 @@ index aeeade58..13480408 100644
  
  #if defined(DISTRHO_PLUGIN_TARGET_CARLA)
 diff --git a/distrho/src/DistrhoUIVST3.cpp b/distrho/src/DistrhoUIVST3.cpp
-index d0e8422c..b8828acb 100644
+index d0e8422c..46bf711e 100644
 --- a/distrho/src/DistrhoUIVST3.cpp
 +++ b/distrho/src/DistrhoUIVST3.cpp
 @@ -21,6 +21,10 @@
@@ -42,93 +42,95 @@ index d0e8422c..b8828acb 100644
  #ifndef DPF_VST3_TIMER_INTERVAL
  # define DPF_VST3_TIMER_INTERVAL 16 /* ~60 fps */
  #endif
-@@ -127,6 +135,13 @@ class UIVst3
+@@ -127,6 +135,14 @@ class UIVst3
            fScaleFactor(scaleFactor),
            fIsResizingFromPlugin(false),
            fIsResizingFromHost(willResizeFromHost),
-+#if defined(DISTRHO_OS_MAC)
++#if DISTRHO_PLUGIN_HAS_EXTERNAL_UI
++# if defined(DISTRHO_OS_MAC)
 +          fTimerPtr(nullptr),
-+#endif
-+#if defined(DISTRHO_OS_WINDOWS)
++# elif defined(DISTRHO_OS_WINDOWS)
 +          fTimerHwnd(nullptr),
 +          fTimerWindowClassName(nullptr),
++# endif
 +#endif
            fUI(this, winId, sampleRate,
                editParameterCallback,
                setParameterCallback,
-@@ -142,8 +157,12 @@ class UIVst3
+@@ -142,8 +158,12 @@ class UIVst3
  
      ~UIVst3()
      {
 -#if !DISTRHO_PLUGIN_HAS_EXTERNAL_UI && (defined(DISTRHO_OS_MAC) || defined(DISTRHO_OS_WINDOWS))
 +#if defined(DISTRHO_OS_MAC) || defined(DISTRHO_OS_WINDOWS)
 +# if DISTRHO_PLUGIN_HAS_EXTERNAL_UI
-+        nativeIdleTimerDestroy();
++        platformIdleTimerDestroy();
 +# else
          fUI.removeIdleCallbackForVST3(this);
 +# endif
  #endif
          if (fConnection != nullptr)
              disconnect();
-@@ -168,8 +187,12 @@ class UIVst3
+@@ -168,8 +188,12 @@ class UIVst3
          if (fConnection != nullptr)
              connect(fConnection);
  
 -#if !DISTRHO_PLUGIN_HAS_EXTERNAL_UI && (defined(DISTRHO_OS_MAC) || defined(DISTRHO_OS_WINDOWS))
 +#if defined(DISTRHO_OS_MAC) || defined(DISTRHO_OS_WINDOWS)
 +# if DISTRHO_PLUGIN_HAS_EXTERNAL_UI
-+        nativeIdleTimerCreate(DPF_VST3_TIMER_INTERVAL);
++        platformIdleTimerCreate(DPF_VST3_TIMER_INTERVAL);
 +# else
          fUI.addIdleCallbackForVST3(this, DPF_VST3_TIMER_INTERVAL);
 +# endif
  #endif
      }
  
-@@ -538,6 +561,15 @@ class UIVst3
+@@ -538,6 +562,16 @@ class UIVst3
      bool fIsResizingFromPlugin;
      bool fIsResizingFromHost;
  
-+    // Native timer support
-+#if defined(DISTRHO_OS_MAC)
++    // Idle timer support
++#if DISTRHO_PLUGIN_HAS_EXTERNAL_UI
++# if defined(DISTRHO_OS_MAC)
 +    CFRunLoopTimerRef fTimerPtr;
-+#endif
-+#if defined(DISTRHO_OS_WINDOWS)
++# elif defined(DISTRHO_OS_WINDOWS)
 +    HWND fTimerHwnd;
 +    LPSTR fTimerWindowClassName;
++# endif
 +#endif
 +
      // Plugin UI (after VST3 stuff so the UI can call into us during its constructor)
      UIExporter fUI;
  
-@@ -712,6 +744,71 @@ class UIVst3
+@@ -712,6 +746,71 @@ class UIVst3
          ((UIVst3*)ptr)->setState(key, value);
      }
  #endif
 +
 +#if DISTRHO_PLUGIN_HAS_EXTERNAL_UI
 +# if defined(DISTRHO_OS_MAC)
-+    void nativeIdleTimerCreate(const uint timerFrequencyInMs)
++    void platformIdleTimerCreate(const uint timerFrequencyInMs)
 +    {
 +        const CFTimeInterval t = static_cast<double>(timerFrequencyInMs) / 1000.0;
 +        CFRunLoopTimerContext ctx = {};
 +        ctx.info = this;
 +        fTimerPtr = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + t, t, 0, 0,
-+            UIVst3::nativeIdleTimerCallback, &ctx);
++            UIVst3::platformIdleTimerCallback, &ctx);
 +        CFRunLoopAddTimer(CFRunLoopGetCurrent(), fTimerPtr, kCFRunLoopCommonModes);
 +    }
 +
-+    void nativeIdleTimerDestroy()
++    void platformIdleTimerDestroy()
 +    {
 +        CFRunLoopRemoveTimer(CFRunLoopGetCurrent(), fTimerPtr, kCFRunLoopCommonModes);
 +        CFRelease(fTimerPtr);
 +    }
 +
-+    static void nativeIdleTimerCallback(CFRunLoopTimerRef timer, void *info)
++    static void platformIdleTimerCallback(CFRunLoopTimerRef /*timer*/, void *info)
 +    {
 +        reinterpret_cast<UIVst3*>(info)->onTimer();
 +    }
 +# elif defined(DISTRHO_OS_WINDOWS)
-+    void nativeIdleTimerCreate(const uint timerFrequencyInMs)
++    void platformIdleTimerCreate(const uint timerFrequencyInMs)
 +    {
 +        // We cannot assume anything about the native parent window passed as a
 +        // parameter (winId) to the UIVst3 constructor because we do not own it.
@@ -150,10 +152,10 @@ index d0e8422c..b8828acb 100644
 +            0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, nullptr, nullptr);
 +        SetWindowLongPtr(fTimerHwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 +        SetTimer(fTimerHwnd, DPF_VST3_WIN32_TIMER_ID, timerFrequencyInMs,
-+            static_cast<TIMERPROC>(UIVst3::nativeIdleTimerCallback));
++            static_cast<TIMERPROC>(UIVst3::platformIdleTimerCallback));
 +    }
 +
-+    void nativeIdleTimerDestroy()
++    void platformIdleTimerDestroy()
 +    {
 +        KillTimer(fTimerHwnd, DPF_VST3_WIN32_TIMER_ID);
 +        DestroyWindow(fTimerHwnd);
@@ -161,7 +163,7 @@ index d0e8422c..b8828acb 100644
 +        std::free(fTimerWindowClassName);
 +    }
 +
-+    WINAPI static void nativeIdleTimerCallback(HWND hwnd, UINT /*uMsg*/, UINT_PTR /*timerId*/,
++    WINAPI static void platformIdleTimerCallback(HWND hwnd, UINT /*uMsg*/, UINT_PTR /*timerId*/,
 +                                        DWORD /*dwTime*/)
 +    {
 +        UIVst3* ui = reinterpret_cast<UIVst3*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
