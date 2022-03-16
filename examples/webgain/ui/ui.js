@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// See src/ui/dpf.js for the UI class implementation, it shows which C++ methods
-// are mapped. The class is automatically injected into the global namespace and
-// guaranteed to be available after the document load event fires and before any
-// referenced script starts running.
+// See src/ui/dpf.js for the UI class implementation
 
 class WebGainExampleUI extends DISTRHO.UI {
 
     constructor() {
-        super(); // mandatory
+        super();
 
         // Helper function
         const elem = (id) => document.getElementById(id);
@@ -37,7 +34,7 @@ class WebGainExampleUI extends DISTRHO.UI {
         // Show user agent
         elem('user-agent').innerText = navigator.userAgent;
 
-        // How to properly handle keyboard focus: when the web widget is not
+        // How to properly handle keyboard focus: when the web view is not
         // accepting keyboard input (default setting) keystrokes are routed to
         // the host. This allows for example to play with the virtual Live
         // keyboard. When the widget needs keyboard this.setKeyboardFocus(true)
