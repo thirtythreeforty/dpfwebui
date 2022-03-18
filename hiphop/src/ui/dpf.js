@@ -582,7 +582,7 @@ class UIHelper {
 //
 class UIHelperPrivate {
 
-    static applyUITweaks() {
+    static applyTweaks() {
         // Disable context menu
         window.addEventListener('contextmenu', (ev) => {
             ev.preventDefault()
@@ -1145,7 +1145,7 @@ const env = UIHelperPrivate.buildEnvObject();
 // Basic setup to make the web UI behave a bit more like a native UI 
 //
 if (!env.dev) {
-    UIHelperPrivate.applyUITweaks();
+    UIHelperPrivate.applyTweaks();
 }
 
 //
