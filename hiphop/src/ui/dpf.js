@@ -412,7 +412,6 @@ class UIHelper {
                      style="fill:#fff;stroke:#fff;stroke-width:2.23000002"
                      transform="translate(183.604,196.39599)">
                     <path
-                        style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:Sans;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;stroke:none;stroke-width:2.23000002;marker:none;enable-background:accumulate"
                         d="m -116.9899,106.24536 31.819808,31.8198 236.310532,-236.310518 -31.81982,-31.819802 z" />
                     <circle
                         style="fill:none;stroke-width:44.59999847"
@@ -609,7 +608,7 @@ class UIHelperPrivate {
 
     static buildEnvObject() {
         // Determine the running environment. This information could be prepared
-        // on the native side and then 1) injected into the webview, or 2)
+        // on the native side and then 1) injected into the web view, or 2)
         // injected into dpf.js before it is served (so it also works for remote
         // clients). But the simplicity of the client-side heuristics below far
         // outweighs the complexity of the aforementioned server-side solution,
