@@ -74,12 +74,13 @@ NOTES FOR WINDOWS
 
 6. Building the WAMR compiler (wamrc) on MinGW requires CMake from pacman
    package 'mingw-w64-x86_64-cmake' and NSIS. CMake from package 'cmake' will
-   not work. Updating all MinGW packages before starting is also recommended.
+   not work. Package dlfcn is also required otherwise -ldl link switch fails.
+   Updating all MinGW packages before starting is also recommended.
 
    ```Bash
    pacman -R cmake
    pacman -Syu
-   pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-nsis
+   pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-nsis mingw-w64-x86_64-dlfcn
    ```
 
    More details [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/doc/build_wamr.md#MinGW)
