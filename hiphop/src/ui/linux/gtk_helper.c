@@ -105,13 +105,14 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // WebKitGTK uses environment variables to scale text only, leaving out
+    // WebKitGTK uses environment variables only for scaling text, leaving out
     // images and px values. Not sure that is a bug or a feature but it is
-    // completely useless. Reset GTK scaling after capturing env values and
-    // before gtk_init(), so scaling can be controlled manually later via zoom.
-    // Warning: window.devicePixelRatio will always return 1.0 .
-    ctx.pixelRatio = device_pixel_ratio();
-    unsetenv("GDK_SCALE");
+    // completely useless. Reset GTK scaling after reading env var values and
+    // before gtk_init(), so scaling can be controlled manually later via zoom
+    // like done in CefHelper. window.devicePixelRatio will always return 1.0 !!
+    ctx.pixelRatio = device_pixel_ratio(); // follows current GDK_* vars
+    unsetenv("GDK_SCALE"); // disable non-fractional scaling
+    unsetenv("GDK_DPI_SCALE"); // disable fractional scaling (just for clarity)
     // Text also follows Xft.dpi, counteract effect by re-setting GDK_DPI_SCALE.
     char temp[8];
     sprintf(temp, "%.2f", 96.f / xft_dpi(ctx.display));
@@ -324,7 +325,7 @@ static void web_view_load_changed_cb(WebKitWebView *view, WebKitLoadEvent event,
 
 static void web_view_script_message_cb(WebKitUserContentManager *manager, WebKitJavascriptResult *res, gpointer data)
 {
-    // Serialize JS values into type;value chunks. Available types are restricted to
+    // Serialize JS values into type;value chunks. Available types are limited to
     // those defined by msg_js_arg_type_t so there is no need to encode value sizes.
     gint32 numArgs, i;
     JSCValue *jsArg;

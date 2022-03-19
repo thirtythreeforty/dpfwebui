@@ -382,7 +382,7 @@ endif
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
-#WAMR_GIT_TAG = set this after our PRs get included in a new release
+#WAMR_GIT_TAG = set this when new release includes 21d8913 (#1000), c8804c1 (#1013), 91adebd (#1046)
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
 WAMR_BUILD_PATH = ${WAMR_PATH}/build-$(HIPHOP_WASM_MODE)
 WAMR_LIB_PATH = $(WAMR_BUILD_PATH)/libvmlib.a
@@ -452,9 +452,9 @@ $(WAMR_LLVM_LIB_PATH): $(WAMR_REPO)
 
 $(WAMR_REPO):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
-	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL)
-	@git -C $(WAMR_PATH) reset --hard 21d8913
 	@#git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
+	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL)
+	@git -C $(WAMR_PATH) reset --hard b1a4dd2
 endif
 endif
 
@@ -608,7 +608,7 @@ ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
 ifeq ($(HIPHOP_NETWORK_SSL), true)
 MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
-MBEDTLS_GIT_TAG = v3.0.0  # LWS build fails for 3.1.0 (Feb 2022)
+MBEDTLS_GIT_TAG = v3.1.0
 MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
 MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
 MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
@@ -637,7 +637,7 @@ endif
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
 LWS_GIT_URL = https://github.com/warmcat/libwebsockets
-LWS_GIT_TAG = v4.3.1 
+#LWS_GIT_TAG = set this when new release includes b61174b (#2564) and 843ee10
 LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
 LWS_BUILD_PATH = ${LWS_PATH}/build
 LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
@@ -670,8 +670,9 @@ $(LWS_LIB_PATH): $(LWS_PATH)
 
 $(LWS_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
-	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) \
-		$(LWS_GIT_URL)
+	@#git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) $(LWS_GIT_URL)
+	@git -C $(HIPHOP_DEPS_PATH) clone $(LWS_GIT_URL)
+	@git -C $(LWS_PATH) reset --hard ad74b77
 endif
 endif
 
