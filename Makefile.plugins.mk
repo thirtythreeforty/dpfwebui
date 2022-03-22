@@ -454,7 +454,7 @@ $(WAMR_REPO):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@#git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
 	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL)
-	@git -C $(WAMR_PATH) reset --hard b1a4dd2
+	@git -C $(WAMR_PATH) reset --hard f8ee05d
 endif
 endif
 

@@ -108,10 +108,6 @@ private:
     wasi_env_t*        fWasiEnv;
 #endif
 
-#if defined(HIPHOP_WASM_RUNTIME_WAMR)
-    static int sWamrEngineRefCount;
-#endif
-
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WasmRuntime)
 
 };

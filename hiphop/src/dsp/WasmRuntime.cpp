@@ -46,10 +46,6 @@ WasmRuntime::WasmRuntime()
         fLib.wasm_engine_delete(fEngine);
         throw wasm_runtime_exception("wasm_store_new() failed");
     }
-
-#if defined(HIPHOP_WASM_RUNTIME_WAMR)
-    sWamrEngineRefCount++;
-#endif
 }
 
 WasmRuntime::~WasmRuntime()
@@ -62,15 +58,6 @@ WasmRuntime::~WasmRuntime()
         fLib.wasm_store_delete(fStore);
         fStore = nullptr;
     }
-
-#if defined(HIPHOP_WASM_RUNTIME_WAMR)
-    if (--sWamrEngineRefCount > 0) {
-        // Calling wasm_engine_delete() also tears down the full WAMR runtime.
-        // There is ongoing discussion on how to fix this:
-        // https://github.com/bytecodealliance/wasm-micro-runtime/pull/1001
-        return;
-    }
-#endif
 
     if (fEngine != nullptr) {
         fLib.wasm_engine_delete(fEngine);
@@ -432,7 +419,3 @@ WasmValue WasmRuntime::CToWTF16String(const char* s)
 
     return callFunctionReturnSingleValue("c_to_wtf16_string", { wPtr });
 }
-
-#if defined(HIPHOP_WASM_RUNTIME_WAMR)
-int WasmRuntime::sWamrEngineRefCount = 0;
-#endif
