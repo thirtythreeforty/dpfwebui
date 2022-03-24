@@ -1,11 +1,15 @@
 Hip-Hop / High Performance Hybrid Audio Plugins
 -----------------------------------------------
 
-This project provides [DPF](http://github.com/DISTRHO/DPF) compatible classes
-and a Makefile for creating audio plugins that run their UI in a web view. Main
-goal is to facilitate the creation of complex user interfaces leveraging
-JavaScript, HTML and related technologies. The web UI runs decoupled from the
-DSP. The latter can be implemented in C++ or optionally [AssemblyScript](https://www.assemblyscript.org).
+This project builds on top of the [DPF](http://github.com/DISTRHO/DPF) audio
+plugin framework to add web-based UI support. Plugins can leverage JavaScript
+and related tech to provide complex user interfaces on either the computer
+running the plugin or over the local network [²].
+
+DSP runs decoupled from the UI and it is implemented
+by extending the standard DPF `Plugin` C++ class or optionally in [AssemblyScript](https://www.assemblyscript.org).
+Both the JavaScript `UI` and AssemblyScript `Plugin` classes attempt to mirror
+their original C++ implementations in DPF.
 
 ![Screenshot_2021-10-24_18-30-37](https://user-images.githubusercontent.com/930494/138603460-e8407acb-35db-4bcb-b991-7b7cd7e74381.png)
 
@@ -16,15 +20,15 @@ DSP. The latter can be implemented in C++ or optionally [AssemblyScript](https:/
 ### Features
 
 * Based on DISTRHO Plugin Framework (DPF)
+* JS / HTML / CSS / etc for UI development
 * C++ or AssemblyScript for DSP development
-* HTML / CSS / JS for UI development
-* VST2 / VST3(¹) / LV2 plugin formats
-* Network UI support(²)
+* VST2 / VST3[¹] / LV2 plugin formats
+* Network UI support[²]
 * Linux / Mac / Windows
 * Just the powerful basics
 
 ¹ May not work on some platform/DAW combinations like Ableton Live for macOS. More details [here](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
-² For controlling plugins from devices in the local network (ie., tablets). Feature currently under development.
+² Feature currently under development.
 
 The following language combinations are possible:
 
@@ -100,19 +104,10 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 
 [Castello Reverb](https://github.com/lucianoiam/castello)
 
-### About DISTRHO Plugin Framework (DPF)
+### Quick FAQ
 
-The framework sports an accurate motto: "DPF is designed to make development of
-new plugins an easy and enjoyable task". It is a low footprint yet powerful tool
-that allows developers to focus on productivity by already solving many
-non-trivial issues found in the audio plugins domain.
-
-What makes it great?
-
-- Bloat-free: scope is limited to audio plugins
-- Makefile based, MinGW compatible
-- Extremely low learning curve
-- High quality clean C++ codebase
-- Great experienced community around
-
-If you find libre software useful please support the developers
+- Why the name? because it is catchy and allows a cheesy but decent enough acronym.
+- Why DPF? mainly because it is lightweight and FOSS-friendly.
+- Isn't web bloated? of course firing 128 ✕ one-knob web UIs is not smart.
+- What about AudioUnit? such format development is stalled in DPF, developers
+welcome.
