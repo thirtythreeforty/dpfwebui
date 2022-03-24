@@ -690,7 +690,7 @@ ifeq ($(WINDOWS),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 ifeq ($(HIPHOP_WASM_MODE),aot)
 WAMR_DLL_FILE = libiwasm.dll
-WAMR_DLL_URL = https://github.com/lucianoiam/hiphop/files/8104817/$(WAMR_DLL_FILE).zip
+WAMR_DLL_URL = https://github.com/lucianoiam/hiphop/files/8341405/$(WAMR_DLL_FILE).zip
 WAMR_DLL_PATH = $(HIPHOP_DEPS_PATH)/$(WAMR_DLL_FILE)
 
 BASE_FLAGS += -DHIPHOP_WASM_DLL=$(WAMR_DLL_FILE)
