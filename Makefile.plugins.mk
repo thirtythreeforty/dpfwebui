@@ -10,12 +10,6 @@ DPF_TARGET_DIR ?= bin
 # Location for object files
 DPF_BUILD_DIR ?= build
 
-# WebAssembly runtime library [ wamr | wasmer ]
-HIPHOP_WASM_RUNTIME ?= wamr
-
-# WebAssembly execution mode - WAMR [ aot | interp ], Wasmer [ jit ]
-HIPHOP_WASM_MODE ?= aot
-
 # (WIP) Enable built-in websockets server and load content over HTTP
 HIPHOP_NETWORK_UI ?= false
 
@@ -27,6 +21,12 @@ HIPHOP_INJECT_FRAMEWORK_JS ?= false
 
 # Web view implementation on Linux [ gtk | cef ]
 HIPHOP_LINUX_WEBVIEW ?= gtk
+
+# WebAssembly runtime library [ wamr | wasmer ]
+HIPHOP_WASM_RUNTIME ?= wamr
+
+# WebAssembly execution mode - WAMR [ aot | interp ], Wasmer [ jit ]
+HIPHOP_WASM_MODE ?= aot
 
 # Universal build only available for non-network web UI and Wasmer DSP
 # Set to false for building current architecture only
@@ -112,14 +112,6 @@ HIPHOP_FILES_DSP = PluginEx.cpp
 HIPHOP_FILES_UI  = UIEx.cpp
 
 # ------------------------------------------------------------------------------
-# Optional support for AssemblyScript DSP
-
-ifeq ($(WASM_DSP),true)
-HIPHOP_FILES_DSP += WasmPluginImpl.cpp \
-                    WasmRuntime.cpp
-endif
-
-# ------------------------------------------------------------------------------
 # Optional support for web UI
 
 ifeq ($(WEB_UI),true)
@@ -148,6 +140,14 @@ HIPHOP_FILES_UI += windows/WindowsWebViewUI.cpp \
                    windows/EdgeWebView.cpp \
                    windows/WebView2EventHandler.cpp
 endif
+endif
+
+# ------------------------------------------------------------------------------
+# Optional support for AssemblyScript DSP
+
+ifeq ($(WASM_DSP),true)
+HIPHOP_FILES_DSP += WasmPluginImpl.cpp \
+                    WasmRuntime.cpp
 endif
 
 FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/dsp/%)
@@ -204,6 +204,63 @@ BASE_FLAGS += -Wno-deprecated-declarations
 ifeq ($(HIPHOP_MACOS_OLD),true)
 # Warning: ...was built for newer macOS version (11.0) than being linked (10.13)
 BASE_FLAGS += -mmacosx-version-min=10.13
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Add build flags for web UI dependencies
+
+ifeq ($(WEB_UI),true)
+
+ifeq ($(HIPHOP_NETWORK_UI),true)
+BASE_FLAGS += -DHIPHOP_NETWORK_UI
+ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+$(warning Network UI is enabled - disabling JavaScript framework injection)
+HIPHOP_INJECT_FRAMEWORK_JS = false
+endif
+endif
+ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
+endif
+ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
+BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
+endif
+
+ifeq ($(HIPHOP_NETWORK_UI),true)
+BASE_FLAGS += -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
+LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
+ifeq ($(HIPHOP_NETWORK_SSL), true)
+BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
+LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH)
+endif
+ifeq ($(WINDOWS),true)
+LINK_FLAGS += -lwebsockets_static
+else
+LINK_FLAGS += -lwebsockets
+endif
+ifeq ($(HIPHOP_NETWORK_SSL), true)
+LINK_FLAGS += -lmbedtls -lmbedcrypto -lmbedx509
+endif
+ifeq ($(LINUX),true)
+LINK_FLAGS += -lcap
+endif
+ifeq ($(WINDOWS),true)
+LINK_FLAGS += -lWs2_32
+endif
+endif
+
+ifeq ($(LINUX),true)
+LINK_FLAGS += -lpthread -ldl
+endif
+ifeq ($(MACOS),true)
+LINK_FLAGS += -framework WebKit 
+endif
+ifeq ($(WINDOWS),true)
+BASE_FLAGS += -I$(EDGE_WEBVIEW2_PATH)/build/native/include -Wno-unknown-pragmas
+LINK_FLAGS += -L$(EDGE_WEBVIEW2_PATH)/build/native/x64 \
+              -lole32 -lShlwapi -lMfplat -lksuser -lmfuuid -lwmcodecdspuuid \
+              -static-libgcc -static-libstdc++ -Wl,-Bstatic \
+              -lstdc++ -lpthread
 endif
 endif
 
@@ -283,63 +340,6 @@ endif
 endif
 
 # ------------------------------------------------------------------------------
-# Add build flags for web UI dependencies
-
-ifeq ($(WEB_UI),true)
-
-ifeq ($(HIPHOP_NETWORK_UI),true)
-BASE_FLAGS += -DHIPHOP_NETWORK_UI
-ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-$(warning Network UI is enabled - disabling JavaScript framework injection)
-HIPHOP_INJECT_FRAMEWORK_JS = false
-endif
-endif
-ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
-endif
-ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
-BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
-endif
-
-ifeq ($(HIPHOP_NETWORK_UI),true)
-BASE_FLAGS += -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
-LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
-ifeq ($(HIPHOP_NETWORK_SSL), true)
-BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
-LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH)
-endif
-ifeq ($(WINDOWS),true)
-LINK_FLAGS += -lwebsockets_static
-else
-LINK_FLAGS += -lwebsockets
-endif
-ifeq ($(HIPHOP_NETWORK_SSL), true)
-LINK_FLAGS += -lmbedtls -lmbedcrypto -lmbedx509
-endif
-ifeq ($(LINUX),true)
-LINK_FLAGS += -lcap
-endif
-ifeq ($(WINDOWS),true)
-LINK_FLAGS += -lWs2_32
-endif
-endif
-
-ifeq ($(LINUX),true)
-LINK_FLAGS += -lpthread -ldl
-endif
-ifeq ($(MACOS),true)
-LINK_FLAGS += -framework WebKit 
-endif
-ifeq ($(WINDOWS),true)
-BASE_FLAGS += -I$(EDGE_WEBVIEW2_PATH)/build/native/include -Wno-unknown-pragmas
-LINK_FLAGS += -L$(EDGE_WEBVIEW2_PATH)/build/native/x64 \
-              -lole32 -lShlwapi -lMfplat -lksuser -lmfuuid -lwmcodecdspuuid \
-              -static-libgcc -static-libstdc++ -Wl,-Bstatic \
-              -lstdc++ -lpthread
-endif
-endif
-
-# ------------------------------------------------------------------------------
 # Print some info
 
 TARGETS += info
@@ -374,6 +374,143 @@ endif
 
 $(LIBDGL_PATH):
 	make -C $(DPF_PATH) $(DGL_MAKE_FLAGS)
+endif
+
+# ------------------------------------------------------------------------------
+# Dependency - Clone and build Mbed TLS
+
+ifeq ($(WEB_UI),true)
+ifeq ($(HIPHOP_NETWORK_UI),true)
+ifeq ($(HIPHOP_NETWORK_SSL), true)
+MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
+MBEDTLS_GIT_TAG = v3.1.0
+MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
+MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
+MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
+
+ifeq ($(SKIP_STRIPPING),true)
+MBEDTLS_MAKE_ARGS = DEBUG=1
+endif
+
+TARGETS += $(MBEDTLS_LIB_PATH)
+
+$(MBEDTLS_LIB_PATH): $(MBEDTLS_PATH)
+	@echo "Building Mbed TLS static library"
+	@mkdir -p $(MBEDTLS_BUILD_PATH) && cd $(MBEDTLS_BUILD_PATH) && make
+
+$(MBEDTLS_PATH):
+	@mkdir -p $(HIPHOP_DEPS_PATH)
+	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(MBEDTLS_GIT_TAG) \
+			$(MBEDTLS_GIT_URL)
+endif
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Dependency - Clone and build libwebsockets
+
+ifeq ($(WEB_UI),true)
+ifeq ($(HIPHOP_NETWORK_UI),true)
+LWS_GIT_URL = https://github.com/warmcat/libwebsockets
+#LWS_GIT_TAG = set this when new release includes b61174b (#2564) and 843ee10
+LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
+LWS_BUILD_PATH = ${LWS_PATH}/build
+LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
+
+LWS_CMAKE_ARGS = -DLWS_WITH_SHARED=0 -DLWS_WITHOUT_TESTAPPS=1
+ifeq ($(HIPHOP_NETWORK_SSL),true)
+LWS_CMAKE_ARGS += -DLWS_WITH_SSL=1 -DLWS_WITH_MBEDTLS=1 \
+                  -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
+else
+LWS_CMAKE_ARGS += -DLWS_WITH_SSL=0
+endif
+
+ifeq ($(WINDOWS),true)
+LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets_static.a
+LWS_CMAKE_ARGS += -G"MSYS Makefiles"
+endif
+
+TARGETS += $(LWS_LIB_PATH)
+
+ifeq ($(LINUX),true)
+LWS_CMAKE_ENV = export CFLAGS=-fPIC
+else
+LWS_CMAKE_ENV = true
+endif
+
+$(LWS_LIB_PATH): $(LWS_PATH)
+	@echo "Building libwebsockets static library"
+	@mkdir -p $(LWS_BUILD_PATH) && cd $(LWS_BUILD_PATH) && $(LWS_CMAKE_ENV) \
+		&& cmake .. $(LWS_CMAKE_ARGS) && cmake --build .
+
+$(LWS_PATH):
+	@mkdir -p $(HIPHOP_DEPS_PATH)
+	@#git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) $(LWS_GIT_URL)
+	@git -C $(HIPHOP_DEPS_PATH) clone $(LWS_GIT_URL)
+	@git -C $(LWS_PATH) reset --hard ad74b77
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Dependency - Built-in JavaScript library include and polyfills
+
+ifeq ($(WEB_UI),true)
+ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
+DPF_JS_INCLUDE_PATH = $(FRAMEWORK_JS_PATH).inc
+
+TARGETS += $(DPF_JS_INCLUDE_PATH)
+
+$(DPF_JS_INCLUDE_PATH): $(FRAMEWORK_JS_PATH)
+	@echo 'R"JS(' > $(DPF_JS_INCLUDE_PATH)
+	@cat $(FRAMEWORK_JS_PATH) >> $(DPF_JS_INCLUDE_PATH)
+	@echo ')JS"' >> $(DPF_JS_INCLUDE_PATH)
+endif
+
+ifeq ($(MACOS),true)
+POLYFILL_JS_PATH = $(HIPHOP_SRC_PATH)/ui/macos/polyfill.js
+POLYFILL_JS_INCLUDE_PATH = $(POLYFILL_JS_PATH).inc
+
+TARGETS += $(POLYFILL_JS_INCLUDE_PATH)
+
+$(POLYFILL_JS_INCLUDE_PATH): $(POLYFILL_JS_PATH)
+	@echo 'R"JS(' > $(POLYFILL_JS_INCLUDE_PATH)
+	@cat $(POLYFILL_JS_PATH) >> $(POLYFILL_JS_INCLUDE_PATH)
+	@echo ')JS"' >> $(POLYFILL_JS_INCLUDE_PATH)
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Dependency - Download Edge WebView2
+
+ifeq ($(WEB_UI),true)
+ifeq ($(WINDOWS),true)
+ifeq ($(MSYS_MINGW),true)
+NUGET_URL = https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+NUGET_BIN = /usr/bin/nuget.exe
+
+TARGETS += $(NUGET_BIN)
+
+$(NUGET_BIN):
+	@echo Downloading NuGet
+	@wget -4 -P /usr/bin $(NUGET_URL)
+else
+ifeq (,$(shell which nuget 2>/dev/null))
+$(error NuGet not found, try sudo apt install nuget or the equivalent for your distro)
+endif
+endif
+
+EDGE_WEBVIEW2_PATH = $(HIPHOP_DEPS_PATH)/Microsoft.Web.WebView2
+
+TARGETS += $(EDGE_WEBVIEW2_PATH)
+
+$(EDGE_WEBVIEW2_PATH):
+	@echo Downloading Edge WebView2 SDK
+	@mkdir -p $(HIPHOP_DEPS_PATH)
+	@eval $(MSYS_MINGW_SYMLINKS)
+	@nuget install Microsoft.Web.WebView2 -OutputDirectory $(HIPHOP_DEPS_PATH)
+	@ln -rs $(EDGE_WEBVIEW2_PATH).* $(EDGE_WEBVIEW2_PATH)
+endif
 endif
 
 # ------------------------------------------------------------------------------
@@ -546,39 +683,6 @@ endif
 endif
 
 # ------------------------------------------------------------------------------
-# Dependency - Download Edge WebView2
-
-ifeq ($(WEB_UI),true)
-ifeq ($(WINDOWS),true)
-ifeq ($(MSYS_MINGW),true)
-NUGET_URL = https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-NUGET_BIN = /usr/bin/nuget.exe
-
-TARGETS += $(NUGET_BIN)
-
-$(NUGET_BIN):
-	@echo Downloading NuGet
-	@wget -4 -P /usr/bin $(NUGET_URL)
-else
-ifeq (,$(shell which nuget 2>/dev/null))
-$(error NuGet not found, try sudo apt install nuget or the equivalent for your distro)
-endif
-endif
-
-EDGE_WEBVIEW2_PATH = $(HIPHOP_DEPS_PATH)/Microsoft.Web.WebView2
-
-TARGETS += $(EDGE_WEBVIEW2_PATH)
-
-$(EDGE_WEBVIEW2_PATH):
-	@echo Downloading Edge WebView2 SDK
-	@mkdir -p $(HIPHOP_DEPS_PATH)
-	@eval $(MSYS_MINGW_SYMLINKS)
-	@nuget install Microsoft.Web.WebView2 -OutputDirectory $(HIPHOP_DEPS_PATH)
-	@ln -rs $(EDGE_WEBVIEW2_PATH).* $(EDGE_WEBVIEW2_PATH)
-endif
-endif
-
-# ------------------------------------------------------------------------------
 # Dependency - Download MSVC WAMR DLL for Windows
 
 ifeq ($(WASM_DSP),true)
@@ -598,110 +702,6 @@ $(WAMR_DLL_PATH):
 	@rm /tmp/$(WAMR_DLL_FILE).zip
 endif
 endif
-endif
-endif
-
-# ------------------------------------------------------------------------------
-# Dependency - Clone and build Mbed TLS
-
-ifeq ($(WEB_UI),true)
-ifeq ($(HIPHOP_NETWORK_UI),true)
-ifeq ($(HIPHOP_NETWORK_SSL), true)
-MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
-MBEDTLS_GIT_TAG = v3.1.0
-MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
-MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
-MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
-
-ifeq ($(SKIP_STRIPPING),true)
-MBEDTLS_MAKE_ARGS = DEBUG=1
-endif
-
-TARGETS += $(MBEDTLS_LIB_PATH)
-
-$(MBEDTLS_LIB_PATH): $(MBEDTLS_PATH)
-	@echo "Building Mbed TLS static library"
-	@mkdir -p $(MBEDTLS_BUILD_PATH) && cd $(MBEDTLS_BUILD_PATH) && make
-
-$(MBEDTLS_PATH):
-	@mkdir -p $(HIPHOP_DEPS_PATH)
-	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(MBEDTLS_GIT_TAG) \
-			$(MBEDTLS_GIT_URL)
-endif
-endif
-endif
-
-# ------------------------------------------------------------------------------
-# Dependency - Clone and build libwebsockets
-
-ifeq ($(WEB_UI),true)
-ifeq ($(HIPHOP_NETWORK_UI),true)
-LWS_GIT_URL = https://github.com/warmcat/libwebsockets
-#LWS_GIT_TAG = set this when new release includes b61174b (#2564) and 843ee10
-LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
-LWS_BUILD_PATH = ${LWS_PATH}/build
-LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
-
-LWS_CMAKE_ARGS = -DLWS_WITH_SHARED=0 -DLWS_WITHOUT_TESTAPPS=1
-ifeq ($(HIPHOP_NETWORK_SSL),true)
-LWS_CMAKE_ARGS += -DLWS_WITH_SSL=1 -DLWS_WITH_MBEDTLS=1 \
-                  -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
-else
-LWS_CMAKE_ARGS += -DLWS_WITH_SSL=0
-endif
-
-ifeq ($(WINDOWS),true)
-LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets_static.a
-LWS_CMAKE_ARGS += -G"MSYS Makefiles"
-endif
-
-TARGETS += $(LWS_LIB_PATH)
-
-ifeq ($(LINUX),true)
-LWS_CMAKE_ENV = export CFLAGS=-fPIC
-else
-LWS_CMAKE_ENV = true
-endif
-
-$(LWS_LIB_PATH): $(LWS_PATH)
-	@echo "Building libwebsockets static library"
-	@mkdir -p $(LWS_BUILD_PATH) && cd $(LWS_BUILD_PATH) && $(LWS_CMAKE_ENV) \
-		&& cmake .. $(LWS_CMAKE_ARGS) && cmake --build .
-
-$(LWS_PATH):
-	@mkdir -p $(HIPHOP_DEPS_PATH)
-	@#git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) $(LWS_GIT_URL)
-	@git -C $(HIPHOP_DEPS_PATH) clone $(LWS_GIT_URL)
-	@git -C $(LWS_PATH) reset --hard ad74b77
-endif
-endif
-
-# ------------------------------------------------------------------------------
-# Dependency - Built-in JavaScript library include and polyfills
-
-ifeq ($(WEB_UI),true)
-ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
-DPF_JS_INCLUDE_PATH = $(FRAMEWORK_JS_PATH).inc
-
-TARGETS += $(DPF_JS_INCLUDE_PATH)
-
-$(DPF_JS_INCLUDE_PATH): $(FRAMEWORK_JS_PATH)
-	@echo 'R"JS(' > $(DPF_JS_INCLUDE_PATH)
-	@cat $(FRAMEWORK_JS_PATH) >> $(DPF_JS_INCLUDE_PATH)
-	@echo ')JS"' >> $(DPF_JS_INCLUDE_PATH)
-endif
-
-ifeq ($(MACOS),true)
-POLYFILL_JS_PATH = $(HIPHOP_SRC_PATH)/ui/macos/polyfill.js
-POLYFILL_JS_INCLUDE_PATH = $(POLYFILL_JS_PATH).inc
-
-TARGETS += $(POLYFILL_JS_INCLUDE_PATH)
-
-$(POLYFILL_JS_INCLUDE_PATH): $(POLYFILL_JS_PATH)
-	@echo 'R"JS(' > $(POLYFILL_JS_INCLUDE_PATH)
-	@cat $(POLYFILL_JS_PATH) >> $(POLYFILL_JS_INCLUDE_PATH)
-	@echo ')JS"' >> $(POLYFILL_JS_INCLUDE_PATH)
 endif
 endif
 
@@ -768,6 +768,78 @@ lxhelper_res:
 	@($(TEST_NOBUNDLE) \
 		&& mkdir -p $(LIB_DIR_NOBUNDLE) \
 		&& cp -ru $(LXHELPER_FILES) $(LIB_DIR_NOBUNDLE) \
+		) || true
+endif
+endif
+
+# ------------------------------------------------------------------------------
+# Post build - Always copy web UI files
+
+ifeq ($(WEB_UI),true)
+HIPHOP_TARGET += lib_ui
+
+ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+COPY_FRAMEWORK_JS = false
+else
+COPY_FRAMEWORK_JS = true
+FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
+endif
+
+# https://unix.stackexchange.com/questions/178235/how-is-cp-f-different-from-cp-remove-destination
+CP_JS_ARGS = -f
+ifeq ($(LINUX),true)
+CP_JS_ARGS += --remove-destination
+endif
+
+lib_ui:
+	@echo "Copying web UI files"
+	@($(TEST_LV2) \
+		&& mkdir -p $(LIB_DIR_LV2)/ui \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_LV2)/ui \
+		) || true
+	@($(TEST_VST3) \
+		&& mkdir -p $(LIB_DIR_VST3)/ui \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST3)/ui \
+		) || true
+	@($(TEST_VST2_MACOS) \
+		&& mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST2_MACOS)/ui \
+		) || true
+	@($(TEST_NOBUNDLE) \
+		&& mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_NOBUNDLE)/ui \
+		) || true
+
+clean: clean_lib
+
+clean_lib:
+	@rm -rf $(LIB_DIR_NOBUNDLE)
+endif
+
+# ------------------------------------------------------------------------------
+# Post build - Copy Windows Edge WebView2 DLL, currently only 64-bit is supported
+
+ifeq ($(WEB_UI),true)
+ifeq ($(WINDOWS),true)
+HIPHOP_TARGET += edge_dll
+WEBVIEW_DLL = $(EDGE_WEBVIEW2_PATH)/runtimes/win-x64/native/WebView2Loader.dll
+
+edge_dll:
+	@($(TEST_LV2) \
+		&& mkdir -p $(LIB_DIR_LV2) \
+		&& cp $(WEBVIEW_DLL) $(LIB_DIR_LV2) \
+		) || true
+	@($(TEST_VST3) \
+		&& mkdir -p $(LIB_DIR_VST3) \
+		&& cp $(WEBVIEW_DLL) $(LIB_DIR_VST3) \
+		) || true
+	@($(TEST_NOBUNDLE) \
+		&& mkdir -p $(LIB_DIR_NOBUNDLE) \
+		&& cp $(WEBVIEW_DLL) $(LIB_DIR_NOBUNDLE) \
 		) || true
 endif
 endif
@@ -842,78 +914,6 @@ lib_dsp:
 		&& mkdir -p $(LIB_DIR_NOBUNDLE)/dsp \
 		&& cp -r $(WASM_BINARY_PATH) $(LIB_DIR_NOBUNDLE)/dsp/$(WASM_BINARY_FILE) \
 		) || true
-endif
-
-# ------------------------------------------------------------------------------
-# Post build - Always copy web UI files
-
-ifeq ($(WEB_UI),true)
-HIPHOP_TARGET += lib_ui
-
-ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-COPY_FRAMEWORK_JS = false
-else
-COPY_FRAMEWORK_JS = true
-FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
-endif
-
-# https://unix.stackexchange.com/questions/178235/how-is-cp-f-different-from-cp-remove-destination
-CP_JS_ARGS = -f
-ifeq ($(LINUX),true)
-CP_JS_ARGS += --remove-destination
-endif
-
-lib_ui:
-	@echo "Copying web UI files"
-	@($(TEST_LV2) \
-		&& mkdir -p $(LIB_DIR_LV2)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_LV2)/ui \
-		) || true
-	@($(TEST_VST3) \
-		&& mkdir -p $(LIB_DIR_VST3)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST3)/ui \
-		) || true
-	@($(TEST_VST2_MACOS) \
-		&& mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST2_MACOS)/ui \
-		) || true
-	@($(TEST_NOBUNDLE) \
-		&& mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_NOBUNDLE)/ui \
-		) || true
-
-clean: clean_lib
-
-clean_lib:
-	@rm -rf $(LIB_DIR_NOBUNDLE)
-endif
-
-# ------------------------------------------------------------------------------
-# Post build - Copy Windows Edge WebView2 DLL, currently only 64-bit is supported
-
-ifeq ($(WEB_UI),true)
-ifeq ($(WINDOWS),true)
-HIPHOP_TARGET += edge_dll
-WEBVIEW_DLL = $(EDGE_WEBVIEW2_PATH)/runtimes/win-x64/native/WebView2Loader.dll
-
-edge_dll:
-	@($(TEST_LV2) \
-		&& mkdir -p $(LIB_DIR_LV2) \
-		&& cp $(WEBVIEW_DLL) $(LIB_DIR_LV2) \
-		) || true
-	@($(TEST_VST3) \
-		&& mkdir -p $(LIB_DIR_VST3) \
-		&& cp $(WEBVIEW_DLL) $(LIB_DIR_VST3) \
-		) || true
-	@($(TEST_NOBUNDLE) \
-		&& mkdir -p $(LIB_DIR_NOBUNDLE) \
-		&& cp $(WEBVIEW_DLL) $(LIB_DIR_NOBUNDLE) \
-		) || true
-endif
 endif
 
 # ------------------------------------------------------------------------------
