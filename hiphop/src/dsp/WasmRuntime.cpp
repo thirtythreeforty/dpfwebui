@@ -340,6 +340,7 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
 #if defined(HIPHOP_WASM_RUNTIME_WAMR)
     paramsVec.num_elems = params.size();
     paramsVec.size_of_elem = sizeof(wasm_val_t);
+    paramsVec.lock = nullptr;
 #endif
     wasm_val_t resultArray[1] = { WASM_INIT_VAL };
     wasm_val_vec_t resultVec = WASM_ARRAY_VEC(resultArray);

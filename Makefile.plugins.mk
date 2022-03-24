@@ -591,7 +591,7 @@ $(WAMR_REPO):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@#git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
 	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL)
-	@git -C $(WAMR_PATH) reset --hard f8ee05d
+	@git -C $(WAMR_PATH) reset --hard 5264ce4
 endif
 endif
 
@@ -690,7 +690,7 @@ ifeq ($(WINDOWS),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 ifeq ($(HIPHOP_WASM_MODE),aot)
 WAMR_DLL_FILE = libiwasm.dll
-WAMR_DLL_URL = https://github.com/lucianoiam/hiphop/files/8341405/$(WAMR_DLL_FILE).zip
+WAMR_DLL_URL = https://github.com/lucianoiam/hiphop/files/8346015/$(WAMR_DLL_FILE).zip
 WAMR_DLL_PATH = $(HIPHOP_DEPS_PATH)/$(WAMR_DLL_FILE)
 
 BASE_FLAGS += -DHIPHOP_WASM_DLL=$(WAMR_DLL_FILE)
