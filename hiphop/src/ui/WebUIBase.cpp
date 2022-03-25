@@ -151,12 +151,6 @@ void WebUIBase::initHandlers()
     });
 #endif
 
-#if DISTRHO_PLUGIN_WANT_STATEFILES
-    fHandler["requestStateFile"] = std::make_pair(1, [this](const JSValue& args) {
-        requestStateFile(args[0].getString() /*key*/);
-    });
-#endif
-
 #if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_SHARED_MEMORY_SIZE
     fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JSValue& args) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
