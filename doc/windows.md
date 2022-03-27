@@ -46,12 +46,21 @@ NOTES FOR WINDOWS
    ```
 
 
-5. The default WebAssembly runtime is WAMR, however the static library built by
-   MinGW GCC (libvmlib.a) seems to be broken when the WAMR ahead-of-time (AOT)
-   feature is enabled. For debugging purposes look [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/25fc006c3359e0788b42bc9a11923f8ffbe29577/core/iwasm/aot/aot_runtime.c#L1542)
+5. AssemblyScript plugins crash on Carla and Ableton Live when running the
+   Wasmer runtime. Work as expected on REAPER, Renoise and Ardour 7. Crash
+   reproducible with both MinGW-built static lib and official MSVC wasmer.dll .
+   WAMR interpreter works for all audio hosts but its performance is poor. WAMR
+   ahead-of-time (AOT) works for all audio hosts only when loaded during runtime
+   from a MSVC built version of libiwasm.dll . Crashes for all hosts when
+   plugins are linked statically to MinGW-built libvmlib.a or MSVC vmlib.lib
+   converted to .a by reimp.exe. Also crashes for the MinGW-built libiwasm.dll .
+   A version of libiwasm.dll built by MSVC is downloaded automatically by the
+   Makefile. The default WebAssembly runtime is WAMR. For debugging look [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/25fc006c3359e0788b42bc9a11923f8ffbe29577/core/iwasm/aot/aot_runtime.c#L1542)
    and [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/52b6c73d9c2dee4973271a5cb1e2b9242a7a975b/core/iwasm/common/arch/invokeNative_general.c#L10).
-   To overcome this issue plugins link against a MSVC DLL instead which is
-   downloaded by the Makefile. Here are the steps for building it from source:
+   
+
+
+6. Steps for building WAMR DLL from source using the Microsoft compiler:
 
    - Install [Visual Studio Community](https://visualstudio.microsoft.com/downloads/)
    - Install [CMake for Windows](https://cmake.org/download/)
@@ -72,7 +81,7 @@ NOTES FOR WINDOWS
    Official instructions for building the DLL can be found [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/doc/build_wamr.md).
 
 
-6. Building the WAMR compiler (wamrc) on MinGW requires CMake from pacman
+7. Building the WAMR compiler (wamrc) on MinGW requires CMake from pacman
    package 'mingw-w64-x86_64-cmake' and NSIS. CMake from package 'cmake' will
    not work. Package dlfcn is also required otherwise -ldl link switch fails.
    Updating all MinGW packages before starting is also recommended.
@@ -86,7 +95,7 @@ NOTES FOR WINDOWS
    More details [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/main/doc/build_wamr.md#MinGW)
 
 
-7. The official binary distribution of Wasmer requires MSVC. To overcome this
+8. The official binary distribution of Wasmer requires MSVC. To overcome this
    problem the Makefile downloads a custom build that is compatible with MinGW.
    If rebuilding Wasmer from source is needed, these are the steps:
 
@@ -109,7 +118,7 @@ NOTES FOR WINDOWS
    Live and Carla.
 
 
-8. Instructions on how to build libwasmer.a with debug symbols can be found here
+9. Instructions on how to build libwasmer.a with debug symbols can be found here
    https://github.com/wasmerio/wasmer/issues/2571
 
    ```Bash

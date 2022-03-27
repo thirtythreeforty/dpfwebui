@@ -1,3 +1,10 @@
+ALL PLATFORMS
+-------------
+
+- HTTP server port not reused when running as VST3. As of March '22 DPF state
+  support is incomplete/untested for VST3.
+
+
 LINUX
 -----
 
@@ -12,12 +19,4 @@ LINUX
 MACOS
 -----
 
-- VST3 plugins not loading on Ableton Live, work as expected on REAPER.
-
-
-WINDOWS
--------
-
-- AssemblyScript plugins crash on Carla and Ableton Live when running the Wasmer
-  runtime. Work as expected on REAPER, Renoise and Ardour 7. Crash reproducible
-  with both MinGW static lib and official MSVC wasmer.dll. No issues with WAMR.
+- VST3 plugins fail to load on Ableton Live, work as expected on REAPER.
