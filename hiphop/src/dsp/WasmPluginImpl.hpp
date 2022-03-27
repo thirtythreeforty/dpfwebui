@@ -69,7 +69,7 @@ public:
 #endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
 #if HIPHOP_SHARED_MEMORY_SIZE
-    void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) override;
+    void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) override;
     void loadWasmBinary(const unsigned char* data, size_t size);
 #endif // HIPHOP_SHARED_MEMORY_SIZE
 

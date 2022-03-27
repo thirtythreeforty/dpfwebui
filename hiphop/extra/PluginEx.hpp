@@ -48,15 +48,15 @@ protected:
     SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
 
     bool writeSharedMemory(const unsigned char* data, size_t size, size_t offset = 0,
-                           const char* token = nullptr);
+                           uint32_t hints = 0);
 
     virtual void sharedMemoryReady() {}
 
-    virtual void sharedMemoryChanged(const unsigned char* data, size_t size, const char* token) 
+    virtual void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) 
     {
         (void)data;
         (void)size;
-        (void)token;
+        (void)hints;
     }
 #endif
 

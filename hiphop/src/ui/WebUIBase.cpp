@@ -69,11 +69,11 @@ void WebUIBase::sharedMemoryReady()
     postMessage({"UI", "sharedMemoryReady"});
 }
 
-void WebUIBase::sharedMemoryChanged(const unsigned char* data, size_t size, const char* token)
+void WebUIBase::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
 {
     (void)size;
     String b64Data = String::asBase64(data, size);
-    postMessage({"UI", "_sharedMemoryChanged", b64Data, token});
+    postMessage({"UI", "_sharedMemoryChanged", b64Data, hints});
 }
 #endif
 
@@ -157,8 +157,8 @@ void WebUIBase::initHandlers()
         writeSharedMemory(
             static_cast<const unsigned char*>(data.data()),
             static_cast<size_t>(data.size()),
-            static_cast<size_t>(args[1].getNumber()), // offset
-            args[2].getString() // token
+            static_cast<size_t>(args[1].getNumber()),  // offset
+            static_cast<uint32_t>(args[2].getNumber()) // hints
         );
     });
 

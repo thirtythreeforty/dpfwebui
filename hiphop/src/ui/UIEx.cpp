@@ -20,15 +20,15 @@
 
 #include "extra/UIEx.hpp"
 
-UIEx::UIEx(uint width, uint height, bool automaticallyScaleAndSetAsMinimumSize)
-    : UI(width, height, automaticallyScaleAndSetAsMinimumSize)
+UIEx::UIEx(uint width, uint height)
+    : UI(width, height)
 {}
 
 #if HIPHOP_SHARED_MEMORY_SIZE
 bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
-                             const char* token)
+                             uint32_t hints)
 {
-    if (fMemory.write(kDirectionUIToPlugin, data, size, offset, token)) {
+    if (fMemory.write(kDirectionUIToPlugin, data, size, offset, hints)) {
         // Notify Plugin instance there is new data available for reading
         setState("_shmem_data", ""/*arbitrary non-null*/);
         return true;
@@ -44,7 +44,7 @@ void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
     // Send binary to the Plugin instance. This could be also achieved using the
     // state interface by first encoding data into something like Base64.
     
-    writeSharedMemory(data, size, 0, "_wasm_bin");
+    writeSharedMemory(data, size, 0, kShMemHintInternal | kShMemHintWasmBinary);
 }
 #endif
 #endif // HIPHOP_SHARED_MEMORY_SIZE
@@ -60,7 +60,7 @@ void UIEx::uiIdle()
 
     if (fMemory.isCreatedOrConnected() && ! fMemory.isRead(idx)) {
         sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(idx),
-                            fMemory.getDataSize(idx), fMemory.getToken(idx));
+                            fMemory.getDataSize(idx), fMemory.getHints(idx));
         fMemory.setRead(idx);
     }
 }

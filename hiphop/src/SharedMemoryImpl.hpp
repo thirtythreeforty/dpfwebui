@@ -22,15 +22,19 @@
 #include "distrho/extra/String.hpp"
 #include "SharedMemory.hpp"
 
+// Plugin code should leave MSB off
+static const uint32_t kShMemHintWasmBinary = 0x1;
+static const uint32_t kShMemHintInternal   = 0x8000;
+
 START_NAMESPACE_DISTRHO
 
-// Total size 128 bytes
+// Keep the read flag atomic
 struct SharedMemoryState
 {
-    unsigned char readFlag; // atomic
-    uint32_t      dataOffset;
-    uint32_t      dataSize;
-    char          token[119];
+    unsigned char readFlag;
+    size_t        dataOffset;
+    size_t        dataSize;
+    uint32_t      hints;
 };
 
 // Two states for full duplex usage
@@ -59,7 +63,7 @@ public:
         a.readFlag   = b.readFlag   = 1;
         a.dataOffset = b.dataOffset = 0;
         a.dataSize   = b.dataSize   = 0;
-        a.token[0]   = b.token[0]   = '\0';
+        a.hints      = b.hints      = 0;
 
         return true;
     }
@@ -97,19 +101,19 @@ public:
         getState(index).readFlag = 1;
     }
 
-    const char* getToken(int index) const noexcept
+    uint32_t getHints(int index) const noexcept
     {
-        return getState(index).token;
+        return getState(index).hints;
     }
 
     size_t getDataOffset(int index) const noexcept
     {
-        return static_cast<size_t>(getState(index).dataOffset);
+        return getState(index).dataOffset;
     }
 
     size_t getDataSize(int index) const noexcept
     {
-        return static_cast<size_t>(getState(index).dataSize);
+        return getState(index).dataSize;
     }
 
     S* getDataPointer() const noexcept
@@ -122,7 +126,7 @@ public:
         return fImpl.getDataFilename();
     }
 
-    bool write(int index, const S* data, size_t size, size_t offset, const char* token)
+    bool write(int index, const S* data, size_t size, size_t offset, uint32_t hints)
     {
         if (size > (getSize() - offset)) {
             return false;
@@ -132,15 +136,9 @@ public:
 
         std::memcpy(getDataPointer() + offset, data, sizeof(S) * size);
         
-        state.dataOffset = static_cast<uint32_t>(offset);
-        state.dataSize = static_cast<uint32_t>(size);
-
-        if (token != nullptr) {
-            std::strcpy(state.token, token);
-        } else {
-            state.token[0] = '\0';
-        }
-        
+        state.dataOffset = offset;
+        state.dataSize = size;
+        state.hints = hints;
         state.readFlag = 0; // do it last
 
         return true;
@@ -156,8 +154,8 @@ private:
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatefulSharedMemory)
 };
 
-constexpr int kDirectionPluginToUI = 0;
-constexpr int kDirectionUIToPlugin = 1;
+static const int kDirectionPluginToUI = 0;
+static const int kDirectionUIToPlugin = 1;
 
 typedef StatefulSharedMemory<unsigned char,HIPHOP_SHARED_MEMORY_SIZE> SharedMemoryImpl;
 

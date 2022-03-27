@@ -156,9 +156,9 @@ class UI extends UIBase() {
     }
 
     // Non-DPF method that writes memory shared with DISTRHO::PluginEx instance
-    // void UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset, const char* token)
-    writeSharedMemory(data /*Uint8Array*/, offset /*Number*/, token /*String*/) {
-        this._call('writeSharedMemory', base64EncArr(data), offset || 0, token);
+    // void UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset, uint32_t hints)
+    writeSharedMemory(data /*Uint8Array*/, offset /*Number*/, hints /*Number*/) {
+        this._call('writeSharedMemory', base64EncArr(data), offset || 0, hints);
     }
 
     // Non-DPF callback method that notifies when shared memory is ready to use
@@ -168,8 +168,8 @@ class UI extends UIBase() {
     }
 
     // Non-DPF callback method that notifies when shared memory has been written
-    // void UIEx::sharedMemoryChanged(const unsigned char* data, size_t size, const char* token)
-    sharedMemoryChanged(data /*Uint8Array*/, token /*String*/) {
+    // void UIEx::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
+    sharedMemoryChanged(data /*Uint8Array*/, hints /*Number*/) {
         // default empty implementation
     }
 
@@ -334,8 +334,8 @@ function UIBase() { return class {
     }
 
     // Helper for decoding received shared memory data
-    _sharedMemoryChanged(b64Data /*String*/, token /*String*/) {
-        this.sharedMemoryChanged(base64DecToArr(b64Data), token);
+    _sharedMemoryChanged(b64Data /*String*/, hints /*Number*/) {
+        this.sharedMemoryChanged(base64DecToArr(b64Data), hints);
     }
 
     // Reject all pending promises on channel disconnection

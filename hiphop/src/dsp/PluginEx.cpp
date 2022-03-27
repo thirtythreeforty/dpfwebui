@@ -91,7 +91,7 @@ void PluginEx::setState(const char* key, const char* value)
     constexpr int idx = kDirectionUIToPlugin;
     if ((std::strcmp(key, "_shmem_data") == 0) && ! fMemory.isRead(idx)) {
         sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(idx),
-                            fMemory.getDataSize(idx), fMemory.getToken(idx));
+                            fMemory.getDataSize(idx), fMemory.getHints(idx));
         fMemory.setRead(idx);
     }
 #endif
@@ -100,9 +100,9 @@ void PluginEx::setState(const char* key, const char* value)
 
 #if HIPHOP_SHARED_MEMORY_SIZE
 bool PluginEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
-                                 const char* token)
+                                 uint32_t hints)
 {
-    if (fMemory.write(kDirectionPluginToUI, data, size, offset, token)) {
+    if (fMemory.write(kDirectionPluginToUI, data, size, offset, hints)) {
         // UI picks up data periodically
         return true;
     } else {

@@ -22,7 +22,7 @@
 #include "WasmPluginImpl.hpp"
 #include "extra/Path.hpp"
 
-#if defined(HIPHOP_WASM_BINARY_AOT)
+#if defined(HIPHOP_WASM_BINARY_COMPILED)
 # if defined(__arm__)
 #  define WASM_BINARY_FILE "aarch64.aot"
 # else
@@ -348,9 +348,9 @@ void WasmPlugin::deactivate()
 }
 
 #if HIPHOP_SHARED_MEMORY_SIZE
-void WasmPlugin::sharedMemoryChanged(const unsigned char* data, size_t size, const char* token)
+void WasmPlugin::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
 {
-    if (std::strcmp(token, "_wasm_bin") == 0) {
+    if (hints & (kShMemHintInternal | kShMemHintWasmBinary)) {
         try {
             loadWasmBinary(data, size);
         } catch (const std::exception& ex) {
