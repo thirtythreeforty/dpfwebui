@@ -48,7 +48,7 @@ USE_NAMESPACE_DISTRHO
 
 NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3)
     : WebUIBase(widthCssPx, heightCssPx, initScaleFactorForVST3)
-    , fPort(0)
+    , fPort(-1)
 {
     if (isDryRun()) {
         return;
@@ -138,6 +138,13 @@ void NetworkUI::postMessage(const JSValue& args)
 void NetworkUI::stateChanged(const char* key, const char* value)
 {
     if (isDryRun()) {
+        return;
+    }
+
+    // TODO - This check should not be needed, it seems stateChanged() can be
+    //        incorrectly called for a nth time with the default state value.
+    //        https://github.com/DISTRHO/DPF/issues/371
+    if (fPort != -1) {
         return;
     }
 
