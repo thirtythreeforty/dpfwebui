@@ -449,8 +449,13 @@ class UIHelper {
 
         const el = document.createRange().createContextualFragment(html).firstChild;
 
-        el.querySelector('a').addEventListener('click', (_) => {
-            this.showQRCodeModal(ui, opt.modal);
+        ['touchstart', 'click'].forEach((evName) => {
+            el.querySelector('a').addEventListener(evName, (ev) => {
+                this.showQRCodeModal(ui, opt.modal);
+                if (ev.cancelable) {
+                    ev.preventDefault();
+                }
+            });
         });
 
         return el;
@@ -498,8 +503,13 @@ class UIHelper {
         el.appendChild(await this.getQRCodeElement(ui));
 
         el.querySelectorAll('a').forEach((a) => {
-            a.addEventListener('click', (_) => {
-                opt.target.removeChild(el);
+            ['touchstart', 'click'].forEach((evName) => {
+                a.addEventListener(evName, (ev) => {
+                    opt.target.removeChild(el);
+                    if (ev.cancelable) {
+                        ev.preventDefault();
+                    }
+                });
             });
         });
 
@@ -550,8 +560,13 @@ class UIHelper {
         const el = document.createRange().createContextualFragment(html).firstChild;
         el.style.height = '100%';
         
-        el.querySelector('a').addEventListener('click', (_) => {
-            ui.openSystemWebBrowser(url);
+        ['touchstart', 'click'].forEach((evName) => {
+            el.querySelector('a').addEventListener(evName, (ev) => {
+                ui.openSystemWebBrowser(url);
+                if (ev.cancelable) {
+                    ev.preventDefault();
+                }
+            });
         });
 
         return el;
