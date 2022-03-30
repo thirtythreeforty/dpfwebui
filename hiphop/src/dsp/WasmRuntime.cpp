@@ -332,16 +332,11 @@ WasmValueVector WasmRuntime::callFunction(const char* name, WasmValueVector para
 {
     const wasm_func_t* func = fLib.wasm_extern_as_func(fModuleExports[name]);
 
-    // wasm_val_vec_t is implemented differently for each runtime type.
-    // Is there a generic way to create an arbitrary sized instance?
-    wasm_val_vec_t paramsVec;
-    paramsVec.size = params.size();
-    paramsVec.data = params.data();
-#if defined(HIPHOP_WASM_RUNTIME_WAMR)
-    paramsVec.num_elems = params.size();
-    paramsVec.size_of_elem = sizeof(wasm_val_t);
-    paramsVec.lock = nullptr;
-#endif
+    // https://stackoverflow.com/questions/10078283/how-sizeofarray-works-at-runtime
+    wasm_val_t paramsArray[params.size()];
+    std::copy(params.begin(), params.end(), paramsArray);
+    wasm_val_vec_t paramsVec = WASM_ARRAY_VEC(paramsArray);
+
     wasm_val_t resultArray[1] = { WASM_INIT_VAL };
     wasm_val_vec_t resultVec = WASM_ARRAY_VEC(resultArray);
 
