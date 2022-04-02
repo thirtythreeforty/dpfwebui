@@ -141,14 +141,13 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         return;
     }
 
-    // TODO - This check should not be needed, it seems stateChanged() can be
-    //        incorrectly called for a nth time with the default state value.
-    //        https://github.com/DISTRHO/DPF/issues/371
-    if (fPort != -1) {
-        return;
-    }
-
     if (std::strcmp(key, "_ws_port") == 0) {
+        // TODO - This check should not be needed, it seems stateChanged() can be
+        //        incorrectly called for a nth time with the default state value.
+        //        https://github.com/DISTRHO/DPF/issues/371
+        if (fPort != -1) {
+            return;
+        }
         fPort = std::atoi(value);
         if (fPort == -1) {
             fPort = findAvailablePort();
@@ -159,7 +158,10 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         if (fPort != -1) {
             initServer();
         }
+        return;
     }
+
+    // TODO - broadcast to all clients
 }
 #endif
 
@@ -185,7 +187,7 @@ void NetworkUI::initHandlers()
 
 void NetworkUI::initServer()
 {
-    fServer.init(fPort);
+    fServer.init(fPort, this);
 #if HIPHOP_UI_PUBLISH_DNSSD
     fZeroconf.publish(DISTRHO_PLUGIN_NAME, SERVICE_TYPE, fPort);
 #endif
@@ -238,4 +240,21 @@ int NetworkUI::findAvailablePort()
     }
 
     return port;
+}
+
+void NetworkUI::handleWebServerConnect(Client client)
+{
+    // TODO - send all parameters and state to newly connected client
+    (void)client;
+}
+
+int NetworkUI::handleWebServerRead(Client client, const char* data)
+{
+    // TODO - dispatch request then update all clients except request source
+    (void)client;
+
+    const JSValue args(data);
+    d_stderr("Rx (%x) : %s", client, args.toJSON().buffer());
+
+    return 0;
 }

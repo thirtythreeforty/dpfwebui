@@ -24,10 +24,11 @@
 #if HIPHOP_UI_PUBLISH_DNSSD
 # include "Zeroconf.hpp"
 #endif
+#include "extra/JSValue.hpp"
 
 START_NAMESPACE_DISTRHO
 
-class NetworkUI : public WebUIBase
+class NetworkUI : public WebUIBase, public WebServerHandler
 {
 public:
     NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3);
@@ -49,6 +50,9 @@ private:
     void initHandlers();
     void initServer();
     int  findAvailablePort();
+
+    void handleWebServerConnect(Client client) override;
+    int  handleWebServerRead(Client client, const char* data) override;
 
     int       fPort;
     WebServer fServer;

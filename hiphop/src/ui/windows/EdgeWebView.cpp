@@ -199,7 +199,7 @@ float EdgeWebView::getDevicePixelRatio()
     // Using it would also require to add a view-ready callback to update the
     // web view and plugin UI sizes because WebView2 initialization is async,
     // creating a visual glitch that is less desirable than relying on an
-    // imperfect method of determining scaling factor (but at least sync).
+    // imperfect method for determining scaling factor (but at least sync).
     return getMonitorScaleFactor(reinterpret_cast<HWND>(getParent()));
 }
 

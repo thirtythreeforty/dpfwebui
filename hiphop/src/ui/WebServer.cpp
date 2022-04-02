@@ -30,11 +30,15 @@ USE_NAMESPACE_DISTRHO
 
 WebServer::WebServer()
     : fContext(nullptr)
+    , fHandler(nullptr)
 {}
 
 // JS injection feature currently not in use, leaving code just in case.
-void WebServer::init(int port, const char* jsInjectTarget, const char* jsInjectToken)
+void WebServer::init(int port, WebServerHandler* handler, const char* jsInjectTarget,
+                        const char* jsInjectToken)
 {
+    fHandler = handler;
+
     lws_set_log_level(LLL_ERR|LLL_WARN/*|LLL_DEBUG*/, 0);
 
     std::memset(fProtocol, 0, sizeof(fProtocol));
@@ -51,7 +55,7 @@ void WebServer::init(int port, const char* jsInjectTarget, const char* jsInjectT
     fMount.def              = "index.html";
 
     if ((jsInjectTarget != nullptr) && (jsInjectToken != nullptr)) {
-        fJsInjectToken = jsInjectToken;
+        fInjectToken = jsInjectToken;
         std::memset(&fMountOptions, 0, sizeof(fMountOptions));
         fMountOptions.name  = jsInjectTarget;
         fMountOptions.value = LWS_PROTOCOL_NAME;
@@ -102,6 +106,15 @@ void WebServer::injectScript(String& script)
     fInjectedScripts.push_back(script);
 }
 
+void WebServer::write(Client client, const char* data)
+{
+    const size_t len = std::strlen(data);
+    ClientContext::PacketBytes packet(LWS_PRE + len);
+    packet.insert(packet.begin() + LWS_PRE, data, data + len);
+    fClients[client].writeBuffer.push_back(packet);
+    lws_callback_on_writable(client);
+}
+
 void WebServer::serve()
 {
     // Avoid blocking on some platforms by passing timeout=-1
@@ -124,18 +137,21 @@ int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
             rc = server->injectScripts(args);
             break;
         }
-        /*case LWS_CALLBACK_ESTABLISHED:
-            rc = server->add_client(wsi);
+        case LWS_CALLBACK_ESTABLISHED:
+            server->fClients.emplace(wsi, ClientContext());
+            server->fHandler->handleWebServerConnect(wsi);
             break;
         case LWS_CALLBACK_CLOSED:
-            rc = server->del_client(wsi);
+            server->fClients.erase(server->fClients.find(wsi));
+            server->fHandler->handleWebServerDisconnect(wsi);
             break;
         case LWS_CALLBACK_RECEIVE:
-            rc = server->recv_client(wsi, in, len);
+            rc = server->handleRead(wsi, in, len);
             break;
-        case LWS_CALLBACK_SERVER_WRITEABLE:
-            rc = server->write_client(wsi);
-            break;*/
+        case LWS_CALLBACK_SERVER_WRITEABLE: {
+            rc = server->handleWrite(wsi);
+            break;
+        }
         default:
             rc = lws_callback_http_dummy(wsi, reason, user, in, len);
             break;
@@ -163,7 +179,7 @@ int WebServer::injectScripts(lws_process_html_args* args)
         return lws_chunked_html_process(args, &phs) ? -1 : 0;
     }
 
-    const char* vars[1] = {fJsInjectToken};
+    const char* vars[1] = {fInjectToken};
     phs.vars = vars;
     phs.count_vars = 1;
     phs.replace = WebServer::lwsReplaceFunc;
@@ -174,9 +190,9 @@ int WebServer::injectScripts(lws_process_html_args* args)
         len += it->length();
     }
 
-    len += strlen(fJsInjectToken) + 2;
+    len += strlen(fInjectToken) + 2;
     char* js = new char[len + 1];
-    std::strcat(js, fJsInjectToken);
+    std::strcat(js, fInjectToken);
     std::strcat(js, ";\n");
 
     for (StringVector::const_iterator it = fInjectedScripts.begin(); it != fInjectedScripts.end(); ++it) {
@@ -189,4 +205,31 @@ int WebServer::injectScripts(lws_process_html_args* args)
     delete[] js;
 
     return rc;
+}
+
+int WebServer::handleRead(Client client, void* in, size_t len)
+{
+    char* data = new char[len + 1];
+    std::memcpy(data, in, len);
+    data[len] = '\0';
+    int rc = fHandler->handleWebServerRead(client, data);
+    delete[] data;
+
+    return rc;
+}
+
+int WebServer::handleWrite(Client client)
+{
+    // Exactly one lws_write() call per LWS_CALLBACK_SERVER_WRITEABLE callback
+    ClientContext::WriteBuffer& wb = fClients[client].writeBuffer;
+    ClientContext::PacketBytes& packet = wb.front();
+    wb.pop_front();
+
+    const int numBytes = lws_write(client, packet.data(), packet.size(), LWS_WRITE_TEXT);
+
+    if (! wb.empty()) {
+        lws_callback_on_writable(client);
+    }
+
+    return numBytes == static_cast<int>(packet.size()) ? 0 : -1;
 }

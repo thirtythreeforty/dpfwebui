@@ -28,13 +28,11 @@
 
 START_NAMESPACE_DISTRHO
 
-class WebViewEventHandler
+struct WebViewEventHandler
 {
-public:
     virtual void handleWebViewLoadFinished() = 0;
     virtual void handleWebViewScriptMessage(const JSValue& args) = 0;
     virtual void handleWebViewConsole(const String& tag, const String& text) = 0;
-
 };
 
 class WebViewBase

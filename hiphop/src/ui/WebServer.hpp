@@ -19,6 +19,8 @@
 #ifndef WEB_SERVER_HPP
 #define WEB_SERVER_HPP
 
+#include <list>
+#include <unordered_map>
 #include <vector>
 
 #include <limits.h>
@@ -29,16 +31,27 @@
 
 START_NAMESPACE_DISTRHO
 
+typedef struct lws* Client;
+
+struct ClientContext;
+
+struct WebServerHandler
+{
+    virtual void handleWebServerConnect(Client) {};
+    virtual void handleWebServerDisconnect(Client) {};
+    virtual int  handleWebServerRead(Client client, const char* data) = 0;
+};
+
 class WebServer
 {
 public:
     WebServer();
     virtual ~WebServer();
 
-    void init(int port, const char* jsInjectTarget = nullptr, const char* jsInjectToken = nullptr);
-
-    virtual void injectScript(String& script);
-
+    void init(int port, WebServerHandler* handler, const char* jsInjectTarget = nullptr,
+                const char* jsInjectToken = nullptr);
+    void injectScript(String& script);
+    void write(Client client, const char* data);
     void serve();
 
 private:
@@ -47,8 +60,8 @@ private:
     static const char* lwsReplaceFunc(void* data, int index);
 
     int injectScripts(lws_process_html_args* args);
-
-    String fJsInjectToken;
+    int handleRead(Client client, void* in, size_t len);
+    int handleWrite(Client client);
 
     char                       fMountOrigin[PATH_MAX];
     lws_http_mount             fMount;
@@ -57,11 +70,24 @@ private:
     lws_context_creation_info  fContextInfo;
     lws_context*               fContext;
 
+    typedef std::unordered_map<Client,ClientContext> ClientContextMap;
+    ClientContextMap fClients;
+
     typedef std::vector<String> StringVector;
     StringVector fInjectedScripts;
+    String       fInjectToken;
+
+    WebServerHandler *fHandler;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebServer)
 
+};
+
+struct ClientContext
+{
+    typedef std::vector<unsigned char> PacketBytes;
+    typedef std::list<PacketBytes> WriteBuffer;
+    WriteBuffer writeBuffer;
 };
 
 END_NAMESPACE_DISTRHO
