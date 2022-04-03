@@ -21,7 +21,6 @@
 
 #include <list>
 #include <unordered_map>
-#include <vector>
 
 #include <limits.h>
 #include <libwebsockets.h>
@@ -73,9 +72,9 @@ private:
     typedef std::unordered_map<Client,ClientContext> ClientContextMap;
     ClientContextMap fClients;
 
-    typedef std::vector<String> StringVector;
-    StringVector fInjectedScripts;
-    String       fInjectToken;
+    typedef std::list<String> StringList;
+    StringList fInjectedScripts;
+    String     fInjectToken;
 
     WebServerHandler *fHandler;
 
@@ -85,8 +84,7 @@ private:
 
 struct ClientContext
 {
-    typedef std::vector<unsigned char> PacketBytes;
-    typedef std::list<PacketBytes> WriteBuffer;
+    typedef std::list<unsigned char*> WriteBuffer;
     WriteBuffer writeBuffer;
 };
 

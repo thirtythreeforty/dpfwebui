@@ -109,8 +109,8 @@ void WebServer::injectScript(String& script)
 void WebServer::write(Client client, const char* data)
 {
     const size_t len = std::strlen(data);
-    ClientContext::PacketBytes packet(LWS_PRE + len);
-    packet.insert(packet.begin() + LWS_PRE, data, data + len);
+    unsigned char* packet = new unsigned char[LWS_PRE + len + 1];
+    std::strcpy(reinterpret_cast<char*>(packet) + LWS_PRE, data);
     fClients[client].writeBuffer.push_back(packet);
     lws_callback_on_writable(client);
 }
@@ -185,8 +185,9 @@ int WebServer::injectScripts(lws_process_html_args* args)
     phs.replace = WebServer::lwsReplaceFunc;
 
     size_t len = 0;
+    typedef StringList::const_iterator Iterator;
 
-    for (StringVector::const_iterator it = fInjectedScripts.begin(); it != fInjectedScripts.end(); ++it) {
+    for (Iterator it = fInjectedScripts.cbegin(); it != fInjectedScripts.cend(); ++it) {
         len += it->length();
     }
 
@@ -195,7 +196,7 @@ int WebServer::injectScripts(lws_process_html_args* args)
     std::strcat(js, fInjectToken);
     std::strcat(js, ";\n");
 
-    for (StringVector::const_iterator it = fInjectedScripts.begin(); it != fInjectedScripts.end(); ++it) {
+    for (Iterator it = fInjectedScripts.cbegin(); it != fInjectedScripts.cend(); ++it) {
         std::strcat(js, *it);
     }
 
@@ -222,14 +223,16 @@ int WebServer::handleWrite(Client client)
 {
     // Exactly one lws_write() call per LWS_CALLBACK_SERVER_WRITEABLE callback
     ClientContext::WriteBuffer& wb = fClients[client].writeBuffer;
-    ClientContext::PacketBytes& packet = wb.front();
+    unsigned char* packet = wb.front();
     wb.pop_front();
 
-    const int numBytes = lws_write(client, packet.data(), packet.size(), LWS_WRITE_TEXT);
+    const size_t len = std::strlen(reinterpret_cast<const char*>(packet) + LWS_PRE);
+    const int numBytes = lws_write(client, packet, len, LWS_WRITE_TEXT);
+    delete[] packet;
 
     if (! wb.empty()) {
         lws_callback_on_writable(client);
     }
 
-    return numBytes == static_cast<int>(packet.size()) ? 0 : -1;
+    return numBytes == static_cast<int>(len) ? 0 : -1;
 }
