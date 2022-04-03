@@ -32,7 +32,11 @@ START_NAMESPACE_DISTRHO
 
 typedef struct lws* Client;
 
-struct ClientContext;
+struct ClientContext
+{
+    typedef std::list<unsigned char*> WriteBuffer;
+    WriteBuffer writeBuffer;
+};
 
 struct WebServerHandler
 {
@@ -80,12 +84,6 @@ private:
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebServer)
 
-};
-
-struct ClientContext
-{
-    typedef std::list<unsigned char*> WriteBuffer;
-    WriteBuffer writeBuffer;
 };
 
 END_NAMESPACE_DISTRHO
