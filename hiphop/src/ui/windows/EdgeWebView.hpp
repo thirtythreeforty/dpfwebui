@@ -24,8 +24,8 @@
 #define COBJMACROS
 
 #include <functional>
+#include <list>
 #include <string>
-#include <vector>
 
 #include "WebView2.h"
 
@@ -91,7 +91,8 @@ private:
     HHOOK   fKeyboardHook;
     String  fUrl;
     
-    std::vector<String> fInjectedScripts;
+    typedef std::list<String> StringList;
+    StringList fInjectedScripts;
 
     WeakWebView2EventHandler* fHandler;
     ICoreWebView2Controller*  fController;

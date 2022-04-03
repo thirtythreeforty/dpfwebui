@@ -300,7 +300,7 @@ HRESULT EdgeWebView::handleWebView2ControllerCompleted(HRESULT result,
     ICoreWebView2Controller2_put_DefaultBackgroundColor(
         reinterpret_cast<ICoreWebView2Controller2 *>(fController), color);
 
-    for (std::vector<String>::iterator it = fInjectedScripts.begin(); it != fInjectedScripts.end(); ++it) {
+    for (StringList::const_iterator it = fInjectedScripts.cbegin(); it != fInjectedScripts.cend(); ++it) {
         ICoreWebView2_AddScriptToExecuteOnDocumentCreated(fView, TO_LPCWSTR(*it), 0);
     }
 
