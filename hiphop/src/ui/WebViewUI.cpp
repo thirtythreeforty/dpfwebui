@@ -139,7 +139,8 @@ void WebViewUI::setKeyboardFocus(bool focus)
     fWebView->setKeyboardFocus(focus);
 }
 
-void WebViewUI::postMessage(const JSValue& args)
+#if ! defined(HIPHOP_NETWORK_UI)
+void WebViewUI::postMessage(const JSValue& args, uintptr_t /*destination*/)
 {
     if (fJsUiReady) {
         fWebView->postMessage(args);
@@ -147,6 +148,7 @@ void WebViewUI::postMessage(const JSValue& args)
         fMessageBuffer.push_back(args);
     }
 }
+#endif
 
 void WebViewUI::uiIdle()
 {
@@ -180,6 +182,7 @@ void WebViewUI::sizeChanged(uint width, uint height)
 {
     WebViewUIBase::sizeChanged(width, height);
     fWebView->setSize(width, height);
+    postMessage({"UI", "sizeChanged", width, height}, kDestinationAny);
 }
 
 void WebViewUI::sizeRequest(const UiBlock& block)
@@ -191,31 +194,31 @@ void WebViewUI::initHandlers()
 {
     // These handlers only make sense for the local web view
 
-    fHandler["getWidth"] = std::make_pair(0, [this](const JSValue&) {
-        postMessage({"UI", "getWidth", static_cast<double>(getWidth())});
+    fHandler["getWidth"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
+        postMessage({"UI", "getWidth", static_cast<double>(getWidth())}, source);
     });
 
-    fHandler["getHeight"] = std::make_pair(0, [this](const JSValue&) {
-        postMessage({"UI", "getHeight", static_cast<double>(getHeight())});
+    fHandler["getHeight"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
+        postMessage({"UI", "getHeight", static_cast<double>(getHeight())}, source);
     });
 
-    fHandler["isResizable"] = std::make_pair(0, [this](const JSValue&) {
-        postMessage({"UI", "isResizable", isResizable()});
+    fHandler["isResizable"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
+        postMessage({"UI", "isResizable", isResizable()}, source);
     });
 
-    fHandler["setWidth"] = std::make_pair(1, [this](const JSValue& args) {
+    fHandler["setWidth"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*source*/) {
         sizeRequest([this, args]() {
             setWidth(static_cast<uint>(args[0].getNumber()));
         });
     });
 
-    fHandler["setHeight"] = std::make_pair(1, [this](const JSValue& args) {
+    fHandler["setHeight"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*source*/) {
         sizeRequest([this, args]() {
             setHeight(static_cast<uint>(args[0].getNumber()));
         });
     });
 
-    fHandler["setSize"] = std::make_pair(2, [this](const JSValue& args) {
+    fHandler["setSize"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*source*/) {
         sizeRequest([this, args]() {
             setSize(
                 static_cast<uint>(args[0].getNumber()), // width
@@ -224,15 +227,15 @@ void WebViewUI::initHandlers()
         });
     });
 
-    fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JSValue& args) {
+    fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*source*/) {
         setKeyboardFocus(static_cast<bool>(args[0].getBoolean()));
     });
 
-    fHandler["ready"] = std::make_pair(0, [this](const JSValue&) {
+    fHandler["ready"] = std::make_pair(0, [this](const JSValue&, uintptr_t /*source*/) {
         ready();
     });
 
-    fHandler["openSystemWebBrowser"] = std::make_pair(1, [this](const JSValue& args) {
+    fHandler["openSystemWebBrowser"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*source*/) {
         String url = args[0].getString();
         openSystemWebBrowser(url);
     });
@@ -245,7 +248,11 @@ void WebViewUI::handleWebViewLoadFinished()
 
 void WebViewUI::handleWebViewScriptMessage(const JSValue& args)
 {
-    handleMessage(args);
+#if ! defined(HIPHOP_NETWORK_UI)
+    handleMessage(args, kSourceWebView);
+#else
+    (void)args;
+#endif
 }
 
 void WebViewUI::handleWebViewConsole(const String& tag, const String& text)

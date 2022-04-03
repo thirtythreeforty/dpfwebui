@@ -40,8 +40,8 @@ class TeleCompExampleUI extends DISTRHO.UI {
         } else {
             document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
 
-            if (env.remote) {
-                this._setupForRemoteWebClient();
+            if (env.network) {
+                this._setupForRemoteClient();
             } else if (env.dev) {
                 this._setupForDevelopment();
             }
@@ -57,16 +57,6 @@ class TeleCompExampleUI extends DISTRHO.UI {
         // Do not let the UI take up all available space in a web browser
         const main = document.getElementById('main');
 
-        // FIXME - WS message channel still not implemented
-        if (!env.plugin) {
-            main.style.width = '480px';
-            main.style.height = '192px';
-            document.body.style.minWidth = '480px';
-            document.body.style.minHeight = '192px';
-            document.body.style.visibility = 'visible';
-            return;
-        }
-
         helper.setSizeToUIInitSize(this, main).then(() => {
             document.body.style.visibility = 'visible';
         });
@@ -81,7 +71,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
         main.appendChild(helper.getMirrorButtonElement(this, {fill: '#000'}));
     }
 
-    _setupForRemoteWebClient() {
+    _setupForRemoteClient() {
         const msg = document.createTextNode('UI running in remote client');
         document.getElementById('main').appendChild(msg);
     }

@@ -43,7 +43,6 @@ protected:
     uint getUnscaledInitWidth() const { return fUnscaledInitWidth; }
     uint getUnscaledInitHeight() const { return fUnscaledInitHeight; }
 
-    void sizeChanged(uint width, uint height) override;
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
     void programLoaded(uint32_t index) override;
@@ -56,16 +55,18 @@ protected:
     void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) override;
 #endif
 
-    virtual void postMessage(const JSValue& args) = 0;
-    virtual void onMessageReceived(const JSValue& args);
+    virtual void postMessage(const JSValue& args, uintptr_t destination) = 0;
+    virtual void onMessageReceived(const JSValue& args, uintptr_t source);
 
-    void handleMessage(const JSValue& args);
+    void handleMessage(const JSValue& args, uintptr_t source);
 
-    typedef std::function<void(const JSValue& args)> MessageHandler;
+    typedef std::function<void(const JSValue& args, uintptr_t source)> MessageHandler;
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
 
     MessageHandlerMap fHandler;
+
+    const uintptr_t kDestinationAny = 0;
 
 private:
     void initHandlers();

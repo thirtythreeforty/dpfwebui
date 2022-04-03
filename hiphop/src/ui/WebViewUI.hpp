@@ -64,7 +64,9 @@ protected:
     void ready();
     void setKeyboardFocus(bool focus);
 
-    void postMessage(const JSValue& args) override;
+#if ! defined(HIPHOP_NETWORK_UI)
+    void postMessage(const JSValue& args, uintptr_t destination) override;
+#endif
 
     void uiIdle() override;
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -97,6 +99,8 @@ private:
     WebViewBase*  fWebView;
     UiBlock       fUiBlock;
     MessageBuffer fMessageBuffer;
+
+    const uintptr_t kSourceWebView = 0;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebViewUI)
 

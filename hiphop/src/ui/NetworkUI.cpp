@@ -127,11 +127,13 @@ void NetworkUI::uiIdle()
     fServer.serve();
 }
 
-void NetworkUI::postMessage(const JSValue& args)
+void NetworkUI::postMessage(const JSValue& args, uintptr_t destination)
 {
-    // TODO - broadcast to all clients
-
-    (void)args;
+    if (destination == kDestinationAny) {
+        fServer.broadcast(args.toJSON());
+    } else {
+        fServer.send(args.toJSON(), reinterpret_cast<Client>(destination));
+    }
 }
 
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -161,27 +163,27 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         return;
     }
 
-    // TODO - broadcast to all clients
+    WebUIBase::stateChanged(key, value);
 }
 #endif
 
 void NetworkUI::initHandlers()
 {
-    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&) {
-        postMessage({"UI", "getPublicUrl", getPublicUrl()});
+    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
+        postMessage({"UI", "getPublicUrl", getPublicUrl()}, source);
     });
 
-    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&) {
+    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
 #if HIPHOP_UI_PUBLISH_DNSSD
         const bool published = fZeroconf.isPublished();
 #else
         const bool published = false;
 #endif
-        postMessage({"UI", "isZeroconfPublished", published});
+        postMessage({"UI", "isZeroconfPublished", published}, source);
     });
 
-    fHandler["ping"] = std::make_pair(0, [this](const JSValue&) {
-        postMessage({"UI", "pong"});
+    fHandler["ping"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
+        postMessage({"UI", "pong"}, source);
     });
 }
 
@@ -250,11 +252,6 @@ void NetworkUI::handleWebServerConnect(Client client)
 
 int NetworkUI::handleWebServerRead(Client client, const char* data)
 {
-    // TODO - dispatch request then update all clients except request source
-    (void)client;
-
-    const JSValue args(data);
-    d_stderr("Rx (%x) : %s", client, args.toJSON().buffer());
-
+    handleMessage(JSValue::fromJSON(data), reinterpret_cast<uintptr_t>(client));
     return 0;
 }

@@ -106,13 +106,27 @@ void WebServer::injectScript(String& script)
     fInjectedScripts.push_back(script);
 }
 
-void WebServer::write(Client client, const char* data)
+void WebServer::send(const char* data, Client client)
 {
-    const size_t len = std::strlen(data);
-    unsigned char* packet = new unsigned char[LWS_PRE + len + 1];
+    ClientContextMap::iterator it = fClients.find(client);
+    if (it == fClients.end()) {
+        return;
+    }
+
+    unsigned char* packet = new unsigned char[LWS_PRE + std::strlen(data) + 1];
     std::strcpy(reinterpret_cast<char*>(packet) + LWS_PRE, data);
-    fClients[client].writeBuffer.push_back(packet);
+    it->second.writeBuffer.push_back(packet);
+
     lws_callback_on_writable(client);
+}
+
+void WebServer::broadcast(const char* data, Client exclude)
+{
+    for (ClientContextMap::iterator it = fClients.begin(); it != fClients.end(); ++it) {
+        if (it->first != exclude) {
+            send(data, it->first);
+        }
+    }
 }
 
 void WebServer::serve()
@@ -128,8 +142,6 @@ int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
     void* userdata = lws_context_user(lws_get_context(wsi));
     WebServer* server = static_cast<WebServer*>(userdata);
     int rc = 0; /* 0 OK, close connection otherwise */
-    
-    //d_stderr("LWS callback reason : %d \n", reason);
     
     switch (reason) {
         case LWS_CALLBACK_PROCESS_HTML: {
@@ -223,11 +235,15 @@ int WebServer::handleWrite(Client client)
 {
     // Exactly one lws_write() call per LWS_CALLBACK_SERVER_WRITEABLE callback
     ClientContext::WriteBuffer& wb = fClients[client].writeBuffer;
+    if (wb.empty()) {
+        return 0;
+    }
+
     unsigned char* packet = wb.front();
     wb.pop_front();
 
     const size_t len = std::strlen(reinterpret_cast<const char*>(packet) + LWS_PRE);
-    const int numBytes = lws_write(client, packet, len, LWS_WRITE_TEXT);
+    const int numBytes = lws_write(client, packet + LWS_PRE, len, LWS_WRITE_TEXT);
     delete[] packet;
 
     if (! wb.empty()) {

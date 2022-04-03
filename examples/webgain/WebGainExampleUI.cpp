@@ -60,10 +60,11 @@ protected:
         // It is now safe to call runScript() and mapped DPF methods.
     }
 
-    void onMessageReceived(const JSValue& args) override
+    void onMessageReceived(const JSValue& args, uintptr_t source) override
     {
         // Web view and DOM are guaranteed to be ready here.
         (void)args;
+        (void)source;
     }
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebGainExampleUI)

@@ -126,14 +126,14 @@ class UI extends UIBase() {
     // Non-DPF method for sending a message to the host
     // void WebViewUI::postMessage(const JSValue& args)
     postMessage(...args) {
-        if (DISTRHO.env.plugin) {
-            window.host.postMessage(args);
-        } else if (DISTRHO.env.remote) {
+        if (DISTRHO.env.network) {
             if (this._socket.readyState == WebSocket.OPEN) {
                 this._socket.send(JSON.stringify(args));
             } else {
                 console.log(`Cannot send message, socket state is ${this._socket.readyState}.`);
             }
+        } else if (DISTRHO.env.plugin) {
+            window.host.postMessage(args);
         } else if (DISTRHO.env.dev) {
             console.log(`stub: postMessage(${args})`);
         }
@@ -215,7 +215,10 @@ function UIBase() { return class {
         this._latency = 0;
         this._pingSendTime = 0;
 
-        if (DISTRHO.env.plugin) {
+        if (DISTRHO.env.network) {
+            this._initSocketMessageChannel();
+
+        } else if (DISTRHO.env.plugin) {
             this._initNativeMessageChannel();
 
             // Call WebUI::ready() to let the host know the JS UI has completed
@@ -226,19 +229,9 @@ function UIBase() { return class {
             // is safe to indirectly call from super() in subclass constructors.
             this._call('ready');
 
-        } else if (DISTRHO.env.remote) {
-            this._initSocketMessageChannel();
-            
         } else if (DISTRHO.env.dev) {
             setTimeout(this.messageChannelOpen.bind(this), 0);
         }
-    }
-
-    // Initialize native C++/JS message channel for the embedded web view
-    _initNativeMessageChannel() {
-        window.host.addMessageListener(this._messageReceived.bind(this));
-        // Make sure subclass constructor completed before firing callback
-        setTimeout(this.messageChannelOpen.bind(this), 0);
     }
 
     // Initialize WebSockets-based message channel for network clients
@@ -273,12 +266,19 @@ function UIBase() { return class {
                 reconnectTimer = setInterval(open, 1000 * reconnectPeriod);
             });
 
-            this._socket.addEventListener('message', (_) => {
+            this._socket.addEventListener('message', (ev) => {
                 this._messageReceived(JSON.parse(ev.data));
             });
         };
 
         open();
+    }
+
+    // Initialize native C++/JS message channel for the embedded web view
+    _initNativeMessageChannel() {
+        window.host.addMessageListener(this._messageReceived.bind(this));
+        // Make sure subclass constructor completed before firing callback
+        setTimeout(this.messageChannelOpen.bind(this), 0);
     }
 
     // Helper for calling UI methods
@@ -307,8 +307,9 @@ function UIBase() { return class {
     }
 
     // Compute latency when response to ping is received
-    _pong() {
+    pong() {
         this._latency = (new Date).getTime() - this._pingSendTime;
+        console.log(`UI: latency = ${this._latency}ms`);
     }
 
     // Handle incoming message
@@ -619,7 +620,7 @@ class UIHelperPrivate {
     static buildEnvObject() {
         // Determine the running environment. This information could be prepared
         // on the native side and then 1) injected into the web view, or 2)
-        // injected into dpf.js before it is served (so it also works for remote
+        // injected into dpf.js before it is served (so it also works for HTTP
         // clients). But the simplicity of the client-side heuristics below far
         // outweighs the complexity of the aforementioned server-side solution,
         // with equal results in practice.
@@ -635,10 +636,8 @@ class UIHelperPrivate {
             env.plugin = false;
         }
 
-        const http = window.location.protocol.indexOf('http') == 0;
-
-        env.remote = !env.plugin && http;
-        env.dev = !env.plugin && !http;
+        env.network = window.location.protocol.indexOf('http') == 0;
+        env.dev = !env.plugin && !env.network;
         
         return Object.freeze(env);
     }
@@ -1168,8 +1167,8 @@ if (!env.dev) {
 //    Base64      object  Base64 codec from MDN
 //    env                 Information about the environment
 //       plugin   bool    True when running in plugin embedded web view
-//       remote   bool    True when running in external client (HTTP)
-//       dev      bool    True for external client non-HTTP (ie. open index.html)
+//       network  bool    True when communicating over the network (HTTP & WS)
+//       dev      bool    True for non-plugin non-HTTP (ie. open file index.html)
 //       ...              Additional fields defined by web views
 // }
 //

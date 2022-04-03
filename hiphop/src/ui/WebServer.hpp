@@ -54,7 +54,8 @@ public:
     void init(int port, WebServerHandler* handler, const char* jsInjectTarget = nullptr,
                 const char* jsInjectToken = nullptr);
     void injectScript(String& script);
-    void write(Client client, const char* data);
+    void send(const char* data, Client client);
+    void broadcast(const char* data, Client exclude = nullptr);
     void serve();
 
 private:
