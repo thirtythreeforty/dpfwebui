@@ -366,6 +366,11 @@ class UIHelper {
         const closedUiCallback = ui.messageChannelClosed.bind(ui);
 
         ui.messageChannelOpen = () => {
+            if (ui._offlineModalTimeout) {
+                clearTimeout(ui._offlineModalTimeout);
+                delete ui._offlineModalTimeout;
+            }
+
             if (ui._offlineModal) {
                 opt.target.removeChild(ui._offlineModal);
                 delete ui._offlineModal;
@@ -377,10 +382,18 @@ class UIHelper {
         ui.messageChannelClosed = () => {
             closedUiCallback();
 
-            if (! ui._offlineModal) {
-                ui._offlineModal = this.getOfflineModalElement();
-                opt.target.appendChild(ui._offlineModal);
+            if (ui._offlineModalTimeout) {
+                clearTimeout(ui._offlineModalTimeout);
             }
+
+            ui._offlineModalTimeout = setTimeout(() => {
+                delete ui._offlineModalTimeout;
+
+                if (! ui._offlineModal) {
+                    ui._offlineModal = this.getOfflineModalElement();
+                    opt.target.appendChild(ui._offlineModal);
+                }
+            }, 500);
         };
     }
 
