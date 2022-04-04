@@ -3,6 +3,9 @@
 
 examples:
 	@make -C examples/webgain
+
+# WAMR depends on building LLVM from source and takes a very long while
+wasm:
 	@make -C examples/jitdrum
 	@make -C examples/astone
 	@make -C examples/hotswap

@@ -4,7 +4,7 @@ Hip-Hop / High Performance Hybrid Audio Plugins
 This project builds on top of the [DPF](http://github.com/DISTRHO/DPF) audio
 plugin framework to add web-based UI support. Plugins can leverage JavaScript
 and related tech to provide complex user interfaces on the computer running
-the plugin and over the local network [²].
+the plugin and over the local network.
 
 DSP runs decoupled from the UI and it is implemented
 by extending the standard DPF `Plugin` C++ class or optionally in [AssemblyScript](https://www.assemblyscript.org).
@@ -23,12 +23,11 @@ their original C++ implementations in DPF.
 * JS / HTML / CSS / etc for UI development
 * C++ or AssemblyScript for DSP development
 * VST2 / VST3[¹] / LV2 plugin formats
-* Network UI support[²]
+* Network UI support
 * Linux / Mac / Windows
 * Just the powerful basics
 
 ¹ May not work on some platform/DAW combinations like Ableton Live for macOS. More details [here](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
-² Feature currently under development.
 
 The following language combinations are possible:
 

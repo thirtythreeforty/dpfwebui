@@ -10,7 +10,7 @@ DPF_TARGET_DIR ?= bin
 # Location for object files
 DPF_BUILD_DIR ?= build
 
-# (WIP) Enable built-in websockets server and load content over HTTP
+# Enable built-in websockets server and load content over HTTP
 HIPHOP_NETWORK_UI ?= false
 
 # (WIP) Enable HTTPS and secure WebSockets
