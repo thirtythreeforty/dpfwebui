@@ -210,7 +210,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
     // Avoid reallocation to ensure pointers to elements remain valid through engine lifetime
     fHostFunctions.reserve(MAX_HOST_FUNCTIONS);
 
-    for (WasmFunctionMap::const_iterator it = hostFunctions.begin(); it != hostFunctions.end(); ++it) {
+    for (WasmFunctionMap::const_iterator it = hostFunctions.cbegin(); it != hostFunctions.cend(); ++it) {
         fHostFunctions.push_back(it->second.function);
 
         wasm_valtype_vec_t params;

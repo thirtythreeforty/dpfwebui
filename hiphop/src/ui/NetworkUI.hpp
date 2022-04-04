@@ -19,6 +19,9 @@
 #ifndef NETWORK_UI_HPP
 #define NETWORK_UI_HPP
 
+#include <string>
+#include <unordered_map>
+
 #include "WebUIBase.hpp"
 #include "WebServer.hpp"
 #if HIPHOP_UI_ZEROCONF
@@ -42,6 +45,7 @@ protected:
 
     void postMessage(const JSValue& args, uintptr_t context) override;
 
+    void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* key, const char* value) override;
 #endif
@@ -59,6 +63,10 @@ private:
 #if HIPHOP_UI_ZEROCONF
     Zeroconf  fZeroconf;
 #endif
+    typedef std::unordered_map<uint32_t, float> ParameterMap;
+    ParameterMap fParameters;
+    typedef std::unordered_map<std::string, std::string> StateMap;
+    StateMap     fStates;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkUI)
 

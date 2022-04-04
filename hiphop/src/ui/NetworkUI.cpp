@@ -136,6 +136,12 @@ void NetworkUI::postMessage(const JSValue& args, uintptr_t context)
     }
 }
 
+void NetworkUI::parameterChanged(uint32_t index, float value)
+{
+    fParameters[index] = value;
+    WebUIBase::parameterChanged(index, value);
+}
+
 #if DISTRHO_PLUGIN_WANT_STATE
 void NetworkUI::stateChanged(const char* key, const char* value)
 {
@@ -157,6 +163,7 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         return;
     }
 
+    fStates[key] = value;
     WebUIBase::stateChanged(key, value);
 }
 #endif
@@ -240,8 +247,13 @@ int NetworkUI::findAvailablePort()
 
 void NetworkUI::handleWebServerConnect(Client client)
 {
-    // TODO - send all parameters and state to newly connected client
-    (void)client;
+    // Send all current parameters and states
+    for (ParameterMap::const_iterator it = fParameters.cbegin(); it != fParameters.cend(); ++it) {
+        postMessage({"UI", "parameterChanged", it->first, it->second}, reinterpret_cast<uintptr_t>(client));
+    }
+    for (StateMap::const_iterator it = fStates.cbegin(); it != fStates.cend(); ++it) {
+        postMessage({"UI", "stateChanged", it->first.c_str(), it->second.c_str()}, reinterpret_cast<uintptr_t>(client));
+    }
 }
 
 int NetworkUI::handleWebServerRead(Client client, const char* data)
