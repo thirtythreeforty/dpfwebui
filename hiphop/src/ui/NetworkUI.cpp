@@ -144,12 +144,6 @@ void NetworkUI::stateChanged(const char* key, const char* value)
     }
 
     if (std::strcmp(key, "_ws_port") == 0) {
-        // TODO - This check should not be needed, it seems stateChanged() can be
-        //        incorrectly called for a nth time with the default state value.
-        //        https://github.com/DISTRHO/DPF/issues/371
-        if (fPort != -1) {
-            return;
-        }
         fPort = std::atoi(value);
         if (fPort == -1) {
             fPort = findAvailablePort();
