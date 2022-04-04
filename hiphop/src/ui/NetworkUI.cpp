@@ -170,6 +170,28 @@ void NetworkUI::stateChanged(const char* key, const char* value)
 
 void NetworkUI::initHandlers()
 {
+    // Broadcast parameter updates to all clients except the originating one
+    const MessageHandler& parameterHandlerSuper = fHandler["setParameterValue"].second;
+    fHandler["setParameterValue"] = std::make_pair(2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t context) {
+        parameterHandlerSuper(args, context);
+        fParameters[static_cast<uint32_t>(args[0].getNumber())] = static_cast<float>(args[1].getNumber());
+        JSValue argsCopy = args; // UI,parameterChanged,index,value
+        argsCopy[1] = "parameterChanged";
+        fServer.broadcast(args.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
+    });
+
+#if DISTRHO_PLUGIN_WANT_STATE
+    // Ditto for states
+    const MessageHandler& stateHandlerSuper = fHandler["setState"].second;
+    fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t context) {
+        stateHandlerSuper(args, context);
+        fStates[args[0].getString().buffer()] = args[1].getString().buffer();
+        JSValue argsCopy = args; // UI,stateChanged,key,value
+        argsCopy[1] = "stateChanged";
+        fServer.broadcast(args.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
+    });
+#endif
+
     fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
         postMessage({"UI", "getPublicUrl", getPublicUrl()}, context);
     });
