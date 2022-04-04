@@ -174,7 +174,7 @@ void NetworkUI::initHandlers()
     });
 
     fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-#if HIPHOP_UI_PUBLISH_DNSSD
+#if HIPHOP_UI_ZEROCONF
         const bool published = fZeroconf.isPublished();
 #else
         const bool published = false;
@@ -190,7 +190,7 @@ void NetworkUI::initHandlers()
 void NetworkUI::initServer()
 {
     fServer.init(fPort, this);
-#if HIPHOP_UI_PUBLISH_DNSSD
+#if HIPHOP_UI_ZEROCONF
     fZeroconf.publish(DISTRHO_PLUGIN_NAME, SERVICE_TYPE, fPort);
 #endif
     d_stderr(LOG_TAG " : server up @ %s", getPublicUrl().buffer());

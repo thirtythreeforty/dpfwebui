@@ -21,7 +21,7 @@
 
 #include "WebUIBase.hpp"
 #include "WebServer.hpp"
-#if HIPHOP_UI_PUBLISH_DNSSD
+#if HIPHOP_UI_ZEROCONF
 # include "Zeroconf.hpp"
 #endif
 #include "extra/JSValue.hpp"
@@ -56,7 +56,7 @@ private:
 
     int       fPort;
     WebServer fServer;
-#if HIPHOP_UI_PUBLISH_DNSSD
+#if HIPHOP_UI_ZEROCONF
     Zeroconf  fZeroconf;
 #endif
 

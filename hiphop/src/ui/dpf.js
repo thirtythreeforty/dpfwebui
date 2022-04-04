@@ -189,7 +189,7 @@ class UI extends UIBase() {
         }
     }
 
-    // Non-DPF method to check whether the plugin is published for DNS-SD
+    // Non-DPF method to check whether the plugin is published using Zeroconf
     // bool Zeroconf::isPublished()
     async isZeroconfPublished() {
         return this._callAndExpectReply('isZeroconfPublished', true);
@@ -566,7 +566,7 @@ class UIHelper {
                     </a>
                     <br>
                     <span style="color:#fff">
-                        DNS-SD: ${pub ? 'on' : 'off'}
+                        Zeroconf: ${pub ? 'on' : 'off'}
                     </span>
                 </div>
             </div>`;
