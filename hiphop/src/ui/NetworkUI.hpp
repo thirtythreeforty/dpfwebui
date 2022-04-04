@@ -40,7 +40,7 @@ public:
 protected:
     void uiIdle() override;
 
-    void postMessage(const JSValue& args, uintptr_t destination) override;
+    void postMessage(const JSValue& args, uintptr_t context) override;
 
 #if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* key, const char* value) override;

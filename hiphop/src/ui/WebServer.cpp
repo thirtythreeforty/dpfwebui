@@ -101,7 +101,7 @@ WebServer::~WebServer()
     }
 }
 
-void WebServer::injectScript(String& script)
+void WebServer::injectScript(const String& script)
 {
     fInjectedScripts.push_back(script);
 }

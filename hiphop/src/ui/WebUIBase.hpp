@@ -55,18 +55,16 @@ protected:
     void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) override;
 #endif
 
-    virtual void postMessage(const JSValue& args, uintptr_t destination) = 0;
-    virtual void onMessageReceived(const JSValue& args, uintptr_t source);
+    virtual void postMessage(const JSValue& args, uintptr_t context) = 0;
+    virtual void onMessageReceived(const JSValue& args, uintptr_t context);
 
-    void handleMessage(const JSValue& args, uintptr_t source);
+    void handleMessage(const JSValue& args, uintptr_t context);
 
-    typedef std::function<void(const JSValue& args, uintptr_t source)> MessageHandler;
+    typedef std::function<void(const JSValue& args, uintptr_t context)> MessageHandler;
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
 
     MessageHandlerMap fHandler;
-
-    const uintptr_t kDestinationAny = 0;
 
 private:
     void initHandlers();

@@ -53,7 +53,7 @@ public:
 
     void init(int port, WebServerHandler* handler, const char* jsInjectTarget = nullptr,
                 const char* jsInjectToken = nullptr);
-    void injectScript(String& script);
+    void injectScript(const String& script);
     void send(const char* data, Client client);
     void broadcast(const char* data, Client exclude = nullptr);
     void serve();
@@ -74,7 +74,7 @@ private:
     lws_context_creation_info  fContextInfo;
     lws_context*               fContext;
 
-    typedef std::unordered_map<Client,ClientContext> ClientContextMap;
+    typedef std::unordered_map<Client, ClientContext> ClientContextMap;
     ClientContextMap fClients;
 
     typedef std::list<String> StringList;

@@ -127,12 +127,12 @@ void NetworkUI::uiIdle()
     fServer.serve();
 }
 
-void NetworkUI::postMessage(const JSValue& args, uintptr_t destination)
+void NetworkUI::postMessage(const JSValue& args, uintptr_t context)
 {
-    if (destination == kDestinationAny) {
+    if (context == 0) {
         fServer.broadcast(args.toJSON());
     } else {
-        fServer.send(args.toJSON(), reinterpret_cast<Client>(destination));
+        fServer.send(args.toJSON(), reinterpret_cast<Client>(context));
     }
 }
 
@@ -169,21 +169,21 @@ void NetworkUI::stateChanged(const char* key, const char* value)
 
 void NetworkUI::initHandlers()
 {
-    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
-        postMessage({"UI", "getPublicUrl", getPublicUrl()}, source);
+    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "getPublicUrl", getPublicUrl()}, context);
     });
 
-    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
+    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
 #if HIPHOP_UI_PUBLISH_DNSSD
         const bool published = fZeroconf.isPublished();
 #else
         const bool published = false;
 #endif
-        postMessage({"UI", "isZeroconfPublished", published}, source);
+        postMessage({"UI", "isZeroconfPublished", published}, context);
     });
 
-    fHandler["ping"] = std::make_pair(0, [this](const JSValue&, uintptr_t source) {
-        postMessage({"UI", "pong"}, source);
+    fHandler["ping"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "pong"}, context);
     });
 }
 
