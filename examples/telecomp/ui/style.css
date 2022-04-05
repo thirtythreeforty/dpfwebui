@@ -35,3 +35,16 @@ a {
     color: #000;
     background: #8c8c8c;
 }
+
+g-knob {
+    width: 48px;
+    height: 48px;
+}
+
+#knob-attack {
+    --circle-color: #3c3c3c;
+    --dot-off-color: #ffffff;
+    --dot-on-color: #ffffff;
+    --track-color: #777777;
+    --value-color: #800000;
+}

@@ -49,7 +49,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
     }
 
     messageChannelOpen() {
-        if (env.plugin) {
+        if (env.dev) {
             document.body.style.visibility = 'visible';
             return;
         }
@@ -64,22 +64,20 @@ class TeleCompExampleUI extends DISTRHO.UI {
 
     _setupForPluginEmbeddedWebview() {
         const main = document.getElementById('main');
-
-        let msg = document.createTextNode('UI running in embedded web view');
-        main.appendChild(msg);
-
         main.appendChild(helper.getMirrorButtonElement(this, {fill: '#000'}));
     }
 
     _setupForRemoteClient() {
-        const msg = document.createTextNode('UI running in remote client');
-        document.getElementById('main').appendChild(msg);
+
+        // TODO
+
     }
 
     _setupForDevelopment() {
         // Directly Open Source mode ;)
-        const msg = document.createTextNode('This program cannot be run in DOS mode');
-        document.getElementById('main').appendChild(msg);
+        const main = document.getElementById('main');
+        //main.innerHTML = '';
+        main.appendChild(document.createTextNode('This program cannot be run in DOS mode'));
     }
 
 }

@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ export default namespace DISTRHO {
     // There is no support for virtual methods in AssemblyScript. Methods that
     // are implemented by the plugin author are declared in PluginInterface
     // and methods provided by the native container implemented in Plugin class.
-    // C++ DISTRHO::Plugin = AS DISTRHO.Plugin + AS DISTRHO.PluginInterface
+    // AS DISTRHO.Plugin + AS DISTRHO.PluginInterface = C++ DISTRHO::Plugin
 
     export interface PluginInterface {
 
