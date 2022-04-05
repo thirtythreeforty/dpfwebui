@@ -1,11 +1,13 @@
 # Filename: Makefile
 # Author:   oss@lucianoiam.com
 
-examples:
+examples: webui
+	@(echo '\033[0;33mHey!\033[0m run make wasm to include the AssemblyScript examples')
+
+webui:
 	@make -C examples/webgain
 
-# WAMR depends on building LLVM from source and takes a very long while
-wasm:
+wasm: webui
 	@make -C examples/jitdrum
 	@make -C examples/astone
 	@make -C examples/hotswap
