@@ -18,7 +18,8 @@
 
 const env = DISTRHO.env, helper = DISTRHO.UIHelper;
 
-const PARAMETERS = ['attack', 'release', 'knee', 'ratio', 'threshold', 'slew'];
+// ZamCompX2Plugin.hpp@33
+const PARAMETERS = ['attack', 'release', 'knee', 'ratio', 'threshold', 'makeup', 'slew'];
 
 class TeleCompExampleUI extends DISTRHO.UI {
 
@@ -53,9 +54,12 @@ class TeleCompExampleUI extends DISTRHO.UI {
 
         // Connect knobs to plugin
         for (let i = 0; i < PARAMETERS.length; i++) {
-            this._getKnob(i).addEventListener('input', (ev) => {
-                this.setParameterValue(i, ev.target.value);
-            });
+            const knob = this._getKnob(i);
+            if (knob) {
+                knob.addEventListener('input', (ev) => {
+                    this.setParameterValue(i, ev.target.value);
+                });
+            }
         }
     }
 
