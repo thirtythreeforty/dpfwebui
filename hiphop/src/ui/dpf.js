@@ -104,10 +104,10 @@ class UI extends UIBase() {
     // Non-DPF method for opening the default system browser
     // void WebViewUI::openSystemWebBrowser(String& url)
     openSystemWebBrowser(url) {
-        if (DISTRHO.env.dev) {
-            window.open(url, '_blank');
-        } else {
+        if (DISTRHO.env.plugin) {
             this._call('openSystemWebBrowser', url);
+        } else {
+            window.open(url, '_blank');
         }
     }
 
@@ -393,12 +393,13 @@ class UIHelper {
                     ui._offlineModal = this.getOfflineModalElement();
                     opt.target.appendChild(ui._offlineModal);
                 }
-            }, 500);
+            }, 1000);
         };
     }
 
     static getOfflineModalElement() {
-        // Position for modals should be fixed but not working for WebKitGTK.
+        // CSS position for modals should be 'fixed' but that is not working for
+        // WebKitGTK. Use predefined style in contrast to other helper elements.
         const html =
             `<div 
                 style="
@@ -434,17 +435,13 @@ class UIHelper {
         return document.createRange().createContextualFragment(html).firstChild;
     }
 
-    static getMirrorButtonElement(ui, opt) {
+    static getQRButtonElement(ui, opt) {
         opt = opt || {};
         opt.size = opt.size || 24;
-        opt.margin = opt.margin || opt.size / 3;
         opt.fill = opt.fill || '#fff';
 
         const html =
             `<div
-                style="position: absolute;
-                top: ${opt.margin}px;
-                right: ${opt.margin}px;
                 width: ${opt.size}px;
                 height: ${opt.size}px;">
                 <a href="#" style="cursor:default;">
@@ -462,6 +459,7 @@ class UIHelper {
             </div>`;
 
         const el = document.createRange().createContextualFragment(html).firstChild;
+        el.id = opt.id;
 
         ['touchstart', 'click'].forEach((evName) => {
             el.querySelector('a').addEventListener(evName, (ev) => {
@@ -473,61 +471,6 @@ class UIHelper {
         });
 
         return el;
-    }
-
-    static async showQRCodeModal(ui, opt) {
-        opt = opt || {};
-        opt.target = opt.target || document.body;
-
-        const html =
-            `<div
-                style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: #000;
-                z-index: 10;">
-                <a
-                    href="#"
-                    style="
-                    position: absolute;
-                    top: 0;
-                    right: 0;
-                    width: 36x;
-                    height: 36px;
-                    padding-top: 8px;
-                    padding-right: 8px;
-                    cursor: default;">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="28"
-                        height="28"
-                        viewBox="0 0 24 24">
-                        <g id="close">
-                            <path id="x" fill="#fff" d="M18.717 6.697l-1.414-1.414-5.303 5.303-5.303-5.303-1.414 1.414 5.303 5.303-5.303 5.303 1.414 1.414 5.303-5.303 5.303 5.303 1.414-1.414-5.303-5.303z"/>
-                        </g>
-                    </svg>
-                </a>
-                </div>
-            </div>`;
-
-        const el = document.createRange().createContextualFragment(html).firstChild;
-        el.appendChild(await this.getQRCodeElement(ui));
-
-        el.querySelectorAll('a').forEach((a) => {
-            ['touchstart', 'click'].forEach((evName) => {
-                a.addEventListener(evName, (ev) => {
-                    opt.target.removeChild(el);
-                    if (ev.cancelable) {
-                        ev.preventDefault();
-                    }
-                });
-            });
-        });
-
-        opt.target.appendChild(el);
     }
 
     static async getQRCodeElement(ui, opt) {
@@ -586,6 +529,54 @@ class UIHelper {
         return el;
     }
 
+    static async showQRCodeModal(ui, opt) {
+        opt = opt || {};
+        opt.target = opt.target || document.body;
+
+        const html =
+            `<div>
+                <a
+                    href="#"
+                    style="
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    width: 36x;
+                    height: 36px;
+                    padding-top: 8px;
+                    padding-right: 8px;
+                    cursor: default;">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="28"
+                        height="28"
+                        viewBox="0 0 24 24">
+                        <g id="close">
+                            <path id="x" fill="#fff" d="M18.717 6.697l-1.414-1.414-5.303 5.303-5.303-5.303-1.414 1.414 5.303 5.303-5.303 5.303 1.414 1.414 5.303-5.303 5.303 5.303 1.414-1.414-5.303-5.303z"/>
+                        </g>
+                    </svg>
+                </a>
+            </div>`;
+
+        const el = document.createRange().createContextualFragment(html).firstChild;
+        el.id = opt.id;
+
+        el.appendChild(await this.getQRCodeElement(ui));
+
+        el.querySelectorAll('a').forEach((a) => {
+            ['touchstart', 'click'].forEach((evName) => {
+                a.addEventListener(evName, (ev) => {
+                    opt.target.removeChild(el);
+                    if (ev.cancelable) {
+                        ev.preventDefault();
+                    }
+                });
+            });
+        });
+
+        opt.target.appendChild(el);
+    }
+
     static async setSizeToUIInitSize(ui, el) {
         el = el || document.body;
 
@@ -599,6 +590,19 @@ class UIHelper {
         document.body.style.minHeight = h + 'px';
     }
 
+    static enableSystemBrowser(ui, el, url) {
+        url = url || el.href;
+
+        ['touchstart', 'click'].forEach((evName) => {
+            el.addEventListener(evName, (ev) => {
+                ui.openSystemWebBrowser(url);
+                if (ev.cancelable) {
+                    ev.preventDefault();
+                }
+            });
+        });
+    }
+
 }
 
 //
@@ -606,7 +610,7 @@ class UIHelper {
 //
 class UIHelperPrivate {
 
-    static applyTweaks() {
+    static applyTweaks(env) {
         // Disable context menu
         window.addEventListener('contextmenu', (ev) => {
             ev.preventDefault()
@@ -626,8 +630,12 @@ class UIHelperPrivate {
         style('*:not(a) { cursor: default; }'); // disable I-beam for text
         style('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
         style('body { user-select: none; -webkit-user-select: none; }'); // disable selection
-        style('body { touch-action: pan-x pan-y; }'); // disable pinch zoom
         style('body { overflow: hidden; }'); // disable overflow
+
+        if (env.plugin) {
+            // Disable pinch zoom. Might still be desirable for web browsers.
+            style('body { touch-action: pan-x pan-y; }');
+        }
     }
 
     static buildEnvObject() {
@@ -1167,7 +1175,7 @@ const env = UIHelperPrivate.buildEnvObject();
 // Basic setup to make the web UI behave a bit more like a native UI 
 //
 if (!env.dev) {
-    UIHelperPrivate.applyTweaks();
+    UIHelperPrivate.applyTweaks(env);
 }
 
 //

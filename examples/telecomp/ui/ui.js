@@ -18,14 +18,6 @@
 
 const env = DISTRHO.env, helper = DISTRHO.UIHelper;
 
-// Colors
-// attack #800000
-// release #008001
-// threshold #feff00
-// ratio #1500ff
-// knee #ff00ff
-// slew #ff02ff
-
 class TeleCompExampleUI extends DISTRHO.UI {
 
     constructor() {
@@ -33,51 +25,46 @@ class TeleCompExampleUI extends DISTRHO.UI {
 
         // Automatically display a modal view when connection is lost
         helper.enableOfflineModal(this);
+
+        // Do not navigate when clicking credits and open system browser instead
+        helper.enableSystemBrowser(this, document.querySelector('#credits > a'));
         
         // Setup view to suit environment
+        const main = document.getElementById('main');
+
         if (env.plugin) {
-            this._setupForPluginEmbeddedWebview();
+            main.appendChild(helper.getQRButtonElement(this, {
+                fill: '#000',
+                id: 'qr-button',
+                modal: {
+                    id: 'qr-modal'
+                }
+            }));
         } else {
             document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
 
-            if (env.network) {
-                this._setupForRemoteClient();
-            } else if (env.dev) {
-                this._setupForDevelopment();
+            if (env.dev) {
+                // Directly Open Source mode ;)
+                main.innerHTML = 'This program cannot be run in DOS mode';
             }
         }
     }
 
     messageChannelOpen() {
-        if (env.dev) {
-            document.body.style.visibility = 'visible';
-            return;
-        }
-        
         // Do not let the UI take up all available space in a web browser
         const main = document.getElementById('main');
 
+        if (env.dev) {
+            main.style.width = '640px';
+            main.style.height = '128px';
+            document.body.style.visibility = 'visible';
+            return;
+        }
+
+        // Could just use the fixed values above, this is for demo purposes.
         helper.setSizeToUIInitSize(this, main).then(() => {
             document.body.style.visibility = 'visible';
         });
-    }
-
-    _setupForPluginEmbeddedWebview() {
-        const main = document.getElementById('main');
-        main.appendChild(helper.getMirrorButtonElement(this, {fill: '#000'}));
-    }
-
-    _setupForRemoteClient() {
-
-        // TODO
-
-    }
-
-    _setupForDevelopment() {
-        // Directly Open Source mode ;)
-        const main = document.getElementById('main');
-        //main.innerHTML = '';
-        main.appendChild(document.createTextNode('This program cannot be run in DOS mode'));
     }
 
 }
