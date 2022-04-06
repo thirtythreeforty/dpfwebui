@@ -38,7 +38,7 @@ AS |JS |Web view user interface, see example [jitdrum](https://github.com/lucian
 AS |C++|DPF Graphics Library (DGL), see example [astone](https://github.com/lucianoiam/hiphop/tree/master/examples/astone).
 C++|C++|No need for this project, use DPF instead.
 
-For information on the implementation go [here](https://github.com/lucianoiam/hiphop/blob/master/doc/internals.md).
+For a network UI example check [telecomp](https://github.com/lucianoiam/hiphop/tree/master/examples/telecomp)
 
 ### Example JavaScript UI code
 
@@ -106,7 +106,7 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 ### Quick FAQ
 
 - Why the name? because it is catchy and allows a cheesy but decent enough acronym.
-- Why DPF? mainly because it is lightweight and FOSS-friendly.
+- Why DPF? mainly because it is lightweight and FOSS friendly.
 - Isn't web bloated? of course firing 128 ✕ one-knob web UIs is not smart.
 - What about AudioUnit? such format development is stalled in DPF, developers
 welcome.
