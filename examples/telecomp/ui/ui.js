@@ -44,6 +44,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
                 }
             }));
         } else {
+            main.style.borderRadius = '10px';
             document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
 
             if (env.dev) {
