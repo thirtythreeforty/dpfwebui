@@ -18,6 +18,8 @@
 
 const env = DISTRHO.env, helper = DISTRHO.UIHelper;
 
+const PARAMETERS = ['attack', 'release', 'knee', 'ratio', 'threshold', 'slew'];
+
 class TeleCompExampleUI extends DISTRHO.UI {
 
     constructor() {
@@ -48,6 +50,13 @@ class TeleCompExampleUI extends DISTRHO.UI {
                 main.innerHTML = 'This program cannot be run in DOS mode';
             }
         }
+
+        // Connect knobs to plugin
+        for (let i = 0; i < PARAMETERS.length; i++) {
+            this._getKnob(i).addEventListener('input', (ev) => {
+                this.setParameterValue(i, ev.target.value);
+            });
+        }
     }
 
     messageChannelOpen() {
@@ -65,6 +74,17 @@ class TeleCompExampleUI extends DISTRHO.UI {
         helper.setSizeToUIInitSize(this, main).then(() => {
             document.body.style.visibility = 'visible';
         });
+    }
+
+    parameterChanged(index, value) {
+        const knob = this._getKnob(index);
+        if (knob) {
+            knob.value = value;
+        }
+    }
+
+    _getKnob(parameterIndex) {
+        return document.getElementById(`knob-${PARAMETERS[parameterIndex]}`);
     }
 
 }

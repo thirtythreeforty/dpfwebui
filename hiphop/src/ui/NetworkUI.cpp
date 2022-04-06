@@ -175,9 +175,10 @@ void NetworkUI::initHandlers()
     fHandler["setParameterValue"] = std::make_pair(2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t context) {
         parameterHandlerSuper(args, context);
         fParameters[static_cast<uint32_t>(args[0].getNumber())] = static_cast<float>(args[1].getNumber());
-        JSValue argsCopy = args; // UI,parameterChanged,index,value
-        argsCopy[1] = "parameterChanged";
-        fServer.broadcast(args.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
+        JSValue msg = args;
+        msg.insertArrayItem(0, "UI");
+        msg.insertArrayItem(1, "parameterChanged");
+        fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -186,8 +187,9 @@ void NetworkUI::initHandlers()
     fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t context) {
         stateHandlerSuper(args, context);
         fStates[args[0].getString().buffer()] = args[1].getString().buffer();
-        JSValue argsCopy = args; // UI,stateChanged,key,value
-        argsCopy[1] = "stateChanged";
+        JSValue msg = args;
+        msg.insertArrayItem(0, "UI");
+        msg.insertArrayItem(1, "stateChanged");
         fServer.broadcast(args.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
     });
 #endif

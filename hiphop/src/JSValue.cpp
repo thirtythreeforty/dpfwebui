@@ -199,6 +199,11 @@ void JSValue::pushArrayItem(const JSValue& value) noexcept
     cJSON_AddItemToArray(fImpl, cJSON_Duplicate(value.fImpl, true/*recurse*/));
 }
 
+void JSValue::insertArrayItem(int idx, const JSValue& value) noexcept
+{
+    cJSON_InsertItemInArray(fImpl, idx, cJSON_Duplicate(value.fImpl, true/*recurse*/));
+}
+
 void JSValue::setObjectItem(const char* key, const JSValue& value) noexcept
 {
     cJSON_AddItemToObject(fImpl, key, cJSON_Duplicate(value.fImpl, true/*recurse*/));

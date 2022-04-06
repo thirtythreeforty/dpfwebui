@@ -84,6 +84,7 @@ CocoaWebView::CocoaWebView()
 CocoaWebView::~CocoaWebView()
 {
     [fNsDelegate release];
+    [fNsWebView.configuration.userContentController removeScriptMessageHandlerForName:@"host"];
     [fNsWebView removeFromSuperview];
     [fNsWebView release];
     [fNsBackground removeFromSuperview];

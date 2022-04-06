@@ -39,7 +39,7 @@ class WebViewBase
 {
 public:
     WebViewBase();
-    virtual ~WebViewBase();
+    virtual ~WebViewBase() {};
 
     uint getWidth();
     uint getHeight();

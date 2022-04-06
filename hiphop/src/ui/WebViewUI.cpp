@@ -47,6 +47,7 @@ WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor
 WebViewUI::~WebViewUI()
 {
     if (fWebView != nullptr) {
+        fWebView->setEventHandler(nullptr);
         delete fWebView;
     }
 }

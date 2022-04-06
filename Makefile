@@ -6,6 +6,7 @@ examples: webui
 
 webui:
 	@make -C examples/webgain
+	@make -C examples/telecomp
 
 wasm: webui
 	@make -C examples/jitdrum

@@ -74,6 +74,7 @@ public:
 
     // Setters
     void pushArrayItem(const JSValue& value) noexcept;
+    void insertArrayItem(int idx, const JSValue& value) noexcept;
     void setObjectItem(const char* key, const JSValue& value) noexcept;
 
     // Operations on arrays
