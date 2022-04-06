@@ -49,6 +49,11 @@ WebViewBase::WebViewBase()
     , fHandler(nullptr)
 {}
 
+WebViewBase::~WebViewBase()
+{
+    fHandler = nullptr;
+}
+
 uint WebViewBase::getWidth()
 {
     return fWidth;
