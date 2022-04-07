@@ -19,7 +19,10 @@
 const env = DISTRHO.env, helper = DISTRHO.UIHelper;
 
 // ZamCompX2Plugin.hpp@33
-const PARAMETERS = ['attack', 'release', 'knee', 'ratio', 'threshold', 'makeup', 'slew'];
+const PARAMETERS = [
+    'attack', 'release', 'knee', 'ratio', 'threshold', 'makeup', 'slew',
+    'stereo', 'sidechain', 'gain', 'output-level'
+];
 
 class TeleCompExampleUI extends DISTRHO.UI {
 
@@ -48,7 +51,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
             document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
 
             if (env.dev) {
-                // Directly Open Source mode ;)
+                // Directly Open the Source mode ;)
                 main.innerHTML = 'This program cannot be run in DOS mode';
             }
         }
@@ -64,27 +67,16 @@ class TeleCompExampleUI extends DISTRHO.UI {
         }
     }
 
-    messageChannelOpen() {
-        // Do not let the UI take up all available space in a web browser
-        const main = document.getElementById('main');
-
-        if (env.dev) {
-            main.style.width = '640px';
-            main.style.height = '128px';
-            document.body.style.visibility = 'visible';
-            return;
-        }
-
-        // Could just use the fixed values above, this is for demo purposes.
-        helper.setSizeToUIInitSize(this, main).then(() => {
-            document.body.style.visibility = 'visible';
-        });
-    }
-
     parameterChanged(index, value) {
         const knob = this._getKnob(index);
         if (knob) {
             knob.value = value;
+        }
+
+        // Do not show UI until full initial parameter state has been received
+        this._parameterChangeCount = this._parameterChangeCount || 0;
+        if (++this._parameterChangeCount == PARAMETERS.length) {
+            document.body.style.visibility = 'visible';
         }
     }
 

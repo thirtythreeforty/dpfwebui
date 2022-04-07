@@ -357,6 +357,19 @@ function UIBase() { return class {
 //
 class UIHelper {
 
+    static enableSystemBrowser(ui, el, url) {
+        url = url || el.href;
+
+        ['touchstart', 'click'].forEach((evName) => {
+            el.addEventListener(evName, (ev) => {
+                ui.openSystemWebBrowser(url);
+                if (ev.cancelable) {
+                    ev.preventDefault();
+                }
+            });
+        });
+    }
+
     static enableOfflineModal(ui, opt) {
         opt = opt || {};
         opt.target = opt.target || document.body;
@@ -588,19 +601,6 @@ class UIHelper {
 
         document.body.style.minWidth = w + 'px';
         document.body.style.minHeight = h + 'px';
-    }
-
-    static enableSystemBrowser(ui, el, url) {
-        url = url || el.href;
-
-        ['touchstart', 'click'].forEach((evName) => {
-            el.addEventListener(evName, (ev) => {
-                ui.openSystemWebBrowser(url);
-                if (ev.cancelable) {
-                    ev.preventDefault();
-                }
-            });
-        });
     }
 
 }
