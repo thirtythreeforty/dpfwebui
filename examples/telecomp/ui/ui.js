@@ -65,7 +65,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
     }
 
     _setupForPluginEmbeddedWebView() {
-        // Add a button for displaying a QR coda with the plugin URL
+        // Add a button for displaying a QR code with the plugin URL
         const main = document.getElementById('main');
         main.appendChild(helper.getQRButtonElement(this, {
             fill: '#000',
@@ -77,7 +77,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
     }
 
     _setupForExternalClients() {
-        // Center the user interface
+        // Center the user interface within the web browser viewport
         document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
         const main = document.getElementById('main');
         main.style.borderRadius = '10px';
