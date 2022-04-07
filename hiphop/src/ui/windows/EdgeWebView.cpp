@@ -156,7 +156,7 @@ float EdgeWebView::getMonitorScaleFactor(HWND hWnd)
     }
 
     typedef HRESULT (*PFN_GetProcessDpiAwareness)(HANDLE hProc, PROCESS_DPI_AWARENESS *pValue);
-    typedef HRESULT (*PFN_GetScaleFactorForMonitor)(HMONITOR hMon, DEVICE_SCALE_FACTOR *pScale);
+    typedef HRESULT (*PFN_GetDpiForMonitor)(HMONITOR hMon, MONITOR_DPI_TYPE dpiType, UINT* dpiX, UINT* dpiY);
 
 # if defined(__GNUC__) && (__GNUC__ >= 9)
 #  pragma GCC diagnostic push
@@ -164,15 +164,15 @@ float EdgeWebView::getMonitorScaleFactor(HWND hWnd)
 # endif
     const PFN_GetProcessDpiAwareness GetProcessDpiAwareness
         = (PFN_GetProcessDpiAwareness)GetProcAddress(shcore, "GetProcessDpiAwareness");
-    const PFN_GetScaleFactorForMonitor GetScaleFactorForMonitor
-        = (PFN_GetScaleFactorForMonitor)GetProcAddress(shcore, "GetScaleFactorForMonitor");
+    const PFN_GetDpiForMonitor GetDpiForMonitor
+        = (PFN_GetDpiForMonitor)GetProcAddress(shcore, "GetDpiForMonitor");
 # if defined(__GNUC__) && (__GNUC__ >= 9)
 #  pragma GCC diagnostic pop
 # endif
 
     PROCESS_DPI_AWARENESS dpiAware;
 
-    if ((GetProcessDpiAwareness != nullptr) && (GetScaleFactorForMonitor != nullptr)
+    if ((GetProcessDpiAwareness != nullptr) && (GetDpiForMonitor != nullptr)
             && (SUCCEEDED(GetProcessDpiAwareness(0, &dpiAware)))
             && (dpiAware != PROCESS_DPI_UNAWARE)) {
         HMONITOR hMon;
@@ -182,9 +182,18 @@ float EdgeWebView::getMonitorScaleFactor(HWND hWnd)
             hMon = MonitorFromPoint({ 0, 0 }, MONITOR_DEFAULTTOPRIMARY);
         }
 
-        DEVICE_SCALE_FACTOR scaleFactor;
+        // GetScaleFactorForMonitor() can return incorrect values in some cases,
+        // for example it is 1.4 when running a plugin on REAPER with display
+        // scaling set to 150%. Same plugin on Ableton Live correctly reads 1.5.
+        // https://stackoverflow.com/questions/63692872/is-getscalefactorformonitor-winapi-returning-incorrect-scaling-factor
+        /*DEVICE_SCALE_FACTOR scaleFactor;
         if (SUCCEEDED(GetScaleFactorForMonitor(hMon, &scaleFactor))) {
             k = static_cast<float>(scaleFactor) / 100.f;
+        }*/
+
+        UINT dpiX, dpiY;
+        if (SUCCEEDED(GetDpiForMonitor(hMon, MDT_EFFECTIVE_DPI, &dpiX, &dpiY))) {
+            k = static_cast<float>(dpiX) / 96.f;
         }
     }
 
@@ -201,6 +210,7 @@ float EdgeWebView::getDevicePixelRatio()
     // creating a visual glitch that is less desirable than relying on an
     // imperfect method for determining scaling factor (but at least sync).
     return getMonitorScaleFactor(reinterpret_cast<HWND>(getParent()));
+
 }
 
 void EdgeWebView::realize()
