@@ -36,38 +36,22 @@ class TeleCompExampleUI extends DISTRHO.UI {
         helper.enableSystemBrowser(this, document.querySelector('#credits > a'));
         
         // Setup view to suit environment
-        const main = document.getElementById('main');
-
         if (env.plugin) {
-            main.appendChild(helper.getQRButtonElement(this, {
-                fill: '#000',
-                id: 'qr-button',
-                modal: {
-                    id: 'qr-modal'
-                }
-            }));
+            this._setupForPluginEmbeddedWebView();
         } else {
-            main.style.borderRadius = '10px';
-            document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
-
-            if (env.dev) {
-                // Directly Open the Source mode ;)
-                main.innerHTML = 'This program cannot be run in DOS mode';
+            if (! env.dev) {
+                this._setupForExternalClients();
+            } else {
+                this._setupForDevelopment();
             }
         }
 
-        // Connect knobs to plugin
-        for (let i = 0; i < PARAMETERS.length; i++) {
-            const knob = this._getKnob(i);
-            if (knob) {
-                knob.addEventListener('input', (ev) => {
-                    this.setParameterValue(i, ev.target.value);
-                });
-            }
-        }
+        // Make the knobs control plugin parameters
+        this._addKnobListeners();
     }
 
     parameterChanged(index, value) {
+        // Update knob value
         const knob = this._getKnob(index);
         if (knob) {
             knob.value = value;
@@ -77,6 +61,47 @@ class TeleCompExampleUI extends DISTRHO.UI {
         this._parameterChangeCount = this._parameterChangeCount || 0;
         if (++this._parameterChangeCount == PARAMETERS.length) {
             document.body.style.visibility = 'visible';
+        }
+    }
+
+    _setupForPluginEmbeddedWebView() {
+        // Add a button for displaying a QR coda with the plugin URL
+        const main = document.getElementById('main');
+        main.appendChild(helper.getQRButtonElement(this, {
+            fill: '#000',
+            id: 'qr-button',
+            modal: {
+                id: 'qr-modal'
+            }
+        }));
+    }
+
+    _setupForExternalClients() {
+        // Center the user interface
+        document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
+        const main = document.getElementById('main');
+        main.style.borderRadius = '10px';
+        main.style.width = '640px';
+        main.style.height = '128px';
+        document.body.style.minWidth = main.style.width;
+        document.body.style.minHeight = main.style.height;
+    }
+
+    _setupForDevelopment() {
+        // Directly Open the Source mode ;)
+        const main = document.getElementById('main');
+        main.innerHTML = 'This program cannot be run in DOS mode';
+    }
+
+    _addKnobListeners() {
+        // Some parameters in ZamCompX2 are missing from this example
+        for (let i = 0; i < PARAMETERS.length; i++) {
+            const knob = this._getKnob(i);
+            if (knob) {
+                knob.addEventListener('input', (ev) => {
+                    this.setParameterValue(i, ev.target.value);
+                });
+            }
         }
     }
 

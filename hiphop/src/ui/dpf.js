@@ -590,19 +590,6 @@ class UIHelper {
         opt.target.appendChild(el);
     }
 
-    static async setSizeToUIInitSize(ui, el) {
-        el = el || document.body;
-
-        const w = await ui.getInitWidth();
-        const h = await ui.getInitHeight();
-
-        el.style.width = w + 'px';
-        el.style.height = h + 'px';
-
-        document.body.style.minWidth = w + 'px';
-        document.body.style.minHeight = h + 'px';
-    }
-
 }
 
 //

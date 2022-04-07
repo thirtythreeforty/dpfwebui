@@ -8,8 +8,6 @@ html {
 
 body {
     height: 100%;
-    min-width: 640px;
-    min-height: 128px;
     margin: 0;
     background: #8c8c8c;
 }
@@ -26,8 +24,8 @@ a {
 }
 
 #main {
-    width: 640px;
-    height: 128px;
+    width: 100%;
+    height: 100%;
     position: relative;
     display: flex;
     flex-direction: column;
