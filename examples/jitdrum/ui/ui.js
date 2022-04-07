@@ -16,19 +16,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+const env = DISTRHO.env, helper = DISTRHO.UIHelper;
+
 class JITDrumExampleUI extends DISTRHO.UI {
 
     constructor() {
         super();
 
-        this.addTapListener('note-1', () => this.sendNote(1, 60, 127));
-        this.addTapListener('note-2', () => this.sendNote(1, 72, 127));
-        this.addTapListener('note-3', () => this.sendNote(1, 84, 127));
+        helper.enableOfflineModal(this);
+
+        this._addTapListener('note-1', () => this.sendNote(1, 60, 127));
+        this._addTapListener('note-2', () => this.sendNote(1, 72, 127));
+        this._addTapListener('note-3', () => this.sendNote(1, 84, 127));
+
+        if (env.plugin) {
+            document.body.appendChild(helper.getQRButtonElement(this, {
+                fill: '#fff',
+                id: 'qr-button',
+                modal: {
+                    id: 'qr-modal'
+                }
+            }));
+        }
 
         document.body.style.visibility = 'visible';
     }
 
-    addTapListener(id, listener) {
+    _addTapListener(id, listener) {
         ['touchstart', 'click'].forEach((evName) => {
             document.getElementById(id).addEventListener(evName, (ev) => {
                 listener();

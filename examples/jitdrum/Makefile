@@ -25,6 +25,11 @@ HIPHOP_AS_DSP_PATH = dsp
 HIPHOP_WEB_UI_PATH = ui
 
 # --------------------------------------------------------------
+# Enable Web UI control from devices in the local network
+
+HIPHOP_NETWORK_UI = true
+
+# --------------------------------------------------------------
 # Files to build
 
 FILES_DSP = \

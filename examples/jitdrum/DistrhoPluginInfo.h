@@ -15,6 +15,12 @@
  */
 
 /**
+   Publish UI URL using mDNS/DNS-SD, also known as Zeroconf or Bonjour.
+   @note Requires avahi-publish on Linux / Windows 10 or newer / works out of the box on macOS.
+ */
+#define HIPHOP_UI_ZEROCONF 1
+
+/**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.

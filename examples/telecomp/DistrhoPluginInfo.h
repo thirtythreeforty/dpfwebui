@@ -16,7 +16,7 @@
 
 /**
    Publish UI URL using mDNS/DNS-SD, also known as Zeroconf or Bonjour.
-   @note Requires avahi-publish on Linux, Windows 10 or newer, works out of the box on macOS.
+   @note Requires avahi-publish on Linux / Windows 10 or newer / works out of the box on macOS.
  */
 #define HIPHOP_UI_ZEROCONF 1
 
