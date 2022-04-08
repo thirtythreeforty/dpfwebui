@@ -16,3 +16,5 @@ MACOS
 
 - On REAPER spacebar keystrokes never reach <input> and instead toggle the DAW
   transport. Pressing Return also does not result in expected event 'change'.
+  Selecting "Send all keyboard input to plug-in" fixes the bug (or feature?)
+  https://forum.juce.com/t/space-key-in-texteditor-and-reaper-osx-au-vst/15403/6
