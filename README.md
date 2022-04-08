@@ -27,7 +27,7 @@ their original C++ implementations in DPF.
 * Linux / Mac / Windows
 * Just the powerful basics
 
-¹ May not work on some platform/DAW combinations like Ableton Live for macOS. More details [here](https://github.com/lucianoiam/hiphop/blob/master/doc/bugs.txt).
+¹ Format currently does not work on Ableton Live. More details [here](https://github.com/DISTRHO/DPF/issues/372).
 
 The following language combinations are possible:
 
