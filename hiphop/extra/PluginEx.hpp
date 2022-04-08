@@ -70,7 +70,10 @@ private:
     uint32_t fStateIndexShMemData;
     SharedMemoryImpl fMemory;
 #endif
-
+#if HIPHOP_UI_ZEROCONF
+    uint32_t fStateIndexZeroconfPublish;
+    uint32_t fStateIndexZeroconfName;
+#endif
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEx)
 
 };

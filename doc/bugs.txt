@@ -13,3 +13,6 @@ MACOS
 -----
 
 - VST3 plugins fail to load on Ableton Live, work as expected on REAPER.
+
+- On REAPER spacebar keystrokes never reach <input> and instead toggle the DAW
+  transport. Pressing Return also does not result in expected event 'change'.

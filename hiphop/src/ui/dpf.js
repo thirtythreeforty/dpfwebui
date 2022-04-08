@@ -190,9 +190,23 @@ class UI extends UIBase() {
     }
 
     // Non-DPF method to check whether the plugin is published using Zeroconf
-    // bool Zeroconf::isPublished()
     async isZeroconfPublished() {
-        return this._callAndExpectReply('isZeroconfPublished', true);
+        return this._callAndExpectReply('isZeroconfPublished', false);
+    }
+
+    // Non-DPF method for toggling Zeroconf publish state
+    setZeroconfPublished(published) {
+        this._call('setZeroconfPublished', published);
+    }
+
+     // Non-DPF method for querying Zeroconf service name
+    async getZeroconfName() {
+        return this._callAndExpectReply('getZeroconfName', false);
+    }
+
+    // Non-DPF method for updating Zeroconf service name
+    setZeroconfName(name) {
+        this._call('setZeroconfName', name);
     }
 
     // Non-DPF local getter for approximate network latency in milliseconds
@@ -492,7 +506,7 @@ class UIHelper {
         opt.fontSize = opt.fontSize || opt.size / 8;
 
         const url = await ui.getPublicUrl();
-        const pub = await ui.isZeroconfPublished();
+        const zcName = await ui.getZeroconfName();
 
         const qrSvg = new QRCode({
             content: url,
@@ -521,9 +535,14 @@ class UIHelper {
                         ${url}
                     </a>
                     <br>
-                    <span style="color:#fff">
-                        Zeroconf: ${pub ? 'on' : 'off'}
-                    </span>
+                    <div
+                        style="display: flex;
+                        flex-direction: row;
+                        align-items: center;">
+                        <span style="color:#fff">Name</span>
+                        &nbsp;
+                        <input type="text" value="${zcName}">
+                    </div>
                 </div>
             </div>`;
 
@@ -537,6 +556,14 @@ class UIHelper {
                     ev.preventDefault();
                 }
             });
+        });
+
+        const nameInput = el.querySelector('input');
+        nameInput.addEventListener('focus', _ => ui.setKeyboardFocus(true));
+        nameInput.addEventListener('blur', _ => ui.setKeyboardFocus(false));
+        nameInput.addEventListener('change', _ => {
+            ui.setZeroconfName(nameInput.value);
+            nameInput.blur();
         });
 
         return el;

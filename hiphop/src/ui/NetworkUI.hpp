@@ -54,6 +54,9 @@ private:
     void initHandlers();
     void initServer();
     int  findAvailablePort();
+#if HIPHOP_UI_ZEROCONF
+    void zeroconfStateUpdated();
+#endif
 
     void handleWebServerConnect(Client client) override;
     int  handleWebServerRead(Client client, const char* data) override;
@@ -62,6 +65,8 @@ private:
     WebServer fServer;
 #if HIPHOP_UI_ZEROCONF
     Zeroconf  fZeroconf;
+    bool      fZeroconfPublish;
+    String    fZeroconfName;
 #endif
     typedef std::unordered_map<uint32_t, float> ParameterMap;
     ParameterMap fParameters;

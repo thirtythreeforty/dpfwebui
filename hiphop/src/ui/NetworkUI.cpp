@@ -49,6 +49,9 @@ USE_NAMESPACE_DISTRHO
 NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3)
     : WebUIBase(widthCssPx, heightCssPx, initScaleFactorForVST3)
     , fPort(-1)
+#if HIPHOP_UI_ZEROCONF
+    , fZeroconfPublish(false)
+#endif
 {
     if (isDryRun()) {
         return;
@@ -163,6 +166,18 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         return;
     }
 
+#if HIPHOP_UI_ZEROCONF
+    if (std::strcmp(key, "_zc_publish") == 0) {
+        fZeroconfPublish = std::strcmp(value, "true") == 0;
+        zeroconfStateUpdated();
+        return;
+    } else if (std::strcmp(key, "_zc_name") == 0) {
+        fZeroconfName = value;
+        zeroconfStateUpdated();
+        return;
+    }
+#endif
+
     fStates[key] = value;
     WebUIBase::stateChanged(key, value);
 }
@@ -194,17 +209,38 @@ void NetworkUI::initHandlers()
     });
 #endif
 
-    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getPublicUrl", getPublicUrl()}, context);
+#if HIPHOP_UI_ZEROCONF
+    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()}, context);
     });
 
-    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-#if HIPHOP_UI_ZEROCONF
-        const bool published = fZeroconf.isPublished();
+    fHandler["setZeroconfPublished"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*context*/) {
+        fZeroconfPublish = args[0].getBoolean();
+        setState("_zc_published", fZeroconfPublish ? "true" : "false");
+        zeroconfStateUpdated();
+    });
+
+    fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "getZeroconfName", fZeroconfName}, context);
+    });
+
+    fHandler["setZeroconfName"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*context*/) {
+        fZeroconfName = args[0].getString();
+        setState("_zc_name", fZeroconfName);
+        zeroconfStateUpdated();
+    });
 #else
-        const bool published = false;
+    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "isZeroconfPublished", false}, context);
+    });
+
+    fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "getZeroconfName", ""}, context);
+    });
 #endif
-        postMessage({"UI", "isZeroconfPublished", published}, context);
+
+    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "getPublicUrl", getPublicUrl()}, context);
     });
 
     fHandler["ping"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
@@ -215,9 +251,6 @@ void NetworkUI::initHandlers()
 void NetworkUI::initServer()
 {
     fServer.init(fPort, this);
-#if HIPHOP_UI_ZEROCONF
-    fZeroconf.publish(DISTRHO_PLUGIN_NAME, SERVICE_TYPE, fPort);
-#endif
     d_stderr(LOG_TAG " : server up @ %s", getPublicUrl().buffer());
 }
 
@@ -268,6 +301,17 @@ int NetworkUI::findAvailablePort()
 
     return port;
 }
+
+#if HIPHOP_UI_ZEROCONF
+void NetworkUI::zeroconfStateUpdated()
+{
+    if (fZeroconfPublish && ! fZeroconfName.isEmpty()) {
+        fZeroconf.publish(fZeroconfName, SERVICE_TYPE, fPort);
+    } else {
+        fZeroconf.unpublish();
+    }
+}
+#endif
 
 void NetworkUI::handleWebServerConnect(Client client)
 {

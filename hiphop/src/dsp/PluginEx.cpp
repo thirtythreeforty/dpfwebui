@@ -29,8 +29,13 @@
 #else
 # define COUNT_1 0
 #endif
+#if HIPHOP_UI_ZEROCONF // DistrhoPluginInfo.h
+# define COUNT_2 2
+#else
+# define COUNT_2 0
+#endif
 
-#define INTERNAL_STATE_COUNT (COUNT_0 + COUNT_1)
+#define INTERNAL_STATE_COUNT (COUNT_0 + COUNT_1 + COUNT_2)
 
 PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount)
     : Plugin(parameterCount, programCount, stateCount + INTERNAL_STATE_COUNT)
@@ -42,6 +47,10 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
 #if HIPHOP_SHARED_MEMORY_SIZE
     , fStateIndexShMemFile(stateCount + __COUNTER__)
     , fStateIndexShMemData(stateCount + __COUNTER__)
+#endif
+#if HIPHOP_UI_ZEROCONF
+    , fStateIndexZeroconfPublish(stateCount + __COUNTER__)
+    , fStateIndexZeroconfName(stateCount + __COUNTER__)
 #endif
 {}
 
@@ -74,6 +83,15 @@ void PluginEx::initState(uint32_t index, State& state)
     } else if (index == fStateIndexShMemData) {
         state.key = "_shmem_data";
         state.defaultValue = "";
+    }
+#endif
+#if HIPHOP_UI_ZEROCONF
+    if (index == fStateIndexZeroconfPublish) {
+        state.key = "_zc_publish";
+        state.defaultValue = "true";
+    } else if (index == fStateIndexZeroconfName) {
+        state.key = "_zc_name";
+        state.defaultValue = DISTRHO_PLUGIN_NAME;
     }
 #endif
 }
