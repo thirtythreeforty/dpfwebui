@@ -11,9 +11,9 @@ by extending the standard DPF `Plugin` C++ class or optionally in [AssemblyScrip
 Both the JavaScript `UI` and AssemblyScript `Plugin` classes attempt to mirror
 their original C++ implementations in DPF.
 
-![Screenshot_2021-10-24_18-30-37](https://user-images.githubusercontent.com/930494/138603460-e8407acb-35db-4bcb-b991-7b7cd7e74381.png)
+![Screenshot_2022-04-08_15-44-39](https://user-images.githubusercontent.com/930494/162448635-63766cbe-94a4-48b9-8de0-54e5190d919f.png)
 
-*WebGain example running on Bitwig for Linux*
+*Examples running on Bitwig for Linux*
 
 ****
 
