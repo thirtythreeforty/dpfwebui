@@ -506,6 +506,7 @@ class UIHelper {
         opt.fontSize = opt.fontSize || opt.size / 8;
 
         const url = await ui.getPublicUrl();
+        const zcPublished = await ui.isZeroconfPublished();
         const zcName = await ui.getZeroconfName();
 
         const qrSvg = new QRCode({
@@ -534,14 +535,24 @@ class UIHelper {
                     <a href="#" style="color:#fff">
                         ${url}
                     </a>
-                    <br>
                     <div
-                        style="display: flex;
+                        style="
+                        margin-top: 1em;
+                        display: flex;
                         flex-direction: row;
                         align-items: center;">
                         <span style="color:#fff">Name</span>
                         &nbsp;
-                        <input type="text" value="${zcName}">
+                        <input
+                            style="
+                            background: #000;
+                            color: #fff;
+                            border: solid 1px #fff;
+                            padding: ${opt.fontSize / 6}px ${opt.fontSize / 3}px;
+                            font-family: monospace;
+                            font-size: ${opt.fontSize}px;"
+                            type="text"
+                            value="${zcName}">
                     </div>
                 </div>
             </div>`;
@@ -559,12 +570,18 @@ class UIHelper {
         });
 
         const nameInput = el.querySelector('input');
-        nameInput.addEventListener('focus', _ => ui.setKeyboardFocus(true));
-        nameInput.addEventListener('blur', _ => ui.setKeyboardFocus(false));
-        nameInput.addEventListener('change', _ => {
-            ui.setZeroconfName(nameInput.value);
-            nameInput.blur();
-        });
+
+        if (zcPublished) {
+            nameInput.addEventListener('focus', _ => ui.setKeyboardFocus(true));
+            nameInput.addEventListener('blur', _ => ui.setKeyboardFocus(false));
+            nameInput.addEventListener('change', _ => {
+                ui.setZeroconfName(nameInput.value);
+                nameInput.blur();
+            });
+        } else {
+            const nameBox = nameInput.parentNode;
+            nameBox.parentNode.removeChild(nameBox);
+        }
 
         return el;
     }
