@@ -11,7 +11,7 @@ by extending the standard DPF `Plugin` C++ class or optionally in [AssemblyScrip
 Both the JavaScript `UI` and AssemblyScript `Plugin` classes attempt to mirror
 their original C++ implementations in DPF.
 
-![Screenshot_2022-04-08_15-44-39](https://user-images.githubusercontent.com/930494/162448635-63766cbe-94a4-48b9-8de0-54e5190d919f.png)
+![Screenshot_2022-04-09_13-47-34](https://user-images.githubusercontent.com/930494/162572881-cba8857c-c4d2-444f-8b10-ab27ba86ea30.png)
 
 *Examples running on Bitwig for Linux*
 
@@ -33,12 +33,10 @@ The following language combinations are possible:
 
 DSP|UI |Comments
 ---|---|---------------------------------------------------------------------------
-C++|JS |Web view user interface, see example [webgain](https://github.com/lucianoiam/hiphop/tree/master/examples/webgain).
+C++|JS |Web view user interface, see examples [webgain](https://github.com/lucianoiam/hiphop/tree/master/examples/webgain) and [telecomp](https://github.com/lucianoiam/hiphop/tree/master/examples/telecomp).
 AS |JS |Web view user interface, see example [jitdrum](https://github.com/lucianoiam/hiphop/tree/master/examples/jitdrum).
 AS |C++|DPF Graphics Library (DGL), see example [astone](https://github.com/lucianoiam/hiphop/tree/master/examples/astone).
 C++|C++|No need for this project, use DPF instead.
-
-For a network UI example check [telecomp](https://github.com/lucianoiam/hiphop/tree/master/examples/telecomp)
 
 ### Example JavaScript UI code
 
