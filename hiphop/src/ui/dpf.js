@@ -155,10 +155,10 @@ class UI extends UIBase() {
         // default empty implementation
     }
 
-    // Non-DPF method that writes memory shared with DISTRHO::PluginEx instance
+    // Non-DPF method that writes to memory shared with DISTRHO::PluginEx instance
     // void UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset, uint32_t hints)
     writeSharedMemory(data /*Uint8Array*/, offset /*Number*/, hints /*Number*/) {
-        this._call('writeSharedMemory', base64EncArr(data), offset || 0, hints);
+        this._call('writeSharedMemory', base64EncArr(data), offset || 0, hints || 0);
     }
 
     // Non-DPF callback method that notifies when shared memory is ready to use
@@ -300,7 +300,7 @@ function UIBase() { return class {
         this.postMessage('UI', method, ...args)
     }
 
-    // Helper for supporting synchronous calls using promises
+    // Helper for supporting value returning calls using promises
     _callAndExpectReply(method, cache, ...args) {
         if (cache && (method in this._cache)) {
             return new Promise((resolve, _) => resolve(...this._cache[method]));
