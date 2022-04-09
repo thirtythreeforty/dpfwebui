@@ -31,17 +31,12 @@ float device_pixel_ratio()
     // and the DPI reported by the X server (through xdpyinfo) as a scaling
     // factor to be used. GTK scale factor is also taken in account by Chromium.
 
-    float k = (float)opt_gdk_scale();
+    return xdpi_scale() * gdk_scale() * gdk_dpi_scale();
+}
 
-    if (k == 0) {
-        k = opt_gdk_dpi_scale();
-    
-        if (k == 0) {
-            k = 1.f;
-        }
-    }
-
-    return xft_dpi() / x_display_dpi() * k;
+float xdpi_scale()
+{
+    return xft_dpi() / xdisplay_dpi();
 }
 
 float xft_dpi()
@@ -73,31 +68,39 @@ float xft_dpi()
     return 96.f;
 }
 
-float x_display_dpi()
+float xdisplay_dpi()
 {
     Display* display = XOpenDisplay(NULL);
     return ((float)(DisplayWidth(display, 0)) * 25.4f /*mm to inch*/)
          / ((float)(DisplayWidthMM(display, 0)));
 }
 
-int opt_gdk_scale()
+int gdk_scale()
 {
     const char* s = getenv("GDK_SCALE");
 
     if (s != NULL) {
-        return atoi(s);
+        int k = atoi(s);
+
+        if (k > 0) {
+            return k;
+        }
     }
 
-    return 0;
+    return 1;
 }
 
-float opt_gdk_dpi_scale()
+float gdk_dpi_scale()
 {
     const char* s = getenv("GDK_DPI_SCALE");
 
     if (s != NULL) {
-        return (float)atof(s);
+        float k = (float)atof(s);
+
+        if (k > 0) {
+            return k;
+        }
     }
 
-    return 0;
+    return 1.f;
 }

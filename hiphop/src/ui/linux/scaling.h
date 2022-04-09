@@ -24,10 +24,11 @@ extern "C" {
 #endif
 
 float device_pixel_ratio();
+float xdpi_scale();
 float xft_dpi();
-float x_display_dpi();
-int   opt_gdk_scale();
-float opt_gdk_dpi_scale();
+float xdisplay_dpi();
+int   gdk_scale();
+float gdk_dpi_scale();
 
 #ifdef __cplusplus
 }

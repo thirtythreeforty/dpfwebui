@@ -54,7 +54,7 @@ typedef struct {
     ipc_t*         ipc;
     Display*       display;
     float          pixelRatio;
-    bool           needsZoom;
+    float          zoom;
     msg_win_size_t size;
     Window         container;
     GtkWindow*     window;
@@ -106,21 +106,22 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Depends on GDK_SCALE or GDK_DPI_SCALE, in that order of priority.
+    // Device pixel ratio depends on Xft.dpi, GDK_SCALE and GDK_DPI_SCALE
     ctx.pixelRatio = device_pixel_ratio();
     
-    // GDK_DPI_SCALE can be used for fractional scaling
-    ctx.needsZoom = opt_gdk_dpi_scale() > 0;
+    // GDK_DPI_SCALE is useful for fractional scaling
+    float dpiScale = gdk_dpi_scale();
 
-    if (ctx.needsZoom) {
+    if (dpiScale > 1.f) {
         // WebKitGTK follows GDK_DPI_SCALE environment variable only for scaling
         // text, leaving out images and pixel values. Work around this by
         // unsetting DPI scaling before gtk_init() [following line for clarity]
         unsetenv("GDK_DPI_SCALE");
         // And later setting zoom like done in CefHelper [see realize()]
-        char temp[8];
-        sprintf(temp, "%.2f", 96.f / xft_dpi(ctx.display));
+        ctx.zoom = dpiScale * /*explain this?*/xdpi_scale();
         // Text also follows Xft.dpi, re-set GDK_DPI_SCALE to counteract effect.
+        char temp[8];
+        sprintf(temp, "%.2f", 96.f / xft_dpi());
         setenv("GDK_DPI_SCALE", temp, 1);
     }
 
@@ -179,8 +180,8 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
 
     ctx->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
 
-    if (ctx->needsZoom) {
-        webkit_web_view_set_zoom_level(ctx->webView, ctx->pixelRatio);
+    if (ctx->zoom > 0) {
+        webkit_web_view_set_zoom_level(ctx->webView, ctx->zoom);
     }
 
     g_signal_connect(ctx->webView, "load-changed", G_CALLBACK(web_view_load_changed_cb), ctx);
