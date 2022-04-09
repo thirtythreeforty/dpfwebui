@@ -425,15 +425,13 @@ class UIHelper {
     }
 
     static getOfflineModalElement() {
-        // CSS position for modals should be 'fixed' but that is not working for
-        // WebKitGTK. Use predefined style in contrast to other helper elements.
         const html =
             `<div 
                 style="
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                position: absolute;
+                position: fixed;
                 top: 0;
                 left: 0;
                 width: 100%;

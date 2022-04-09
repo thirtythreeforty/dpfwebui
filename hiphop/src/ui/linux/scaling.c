@@ -20,13 +20,28 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gdk/gdkx.h>
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 
 #include "scaling.h"
 
+int primary_monitor_scale_factor()
+{
+    GdkMonitor* monitor = gdk_display_get_primary_monitor(gdk_display_get_default());
+    return gdk_monitor_get_scale_factor(monitor);
+}
+
 float device_pixel_ratio()
 {
+    // Favor GDK scale factor, like set by Gnome Shell display settings.
+
+    int k = primary_monitor_scale_factor();
+    
+    if (k > 1) {
+        return (float)k;
+    }
+
     // Simulate Chromium device pixel ratio https://wiki.debian.org/MonitorDPI
     // Chromium will use the ratio between Xft/DPI (as set through XSETTINGS)
     // and the DPI reported by the X server (through xdpyinfo) as a scaling

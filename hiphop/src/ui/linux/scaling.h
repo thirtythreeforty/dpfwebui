@@ -23,6 +23,7 @@
 extern "C" {
 #endif
 
+int primary_monitor_scale_factor();
 float device_pixel_ratio();
 float xft_dpi();
 float display_dpi();

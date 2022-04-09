@@ -246,7 +246,8 @@ endif
 endif
 
 ifeq ($(LINUX),true)
-LINK_FLAGS += -lpthread -ldl
+BASE_FLAGS += $(shell $(PKG_CONFIG) --cflags gtk+-3.0)
+LINK_FLAGS += $(shell $(PKG_CONFIG) --libs gtk+-3.0) -lpthread -ldl
 endif
 ifeq ($(MACOS),true)
 LINK_FLAGS += -framework WebKit 
