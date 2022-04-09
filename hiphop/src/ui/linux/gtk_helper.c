@@ -54,6 +54,7 @@ typedef struct {
     ipc_t*         ipc;
     Display*       display;
     float          pixelRatio;
+    bool           needsZoom;
     msg_win_size_t size;
     Window         container;
     GtkWindow*     window;
@@ -105,18 +106,21 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    ctx.pixelRatio = device_pixel_ratio(); // follows current GDK_* vars
-    if (primary_monitor_scale_factor() == 1) {
-        // WebKitGTK uses environment variables only for scaling text, leaving out
-        // images and px values. Not sure that is a bug or a feature but it is
-        // completely useless. Reset GTK scaling after reading env var values and
-        // before gtk_init(), so scaling can be controlled manually later via zoom
-        // like done in CefHelper. window.devicePixelRatio will always return 1.0 !!
-        unsetenv("GDK_SCALE"); // disable non-fractional scaling
-        unsetenv("GDK_DPI_SCALE"); // disable fractional scaling (just for clarity)
-        // Text also follows Xft.dpi, counteract effect by re-setting GDK_DPI_SCALE.
+    // Depends on GDK_SCALE or GDK_DPI_SCALE, in that order of priority.
+    ctx.pixelRatio = device_pixel_ratio();
+    
+    // GDK_DPI_SCALE can be used for fractional scaling
+    ctx.needsZoom = opt_gdk_dpi_scale() > 0;
+
+    if (ctx.needsZoom) {
+        // WebKitGTK follows GDK_DPI_SCALE environment variable only for scaling
+        // text, leaving out images and pixel values. Work around this by
+        // unsetting DPI scaling before gtk_init() [following line for clarity]
+        unsetenv("GDK_DPI_SCALE");
+        // And later setting zoom like done in CefHelper [see realize()]
         char temp[8];
         sprintf(temp, "%.2f", 96.f / xft_dpi(ctx.display));
+        // Text also follows Xft.dpi, re-set GDK_DPI_SCALE to counteract effect.
         setenv("GDK_DPI_SCALE", temp, 1);
     }
 
@@ -174,7 +178,8 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
     gtk_window_resize(ctx->window, width, height);
 
     ctx->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
-    if (primary_monitor_scale_factor() == 1) {
+
+    if (ctx->needsZoom) {
         webkit_web_view_set_zoom_level(ctx->webView, ctx->pixelRatio);
     }
 

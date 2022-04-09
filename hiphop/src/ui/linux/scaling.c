@@ -16,38 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <gdk/gdkx.h>
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 
 #include "scaling.h"
 
-int primary_monitor_scale_factor()
-{
-    GdkMonitor* monitor = gdk_display_get_primary_monitor(gdk_display_get_default());
-    return gdk_monitor_get_scale_factor(monitor);
-}
-
 float device_pixel_ratio()
 {
-    // Favor GDK scale factor, like set by Gnome Shell display settings.
-
-    int k = primary_monitor_scale_factor();
-    
-    if (k > 1) {
-        return (float)k;
-    }
-
     // Simulate Chromium device pixel ratio https://wiki.debian.org/MonitorDPI
     // Chromium will use the ratio between Xft/DPI (as set through XSETTINGS)
     // and the DPI reported by the X server (through xdpyinfo) as a scaling
     // factor to be used. GTK scale factor is also taken in account by Chromium.
 
-    return xft_dpi() / display_dpi() * gtk_env_scale();
+    float k = (float)opt_gdk_scale();
+
+    if (k == 0) {
+        k = opt_gdk_dpi_scale();
+    
+        if (k == 0) {
+            k = 1.f;
+        }
+    }
+
+    return xft_dpi() / x_display_dpi() * k;
 }
 
 float xft_dpi()
@@ -67,7 +61,7 @@ float xft_dpi()
             if (XrmGetResource(sdb, "Xft.dpi", "String", &type, &ret)
                     && (ret.addr != NULL) && (type != NULL)
                     && (strncmp("String", type, 6) == 0)) {
-                float dpi = atof(ret.addr);
+                float dpi = (float)atof(ret.addr);
 
                 if (dpi > 0) {
                     return dpi;
@@ -79,28 +73,31 @@ float xft_dpi()
     return 96.f;
 }
 
-float display_dpi()
+float x_display_dpi()
 {
     Display* display = XOpenDisplay(NULL);
     return ((float)(DisplayWidth(display, 0)) * 25.4f /*mm to inch*/)
          / ((float)(DisplayWidthMM(display, 0)));
 }
 
-float gtk_env_scale()
+int opt_gdk_scale()
 {
     const char* s = getenv("GDK_SCALE");
-    int d;
 
-    if ((s != 0) && (sscanf(s, "%d", &d) == 1)) {
-        return (float)d;
-    } else {
-        s = getenv("GDK_DPI_SCALE");
-        float f;
-
-        if ((s != 0) && (sscanf(s, "%f", &f) == 1)) {
-            return f;
-        }
+    if (s != NULL) {
+        return atoi(s);
     }
 
-    return 1.f;
+    return 0;
+}
+
+float opt_gdk_dpi_scale()
+{
+    const char* s = getenv("GDK_DPI_SCALE");
+
+    if (s != NULL) {
+        return (float)atof(s);
+    }
+
+    return 0;
 }

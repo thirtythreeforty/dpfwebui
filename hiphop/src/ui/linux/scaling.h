@@ -23,11 +23,11 @@
 extern "C" {
 #endif
 
-int primary_monitor_scale_factor();
 float device_pixel_ratio();
 float xft_dpi();
-float display_dpi();
-float gtk_env_scale();
+float x_display_dpi();
+int   opt_gdk_scale();
+float opt_gdk_dpi_scale();
 
 #ifdef __cplusplus
 }
