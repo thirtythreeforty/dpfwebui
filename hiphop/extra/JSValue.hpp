@@ -80,6 +80,14 @@ public:
     // Operations on arrays
     JSValue sliceArray(int start, int end = -1) const noexcept;
 
+    // Arithmetic operators
+    JSValue& operator+=(const JSValue& other);
+    friend JSValue operator+(JSValue lhs, const JSValue& rhs)
+    {
+        lhs += rhs;
+        return lhs;
+    }
+
     // Type casting operators
     operator bool()   const noexcept { return getBoolean(); }
     operator double() const noexcept { return getNumber(); }

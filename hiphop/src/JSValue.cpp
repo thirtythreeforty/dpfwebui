@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <stdexcept>
+
 #include "extra/JSValue.hpp"
 
 USE_NAMESPACE_DISTRHO
@@ -236,6 +238,21 @@ JSValue JSValue::sliceArray(int start, int end) const noexcept
     }
 
     return arr;
+}
+
+JSValue& JSValue::operator+=(const JSValue& other)
+{
+    if (! isArray() || ! other.isArray()) {
+        throw std::runtime_error("Only summing arrays is implemented");
+    }
+
+    const int size = other.getArraySize();
+
+    for (int i = 0; i < size; ++i) {
+        pushArrayItem(other.getArrayItem(i));
+    }
+
+    return *this;
 }
 
 String JSValue::toJSON(bool format) const noexcept
