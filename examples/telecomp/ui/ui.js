@@ -91,6 +91,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
         // Directly Open the Source mode ;)
         const main = document.getElementById('main');
         main.innerHTML = 'This program cannot be run in DOS mode';
+        document.body.style.visibility = 'visible';
     }
 
     _addKnobListeners() {
