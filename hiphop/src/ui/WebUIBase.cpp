@@ -79,6 +79,11 @@ void WebUIBase::onMessageReceived(const JSValue& args, uintptr_t context)
 
 void WebUIBase::handleMessage(const JSValue& args, uintptr_t context)
 {
+    if (! args.isArray()) {
+        d_stderr2("Message must be an array");
+        return;
+    }
+
     if ((args.getArraySize() < 2) || (args[0].getString() != "UI")) {
         onMessageReceived(args, context); // passthrough
         return;
