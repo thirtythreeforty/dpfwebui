@@ -6,8 +6,6 @@ LINUX
 - Broken CSS viewport units (vw/vh/vmin/vmax) on WebKitGTK web view due to
   workaround for https://bugs.webkit.org/show_bug.cgi?id=229227
 
-- window.devicePixelRatio reports fixed value 1.0 on WebKitGTK web view.
-
 
 MACOS
 -----

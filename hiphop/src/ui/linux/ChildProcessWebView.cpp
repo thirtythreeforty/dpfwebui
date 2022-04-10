@@ -119,10 +119,11 @@ ChildProcessWebView::ChildProcessWebView()
     // vw/vh/vmin/vmax units are relative to fixed size when UI is resizable
     setEnvironmentBool("noCSSViewportUnits", true);
 # endif
-    // window.devicePixelRatio returns fixed 1.0 value
-    setEnvironmentBool("noDevicePixelRatio", true);
     // <input type="range"> elements do not react to touches
     setEnvironmentBool("noRangeInputTouch", true);
+    // Overwrite 1.0 with value from device_pixel_ratio()
+    String js = "window.devicePixelRatio=" + String(fDevicePixelRatio) + ";";
+    injectScript(js);
 #endif
 
     fIpc->write(OP_INJECT_SHIMS);

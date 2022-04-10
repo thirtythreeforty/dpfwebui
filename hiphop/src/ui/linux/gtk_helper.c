@@ -62,7 +62,7 @@ typedef struct {
     gboolean       focus;
     Window         focusXWin;
     pthread_t      watchdog;
-    char           injectedJs[65536];
+    char           injectedJs[262144];
 } context_t;
 
 static void realize(context_t *ctx, const msg_win_cfg_t *config);
