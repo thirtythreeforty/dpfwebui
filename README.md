@@ -4,12 +4,7 @@ Hip-Hop / High Performance Hybrid Audio Plugins
 This project builds on top of the [DPF](http://github.com/DISTRHO/DPF) audio
 plugin framework to add web-based UI support. Plugins can leverage JavaScript
 and related tech to provide complex user interfaces on the computer running
-the plugin and over the local network.
-
-DSP runs decoupled from the UI and it is implemented
-by extending the standard DPF `Plugin` C++ class or optionally in [AssemblyScript](https://www.assemblyscript.org).
-Both the JavaScript `UI` and AssemblyScript `Plugin` classes attempt to mirror
-their original C++ implementations in DPF.
+the plugin and optionally over the local network.
 
 ![Screenshot_2022-04-09_13-47-34](https://user-images.githubusercontent.com/930494/162572881-cba8857c-c4d2-444f-8b10-ab27ba86ea30.png)
 
@@ -20,11 +15,11 @@ their original C++ implementations in DPF.
 ### Features
 
 * Based on DISTRHO Plugin Framework (DPF)
-* JS / HTML / CSS / etc for UI development
-* C++ or AssemblyScript for DSP development
+* Same `UI` and `Plugin` interfaces ported to JavaScript and [AssemblyScript](https://www.assemblyscript.org)
+* C++ sill possible for DSP development
+* WebKitGTK or CEF on Linux, WKWebView on macOS, Edge WebView2 on Windows
 * VST2 / VST3[¹] / LV2 plugin formats
-* Network UI support
-* Linux / Mac / Windows
+* Network UI support, for example for remote control using a tablet
 * Just the powerful basics
 
 ¹ Format currently does not work on Ableton Live. More details [here](https://github.com/DISTRHO/DPF/issues/372).
@@ -33,7 +28,7 @@ The following language combinations are possible:
 
 DSP|UI |Comments
 ---|---|---------------------------------------------------------------------------
-C++|JS |Web view user interface, see examples [webgain](https://github.com/lucianoiam/hiphop/tree/master/examples/webgain) and [telecomp](https://github.com/lucianoiam/hiphop/tree/master/examples/telecomp).
+C++|JS |Web view user interface, see examples [telecomp](https://github.com/lucianoiam/hiphop/tree/master/examples/telecomp) and [webgain](https://github.com/lucianoiam/hiphop/tree/master/examples/webgain).
 AS |JS |Web view user interface, see example [jitdrum](https://github.com/lucianoiam/hiphop/tree/master/examples/jitdrum).
 AS |C++|DPF Graphics Library (DGL), see example [astone](https://github.com/lucianoiam/hiphop/tree/master/examples/astone).
 C++|C++|No need for this project, use DPF instead.
@@ -104,7 +99,7 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 ### Quick FAQ
 
 - Why the name? because it is catchy and allows a cheesy but decent enough acronym.
-- Why DPF? mainly because it is lightweight and FOSS friendly.
-- Isn't web bloated? of course firing 128 ✕ one-knob web UIs is not smart.
-- What about AudioUnit? such format development is stalled in DPF, developers
+- Why DPF? among other great things, because it is lightweight and FOSS friendly.
+- Isn't web bloated? it all depends on the use case.
+- Where is AudioUnit? such format development is stalled in DPF, developers
 welcome.
