@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const DISTRHO = (() => {
+window.DISTRHO = (() => {
 
 class UI extends UIBase() {
 
@@ -656,15 +656,19 @@ class UIHelperPrivate {
             document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
         };
 
-        style('*:not(a) { cursor: default; }'); // disable I-beam for text
-        style('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
-        style('body { user-select: none; -webkit-user-select: none; }'); // disable selection
-        style('body { overflow: hidden; }'); // disable overflow
+        // Cannot call style() right away because dpf.js might have been
+        // injected, in such case document.head will be null.
+        document.addEventListener('DOMContentLoaded', (_) => {
+            style('*:not(a) { cursor: default; }'); // disable I-beam for text
+            style('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
+            style('body { user-select: none; -webkit-user-select: none; }'); // disable selection
+            style('body { overflow: hidden; }'); // disable overflow
 
-        if (env.plugin) {
-            // Disable pinch zoom. Might still be desirable for web browsers.
-            style('body { touch-action: pan-x pan-y; }');
-        }
+            if (env.plugin) {
+                // Disable pinch zoom. Might still be desirable for web browsers.
+                style('body { touch-action: pan-x pan-y; }');
+            }
+        });
     }
 
     static buildEnvObject() {

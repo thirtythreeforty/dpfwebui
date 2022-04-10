@@ -15,6 +15,11 @@ NAME = d_webgain
 HIPHOP_PROJECT_VERSION = 1
 
 # --------------------------------------------------------------
+# Automatically inject dpf.js
+
+HIPHOP_INJECT_FRAMEWORK_JS = true
+
+# --------------------------------------------------------------
 # Enable Web UI by setting web files location
 
 HIPHOP_WEB_UI_PATH = ui
