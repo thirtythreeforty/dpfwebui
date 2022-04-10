@@ -33,12 +33,14 @@
 #include "DistrhoPluginInfo.h"
 
 // Web view created with fixed size, see comprehensive explanation in realize().
-// Resizable plugins need DISTRHO_UI_USER_RESIZABLE=1 in DistrhoPluginInfo.h and
-// optionally HIPHOP_GTK_WEBVIEW_WIDTH / HIPHOP_GTK_WEBVIEW_HEIGHT to set the
-// maximum size and also ensure viewport dimensions (vw/vw/vmin/vmax) are
-// relative to some known fixed values. Non-resizable plugins should set
+// Plugins resizable by the host's own resize control need DISTRHO_UI_USER_RESIZABLE=1
+// in DistrhoPluginInfo.h and optionally HIPHOP_GTK_WEBVIEW_WIDTH / HIPHOP_GTK_WEBVIEW_HEIGHT
+// to set the maximum size and also ensure viewport dimensions (vw/vw/vmin/vmax)
+// are relative to some known fixed values. Non-resizable plugins should set
 // DISTRHO_UI_USER_RESIZABLE=0 and the web view will be set to the init UI size.
-#if DISTRHO_UI_USER_RESIZABLE
+// Plugins including a custom resize handle in their UI should set HIPHOP_UI_USER_RESIZABLE=1
+// to set the maximum size otherwise web UI will be fixed to the init size.
+#if DISTRHO_UI_USER_RESIZABLE || HIPHOP_UI_USER_RESIZABLE
 # if !defined(HIPHOP_GTK_WEBVIEW_WIDTH) || !defined(HIPHOP_GTK_WEBVIEW_HEIGHT)
 #  define HIPHOP_GTK_WEBVIEW_WIDTH  1536
 #  define HIPHOP_GTK_WEBVIEW_HEIGHT 1536
@@ -151,7 +153,7 @@ int main(int argc, char* argv[])
 static void realize(context_t *ctx, const msg_win_cfg_t *config)
 {
     // Create a native container window
-#if DISTRHO_UI_USER_RESIZABLE
+#if DISTRHO_UI_USER_RESIZABLE || HIPHOP_UI_USER_RESIZABLE
     int width = HIPHOP_GTK_WEBVIEW_WIDTH;
     int height = HIPHOP_GTK_WEBVIEW_HEIGHT;
 #else
