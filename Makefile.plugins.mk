@@ -443,7 +443,7 @@ $(LWS_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@#git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) $(LWS_GIT_URL)
 	@git -C $(HIPHOP_DEPS_PATH) clone $(LWS_GIT_URL)
-	@git -C $(LWS_PATH) reset --hard ad74b77
+	@git -C $(LWS_PATH) reset --hard 6589037
 endif
 endif
 
