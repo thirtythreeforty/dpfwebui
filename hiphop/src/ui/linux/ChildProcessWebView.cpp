@@ -116,7 +116,7 @@ ChildProcessWebView::ChildProcessWebView()
     setEnvironmentBool("noDragAndDrop", true);
 #if defined(HIPHOP_LINUX_WEBVIEW_GTK)
 # if HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND
-    // vw/vh/vmin/vmax units are not reliable when the UI is allowefd to resize
+    // vw/vh/vmin/vmax units are not reliable when the UI is allowed to resize
     setEnvironmentBool("noCSSViewportUnits", true);
 # endif
     // <input type="range"> elements do not react to touches
