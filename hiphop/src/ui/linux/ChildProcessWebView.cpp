@@ -115,8 +115,8 @@ ChildProcessWebView::ChildProcessWebView()
     // No drag and drop for GTK or CEF
     setEnvironmentBool("noDragAndDrop", true);
 #if defined(HIPHOP_LINUX_WEBVIEW_GTK)
-# if defined DISTRHO_UI_USER_RESIZABLE && (!defined(HIPHOP_GTK_WEBVIEW_WIDTH) || !defined(HIPHOP_GTK_WEBVIEW_HEIGHT))
-    // vw/vh/vmin/vmax units are relative to fixed size when UI is resizable
+# if HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND
+    // vw/vh/vmin/vmax units are not reliable when the UI is allowefd to resize
     setEnvironmentBool("noCSSViewportUnits", true);
 # endif
     // <input type="range"> elements do not react to touches
