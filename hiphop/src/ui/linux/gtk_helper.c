@@ -32,18 +32,20 @@
 
 #include "DistrhoPluginInfo.h"
 
-// Web view created with fixed size, see comprehensive explanation in realize().
-// Plugins resizable by the host's own resize control need DISTRHO_UI_USER_RESIZABLE=1
-// in DistrhoPluginInfo.h and optionally HIPHOP_GTK_WEBVIEW_WIDTH / HIPHOP_GTK_WEBVIEW_HEIGHT
-// to set the maximum size and also ensure viewport dimensions (vw/vw/vmin/vmax)
-// are relative to some known fixed values. Non-resizable plugins should set
-// DISTRHO_UI_USER_RESIZABLE=0 and the web view will be set to the init UI size.
-// Plugins including a custom resize handle in their UI should set HIPHOP_UI_USER_RESIZABLE=1
-// to set the maximum size otherwise web UI will be fixed to the init size.
-#if DISTRHO_UI_USER_RESIZABLE || HIPHOP_UI_USER_RESIZABLE
-# if !defined(HIPHOP_GTK_WEBVIEW_WIDTH) || !defined(HIPHOP_GTK_WEBVIEW_HEIGHT)
-#  define HIPHOP_GTK_WEBVIEW_WIDTH  1536
-#  define HIPHOP_GTK_WEBVIEW_HEIGHT 1536
+// The WebKitGTK web view is created with a fixed size, see comprehensive
+// explanation in realize(). Set HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND=1
+// in DistrhoPluginInfo.h to allow the UI to grow, whether it is by using the
+// host's own resize control (DISTRHO_UI_USER_RESIZABLE=1) or by binding a
+// custom resize control to UI::setSize(). Maximum width and height can be
+// adjusted with HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH/HEIGHT. When the workaround
+// is disabled the web view size will be fixed to the init size. In all cases
+// CSS viewport dimensions (vw/vh/vmin/vmax) will not follow changes in size.
+#if HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND
+# if !defined(HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH)
+#  define HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH  1536
+# endif
+# if !defined(HIPHOP_UI_LINUX_GTK_WEBVIEW_HEIGHT)
+#  define HIPHOP_UI_LINUX_GTK_WEBVIEW_HEIGHT 1536
 # endif
 #endif
 
@@ -153,9 +155,9 @@ int main(int argc, char* argv[])
 static void realize(context_t *ctx, const msg_win_cfg_t *config)
 {
     // Create a native container window
-#if DISTRHO_UI_USER_RESIZABLE || HIPHOP_UI_USER_RESIZABLE
-    int width = HIPHOP_GTK_WEBVIEW_WIDTH;
-    int height = HIPHOP_GTK_WEBVIEW_HEIGHT;
+#if HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND
+    int width = HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH;
+    int height = HIPHOP_UI_LINUX_GTK_WEBVIEW_HEIGHT;
 #else
     int width = config->size.width;
     int height = config->size.height;
