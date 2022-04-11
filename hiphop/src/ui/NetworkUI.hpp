@@ -70,6 +70,7 @@ private:
 #endif
     typedef std::unordered_map<uint32_t, float> ParameterMap;
     ParameterMap fParameters;
+    bool         fParameterLock;
     typedef std::unordered_map<std::string, std::string> StateMap;
     StateMap     fStates;
 

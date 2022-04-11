@@ -52,6 +52,7 @@ NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactorFor
 #if HIPHOP_UI_ZEROCONF
     , fZeroconfPublish(false)
 #endif
+    , fParameterLock(false)
 {
     if (isDryRun()) {
         return;
@@ -142,7 +143,12 @@ void NetworkUI::postMessage(const JSValue& args, uintptr_t context)
 void NetworkUI::parameterChanged(uint32_t index, float value)
 {
     fParameters[index] = value;
-    WebUIBase::parameterChanged(index, value);
+    
+    if (fParameterLock) {
+        fParameterLock = false;
+    } else {
+        WebUIBase::parameterChanged(index, value);
+    }
 }
 
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -188,8 +194,11 @@ void NetworkUI::initHandlers()
     // Broadcast parameter updates to all clients except the originating one
     const MessageHandler& parameterHandlerSuper = fHandler["setParameterValue"].second;
     fHandler["setParameterValue"] = std::make_pair(2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t context) {
+        fParameterLock = true; // avoid echo
         parameterHandlerSuper(args, context);
-        fParameters[static_cast<uint32_t>(args[0].getNumber())] = static_cast<float>(args[1].getNumber());
+        const uint32_t index = static_cast<uint32_t>(args[0].getNumber());
+        const float value = static_cast<float>(args[1].getNumber());
+        fParameters[index] = value;
         JSValue msg = JSValue({"UI", "parameterChanged"}) + args;
         fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
     });
@@ -199,7 +208,9 @@ void NetworkUI::initHandlers()
     const MessageHandler& stateHandlerSuper = fHandler["setState"].second;
     fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t context) {
         stateHandlerSuper(args, context);
-        fStates[args[0].getString().buffer()] = args[1].getString().buffer();
+        const char* key = args[0].getString().buffer();
+        const char* value = args[1].getString().buffer();
+        fStates[key] = value;
         JSValue msg = JSValue({"UI", "stateChanged"}) + args;
         fServer.broadcast(args.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
     });
