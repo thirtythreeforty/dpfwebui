@@ -111,16 +111,16 @@ class UI extends UIBase() {
         }
     }
 
-    // Non-DPF method that returns the UI width at initialization time
-    // uint WebViewUI::getUnscaledInitWidth()
-    async getInitWidth() {
-        return this._callAndExpectReply('getInitWidth', true);
+    // Non-DPF method that returns the UI width in CSS px at initialization time
+    // uint WebViewUI::getInitWidthCSS()
+    async getInitWidthCSS() {
+        return this._callAndExpectReply('getInitWidthCSS', true);
     }
 
-    // Non-DPF method that returns the UI height at initialization time
-    // uint WebViewUI::getUnscaledInitHeight()
-    async getInitHeight() {
-        return this._callAndExpectReply('getInitHeight', true);
+    // Non-DPF method that returns the UI height in CSS px at initialization time
+    // uint WebViewUI::getInitHeightCSS()
+    async getInitHeightCSS() {
+        return this._callAndExpectReply('getInitHeightCSS', true);
     }
 
     // Non-DPF method for sending a message to the host

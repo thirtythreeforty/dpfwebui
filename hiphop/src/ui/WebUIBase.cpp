@@ -24,8 +24,8 @@ USE_NAMESPACE_DISTRHO
 
 WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3)
     : UIEx(initScaleFactorForVST3 * widthCssPx, initScaleFactorForVST3 * heightCssPx)
-    , fUnscaledInitWidth(widthCssPx)
-    , fUnscaledInitHeight(heightCssPx)
+    , fInitWidthCssPx(widthCssPx)
+    , fInitHeightCssPx(heightCssPx)
 {
     initHandlers();
 }
@@ -110,12 +110,12 @@ void WebUIBase::handleMessage(const JSValue& args, uintptr_t context)
 
 void WebUIBase::initHandlers()
 {
-    fHandler["getInitWidth"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getInitWidth", static_cast<double>(getUnscaledInitWidth())}, context);
+    fHandler["getInitWidthCSS"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "getInitWidthCSS", static_cast<double>(getInitWidthCSS())}, context);
     });
 
-    fHandler["getInitHeight"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getInitHeight", static_cast<double>(getUnscaledInitHeight())}, context);
+    fHandler["getInitHeightCSS"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "getInitHeightCSS", static_cast<double>(getInitHeightCSS())}, context);
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT

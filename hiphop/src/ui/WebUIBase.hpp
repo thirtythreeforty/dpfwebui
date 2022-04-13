@@ -40,8 +40,8 @@ protected:
 
     bool isDryRun();
     
-    uint getUnscaledInitWidth() const { return fUnscaledInitWidth; }
-    uint getUnscaledInitHeight() const { return fUnscaledInitHeight; }
+    uint getInitWidthCSS() const { return fInitWidthCssPx; }
+    uint getInitHeightCSS() const { return fInitHeightCssPx; }
 
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
@@ -69,8 +69,8 @@ protected:
 private:
     void initHandlers();
 
-    uint fUnscaledInitWidth;
-    uint fUnscaledInitHeight;
+    uint fInitWidthCssPx;
+    uint fInitHeightCssPx;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 

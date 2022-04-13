@@ -83,8 +83,8 @@ void WebViewUI::setWebView(WebViewBase* webView)
     // displays, known as Retina or HiDPI. WebViewBase::getDevicePixelRatio()
     // needs a parent window to be set because scaling can vary across displays.
     const float k = fWebView->getDevicePixelRatio();
-    const uint width = static_cast<uint>(k * static_cast<float>(getUnscaledInitWidth()));
-    const uint height = static_cast<uint>(k * static_cast<float>(getUnscaledInitHeight()));
+    const uint width = static_cast<uint>(k * static_cast<float>(getInitWidthCSS()));
+    const uint height = static_cast<uint>(k * static_cast<float>(getInitHeightCSS()));
     fWebView->setSize(width, height);
     fWebView->realize();
 
