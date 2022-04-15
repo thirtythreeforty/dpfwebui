@@ -50,7 +50,10 @@
 #endif
 
 // CSS touch-action based approach seems to be failing for WebKitGTK. Looks like a bug.
-#define JS_DISABLE_PINCH_ZOOM_WORKAROUND "if (document.body.children.length > 0) document.body.children[0].addEventListener('touchstart', (ev) => { ev.preventDefault(); });"
+#define JS_DISABLE_PINCH_ZOOM_WORKAROUND "if (document.body.children.length > 0) " \
+                                         "  document.body.children[0].addEventListener('touchstart', (ev) => {" \
+                                         "    ev.preventDefault();" \
+                                         "  });"
 
 #define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.webkit.messageHandlers.host.postMessage(args);"
 

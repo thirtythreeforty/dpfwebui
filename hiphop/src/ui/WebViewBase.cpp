@@ -27,10 +27,10 @@
                                "};" \
                                "window.host.env = {};"
 #define JS_CREATE_CONSOLE  "window.console = {" \
-                           "   log  : (s) => window.host.postMessage(['console', 'log'  , String(s)])," \
-                           "   info : (s) => window.host.postMessage(['console', 'info' , String(s)])," \
-                           "   warn : (s) => window.host.postMessage(['console', 'warn' , String(s)])," \
-                           "   error: (s) => window.host.postMessage(['console', 'error', String(s)])" \
+                           "  log  : (s) => window.host.postMessage(['console', 'log'  , String(s)])," \
+                           "  info : (s) => window.host.postMessage(['console', 'info' , String(s)])," \
+                           "  warn : (s) => window.host.postMessage(['console', 'warn' , String(s)])," \
+                           "  error: (s) => window.host.postMessage(['console', 'error', String(s)])" \
                            "};"
 
 /**

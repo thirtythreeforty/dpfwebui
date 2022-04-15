@@ -33,7 +33,7 @@ START_NAMESPACE_DISTRHO
 #if defined(HIPHOP_NETWORK_UI)
 typedef NetworkUI WebViewUIBase; // https:// + WebSockets messaging
 #else
-typedef WebUIBase WebViewUIBase; // file://  + Local web view messaging
+typedef WebUIBase WebViewUIBase; // file://  + Native interface [postMessage()]
 #endif
 
 class WebViewUI : public WebViewUIBase, private WebViewEventHandler
