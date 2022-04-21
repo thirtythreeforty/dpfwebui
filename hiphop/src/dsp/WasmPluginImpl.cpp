@@ -338,10 +338,6 @@ void WasmPlugin::deactivate()
         for (int i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; i++) {
             memcpy(outputs[i], audioBlock + i * frames, frames * 4);
         }
-
-        // Run AS GC on each _run() call for more deterministic memory mgmt.
-        // This can help preventing dropouts when running at small buffer sizes.
-        fRuntime->callFunction("__collect");
     } catch (const std::exception& ex) {
         //d_stderr2(ex.what());
     }

@@ -178,6 +178,10 @@ export function run(frames: u32, midiEventCount: u32): void {
 
     // Count arguments are redundant, they can be inferred from arrays length.
     pluginInstance.run(inputs, outputs, midiEvents)
+
+    // Run AS GC on each _run() call for more deterministic memory mgmt.
+    // This can help preventing dropouts when running at small buffer sizes.
+    __collect();
 }
 
 // Number of inputs or outputs does not change during runtime so it makes sense
