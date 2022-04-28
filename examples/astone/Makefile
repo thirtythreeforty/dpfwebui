@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = d_astone
+NAME = astone
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names

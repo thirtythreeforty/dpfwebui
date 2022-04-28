@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = d_hotswap
+NAME = hotswap
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names

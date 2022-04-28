@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = d_webgain
+NAME = webgain
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names

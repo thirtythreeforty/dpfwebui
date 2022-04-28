@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = d_telecomp
+NAME = telecomp
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names

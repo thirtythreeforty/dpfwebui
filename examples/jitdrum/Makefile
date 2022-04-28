@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = d_jitdrum
+NAME = jitdrum
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names
