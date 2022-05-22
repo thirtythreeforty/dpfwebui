@@ -167,6 +167,9 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
     fLib.wasm_module_imports(fModule, &importTypes);
     wasm_extern_vec_t imports;
     fLib.wasm_extern_vec_new_uninitialized(&imports, importTypes.size);
+#if defined(HIPHOP_WASM_RUNTIME_WAMR)
+    imports.num_elems = imports.size;
+#endif
 
     std::unordered_map<std::string, int> importIndex;
     bool moduleNeedsWasi = false;
@@ -227,7 +230,7 @@ void WasmRuntime::createInstance(WasmFunctionMap hostFunctions)
         fLib.wasm_valtype_vec_delete(&params);
     }
 
-    // Create instance and start WASI
+    // Create instance and start WASI if needed
 
     fInstance = fLib.wasm_instance_new(fStore, fModule, &imports, nullptr);
 

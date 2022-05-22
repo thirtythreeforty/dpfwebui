@@ -408,7 +408,7 @@ endif
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
 LWS_GIT_URL = https://github.com/warmcat/libwebsockets
-#LWS_GIT_TAG = set this when new release includes b61174b (#2564) and 843ee10
+LWS_GIT_TAG = v4.3.2
 LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
 LWS_BUILD_PATH = ${LWS_PATH}/build
 LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
@@ -441,9 +441,7 @@ $(LWS_LIB_PATH): $(LWS_PATH)
 
 $(LWS_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
-	@#git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) $(LWS_GIT_URL)
-	@git -C $(HIPHOP_DEPS_PATH) clone $(LWS_GIT_URL)
-	@git -C $(LWS_PATH) reset --hard 6589037
+	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) $(LWS_GIT_URL)
 endif
 endif
 
@@ -515,7 +513,7 @@ endif
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
-#WAMR_GIT_TAG = set this when new release includes 21d8913 (#1000), c8804c1 (#1013), 91adebd (#1046)
+WAMR_GIT_TAG = WAMR-05-18-2022
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
 WAMR_BUILD_PATH = ${WAMR_PATH}/build-$(HIPHOP_WASM_MODE)
 WAMR_LIB_PATH = $(WAMR_BUILD_PATH)/libvmlib.a
@@ -585,9 +583,7 @@ $(WAMR_LLVM_LIB_PATH): $(WAMR_REPO)
 
 $(WAMR_REPO):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
-	@#git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
-	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL)
-	@git -C $(WAMR_PATH) reset --hard 5264ce4
+	@git -C $(HIPHOP_DEPS_PATH) clone $(WAMR_GIT_URL) --branch $(WAMR_GIT_TAG) --depth 1
 endif
 endif
 
