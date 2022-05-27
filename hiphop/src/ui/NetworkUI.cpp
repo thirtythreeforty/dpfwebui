@@ -92,7 +92,7 @@ String NetworkUI::getLocalUrl()
 
 String NetworkUI::getPublicUrl()
 {
-    String url;
+    String url = getLocalUrl();
 
     const int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd == -1) {
@@ -116,7 +116,7 @@ String NetworkUI::getPublicUrl()
             d_stderr(LOG_TAG " : failed getsockname(), errno %d", errno);
         }
     } else {
-        d_stderr(LOG_TAG " : failed connect(), errno %d", errno);
+        //d_stderr(LOG_TAG " : failed connect(), errno %d", errno);
     }
 
     if (CLOSE_SOCKET(sockfd) == -1) {
