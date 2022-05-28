@@ -57,6 +57,7 @@ public:
     void send(const char* data, Client client);
     void broadcast(const char* data, Client exclude = nullptr);
     void serve();
+    void cancel();
 
 private:
     static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,

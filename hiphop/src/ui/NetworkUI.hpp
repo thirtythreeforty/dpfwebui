@@ -22,6 +22,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "distrho/extra/Thread.hpp"
+
 #include "WebUIBase.hpp"
 #include "WebServer.hpp"
 #if HIPHOP_UI_ZEROCONF
@@ -30,6 +32,8 @@
 #include "extra/JSValue.hpp"
 
 START_NAMESPACE_DISTRHO
+
+class WebServerThread;
 
 class NetworkUI : public WebUIBase, public WebServerHandler
 {
@@ -41,8 +45,6 @@ public:
     String getPublicUrl();
 
 protected:
-    void uiIdle() override;
-
     void postMessage(const JSValue& args, uintptr_t context) override;
 
     void parameterChanged(uint32_t index, float value) override;
@@ -61,8 +63,9 @@ private:
     void handleWebServerConnect(Client client) override;
     int  handleWebServerRead(Client client, const char* data) override;
 
-    int       fPort;
-    WebServer fServer;
+    int              fPort;
+    WebServer        fServer;
+    WebServerThread* fThread;
 #if HIPHOP_UI_ZEROCONF
     Zeroconf  fZeroconf;
     bool      fZeroconfPublish;
@@ -76,6 +79,21 @@ private:
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NetworkUI)
 
+};
+
+class WebServerThread : public Thread
+{
+public:
+    WebServerThread(WebServer* server) noexcept;
+    virtual ~WebServerThread() noexcept;
+
+    void run() noexcept override;
+
+private:
+    WebServer* fServer;
+    bool       fRun;
+
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebServerThread)
 };
 
 END_NAMESPACE_DISTRHO

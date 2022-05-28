@@ -131,9 +131,12 @@ void WebServer::broadcast(const char* data, Client exclude)
 
 void WebServer::serve()
 {
-    // Avoid blocking on some platforms by passing timeout=-1
-    // https://github.com/warmcat/libwebsockets/issues/1735
-    lws_service(fContext, -1);
+    lws_service(fContext, 0);
+}
+
+void WebServer::cancel()
+{
+    lws_cancel_service(fContext);
 }
 
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,

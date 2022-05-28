@@ -49,6 +49,7 @@ USE_NAMESPACE_DISTRHO
 NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3)
     : WebUIBase(widthCssPx, heightCssPx, initScaleFactorForVST3)
     , fPort(-1)
+    , fThread(nullptr)
 #if HIPHOP_UI_ZEROCONF
     , fZeroconfPublish(false)
 #endif
@@ -80,6 +81,10 @@ NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initScaleFactorFor
 
 NetworkUI::~NetworkUI()
 {
+    if (fThread != nullptr) {
+        delete fThread;
+        fThread = nullptr;
+    }
 #if defined(DISTRHO_OS_WINDOWS)
     WSACleanup();
 #endif
@@ -124,11 +129,6 @@ String NetworkUI::getPublicUrl()
     }
 
     return url;
-}
-
-void NetworkUI::uiIdle()
-{
-    fServer.serve();
 }
 
 void NetworkUI::postMessage(const JSValue& args, uintptr_t context)
@@ -258,6 +258,7 @@ void NetworkUI::initHandlers()
 void NetworkUI::initServer()
 {
     fServer.init(fPort, this);
+    fThread = new WebServerThread(&fServer);
     d_stderr(LOG_TAG " : server up @ %s", getPublicUrl().buffer());
 }
 
@@ -335,4 +336,25 @@ int NetworkUI::handleWebServerRead(Client client, const char* data)
 {
     handleMessage(JSValue::fromJSON(data), reinterpret_cast<uintptr_t>(client));
     return 0;
+}
+
+WebServerThread::WebServerThread(WebServer* server) noexcept
+    : fServer(server)
+    , fRun(true)
+{
+    startThread();
+}
+
+WebServerThread::~WebServerThread() noexcept
+{
+    fRun = false;
+    fServer->cancel();
+    stopThread(-1 /*wait forever*/);
+}
+
+void WebServerThread::run() noexcept
+{
+    while (fRun) {
+        fServer->serve();
+    }
 }
