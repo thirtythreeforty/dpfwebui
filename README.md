@@ -95,11 +95,3 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 ### Plugin implementations
 
 [Castello Reverb](https://github.com/lucianoiam/castello)
-
-### Quick FAQ
-
-- Why the name? because it is catchy and allows a cheesy but decent enough acronym.
-- Why DPF? among other great things, because it is lightweight and FOSS friendly.
-- Isn't web bloated? it all depends on the use case.
-- Where is AudioUnit? such format development is stalled in DPF, developers
-welcome.

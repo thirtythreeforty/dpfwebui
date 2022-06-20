@@ -1,6 +1,5 @@
-GENERAL
--------
-
 - Map alert(), confirm(), prompt() to native dialogs
+
 - Profile everything for memory leaks
+
 - Complete standalone application support

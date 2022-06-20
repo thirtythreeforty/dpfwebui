@@ -10,71 +10,12 @@ runtime library from https://developer.microsoft.com/microsoft-edge/webview2.
 Windows 11 already ships with this library.
 
 Usage of JS frameworks is up to the developer. No web equivalent versions of the
-DPF/DGL widgets are provided. There are some options available:
+DPF/DGL widgets are provided. These are some available solutions:
 
+- Look for libraries, for example [here](https://github.com/lucianoiam/guinda) and [here](https://github.com/DeutscheSoft/toolkit)
 - Rely on stock HTML elements plus styling
-- Browse the web for available toolkits like this one [here](https://github.com/DeutscheSoft/toolkit)
-- Try my widgets library [here](https://github.com/lucianoiam/guinda). It
-is incomplete and still under development as of Aug '21.
-- Roll your own widgets. HTML5 offers plenty of tools, being SVG and canvas
-worth looking into. Even a quick combination of images, stylesheets and little
-code can do the job.
-
-### Integration with the underlying C++ framework (DPF)
-
-The project provides a basic C++ wrapper around the Wasm standardized C API,
-implemented in `WasmRuntime.cpp`. It provides some methods to read and write
-global variables, and for enabling cross-language function calls. This can be
-useful for creating new hybrid features.
-
-For the UI a small JS wrapper around the C++ `DISTRHO::UI` class is provided
-for convenience. New integrations between C++ and JS code can be easily built
-around a single function `window.host.postMessage()` that wraps the
-platform specific calls:
-
-Linux CEF:
-`window.hostPostMessage()`
-
-Linux GTK, Mac:
-`window.webkit.messageHandlers.host.postMessage()`
-
-Windows:
-`window.chrome.webview.postMessage()`
-
-In an attempt to keep the interface symmetrical and generic, `window.host`
-is created as a `EventTarget` instance that can listened for events named
-'message' on the JS side. This allows C++ to send messages by running the
-following JS code:
-
-`window.host.dispatchEvent(new CustomEvent('message',{detail:args}))`
-
-The `DISTRHO::WebUI` and JS `DISTRHO.UI` classes use the above mechanism
-to map some useful plugin methods, like the ones shown in the first code example
-of the main README.
-
-The bridge interface in a nutshell:
-
-```
-// Send from JS to C++
-
-window.host.postMessage([...]);
-
-void WebUI::onMessageReceived(const JSValue& args, uintptr_t source) {
-
-   // Receive in C++ from JS
-
-}
-
-// Send from C++ to JS
-
-WebUI::postMessage({...});
-
-window.host.addMessageListener((args) => {
-    
-    // Receive in JS from C++
-
-});
-```
+- Create custom widgets, HTML offers plenty of tools like SVG, canvas and bitmap
+images.
 
 ### AssemblyScript DSP
 
@@ -88,7 +29,7 @@ for running precompiled AssemblyScript code at near native performance.
 It is worth noting that code running on top of the Wasm runtime and the web view
 are completely separated entities that only communicate through a key/value
 pairs interface provided by DPF (states) or shared memory. Completely decoupled
-DSP and UI is enforced by DPF and this project builds upon this design. The Wasm
+DSP and UI is enforced by DPF and this project builds upon that design. The Wasm
 runtime runs in parallel to the web view, and the latter will be loaded or
 unloaded depending on the UI visibility state. There is no continuously running
 hidden web view or similar hacks involved.
