@@ -35,13 +35,17 @@ public:
     WebUIBase(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3);
     virtual ~WebUIBase() {}
 
-protected:
-    void uiIdle() override {}
+    typedef std::function<void()> UiBlock;
 
+    void queue(const UiBlock& block);
+
+protected:
     bool isDryRun();
     
     uint getInitWidthCSS() const { return fInitWidthCssPx; }
     uint getInitHeightCSS() const { return fInitHeightCssPx; }
+
+    void uiIdle() override;
 
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
@@ -69,8 +73,10 @@ protected:
 private:
     void initHandlers();
 
-    uint fInitWidthCssPx;
-    uint fInitHeightCssPx;
+    uint    fInitWidthCssPx;
+    uint    fInitHeightCssPx;
+    bool    fUiBlockQueued;
+    UiBlock fUiBlock;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 

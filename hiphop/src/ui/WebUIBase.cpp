@@ -26,8 +26,15 @@ WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initScaleFactorFor
     : UIEx(initScaleFactorForVST3 * widthCssPx, initScaleFactorForVST3 * heightCssPx)
     , fInitWidthCssPx(widthCssPx)
     , fInitHeightCssPx(heightCssPx)
+    , fUiBlockQueued(false)
 {
     initHandlers();
+}
+
+void WebUIBase::queue(const UiBlock& block)
+{
+    fUiBlock = block;
+    fUiBlockQueued = true;
 }
 
 bool WebUIBase::isDryRun()
@@ -35,6 +42,16 @@ bool WebUIBase::isDryRun()
     // When running as a plugin the UI ctor/dtor can be repeatedly called with
     // no parent window available, avoid allocating resources in such cases.
     return ! isStandalone() && (getParentWindowHandle() == 0);
+}
+
+void WebUIBase::uiIdle()
+{
+    UIEx::uiIdle();
+
+    if (fUiBlockQueued) {
+        fUiBlockQueued = false;
+        fUiBlock();
+    }
 }
 
 void WebUIBase::parameterChanged(uint32_t index, float value)

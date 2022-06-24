@@ -43,10 +43,6 @@ public:
         float initScaleFactorForVST3);
     virtual ~WebViewUI();
 
-    typedef std::function<void()> UiBlock;
-
-    void queue(const UiBlock& block);
-
     uintptr_t getPlatformWindow() const { return fPlatformWindow; }
 
     WebViewBase* getWebView() { return fWebView; }
@@ -94,10 +90,8 @@ private:
 
     uint32_t      fBackgroundColor;
     bool          fJsUiReady;
-    bool          fUiBlockQueued;
     uintptr_t     fPlatformWindow;
     WebViewBase*  fWebView;
-    UiBlock       fUiBlock;
     MessageBuffer fMessageBuffer;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebViewUI)

@@ -194,8 +194,10 @@ void NetworkUI::initHandlers()
     // Broadcast parameter updates to all clients except the originating one
     const MessageHandler& parameterHandlerSuper = fHandler["setParameterValue"].second;
     fHandler["setParameterValue"] = std::make_pair(2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t context) {
-        fParameterLock = true; // avoid echo
-        parameterHandlerSuper(args, context);
+        queue([this, parameterHandlerSuper, args, context] {
+            fParameterLock = true; // avoid echo
+            parameterHandlerSuper(args, context);
+        });
         const uint32_t index = static_cast<uint32_t>(args[0].getNumber());
         const float value = static_cast<float>(args[1].getNumber());
         fParameters[index] = value;
@@ -207,7 +209,9 @@ void NetworkUI::initHandlers()
     // Ditto for states
     const MessageHandler& stateHandlerSuper = fHandler["setState"].second;
     fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t context) {
-        stateHandlerSuper(args, context);
+        queue([stateHandlerSuper, args, context] {
+            stateHandlerSuper(args, context);
+        });
         const char* key = args[0].getString().buffer();
         const char* value = args[1].getString().buffer();
         fStates[key] = value;

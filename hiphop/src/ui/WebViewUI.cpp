@@ -37,7 +37,6 @@ WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor
     : WebViewUIBase(widthCssPx, heightCssPx, initScaleFactorForVST3)
     , fBackgroundColor(backgroundColor)
     , fJsUiReady(false)
-    , fUiBlockQueued(false)
     , fPlatformWindow(0)
     , fWebView(nullptr)
 {
@@ -50,12 +49,6 @@ WebViewUI::~WebViewUI()
         fWebView->setEventHandler(nullptr);
         delete fWebView;
     }
-}
-
-void WebViewUI::queue(const UiBlock& block)
-{
-    fUiBlock = block;
-    fUiBlockQueued = true;
 }
 
 void WebViewUI::setWebView(WebViewBase* webView)
@@ -152,11 +145,6 @@ void WebViewUI::postMessage(const JSValue& args, uintptr_t /*context*/)
 void WebViewUI::uiIdle()
 {
     WebViewUIBase::uiIdle();
-    
-    if (fUiBlockQueued) {
-        fUiBlockQueued = false;
-        fUiBlock();
-    }
 
     if (isStandalone()) {
         processStandaloneEvents();

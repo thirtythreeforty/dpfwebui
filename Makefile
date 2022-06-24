@@ -2,7 +2,7 @@
 # Author:   oss@lucianoiam.com
 
 examples: webui
-	@(echo '\033[0;33mHey!\033[0m run make wasm to include the AssemblyScript examples')
+	@(echo '\033[0;33mHeya!\033[0m run make wasm to include the AssemblyScript examples')
 
 webui:
 	@make -C examples/webgain
