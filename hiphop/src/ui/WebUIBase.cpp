@@ -116,9 +116,10 @@ void WebUIBase::handleMessage(const JSValue& args, uintptr_t context)
     const JSValue handlerArgs = args.sliceArray(2);
     
     ArgumentCountAndMessageHandler handler = fHandler[key.buffer()];
+    const int argsCount = handlerArgs.getArraySize();
 
-    if (handler.first != handlerArgs.getArraySize()) {
-        d_stderr2("Incorrect WebUI method argument count");
+    if (argsCount < handler.first) {
+        d_stderr2("Missing WebUI method arguments (%d < %d)", argsCount, handler.first);
         return;
     }
 

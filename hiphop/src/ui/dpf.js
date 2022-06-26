@@ -139,6 +139,11 @@ class UI extends UIBase() {
         }
     }
 
+    // Non-DPF method for sending a message to all connected network clients
+    broadcastMessage(...args) {
+        this.postMessage('UI', 'broadcast', ...args)
+    }
+
     // Non-DPF callback method for receiving messages from the host
     // void WebUIBase::onMessageReceived(const JSValue& args)
     messageReceived(args) {

@@ -220,6 +220,12 @@ void NetworkUI::initHandlers()
     });
 #endif
 
+    // Custom method for exchanging UI-only messages between clients
+    fHandler["broadcast"] = std::make_pair(1, [this](const JSValue& args, uintptr_t context) {
+        JSValue msg = JSValue({"UI", "messageReceived"}) + args;
+        fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
+    });
+
 #if HIPHOP_UI_ZEROCONF
     fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
         postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()}, context);
