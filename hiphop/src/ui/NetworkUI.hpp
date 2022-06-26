@@ -45,6 +45,7 @@ public:
     String getPublicUrl();
 
 protected:
+    void broadcastMessage(const JSValue& args, Client origin = nullptr);
     void postMessage(const JSValue& args, uintptr_t context) override;
 
     void parameterChanged(uint32_t index, float value) override;

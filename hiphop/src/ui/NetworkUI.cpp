@@ -131,6 +131,11 @@ String NetworkUI::getPublicUrl()
     return url;
 }
 
+void NetworkUI::broadcastMessage(const JSValue& args, Client origin)
+{
+    fServer.broadcast(args.toJSON(), /*exclude*/origin);
+}
+
 void NetworkUI::postMessage(const JSValue& args, uintptr_t context)
 {
     if (context == 0) {
@@ -223,7 +228,7 @@ void NetworkUI::initHandlers()
     // Custom method for exchanging UI-only messages between clients
     fHandler["broadcast"] = std::make_pair(1, [this](const JSValue& args, uintptr_t context) {
         JSValue msg = JSValue({"UI", "messageReceived"}) + args;
-        fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
+        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(context));
     });
 
 #if HIPHOP_UI_ZEROCONF

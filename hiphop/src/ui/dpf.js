@@ -140,6 +140,7 @@ class UI extends UIBase() {
     }
 
     // Non-DPF method for sending a message to all connected network clients
+    // void NetworkUI::broadcastMessage(const JSValue& args, Client origin)
     broadcastMessage(...args) {
         this.postMessage('UI', 'broadcast', ...args)
     }
