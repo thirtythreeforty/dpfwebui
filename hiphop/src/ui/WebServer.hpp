@@ -56,7 +56,7 @@ public:
     void injectScript(const String& script);
     void send(const char* data, Client client);
     void broadcast(const char* data, Client exclude = nullptr);
-    void serve(bool block = false);
+    void serve(bool block = true);
     void cancel();
 
 private:
