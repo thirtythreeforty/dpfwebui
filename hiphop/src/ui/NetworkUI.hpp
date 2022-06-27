@@ -44,6 +44,8 @@ public:
     String getLocalUrl();
     String getPublicUrl();
 
+    void setState(const char* key, const char* value);
+
 protected:
     void broadcastMessage(const JSValue& args, Client origin = nullptr);
     void postMessage(const JSValue& args, uintptr_t context) override;

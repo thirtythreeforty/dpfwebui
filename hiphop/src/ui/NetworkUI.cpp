@@ -132,6 +132,13 @@ String NetworkUI::getPublicUrl()
     return url;
 }
 
+void NetworkUI::setState(const char* key, const char* value)
+{
+    // Warning : UI::setState() is non-virtual !
+    WebUIBase::setState(key, value);
+    fStates[key] = value;
+}
+
 void NetworkUI::broadcastMessage(const JSValue& args, Client origin)
 {
     fServer.broadcast(args.toJSON(), /*exclude*/origin);
