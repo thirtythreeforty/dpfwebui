@@ -195,6 +195,11 @@ void NetworkUI::stateChanged(const char* key, const char* value)
 }
 #endif
 
+void NetworkUI::onClientConnected(Client client)
+{
+    (void)client;
+}
+
 void NetworkUI::initHandlers()
 {
     // Broadcast parameter updates to all clients except the originating one
@@ -353,6 +358,8 @@ void NetworkUI::handleWebServerConnect(Client client)
             postMessage({"UI", "stateChanged", it->first.c_str(), it->second.c_str()},
                         reinterpret_cast<uintptr_t>(client));
         }
+
+        onClientConnected(client);
     });
 }
 

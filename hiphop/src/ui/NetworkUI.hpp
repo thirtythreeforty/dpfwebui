@@ -53,6 +53,8 @@ protected:
     void stateChanged(const char* key, const char* value) override;
 #endif
 
+    virtual void onClientConnected(Client client);
+
 private:
     void initHandlers();
     void initServer();
