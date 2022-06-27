@@ -37,6 +37,8 @@
 
 #include "src/DistrhoDefines.h"
 
+#define TXT_RECORD "dpf-plugin"
+
 #if DISTRHO_OS_LINUX
 extern char **environ;
 #endif
@@ -85,7 +87,7 @@ public:
         const char* const bin = "avahi-publish";
         char sport[10];
         std::sprintf(sport, "%d", port);
-        const char *argv[] = {bin, "-s", name, type, sport, nullptr};
+        const char *argv[] = {bin, "-s", name, type, sport, TXT_RECORD, nullptr};
         const int status = posix_spawnp(&fPid, bin, nullptr/*file_actions*/, nullptr/*attrp*/,
                                         const_cast<char* const*>(argv), environ);
         if (status == 0) {
@@ -94,9 +96,14 @@ public:
             d_stderr2("Zeroconf : failed publish()");
         }
 #elif DISTRHO_OS_MAC
-        DNSServiceErrorType err = DNSServiceRegister(&fService, 0/*flags*/, kDNSServiceInterfaceIndexAny, name, type,
-            nullptr/*domain*/, nullptr/*host*/, htons(port), 0/*txtLen*/, nullptr/*txtRecord*/, nullptr/*callBack*/,
-            nullptr/*context*/);
+        char txtRecord[127];
+        snprintf(txtRecord + 1, sizeof(txtRecord) - 1, TXT_RECORD);
+        txtRecord[0] = static_cast<char>(strlen(TXT_RECORD));
+        const uint16_t txtLen = 1 + static_cast<uint16_t>(txtRecord[0]);
+
+        DNSServiceErrorType err = DNSServiceRegister(&fService, 0/*flags*/, kDNSServiceInterfaceIndexAny,
+            name, type, nullptr/*domain*/, nullptr/*host*/, htons(port), txtLen, txtRecord,
+            nullptr/*callBack*/, nullptr/*context*/);
         if (err == kDNSServiceErr_NoError) {
             fPublished = true;
         } else {
