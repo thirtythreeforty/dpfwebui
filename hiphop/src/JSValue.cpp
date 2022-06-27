@@ -213,7 +213,11 @@ void JSValue::insertArrayItem(int idx, const JSValue& value) noexcept
 
 void JSValue::setObjectItem(const char* key, const JSValue& value) noexcept
 {
-    cJSON_AddItemToObject(fImpl, key, cJSON_Duplicate(value.fImpl, true/*recurse*/));
+    if (cJSON_HasObjectItem(fImpl, key)) {
+        cJSON_ReplaceItemInObject(fImpl, key, cJSON_Duplicate(value.fImpl, true/*recurse*/));
+    } else {
+        cJSON_AddItemToObject(fImpl, key, cJSON_Duplicate(value.fImpl, true/*recurse*/));
+    }
 }
 
 JSValue JSValue::sliceArray(int start, int end) const noexcept
