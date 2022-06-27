@@ -26,6 +26,7 @@
 #include <libwebsockets.h>
 
 #include "distrho/extra/LeakDetector.hpp"
+#include "distrho/extra/Mutex.hpp"
 #include "distrho/extra/String.hpp"
 
 START_NAMESPACE_DISTRHO
@@ -74,6 +75,8 @@ private:
     lws_protocols              fProtocol[2];
     lws_context_creation_info  fContextInfo;
     lws_context*               fContext;
+
+    Mutex fMutex;
 
     typedef std::unordered_map<Client, ClientContext> ClientContextMap;
     ClientContextMap fClients;

@@ -20,7 +20,7 @@
 
 #include "WebServer.hpp"
 
-// Keep DPF include after WebServer.hpp to avoid warning from MinGW gcc:
+// Keep this include after WebServer.hpp to avoid warning from MinGW gcc:
 // "Please include winsock2.h before windows.h"
 #include "extra/Path.hpp"
 
@@ -115,6 +115,8 @@ void WebServer::send(const char* data, Client client)
 
     unsigned char* packet = new unsigned char[LWS_PRE + std::strlen(data) + 1];
     std::strcpy(reinterpret_cast<char*>(packet) + LWS_PRE, data);
+
+    const MutexLocker writeBufferScopedLock(fMutex);
     it->second.writeBuffer.push_back(packet);
 
     lws_callback_on_writable(client);
@@ -238,6 +240,8 @@ int WebServer::handleRead(Client client, void* in, size_t len)
 
 int WebServer::handleWrite(Client client)
 {
+    const MutexLocker writeBufferScopedLock(fMutex);
+
     // Exactly one lws_write() call per LWS_CALLBACK_SERVER_WRITEABLE callback
     ClientContext::WriteBuffer& wb = fClients[client].writeBuffer;
     if (wb.empty()) {
