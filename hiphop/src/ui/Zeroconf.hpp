@@ -37,8 +37,6 @@
 
 #include "src/DistrhoDefines.h"
 
-#define TXT_RECORD "dpf-plugin"
-
 #if DISTRHO_OS_LINUX
 extern char **environ;
 #endif
@@ -79,7 +77,7 @@ public:
         return fPublished;
     }
 
-    void publish(const char* name, const char* type, int port) noexcept
+    void publish(const char* name, const char* type, int port, const char* txt) noexcept
     {
         unpublish();
 
@@ -87,7 +85,7 @@ public:
         const char* const bin = "avahi-publish";
         char sport[10];
         std::sprintf(sport, "%d", port);
-        const char *argv[] = {bin, "-s", name, type, sport, TXT_RECORD, nullptr};
+        const char *argv[] = {bin, "-s", name, type, sport, txt, nullptr};
         const int status = posix_spawnp(&fPid, bin, nullptr/*file_actions*/, nullptr/*attrp*/,
                                         const_cast<char* const*>(argv), environ);
         if (status == 0) {
@@ -97,8 +95,8 @@ public:
         }
 #elif DISTRHO_OS_MAC
         char txtRecord[127];
-        snprintf(txtRecord + 1, sizeof(txtRecord) - 1, TXT_RECORD);
-        txtRecord[0] = static_cast<char>(strlen(TXT_RECORD));
+        snprintf(txtRecord + 1, sizeof(txtRecord) - 1, "%s", txt);
+        txtRecord[0] = static_cast<char>(strlen(txt));
         const uint16_t txtLen = 1 + static_cast<uint16_t>(txtRecord[0]);
 
         DNSServiceErrorType err = DNSServiceRegister(&fService, 0/*flags*/, kDNSServiceInterfaceIndexAny,

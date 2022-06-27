@@ -41,7 +41,8 @@
 #else
 # define TRANSFER_PROTOCOL "http"
 #endif
-#define SERVICE_TYPE "_http._tcp"
+#define DNS_SERVICE_TYPE "_http._tcp"
+#define DNS_TXT_RECORD   "distrho-plugin-name"
 #define FIRST_PORT 49152 // first in dynamic/private range
 
 USE_NAMESPACE_DISTRHO
@@ -329,7 +330,9 @@ int NetworkUI::findAvailablePort()
 void NetworkUI::zeroconfStateUpdated()
 {
     if (fZeroconfPublish && ! fZeroconfName.isEmpty()) {
-        fZeroconf.publish(fZeroconfName, SERVICE_TYPE, fPort);
+        char txt[127];
+        snprintf(txt, sizeof(txt), "%s=%s", DNS_TXT_RECORD, DISTRHO_PLUGIN_NAME);
+        fZeroconf.publish(fZeroconfName, DNS_SERVICE_TYPE, fPort, txt);
     } else {
         fZeroconf.unpublish();
     }
