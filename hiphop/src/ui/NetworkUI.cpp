@@ -346,21 +346,18 @@ void NetworkUI::zeroconfStateUpdated()
 
 void NetworkUI::handleWebServerConnect(Client client)
 {
-    // TODO : need to investigate why writing data to the WebSocket immediately
-    //        after a connection is established can cause the connection to drop.
-    queue([this, client] {
-        // Send all current parameters and states
-        for (ParameterMap::const_iterator it = fParameters.cbegin(); it != fParameters.cend(); ++it) {
-            postMessage({"UI", "parameterChanged", it->first, it->second},
-                        reinterpret_cast<uintptr_t>(client));
-        }
-        for (StateMap::const_iterator it = fStates.cbegin(); it != fStates.cend(); ++it) {
-            postMessage({"UI", "stateChanged", it->first.c_str(), it->second.c_str()},
-                        reinterpret_cast<uintptr_t>(client));
-        }
+    // Send all current parameters and states
+    for (ParameterMap::const_iterator it = fParameters.cbegin(); it != fParameters.cend(); ++it) {
+        postMessage({"UI", "parameterChanged", it->first, it->second},
+                    reinterpret_cast<uintptr_t>(client));
+    }
 
-        onClientConnected(client);
-    });
+    for (StateMap::const_iterator it = fStates.cbegin(); it != fStates.cend(); ++it) {
+        postMessage({"UI", "stateChanged", it->first.c_str(), it->second.c_str()},
+                    reinterpret_cast<uintptr_t>(client));
+    }
+
+    onClientConnected(client);
 }
 
 int NetworkUI::handleWebServerRead(Client client, const char* data)
