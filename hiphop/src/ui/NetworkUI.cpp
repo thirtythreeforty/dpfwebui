@@ -215,22 +215,22 @@ void NetworkUI::initHandlers()
         });
 
         const JSValue msg = JSValue({"UI", "parameterChanged"}) + args;
-        fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
+        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(context));
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    // Ditto for states
+    // Broadcast state updates to all clients except the originating one
     const MessageHandler& stateHandlerSuper = fHandler["setState"].second;
     fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t context) {
         queue([this, stateHandlerSuper, args, context] {
-            const char* key = args[0].getString().buffer();
-            const char* value = args[1].getString().buffer();
-            fStates[key] = value;
+            const String key = args[0].getString();
+            const String value = args[1].getString();
+            fStates[key.buffer()] = value.buffer();
             stateHandlerSuper(args, context);
         });
 
         const JSValue msg = JSValue({"UI", "stateChanged"}) + args;
-        fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
+        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(context));
     });
 #endif
 
