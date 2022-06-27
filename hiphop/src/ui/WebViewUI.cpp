@@ -26,15 +26,8 @@
 
 USE_NAMESPACE_DISTRHO
 
-// DPF implementation of VST3 needs the DISTRHO::UI constructor to be called
-// with already scaled dimensions because the setSize() request in setWebView()
-// below is ignored, see https://github.com/DISTRHO/DPF/issues/359 . Since the
-// parent native window only becomes available later on UI lifecycle, scale
-// factor for the display containing the web view cannot be determined on UI
-// construction. Plugins on secondary displays might open with wrong dimensions.
-WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor,
-                     float initScaleFactorForVST3)
-    : WebViewUIBase(widthCssPx, heightCssPx, initScaleFactorForVST3)
+WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor)
+    : WebViewUIBase(widthCssPx, heightCssPx)
     , fBackgroundColor(backgroundColor)
     , fJsUiReady(false)
     , fPlatformWindow(0)
@@ -82,6 +75,10 @@ void WebViewUI::setWebView(WebViewBase* webView)
     fWebView->realize();
 
     setSize(width, height);
+
+    if (::strcmp(getPluginFormatName(), "VST3") == 0) {
+        setSize(width, height); // 2x setSize() calls needed for VST3 - DPF bug?
+    }
 }
 
 void WebViewUI::load()

@@ -18,12 +18,13 @@
 
 #include "WebUIBase.hpp"
 
+#include "distrho/DistrhoPluginUtils.hpp"
 #include "distrho/extra/Base64.hpp"
 
 USE_NAMESPACE_DISTRHO
 
-WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3)
-    : UIEx(initScaleFactorForVST3 * widthCssPx, initScaleFactorForVST3 * heightCssPx)
+WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx)
+    : UIEx(widthCssPx, heightCssPx)
     , fInitWidthCssPx(widthCssPx)
     , fInitHeightCssPx(heightCssPx)
     , fUiBlockQueued(false)

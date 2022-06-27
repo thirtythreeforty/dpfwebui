@@ -26,8 +26,7 @@ USE_NAMESPACE_DISTRHO
 
 WindowsWebViewUI::WindowsWebViewUI(uint baseWidth, uint baseHeight,
         uint32_t backgroundColor, bool startLoading)
-    : WebViewUI(baseWidth, baseHeight, backgroundColor,
-                /*initScaleFactorForVST3*/EdgeWebView::getMonitorScaleFactor(0))
+    : WebViewUI(baseWidth, baseHeight, backgroundColor)
     , fHostHWnd(0)
 {
     if (isDryRun()) {

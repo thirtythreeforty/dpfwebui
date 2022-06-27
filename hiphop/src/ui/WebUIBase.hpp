@@ -32,7 +32,7 @@ START_NAMESPACE_DISTRHO
 class WebUIBase : public UIEx
 {
 public:
-    WebUIBase(uint widthCssPx, uint heightCssPx, float initScaleFactorForVST3);
+    WebUIBase(uint widthCssPx, uint heightCssPx);
     virtual ~WebUIBase() {}
 
     typedef std::function<void()> UiBlock;
