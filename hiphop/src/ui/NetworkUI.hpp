@@ -22,7 +22,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "distrho/extra/Mutex.hpp"
 #include "distrho/extra/Thread.hpp"
 
 #include "WebUIBase.hpp"
@@ -70,7 +69,6 @@ private:
     int              fPort;
     WebServer        fServer;
     WebServerThread* fThread;
-    Mutex            fMutex;
 #if HIPHOP_UI_ZEROCONF
     Zeroconf  fZeroconf;
     bool      fZeroconfPublish;

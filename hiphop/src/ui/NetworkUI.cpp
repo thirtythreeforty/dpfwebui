@@ -148,9 +148,7 @@ void NetworkUI::postMessage(const JSValue& args, uintptr_t context)
 
 void NetworkUI::parameterChanged(uint32_t index, float value)
 {
-    fMutex.lock();
     fParameters[index] = value;
-    fMutex.unlock();
 
     if (fParameterLock) {
         fParameterLock = false;
@@ -192,9 +190,7 @@ void NetworkUI::stateChanged(const char* key, const char* value)
     }
 #endif
 
-    fMutex.lock();
     fStates[key] = value;
-    fMutex.unlock();
 
     WebUIBase::stateChanged(key, value);
 }
@@ -210,17 +206,14 @@ void NetworkUI::initHandlers()
     // Broadcast parameter updates to all clients except the originating one
     const MessageHandler& parameterHandlerSuper = fHandler["setParameterValue"].second;
     fHandler["setParameterValue"] = std::make_pair(2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t context) {
-        queue([this, parameterHandlerSuper, args, context] {
-            fParameterLock = true; // avoid echo
-            parameterHandlerSuper(args, context);
-        });
-        
         const uint32_t index = static_cast<uint32_t>(args[0].getNumber());
         const float value = static_cast<float>(args[1].getNumber());
-        
-        fMutex.lock();
-        fParameters[index] = value;
-        fMutex.unlock();
+
+        queue([this, parameterHandlerSuper, index, value, args, context] {
+            fParameterLock = true; // avoid echo
+            fParameters[index] = value;
+            parameterHandlerSuper(args, context);
+        });
 
         JSValue msg = JSValue({"UI", "parameterChanged"}) + args;
         fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
@@ -230,16 +223,13 @@ void NetworkUI::initHandlers()
     // Ditto for states
     const MessageHandler& stateHandlerSuper = fHandler["setState"].second;
     fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t context) {
-        queue([stateHandlerSuper, args, context] {
-            stateHandlerSuper(args, context);
-        });
-
         const char* key = args[0].getString().buffer();
         const char* value = args[1].getString().buffer();
-        
-        fMutex.lock();
-        fStates[key] = value;
-        fMutex.unlock();
+
+        queue([this, stateHandlerSuper, key, value, args, context] {
+            fStates[key] = value;
+            stateHandlerSuper(args, context);
+        });
 
         JSValue msg = JSValue({"UI", "stateChanged"}) + args;
         fServer.broadcast(args.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
@@ -361,22 +351,20 @@ void NetworkUI::zeroconfStateUpdated()
 
 void NetworkUI::handleWebServerConnect(Client client)
 {
-    fMutex.lock();
+    queue([this, client] {
+        // Send all current parameters and states
+        for (ParameterMap::const_iterator it = fParameters.cbegin(); it != fParameters.cend(); ++it) {
+            const JSValue msg = { "UI", "parameterChanged", it->first, it->second };
+            postMessage(msg, reinterpret_cast<uintptr_t>(client));
+        }
 
-    // Send all current parameters and states
-    for (ParameterMap::const_iterator it = fParameters.cbegin(); it != fParameters.cend(); ++it) {
-        const JSValue msg = { "UI", "parameterChanged", it->first, it->second };
-        postMessage(msg, reinterpret_cast<uintptr_t>(client));
-    }
+        for (StateMap::const_iterator it = fStates.cbegin(); it != fStates.cend(); ++it) {
+            const JSValue msg = { "UI", "stateChanged", it->first.c_str(), it->second.c_str() };
+            postMessage(msg, reinterpret_cast<uintptr_t>(client));
+        }
 
-    for (StateMap::const_iterator it = fStates.cbegin(); it != fStates.cend(); ++it) {
-        const JSValue msg = { "UI", "stateChanged", it->first.c_str(), it->second.c_str() };
-        postMessage(msg, reinterpret_cast<uintptr_t>(client));
-    }
-
-    fMutex.unlock();
-
-    onClientConnected(client);
+        onClientConnected(client);
+    });
 }
 
 int NetworkUI::handleWebServerRead(Client client, const char* data)
