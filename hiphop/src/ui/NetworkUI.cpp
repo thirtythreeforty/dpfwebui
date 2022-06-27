@@ -214,7 +214,7 @@ void NetworkUI::initHandlers()
             parameterHandlerSuper(args, context);
         });
 
-        JSValue msg = JSValue({"UI", "parameterChanged"}) + args;
+        const JSValue msg = JSValue({"UI", "parameterChanged"}) + args;
         fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
     });
 
@@ -229,14 +229,14 @@ void NetworkUI::initHandlers()
             stateHandlerSuper(args, context);
         });
 
-        JSValue msg = JSValue({"UI", "stateChanged"}) + args;
-        fServer.broadcast(args.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
+        const JSValue msg = JSValue({"UI", "stateChanged"}) + args;
+        fServer.broadcast(msg.toJSON(), /*exclude*/reinterpret_cast<Client>(context));
     });
 #endif
 
     // Custom method for exchanging UI-only messages between clients
     fHandler["broadcast"] = std::make_pair(1, [this](const JSValue& args, uintptr_t context) {
-        JSValue msg = JSValue({"UI", "messageReceived"}) + args;
+        const JSValue msg = JSValue({"UI", "messageReceived"}) + args;
         broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(context));
     });
 
