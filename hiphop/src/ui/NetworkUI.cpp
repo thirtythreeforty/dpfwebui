@@ -395,6 +395,12 @@ WebServerThread::~WebServerThread() noexcept
 void WebServerThread::run() noexcept
 {
     while (fRun) {
-        fServer->serve();
+#if defined(DISTRHO_OS_WINDOWS)
+        // Telling serve() to block creates lags during new connections setup
+        fServer->serve(false);
+        Sleep(1);
+#else
+        fServer->serve(true);
+#endif
     }
 }

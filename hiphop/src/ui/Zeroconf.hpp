@@ -112,6 +112,8 @@ public:
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wcast-function-type"
 # endif
+        (void)txt; // TODO
+        
         HMODULE dnsapi = LOAD_DNSAPI_DLL();
         if (dnsapi == nullptr) {
             return;
