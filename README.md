@@ -94,4 +94,5 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 
 ### Plugin implementations
 
+[Consul](https://github.com/lucianoiam/consul) \
 [Castello Reverb](https://github.com/lucianoiam/castello)
