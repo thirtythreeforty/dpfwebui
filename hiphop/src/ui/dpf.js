@@ -473,6 +473,7 @@ class UIHelper {
 
         const html =
             `<div
+                style="
                 width: ${opt.size}px;
                 height: ${opt.size}px;">
                 <a href="#" style="cursor:default;">
