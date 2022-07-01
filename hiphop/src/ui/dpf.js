@@ -526,38 +526,46 @@ class UIHelper {
                 data-url="${url}"
                 style="
                 display: flex;
-                flex-direction: ${opt.vertical ? 'column' : 'row'};
                 align-items: center;
-                justify-content: space-evenly;
+                justify-content: center;
+                width: 100%;
                 height: 100%;">
-                ${qrSvg}
                 <div
                     style="
                     display: flex;
-                    flex-direction: column;
-                    font-family: monospace;
-                    font-size: ${opt.fontSize}px;">
-                    <a href="#" style="color:#fff">
-                        ${url}
-                    </a>
+                    flex-direction: ${opt.vertical ? 'column' : 'row'};
+                    align-items: center;
+                    justify-content: space-evenly;
+                    gap: 50px;">
+                    ${qrSvg}
                     <div
                         style="
-                        margin-top: 1em;
                         display: flex;
-                        flex-direction: row;
-                        align-items: center;">
-                        <span style="color:#fff">Name</span>
-                        &nbsp;
-                        <input
+                        flex-direction: column;
+                        font-family: monospace;
+                        font-size: ${opt.fontSize}px;">
+                        <a href="#" style="color:#fff">
+                            ${url}
+                        </a>
+                        <div
                             style="
-                            background: #000;
-                            color: #fff;
-                            border: solid 1px #fff;
-                            padding: ${opt.fontSize / 6}px ${opt.fontSize / 3}px;
-                            font-family: monospace;
-                            font-size: ${opt.fontSize}px;"
-                            type="text"
-                            value="${zcName}">
+                            margin-top: 1em;
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;">
+                            <span style="color:#fff">Name</span>
+                            &nbsp;
+                            <input
+                                style="
+                                background: #000;
+                                color: #fff;
+                                border: solid 1px #fff;
+                                padding: ${opt.fontSize / 6}px ${opt.fontSize / 3}px;
+                                font-family: monospace;
+                                font-size: ${opt.fontSize}px;"
+                                type="text"
+                                value="${zcName}">
+                        </div>
                     </div>
                 </div>
             </div>`;
