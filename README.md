@@ -1,5 +1,6 @@
-Hip-Hop / High Performance Hybrid Audio Plugins
------------------------------------------------
+Hip-Hop
+-------
+*High Performance Hybrid Audio Plugins*
 
 This project builds on top of the [DPF](http://github.com/DISTRHO/DPF) audio
 plugin framework to add web-based UI support. Plugins can leverage JavaScript
@@ -96,3 +97,8 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 
 [Consul](https://github.com/lucianoiam/consul) \
 [Castello Reverb](https://github.com/lucianoiam/castello)
+
+### Related projects
+
+[Pisco](https://github.com/lucianoiam/pisco)
+
