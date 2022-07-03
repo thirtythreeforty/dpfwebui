@@ -90,11 +90,11 @@ public:
         unpublish();
 
 #if DISTRHO_OS_LINUX
-        typedef std::vector<const char*> CArrayVector;
+        typedef std::vector<const char*> CStringArrayVector;
 
         const char* const bin = "avahi-publish";
         const std::string sport = std::to_string(port);
-        CArrayVector argv = { bin, "-s", name, type, sport.c_str() };
+        CStringArrayVector argv = { bin, "-s", name, type, sport.c_str() };
         const size_t offset = argv.size(); // for freeing below
 
         for (KeyValuePairsVector::const_iterator it = txtData.cbegin(); it != txtData.cend(); ++it) {
@@ -113,7 +113,7 @@ public:
             d_stderr2("Zeroconf : failed publish()");
         }
 
-        for (CArrayVector::const_iterator it = argv.cbegin() + offset ; it != argv.cend(); ++it) {
+        for (CStringArrayVector::const_iterator it = argv.cbegin() + offset ; it != argv.cend(); ++it) {
             delete *it;
         }
 #elif DISTRHO_OS_MAC
@@ -139,8 +139,6 @@ public:
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wcast-function-type"
 # endif
-        (void)txtData; // TODO
-        
         HMODULE dnsapi = LOAD_DNSAPI_DLL();
         if (dnsapi == nullptr) {
             return;
@@ -172,6 +170,17 @@ public:
         std::strcat(service, type);
         std::strcat(service, ".local");
 
+        typedef std::vector<PCWSTR> CWideStringArrayVector;
+        CWideStringArrayVector keys, values;
+        for (KeyValuePairsVector::const_iterator it = txtData.cbegin(); it != txtData.cend(); ++it) {
+            PWSTR key = new WCHAR[255], value = new WCHAR[255];
+            mbstowcs(key, it->key, 255);
+            mbstowcs(value, it->value, 255);
+            keys.push_back(key);
+            values.push_back(value);
+        }
+
+        const size_t propCount = keys.size();
         std::wstring_convert<std::codecvt_utf8<wchar_t>> wconv;
 
         // Helper outlives Zeroconf instance because the DNS API is asynchronous
@@ -179,8 +188,13 @@ public:
         fHelper->weakThis = this;
         fHelper->instance = pDnsServiceConstructInstance(wconv.from_bytes(service).c_str(),
                 wconv.from_bytes(hostname).c_str(), nullptr, nullptr, static_cast<WORD>(port),
-                0, 0, 0, nullptr, nullptr);
-        
+                0, 0, propCount, keys.data(), values.data());
+
+        for (size_t i = 0; i < propCount; ++i) {
+            delete keys[i];
+            delete values[i];
+        }
+
         if (fHelper->instance != nullptr) {
             std::memset(&fCancel, 0, sizeof(fCancel));
             std::memset(&fRequest, 0, sizeof(fRequest));
