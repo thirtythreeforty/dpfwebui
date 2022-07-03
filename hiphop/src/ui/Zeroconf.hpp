@@ -57,7 +57,6 @@ struct KeyValuePair
 {
     const char *key;
     const char *value;
-
 };
 
 typedef std::vector<KeyValuePair> KeyValuePairsVector;
@@ -140,7 +139,7 @@ public:
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wcast-function-type"
 # endif
-        (void)txt; // TODO
+        (void)txtData; // TODO
         
         HMODULE dnsapi = LOAD_DNSAPI_DLL();
         if (dnsapi == nullptr) {
