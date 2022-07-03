@@ -30,12 +30,34 @@
 # define COUNT_1 0
 #endif
 #if HIPHOP_UI_ZEROCONF // DistrhoPluginInfo.h
-# define COUNT_2 2
+# define COUNT_2 3
 #else
 # define COUNT_2 0
 #endif
 
 #define INTERNAL_STATE_COUNT (COUNT_0 + COUNT_1 + COUNT_2)
+
+#if HIPHOP_UI_ZEROCONF
+#include <random>
+
+std::string gen_uuid() {
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<int> dist(0, 15);
+
+    const char *v = "0123456789abcdef";
+    const bool dash[] = { 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0 };
+
+    std::string res;
+    for (int i = 0; i < 16; i++) {
+        if (dash[i]) res += "-";
+        res += v[dist(rng)];
+        res += v[dist(rng)];
+    }
+
+    return res;
+}
+#endif
 
 PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount)
     : Plugin(parameterCount, programCount, stateCount + INTERNAL_STATE_COUNT)
@@ -50,6 +72,7 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
 #endif
 #if HIPHOP_UI_ZEROCONF
     , fStateIndexZeroconfPublish(stateCount + __COUNTER__)
+    , fStateIndexZeroconfId(stateCount + __COUNTER__)
     , fStateIndexZeroconfName(stateCount + __COUNTER__)
 #endif
 {}
@@ -89,6 +112,9 @@ void PluginEx::initState(uint32_t index, State& state)
     if (index == fStateIndexZeroconfPublish) {
         state.key = "_zc_publish";
         state.defaultValue = "true";
+    } else if (index == fStateIndexZeroconfId) {
+        state.key = "_zc_id";
+        state.defaultValue = gen_uuid().c_str();
     } else if (index == fStateIndexZeroconfName) {
         state.key = "_zc_name";
         state.defaultValue = DISTRHO_PLUGIN_NAME;

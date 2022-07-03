@@ -188,6 +188,10 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         fZeroconfPublish = std::strcmp(value, "true") == 0;
         zeroconfStateUpdated();
         return;
+    } else if (std::strcmp(key, "_zc_id") == 0) {
+        fZeroconfId = value;
+        zeroconfStateUpdated();
+        return;
     } else if (std::strcmp(key, "_zc_name") == 0) {
         fZeroconfName = value;
         zeroconfStateUpdated();
@@ -342,10 +346,13 @@ int NetworkUI::findAvailablePort()
 #if HIPHOP_UI_ZEROCONF
 void NetworkUI::zeroconfStateUpdated()
 {
-    if (fZeroconfPublish && ! fZeroconfName.isEmpty()) {
+    if (fZeroconfPublish && ! fZeroconfId.isEmpty() && ! fZeroconfName.isEmpty()) {
         fZeroconf.publish(fZeroconfName, "_http._tcp", fPort, {
-            { "distrho-plugin-name", DISTRHO_PLUGIN_NAME }
-            //TODO { "id", ""}
+            { "distrho-plugin-name", DISTRHO_PLUGIN_NAME },
+# if DISTRHO_PLUGIN_WANT_FULL_STATE
+            // ID is useless unless plugin state is made persistent
+            { "id", fZeroconfId }
+# endif
         });
     } else {
         fZeroconf.unpublish();

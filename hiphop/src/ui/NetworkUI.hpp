@@ -74,6 +74,7 @@ private:
 #if HIPHOP_UI_ZEROCONF
     Zeroconf  fZeroconf;
     bool      fZeroconfPublish;
+    String    fZeroconfId;
     String    fZeroconfName;
 #endif
     typedef std::unordered_map<uint32_t, float> ParameterMap;
