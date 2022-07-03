@@ -19,6 +19,7 @@
 #ifndef ZEROCONF_HPP
 #define ZEROCONF_HPP
 
+#include <vector>
 #if DISTRHO_OS_LINUX
 # include <cstdio>
 # include <signal.h>
@@ -52,6 +53,14 @@ struct DnsApiHelper
     DNS_SERVICE_INSTANCE* instance;
 };
 #endif
+struct KeyValuePair
+{
+    const char *key;
+    const char *value;
+
+};
+
+typedef std::vector<KeyValuePair> KeyValuePairsVector;
 
 class Zeroconf
 {
@@ -77,36 +86,55 @@ public:
         return fPublished;
     }
 
-    void publish(const char* name, const char* type, int port, const char* txt) noexcept
+    void publish(const char* name, const char* type, int port, const KeyValuePairsVector txtData) noexcept
     {
         unpublish();
 
 #if DISTRHO_OS_LINUX
+        typedef std::vector<const char*> CArrayVector;
+
         const char* const bin = "avahi-publish";
-        char sport[10];
-        std::sprintf(sport, "%d", port);
-        const char *argv[] = {bin, "-s", name, type, sport, txt, nullptr};
+        const std::string sport = std::to_string(port);
+        CArrayVector argv = { bin, "-s", name, type, sport.c_str() };
+        const size_t offset = argv.size(); // for freeing below
+
+        for (KeyValuePairsVector::const_iterator it = txtData.cbegin(); it != txtData.cend(); ++it) {
+            char *buf = new char[255];
+            snprintf(buf, 255, "%s=%s", it->key, it->value);
+            argv.push_back(buf);
+        }
+
+        argv.push_back(nullptr);
+
         const int status = posix_spawnp(&fPid, bin, nullptr/*file_actions*/, nullptr/*attrp*/,
-                                        const_cast<char* const*>(argv), environ);
+                                        const_cast<char* const*>(argv.data()), environ);
         if (status == 0) {
             fPublished = true;
         } else {
             d_stderr2("Zeroconf : failed publish()");
         }
-#elif DISTRHO_OS_MAC
-        char txtRecord[127];
-        snprintf(txtRecord + 1, sizeof(txtRecord) - 1, "%s", txt);
-        txtRecord[0] = static_cast<char>(strlen(txt));
-        const uint16_t txtLen = 1 + static_cast<uint16_t>(txtRecord[0]);
 
-        DNSServiceErrorType err = DNSServiceRegister(&fService, 0/*flags*/, kDNSServiceInterfaceIndexAny,
-            name, type, nullptr/*domain*/, nullptr/*host*/, htons(port), txtLen, txtRecord,
+        for (CArrayVector::const_iterator it = argv.cbegin() + offset ; it != argv.cend(); ++it) {
+            delete *it;
+        }
+#elif DISTRHO_OS_MAC
+        TXTRecordRef txtRecord;
+        TXTRecordCreate(&txtRecord, 0/*bufferLen*/, nullptr/*buffer*/);
+        for (KeyValuePairsVector::const_iterator it = txtData.cbegin(); it != txtData.cend(); ++it) {
+            TXTRecordSetValue(&txtRecord, it->key, strlen(it->value), it->value);
+        }
+
+        DNSServiceErrorType err = DNSServiceRegister(&fService, 0/*flags*/,
+            kDNSServiceInterfaceIndexAny, name, type, nullptr/*domain*/, nullptr/*host*/,
+            htons(port), TXTRecordGetLength(&txtRecord), TXTRecordGetBytesPtr(&txtRecord),
             nullptr/*callBack*/, nullptr/*context*/);
         if (err == kDNSServiceErr_NoError) {
             fPublished = true;
         } else {
             d_stderr2("Zeroconf : failed publish()");
         }
+
+        TXTRecordDeallocate(&txtRecord);
 #elif DISTRHO_OS_WINDOWS
 # if defined(__GNUC__) && (__GNUC__ >= 9)
 #  pragma GCC diagnostic push
