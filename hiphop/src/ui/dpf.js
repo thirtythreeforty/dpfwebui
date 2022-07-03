@@ -205,6 +205,11 @@ class UI extends UIBase() {
         this._call('setZeroconfPublished', published);
     }
 
+    // Non-DPF method for querying Zeroconf plugin instance ID (read-only)
+    async getZeroconfId() {
+        return this._callAndExpectReply('getZeroconfId', false);
+    }
+
      // Non-DPF method for querying Zeroconf service name
     async getZeroconfName() {
         return this._callAndExpectReply('getZeroconfName', false);
@@ -512,6 +517,7 @@ class UIHelper {
 
         const url = await ui.getPublicUrl();
         const zcPublished = await ui.isZeroconfPublished();
+        const zcId = await ui.getZeroconfId();
         const zcName = await ui.getZeroconfName();
 
         const qrSvg = new QRCode({
@@ -543,22 +549,24 @@ class UIHelper {
                         display: flex;
                         flex-direction: column;
                         font-family: monospace;
-                        font-size: ${opt.fontSize}px;">
-                        <a href="#" style="color:#fff">
-                            ${url}
-                        </a>
+                        font-size: ${opt.fontSize}px;
+                        color: #fff;
+                        gap: 1em;">
+                        <div>
+                            <a href="#" style="color:#fff">${url}</a>
+                        </div>
+                        ${zcId ? `<div>ID ${zcId}</div>` : '' }
                         <div
                             style="
-                            margin-top: 1em;
                             display: flex;
                             flex-direction: row;
                             align-items: center;">
-                            <span style="color:#fff">Name</span>
+                            <span>Name</span>
                             &nbsp;
                             <input
                                 style="
-                                background: #000;
                                 color: #fff;
+                                background: #000;
                                 border: solid 1px #fff;
                                 padding: ${opt.fontSize / 6}px ${opt.fontSize / 3}px;
                                 font-family: monospace;

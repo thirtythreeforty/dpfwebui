@@ -260,6 +260,10 @@ void NetworkUI::initHandlers()
         zeroconfStateUpdated();
     });
 
+    fHandler["getZeroconfId"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
+        postMessage({"UI", "getZeroconfId", fZeroconfId}, context);
+    });
+
     fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
         postMessage({"UI", "getZeroconfName", fZeroconfName}, context);
     });
