@@ -348,10 +348,11 @@ void NetworkUI::zeroconfStateUpdated()
 {
     if (fZeroconfPublish && ! fZeroconfId.isEmpty() && ! fZeroconfName.isEmpty()) {
         fZeroconf.publish(fZeroconfName, "_http._tcp", fPort, {
-            { "distrho-plugin-name", DISTRHO_PLUGIN_NAME },
+            { "dpfplugin", "1" },
+            { "uri", DISTRHO_PLUGIN_URI },
 # if DISTRHO_PLUGIN_WANT_FULL_STATE
             // ID is useless unless plugin state is made persistent
-            { "id", fZeroconfId }
+            { "instanceid", fZeroconfId }
 # endif
         });
     } else {
