@@ -243,9 +243,7 @@ static void apply_size(const context_t *ctx)
         return;
     }
 
-    // Does not result in webview contents size update
-    //gtk_window_resize(ctx->window, width, height);
-
+#if HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT
     width = (unsigned)((float)width / ctx->pixelRatio);
     height = (unsigned)((float)height / ctx->pixelRatio);
 
@@ -255,6 +253,10 @@ static void apply_size(const context_t *ctx)
                 "document.documentElement.style.height = '%dpx';",
                 width, height);
     run_script(ctx, js);
+#else
+    // Currently does not result in webview contents size update
+    gtk_window_resize(ctx->window, width, height);
+#endif
 }
 
 static void set_keyboard_focus(context_t *ctx, gboolean focus)
@@ -333,7 +335,7 @@ static void web_view_load_changed_cb(WebKitWebView *view, WebKitLoadEvent event,
             apply_size(ctx);
             gtk_widget_show_all(GTK_WIDGET(ctx->window));
             ipc_write_simple(ctx, OP_HANDLE_LOAD_FINISHED, NULL, 0);
-            usleep(50000); // TODO: look for better solution than a 50ms delay to prevent black flicker
+            usleep(100000L); // TODO: look for better solution than a 100ms delay to prevent black flicker
             break;
         default:
             break;
