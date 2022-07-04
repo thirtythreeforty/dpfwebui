@@ -115,7 +115,7 @@ ChildProcessWebView::ChildProcessWebView()
     // No drag and drop for GTK or CEF
     setEnvironmentBool("noDragAndDrop", true);
 #if defined(HIPHOP_LINUX_WEBVIEW_GTK)
-# if HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND
+# if HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT
     // CSS media queries for screen dimensions and CSS viewport units
     // (vw/vh/vmin/vmax) are not reliable when the UI is allowed to resize
     setEnvironmentBool("noReliableScreenSize", true);

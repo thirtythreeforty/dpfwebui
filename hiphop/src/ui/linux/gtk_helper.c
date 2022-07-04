@@ -33,14 +33,14 @@
 #include "DistrhoPluginInfo.h"
 
 // The WebKitGTK web view is created with a fixed size, see comprehensive
-// explanation in realize(). Set HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND=1
+// explanation in realize(). Set HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT=1
 // in DistrhoPluginInfo.h to allow the UI to grow, whether it is by using the
 // host's own resize control (DISTRHO_UI_USER_RESIZABLE=1) or by binding a
 // custom resize control to UI::setSize(). Maximum width and height can be
 // adjusted with HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH/HEIGHT. When the workaround
 // is disabled the web view size will be fixed to the init size. In all cases
 // CSS viewport dimensions (vw/vh/vmin/vmax) will not follow changes in size.
-#if HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND
+#if HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT
 # if !defined(HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH)
 #  define HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH  1536
 # endif
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 static void realize(context_t *ctx, const msg_win_cfg_t *config)
 {
     // Create a native container window
-#if HIPHOP_UI_LINUX_GTK_WEBVIEW_RESIZE_WORKAROUND
+#if HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT
     int width = HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH;
     int height = HIPHOP_UI_LINUX_GTK_WEBVIEW_HEIGHT;
 #else
