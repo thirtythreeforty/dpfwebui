@@ -158,8 +158,10 @@ FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/ui/%)
 
 ifeq ($(MACOS),true)
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
+ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 $(error Universal build is currently unavailable for WAMR)
+endif
 endif
 # Non CPU-specific optimization flags, see DPF Makefile.base.mk
 NOOPT = true
