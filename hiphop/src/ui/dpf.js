@@ -397,7 +397,7 @@ class UIHelper {
 
     static enableOfflineModal(ui, opt) {
         opt = opt || {};
-        opt.target = opt.target || document.body;
+        opt.parent = opt.parent || document.body;
 
         // Monkey patch UI message channel callbacks
         const openUiCallback = ui.messageChannelOpen.bind(ui);
@@ -410,7 +410,7 @@ class UIHelper {
             }
 
             if (ui._offlineModal) {
-                opt.target.removeChild(ui._offlineModal);
+                opt.parent.removeChild(ui._offlineModal);
                 delete ui._offlineModal;
             }
 
@@ -429,7 +429,7 @@ class UIHelper {
 
                 if (! ui._offlineModal) {
                     ui._offlineModal = this.getOfflineModalElement();
-                    opt.target.appendChild(ui._offlineModal);
+                    opt.parent.appendChild(ui._offlineModal);
                 }
             }, 1000);
         };
@@ -609,10 +609,10 @@ class UIHelper {
 
     static async showQRCodeModal(ui, opt) {
         opt = opt || {};
-        opt.target = opt.target || document.body;
+        opt.parent = opt.parent || document.body;
 
         const html =
-            `<div>
+            `<div style="position: relative;">
                 <a
                     href="#"
                     style="
@@ -644,7 +644,10 @@ class UIHelper {
         el.querySelectorAll('a').forEach((a) => {
             ['touchstart', 'click'].forEach((evName) => {
                 a.addEventListener(evName, (ev) => {
-                    opt.target.removeChild(el);
+                    opt.parent.removeChild(el);
+                    if (opt.display) {
+                        opt.parent.style.display = 'none';
+                    }
                     if (ev.cancelable) {
                         ev.preventDefault();
                     }
@@ -652,7 +655,11 @@ class UIHelper {
             });
         });
 
-        opt.target.appendChild(el);
+        opt.parent.appendChild(el);
+
+        if (opt.display) {
+            opt.parent.style.display = opt.display;
+        }
     }
 
 }
