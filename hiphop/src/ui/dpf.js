@@ -612,7 +612,7 @@ class UIHelper {
         opt.parent = opt.parent || document.body;
 
         const html =
-            `<div style="position: relative;">
+            `<div>
                 <a
                     href="#"
                     style="
