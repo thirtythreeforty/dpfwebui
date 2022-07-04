@@ -28,7 +28,7 @@ HIPHOP_WASM_RUNTIME ?= wamr
 # WebAssembly execution mode - WAMR [ aot | interp ], Wasmer [ jit ]
 HIPHOP_WASM_MODE ?= aot
 
-# Universal build only available for non-network web UI and Wasmer DSP
+# Universal build not available for Wasmer DSP
 # Set to false for building current architecture only
 HIPHOP_MACOS_UNIVERSAL ?= false
 
@@ -432,6 +432,10 @@ TARGETS += $(LWS_LIB_PATH)
 
 ifeq ($(LINUX),true)
 LWS_CMAKE_ENV = export CFLAGS=-fPIC
+else ifeq ($(MACOS),true)
+ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
+LWS_CMAKE_ENV = export CMAKE_OSX_ARCHITECTURES="arm64;x86_64;"
+endif
 else
 LWS_CMAKE_ENV = true
 endif
