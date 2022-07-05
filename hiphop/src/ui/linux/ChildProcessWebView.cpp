@@ -139,7 +139,6 @@ ChildProcessWebView::~ChildProcessWebView()
 #endif
         int stat;
         waitpid(fPid, &stat, 0);
-
         fPid = -1;
     }
 

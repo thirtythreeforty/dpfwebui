@@ -217,6 +217,8 @@ public:
 #if DISTRHO_OS_LINUX
         if (fPid != 0) {
             kill(fPid, SIGTERM);
+            int stat;
+            waitpid(fPid, &stat, 0);
             fPid = 0;
         }
 #elif DISTRHO_OS_MAC
