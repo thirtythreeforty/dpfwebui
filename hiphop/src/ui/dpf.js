@@ -382,12 +382,18 @@ function UIBase() { return class {
 //
 class UIHelper {
 
-    static enableSystemBrowser(ui, el, url) {
-        url = url || el.href;
+    static enableSystemBrowser(ui, el, opt) {
+        opt = opt || {};
+        const url = opt.url || el.href;
 
         ['touchstart', 'click'].forEach((evName) => {
             el.addEventListener(evName, (ev) => {
                 ui.openSystemWebBrowser(url);
+
+                if (opt.callback instanceof Function) {
+                    opt.callback();
+                }
+
                 if (ev.cancelable) {
                     ev.preventDefault();
                 }
