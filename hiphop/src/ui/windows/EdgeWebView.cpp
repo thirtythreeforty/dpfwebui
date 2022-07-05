@@ -285,6 +285,7 @@ HRESULT EdgeWebView::handleWebView2ControllerCompleted(HRESULT result,
     fController = controller;
 
     ICoreWebView2Controller2_AddRef(fController);
+    ICoreWebView2Controller2_put_IsVisible(fController, false);
     ICoreWebView2Controller2_get_CoreWebView2(fController, &fView);
     ICoreWebView2_add_NavigationCompleted(fView, fHandler, nullptr);
     ICoreWebView2_add_WebMessageReceived(fView, fHandler, nullptr);
@@ -327,6 +328,7 @@ HRESULT EdgeWebView::handleWebView2NavigationCompleted(ICoreWebView2 *sender,
     (void)sender;
     (void)eventArgs;
 
+    ICoreWebView2Controller2_put_IsVisible(fController, true);
     handleLoadFinished();
     
     return S_OK;
