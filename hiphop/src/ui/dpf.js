@@ -645,9 +645,6 @@ class UIHelper {
             ['touchstart', 'click'].forEach((evName) => {
                 a.addEventListener(evName, (ev) => {
                     opt.parent.removeChild(el);
-                    if (opt.display) {
-                        opt.parent.style.display = 'none';
-                    }
                     if (ev.cancelable) {
                         ev.preventDefault();
                     }
@@ -656,10 +653,6 @@ class UIHelper {
         });
 
         opt.parent.appendChild(el);
-
-        if (opt.display) {
-            opt.parent.style.display = opt.display;
-        }
     }
 
 }
