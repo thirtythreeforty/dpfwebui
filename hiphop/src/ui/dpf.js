@@ -512,8 +512,9 @@ class UIHelper {
 
     static async getQRCodeElement(ui, opt) {
         opt = opt || {};
-        opt.size = opt.size || 96;
-        opt.fontSize = opt.fontSize || opt.size / 8;
+        opt.size = opt.size || 96; // px
+        opt.fontSize = opt.fontSize || opt.size / 8; // px
+        opt.gap = opt.gap || 50; // px
 
         const url = await ui.getPublicUrl();
         const zcPublished = await ui.isZeroconfPublished();
@@ -542,7 +543,7 @@ class UIHelper {
                     flex-direction: ${opt.vertical ? 'column' : 'row'};
                     align-items: center;
                     justify-content: space-evenly;
-                    gap: 50px;">
+                    gap: ${opt.gap}px;">
                     ${qrSvg}
                     <div
                         style="
