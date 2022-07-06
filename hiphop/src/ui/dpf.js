@@ -477,7 +477,7 @@ class UIHelper {
         return document.createRange().createContextualFragment(html).firstChild;
     }
 
-    static getQRButtonElement(ui, opt) {
+    static getNetworkDetailsModalButton(ui, opt) {
         opt = opt || {};
         opt.size = opt.size || 24;
         opt.fill = opt.fill || '#fff';
@@ -506,7 +506,7 @@ class UIHelper {
 
         ['touchstart', 'click'].forEach((evName) => {
             el.querySelector('a').addEventListener(evName, (ev) => {
-                this.showQRCodeModal(ui, opt.modal);
+                this.showNetworkDetailsModal(ui, opt.modal);
                 if (ev.cancelable) {
                     ev.preventDefault();
                 }
@@ -516,7 +516,7 @@ class UIHelper {
         return el;
     }
 
-    static async getQRCodeElement(ui, opt) {
+    static async getNetworkDetailsElement(ui, opt) {
         opt = opt || {};
         opt.size = opt.size || 96; // px
         opt.fontSize = opt.fontSize || opt.size / 8; // px
@@ -614,7 +614,7 @@ class UIHelper {
         return el;
     }
 
-    static async showQRCodeModal(ui, opt) {
+    static async showNetworkDetailsModal(ui, opt) {
         opt = opt || {};
         opt.parent = opt.parent || document.body;
 
@@ -646,7 +646,7 @@ class UIHelper {
         const el = document.createRange().createContextualFragment(html).firstChild;
         el.id = opt.id;
 
-        el.appendChild(await this.getQRCodeElement(ui));
+        el.appendChild(await this.getNetworkDetailsElement(ui));
 
         el.querySelectorAll('a').forEach((a) => {
             ['touchstart', 'click'].forEach((evName) => {

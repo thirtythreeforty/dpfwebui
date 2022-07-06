@@ -67,7 +67,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
     _setupForPluginEmbeddedWebView() {
         // Add a button for displaying a QR code with the plugin URL
         const main = document.getElementById('main');
-        main.appendChild(helper.getQRButtonElement(this, {
+        main.appendChild(helper.getNetworkDetailsModalButton(this, {
             fill: '#000',
             id: 'qr-button',
             modal: {

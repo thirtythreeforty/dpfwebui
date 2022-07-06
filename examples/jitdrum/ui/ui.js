@@ -30,7 +30,7 @@ class JITDrumExampleUI extends DISTRHO.UI {
         this._addTapListener('note-3', () => this.sendNote(1, 84, 127));
 
         if (env.plugin) {
-            document.body.appendChild(helper.getQRButtonElement(this, {
+            document.body.appendChild(helper.getNetworkDetailsModalButton(this, {
                 fill: '#fff',
                 id: 'qr-button',
                 modal: {
