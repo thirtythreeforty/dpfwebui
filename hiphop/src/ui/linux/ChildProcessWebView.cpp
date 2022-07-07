@@ -118,7 +118,7 @@ ChildProcessWebView::ChildProcessWebView()
 # if HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT
     // CSS media queries for screen dimensions and CSS viewport units
     // (vw/vh/vmin/vmax) are not reliable when the UI is allowed to resize
-    setEnvironmentBool("noReliableScreenSize", true);
+    setEnvironmentBool("fakeViewport", true);
 # endif
     // <input type="range"> elements do not react to touches
     setEnvironmentBool("noRangeInputTouch", true);
