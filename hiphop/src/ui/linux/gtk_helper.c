@@ -42,10 +42,10 @@
 // CSS viewport dimensions (vw/vh/vmin/vmax) will not follow changes in size.
 #if HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT
 # if !defined(HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH)
-#  define HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH  1536
+#  define HIPHOP_UI_LINUX_GTK_WEBVIEW_WIDTH  2560
 # endif
 # if !defined(HIPHOP_UI_LINUX_GTK_WEBVIEW_HEIGHT)
-#  define HIPHOP_UI_LINUX_GTK_WEBVIEW_HEIGHT 1536
+#  define HIPHOP_UI_LINUX_GTK_WEBVIEW_HEIGHT 1600
 # endif
 #endif
 
