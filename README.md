@@ -16,7 +16,7 @@ the plugin and optionally over the local network.
 ### Features
 
 * Based on DISTRHO Plugin Framework (DPF)
-* Same `UI` and `Plugin` interfaces ported to JavaScript and [AssemblyScript](https://www.assemblyscript.org)
+* Subset of the `UI` and `Plugin` interfaces ported to JavaScript and [AssemblyScript](https://www.assemblyscript.org)
 * C++ sill possible for DSP development
 * WebKitGTK or CEF on Linux, WKWebView on macOS, Edge WebView2 on Windows
 * VST2 / VST3[¹] / LV2 plugin formats
