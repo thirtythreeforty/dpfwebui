@@ -33,7 +33,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
         helper.enableOfflineModal(this);
 
         // Do not navigate when clicking credits and open system browser instead
-        helper.enableSystemBrowser(this, document.querySelector('#credits > a'));
+        helper.bindSystemBrowser(this, document.querySelector('#credits > a'));
         
         // Setup view to suit environment
         if (env.plugin) {

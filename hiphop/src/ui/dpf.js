@@ -382,7 +382,7 @@ function UIBase() { return class {
 //
 class UIHelper {
 
-    static enableSystemBrowser(ui, el, opt) {
+    static bindSystemBrowser(ui, el, opt) {
         opt = opt || {};
         const url = opt.url || el.href;
 
