@@ -23,10 +23,16 @@
 #include "SharedMemory.hpp"
 
 // Plugin code should leave MSB off
-static const uint32_t kShMemHintWasmBinary = 0x1;
-static const uint32_t kShMemHintInternal   = 0x8000;
+#define kShMemHintWasmBinary  0x1
+#define kShMemHintInternal    0x8000
 
 START_NAMESPACE_DISTRHO
+
+// Used for determining who should read changes to the shared memory
+enum {
+    kSharedMemoryWriteOriginPlugin = 0,
+    kSharedMemoryWriteOriginUI     = 1
+};
 
 // Keep the read flag atomic
 struct SharedMemoryState
@@ -91,29 +97,29 @@ public:
         return N * sizeof(S);
     }
 
-    bool isRead(int index) const noexcept
+    bool isRead(int origin) const noexcept
     {
-        return getState(index).readFlag != 0;
+        return getState(origin).readFlag != 0;
     }
 
-    void setRead(int index) noexcept
+    void setRead(int origin) noexcept
     {
-        getState(index).readFlag = 1;
+        getState(origin).readFlag = 1;
     }
 
-    uint32_t getHints(int index) const noexcept
+    uint32_t getHints(int origin) const noexcept
     {
-        return getState(index).hints;
+        return getState(origin).hints;
     }
 
-    size_t getDataOffset(int index) const noexcept
+    size_t getDataOffset(int origin) const noexcept
     {
-        return getState(index).dataOffset;
+        return getState(origin).dataOffset;
     }
 
-    size_t getDataSize(int index) const noexcept
+    size_t getDataSize(int origin) const noexcept
     {
-        return getState(index).dataSize;
+        return getState(origin).dataSize;
     }
 
     S* getDataPointer() const noexcept
@@ -126,13 +132,13 @@ public:
         return fImpl.getDataFilename();
     }
 
-    bool write(int index, const S* data, size_t size, size_t offset, uint32_t hints)
+    bool write(int origin, const S* data, size_t size, size_t offset, uint32_t hints)
     {
         if (size > (getSize() - offset)) {
             return false;
         }
         
-        SharedMemoryState& state = getState(index);
+        SharedMemoryState& state = getState(origin);
 
         std::memcpy(getDataPointer() + offset, data, sizeof(S) * size);
         
@@ -144,18 +150,15 @@ public:
         return true;
     }
 private:
-    SharedMemoryState& getState(int index) const noexcept
+    SharedMemoryState& getState(int origin) const noexcept
     {
-        return reinterpret_cast<SharedMemoryHeader*>(fImpl.getDataPointer())->state[index];
+        return reinterpret_cast<SharedMemoryHeader*>(fImpl.getDataPointer())->state[origin];
     }
 
     SharedMemory<S,N> fImpl;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatefulSharedMemory)
 };
-
-static const int kDirectionPluginToUI = 0;
-static const int kDirectionUIToPlugin = 1;
 
 typedef StatefulSharedMemory<unsigned char,HIPHOP_SHARED_MEMORY_SIZE> SharedMemoryImpl;
 

@@ -28,7 +28,7 @@ UIEx::UIEx(uint width, uint height)
 bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
                              uint32_t hints)
 {
-    if (fMemory.write(kDirectionUIToPlugin, data, size, offset, hints)) {
+    if (fMemory.write(kSharedMemoryWriteOriginUI, data, size, offset, hints)) {
         // Notify Plugin instance there is new data available for reading
         setState("_shmem_data", ""/*arbitrary non-null*/);
         return true;
@@ -56,12 +56,12 @@ void UIEx::uiIdle()
     // is not fast enough for visualizations a custom timer solution needs to be
     // implemented, or DPF modified so the uiIdle() frequency can be configured.
 
-    constexpr int idx = kDirectionPluginToUI;
+    constexpr int origin = kSharedMemoryWriteOriginPlugin;
 
-    if (fMemory.isCreatedOrConnected() && ! fMemory.isRead(idx)) {
-        sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(idx),
-                            fMemory.getDataSize(idx), fMemory.getHints(idx));
-        fMemory.setRead(idx);
+    if (fMemory.isCreatedOrConnected() && ! fMemory.isRead(origin)) {
+        sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(origin),
+                            fMemory.getDataSize(origin), fMemory.getHints(origin));
+        fMemory.setRead(origin);
     }
 }
 #endif
