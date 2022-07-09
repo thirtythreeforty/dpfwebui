@@ -46,6 +46,10 @@
 
 #include "extra/macro.h"
 
+#if DISTRHO_OS_WINDOWS
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#endif
+
 START_NAMESPACE_DISTRHO
 
 enum class PluginFormat { Unknown, Jack, LV2, VST2, VST3 };
@@ -120,7 +124,7 @@ struct Path
             void* handle = dlopen(binPath, RTLD_LAZY | RTLD_NOLOAD);
 
             if (handle != 0) {
-                if ((dlsym(handle, "lv2ui_descriptor") != 0) || dlsym(handle, "lv2_descriptor") != 0) {
+                if ((dlsym(handle, "lv2_descriptor") != 0) || (dlsym(handle, "lv2ui_descriptor") != 0)) {
                     format = PluginFormat::LV2;
                 } else if (dlsym(handle, "main") != 0) {
                     format = PluginFormat::VST2;
@@ -138,7 +142,7 @@ struct Path
         if (handle == 0) {
             format = PluginFormat::Jack;
         } else {
-            if ((dlsym(handle, "lv2_descriptor") != 0) || dlsym(handle, "lv2ui_descriptor") != 0) {
+            if ((dlsym(handle, "lv2_descriptor") != 0) || (dlsym(handle, "lv2ui_descriptor") != 0)) {
                 format = PluginFormat::LV2;
             } else if (dlsym(handle, "VSTPluginMain") != 0) {
                 format = PluginFormat::VST2;
