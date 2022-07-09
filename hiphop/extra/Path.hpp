@@ -42,6 +42,10 @@
 # include <shtypes.h>
 #endif
 
+#if ! DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+# include "DistrhoPluginUtils.hpp"
+#endif
+
 #include "distrho/extra/String.hpp"
 
 #include "extra/macro.h"
@@ -52,7 +56,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 START_NAMESPACE_DISTRHO
 
-enum class PluginFormat { Unknown, Jack, LV2, VST2, VST3 };
+enum class PluginFormat { Jack, LV2, VST2, VST3, Unknown };
 
 namespace PathSubdirectory {
 
@@ -66,20 +70,22 @@ struct Path
 {
     static String getPluginBinary() noexcept
     {
-        static String filename;
-#ifdef DISTRHO_OS_WINDOWS
+#if ! DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+        return String(getBinaryFilename()); // DistrhoUtils.cpp
+#else
+# ifdef DISTRHO_OS_WINDOWS
         CHAR buf[MAX_PATH];
         buf[0] = '\0';
         GetModuleFileNameA((HINSTANCE)&__ImageBase, buf, sizeof(buf));
-        filename = buf;
-#else
+        return String(buf);
+# else
         // dladdr() works for executables and dynamic libs on Linux and macOS
         Dl_info info;
         dladdr((void *)&__PRETTY_FUNCTION__, &info);
         char buf[PATH_MAX];
-        filename = realpath(info.dli_fname, buf);
-#endif
-        return filename;
+        return String(realpath(info.dli_fname, buf));
+# endif
+#endif // DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
     }
 
     static String getPluginLibrary() noexcept
@@ -107,7 +113,22 @@ struct Path
     {
         PluginFormat format = PluginFormat::Unknown;
 
-#if DISTRHO_OS_LINUX
+#if ! DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+        const char* pfn = getPluginFormatName();
+
+        if (strcmp(pfn, "JACK/Standalone") == 0) {
+            format = PluginFormat::Jack;
+        } else if (strcmp(pfn, "LV2") == 0) {
+            format = PluginFormat::LV2;
+        } else if (strcmp(pfn, "VST2") == 0) {
+            format = PluginFormat::VST2;
+        } else if (strcmp(pfn, "VST3") == 0) {
+            format = PluginFormat::VST3;
+        } else {
+            format = PluginFormat::Unknown;
+        }
+#else
+# if DISTRHO_OS_LINUX
         char exePath[PATH_MAX];
         exePath[0] = '\0';
         ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
@@ -135,7 +156,7 @@ struct Path
                 dlclose(handle);
             }
         }
-#elif DISTRHO_OS_MAC
+# elif DISTRHO_OS_MAC
         void* handle = dlopen(getPluginBinary(), RTLD_LAZY | RTLD_NOLOAD);
 
         // dlopen() returns 0 for the standalone executable on macOS
@@ -152,7 +173,7 @@ struct Path
 
             dlclose(handle);
         }
-#elif DISTRHO_OS_WINDOWS
+# elif DISTRHO_OS_WINDOWS
         // HISTANCE and HMODULE are interchangeable
         // https://stackoverflow.com/questions/2126657/how-can-i-get-hinstance-from-a-dll
         HMODULE hm = (HMODULE)&__ImageBase;
@@ -166,7 +187,9 @@ struct Path
         } else {
             format = PluginFormat::Jack;
         }
-#endif
+# endif
+#endif // DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+
         return format;
     }
 
