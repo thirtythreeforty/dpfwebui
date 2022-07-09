@@ -19,14 +19,6 @@
 #ifndef PATH_HPP
 #define PATH_HPP
 
-#include "distrho/extra/String.hpp"
-#if !defined(DISABLE_PATH_GET_PLUGIN_LIBRARY)
-  // Including this file when compiling the CEF helper would involve adding
-  // lots of dependencies from DPF, helper only needs to call getCachesPath().
-  // The GTK-based helper does not need to call functions in LinuxPath.cpp.
-# include "DistrhoPluginUtils.hpp"
-#endif
-
 #if DISTRHO_OS_LINUX
 # include <cstring>
 # include <pwd.h>
@@ -35,6 +27,8 @@
 #endif
 #if DISTRHO_OS_MAC
 # include <cstring>
+# include <dlfcn.h>
+# include <libgen.h>
 # include <sys/stat.h>
 # include <sysdir.h>
 # include <wordexp.h>
@@ -47,9 +41,13 @@
 # include <shtypes.h>
 #endif
 
+#include "distrho/extra/String.hpp"
+
 #include "extra/macro.h"
 
 START_NAMESPACE_DISTRHO
+
+enum class PluginFormat { Unknown, Jack, LV2, VST2, VST3 };
 
 namespace PathSubdirectory {
 
@@ -61,57 +59,115 @@ namespace PathSubdirectory {
 
 struct Path
 {
-#if !defined(DISABLE_PATH_GET_PLUGIN_LIBRARY)
-    static String getPluginLibrary()
+    static const char* getPluginBinary() noexcept
     {
-#if DISTRHO_OS_LINUX
-        String path = String(getBinaryFilename());
-        path.truncate(path.rfind('/'));
-
-        const char* format = getPluginFormatName();
-
-        if (strcmp(format, "LV2") == 0) {
-            return path + "/" + PathSubdirectory::bundleLibrary;
-        } else if (strcmp(format, "VST2") == 0) {
-            return path + "/" + PathSubdirectory::nonBundleLibrary;
-        } else if (strcmp(format, "VST3") == 0) {
-            return path.truncate(path.rfind('/')) + "/Resources";
-        }
-
-        return path + "/" + PathSubdirectory::nonBundleLibrary;
-#elif DISTRHO_OS_MAC
-        String path = String(getBinaryFilename());
-        path.truncate(path.rfind('/'));
-
-        const char* format = getPluginFormatName();
-
-        if (strcmp(format, "LV2") == 0) {
-            return path + "/" + PathSubdirectory::bundleLibrary;
-        } else if ((strcmp(format, "VST2") == 0) || (strcmp(format, "VST3") == 0)) {
-            return path.truncate(path.rfind('/')) + "/Resources";
-        }
-
-        return path + "/" + PathSubdirectory::nonBundleLibrary;
-#elif DISTRHO_OS_WINDOWS
-        String path = String(getBinaryFilename());
-        path.truncate(path.rfind('\\'));
-
-        const char* format = getPluginFormatName();
-
-        if (strcmp(format, "LV2") == 0) {
-            return path + "\\" + PathSubdirectory::bundleLibrary;
-        } else if (strcmp(format, "VST2") == 0) {
-            return path + "\\" + PathSubdirectory::nonBundleLibrary;
-        } else if (strcmp(format, "VST3") == 0) {
-            return path.truncate(path.rfind('\\')) + "\\Resources";
-        }
-
-        return path + "\\" + PathSubdirectory::nonBundleLibrary;
+        static String filename;
+#ifdef DISTRHO_OS_WINDOWS
+        CHAR buf[MAX_PATH];
+        buf[0] = '\0';
+        GetModuleFileNameA((HINSTANCE)&__ImageBase, buf, sizeof(buf));
+        filename = buf;
+#else
+        // dladdr() works for executables and dynamic libs on Linux and macOS
+        Dl_info info;
+        dladdr((void *)&__PRETTY_FUNCTION__, &info);
+        char buf[PATH_MAX];
+        filename = realpath(info.dli_fname, buf);
 #endif
+        return filename;
     }
-#endif // DISABLE_PATH_GET_PLUGIN_LIBRARY
 
-    static String getUserData()
+    static String getPluginLibrary() noexcept
+    {
+        String path = String(getPluginBinary());
+        path.truncate(path.rfind(DISTRHO_OS_SEP));
+
+        switch (getPluginFormat()) {
+            case PluginFormat::LV2:
+                return path + DISTRHO_OS_SEP_STR + PathSubdirectory::bundleLibrary;
+            case PluginFormat::VST2:
+#if defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_WINDOWS)
+                return path + DISTRHO_OS_SEP_STR + PathSubdirectory::nonBundleLibrary;
+#endif
+            case PluginFormat::VST3:
+                return path.truncate(path.rfind(DISTRHO_OS_SEP)) + DISTRHO_OS_SEP_STR + "Resources";
+            default:
+                break;
+        }
+
+        return path + DISTRHO_OS_SEP_STR + PathSubdirectory::nonBundleLibrary;
+    }
+
+    static PluginFormat getPluginFormat() noexcept
+    {
+        PluginFormat format = PluginFormat::Unknown;
+
+#if DISTRHO_OS_LINUX
+        char exePath[PATH_MAX];
+        exePath[0] = '\0';
+        ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+        if (len == -1) {
+            d_stderr2("Could not determine executable path");
+            return format;
+        }
+
+        if (strcmp(exePath, getPluginBinary()) == 0) {
+            format = PluginFormat::Jack;
+        } else {
+            void* handle = dlopen(imgPath, RTLD_LAZY | RTLD_NOLOAD);
+            String path(dirname(imgPath)); 
+
+            if (handle != 0) {
+                if ((dlsym(handle, "lv2ui_descriptor") != 0) || dlsym(handle, "lv2_descriptor") != 0) {
+                    format = PluginFormat::LV2;
+                } else if (dlsym(handle, "main") != 0) {
+                    format = PluginFormat::VST2;
+                } else if (dlsym(handle, "GetPluginFactory") != 0) {
+                    format = PluginFormat::VST2;
+                }
+
+                dlclose(handle);
+            }
+        }
+#elif DISTRHO_OS_MAC
+        char filename[PATH_MAX];
+        strcpy(filename, getPluginBinary());
+        String path(dirname(filename));
+        void* handle = dlopen(filename, RTLD_LAZY | RTLD_NOLOAD);
+
+        // dlopen() returns 0 for the standalone executable on macOS
+        if (handle == 0) {
+            format = PluginFormat::Jack;
+        } else {
+            if ((dlsym(handle, "lv2_descriptor") != 0) || dlsym(handle, "lv2ui_descriptor") != 0) {
+                format = PluginFormat::LV2;
+            } else if (dlsym(handle, "VSTPluginMain") != 0) {
+                format = PluginFormat::VST2;
+            } else if (dlsym(handle, "GetPluginFactory") != 0) {
+                format = PluginFormat::VST2;
+            }
+
+            dlclose(handle);
+        }
+#elif DISTRHO_OS_WINDOWS
+        // HISTANCE and HMODULE are interchangeable
+        // https://stackoverflow.com/questions/2126657/how-can-i-get-hinstance-from-a-dll
+        HMODULE hm = (HMODULE)&__ImageBase;
+
+        if ((GetProcAddress(hm, "lv2_descriptor") != 0) || (GetProcAddress(hm, "lv2ui_descriptor") != 0)) {
+            format = PluginFormat::LV2;
+        } else if (GetProcAddress(hm, "VSTPluginMain") != 0) {
+            format = PluginFormat::VST2;
+        } else if (GetProcAddress(hm, "GetPluginFactory") != 0) {
+            format = PluginFormat::VST3;
+        } else {
+            format = PluginFormat::Jack;
+        }
+#endif
+        return format;
+    }
+
+    static String getUserData() noexcept
     {
 #if DISTRHO_OS_LINUX
         String path;

@@ -76,7 +76,7 @@ void WebViewUI::setWebView(WebViewBase* webView)
 
     setSize(width, height);
 
-    if (::strcmp(getPluginFormatName(), "VST3") == 0) {
+    if (Path::getPluginFormat() == PluginFormat::VST3) {
         setSize(width, height); // 2x setSize() calls needed for VST3 - DPF bug?
     }
 }
