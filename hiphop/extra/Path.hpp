@@ -42,7 +42,9 @@
 # include <shtypes.h>
 #endif
 
-#if ! DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+// This header can be also included from non-plugin code (ie. Linux CEF helper)
+#if ! defined(HIPHOP_SKIP_DPF) && ! DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+# define USE_DPF
 # include "DistrhoPluginUtils.hpp"
 #endif
 
@@ -70,7 +72,7 @@ struct Path
 {
     static String getPluginBinary() noexcept
     {
-#if ! DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+#ifdef USE_DPF
         return String(getBinaryFilename()); // DistrhoUtils.cpp
 #else
 # ifdef DISTRHO_OS_WINDOWS
@@ -85,7 +87,7 @@ struct Path
         char buf[PATH_MAX];
         return String(realpath(info.dli_fname, buf));
 # endif
-#endif // DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+#endif // USE_DPF
     }
 
     static String getPluginLibrary() noexcept
@@ -113,7 +115,7 @@ struct Path
     {
         PluginFormat format = PluginFormat::Unknown;
 
-#if ! DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+#ifdef USE_DPF
         const char* pfn = getPluginFormatName();
 
         if (strcmp(pfn, "JACK/Standalone") == 0) {
@@ -188,7 +190,7 @@ struct Path
             format = PluginFormat::Jack;
         }
 # endif
-#endif // DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+#endif // USE_DPF
 
         return format;
     }
