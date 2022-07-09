@@ -19,22 +19,23 @@
 #ifndef PATH_HPP
 #define PATH_HPP
 
+#include <cstring>
 #if DISTRHO_OS_LINUX
-# include <cstring>
+# include <dlfcn.h>
+# include <libgen.h>
 # include <pwd.h>
 # include <unistd.h>
+# include <linux/limits.h>
 # include <sys/stat.h>
 #endif
 #if DISTRHO_OS_MAC
-# include <cstring>
 # include <dlfcn.h>
 # include <libgen.h>
-# include <sys/stat.h>
 # include <sysdir.h>
 # include <wordexp.h>
+# include <sys/stat.h>
 #endif
 #if DISTRHO_OS_WINDOWS
-# include <cstring>
 # include <errhandlingapi.h>
 # include <shlobj.h>
 # include <shlwapi.h>
@@ -59,7 +60,7 @@ namespace PathSubdirectory {
 
 struct Path
 {
-    static const char* getPluginBinary() noexcept
+    static String getPluginBinary() noexcept
     {
         static String filename;
 #ifdef DISTRHO_OS_WINDOWS
@@ -79,7 +80,7 @@ struct Path
 
     static String getPluginLibrary() noexcept
     {
-        String path = String(getPluginBinary());
+        String path = getPluginBinary();
         path.truncate(path.rfind(DISTRHO_OS_SEP));
 
         switch (getPluginFormat()) {
@@ -111,11 +112,12 @@ struct Path
             return format;
         }
 
-        if (strcmp(exePath, getPluginBinary()) == 0) {
+        String binPath = getPluginBinary();
+
+        if (strcmp(binPath, exePath) == 0) {
             format = PluginFormat::Jack;
         } else {
-            void* handle = dlopen(imgPath, RTLD_LAZY | RTLD_NOLOAD);
-            String path(dirname(imgPath)); 
+            void* handle = dlopen(binPath, RTLD_LAZY | RTLD_NOLOAD);
 
             if (handle != 0) {
                 if ((dlsym(handle, "lv2ui_descriptor") != 0) || dlsym(handle, "lv2_descriptor") != 0) {
@@ -123,17 +125,14 @@ struct Path
                 } else if (dlsym(handle, "main") != 0) {
                     format = PluginFormat::VST2;
                 } else if (dlsym(handle, "GetPluginFactory") != 0) {
-                    format = PluginFormat::VST2;
+                    format = PluginFormat::VST3;
                 }
 
                 dlclose(handle);
             }
         }
 #elif DISTRHO_OS_MAC
-        char filename[PATH_MAX];
-        strcpy(filename, getPluginBinary());
-        String path(dirname(filename));
-        void* handle = dlopen(filename, RTLD_LAZY | RTLD_NOLOAD);
+        void* handle = dlopen(getPluginBinary(), RTLD_LAZY | RTLD_NOLOAD);
 
         // dlopen() returns 0 for the standalone executable on macOS
         if (handle == 0) {
@@ -144,7 +143,7 @@ struct Path
             } else if (dlsym(handle, "VSTPluginMain") != 0) {
                 format = PluginFormat::VST2;
             } else if (dlsym(handle, "GetPluginFactory") != 0) {
-                format = PluginFormat::VST2;
+                format = PluginFormat::VST3;
             }
 
             dlclose(handle);
