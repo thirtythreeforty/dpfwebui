@@ -88,10 +88,10 @@ g-knob {
     width: 48px;
     height: 48px;
     margin-bottom: 2px;
-    --circle-color: #272727;
-    --dot-off-color: #ffffff;
-    --dot-on-color: #ffffff;
-    --track-color: #777777;
+    --body-color: #272727;
+    --range-color: #777777;
+    --pointer-off-color: #ffffff;
+    --pointer-on-color: #ffffff;
 }
 
 #knob-attack {
