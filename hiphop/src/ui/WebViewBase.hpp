@@ -46,7 +46,7 @@ public:
     void setSize(uint width, uint height);
     
     uint32_t getBackgroundColor();
-    void     setBackgroundColor(const char* cssColor);
+    void     setBackgroundColor(uint32_t color);
     
     uintptr_t getParent();
     void      setParent(uintptr_t parent);

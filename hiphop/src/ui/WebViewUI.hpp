@@ -87,7 +87,7 @@ private:
 
     typedef std::vector<JSValue> MessageBuffer;
 
-    String        fBackgroundColor;
+    uint32_t      fBackgroundColor;
     bool          fJsUiReady;
     uintptr_t     fPlatformWindow;
     WebViewBase*  fWebView;

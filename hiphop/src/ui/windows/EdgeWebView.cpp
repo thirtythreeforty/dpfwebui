@@ -36,8 +36,6 @@
 
 #define JS_POST_MESSAGE_SHIM  "window.host.postMessage = (args) => window.chrome.webview.postMessage(args);"
 
-#define COLOR_TRANSPARENT 0x000000ff
-
 #define WSTR_CONVERTER std::wstring_convert<std::codecvt_utf8<wchar_t>>()
 #define TO_LPCWSTR(s)  WSTR_CONVERTER.from_bytes(s).c_str()
 #define TO_LPCSTR(s)   WSTR_CONVERTER.to_bytes(s).c_str()
@@ -64,7 +62,7 @@ EdgeWebView::EdgeWebView()
         return;
     }
 
-    setBackgroundColor(COLOR_TRANSPARENT);
+    setBackgroundColor(0); // transparent
 
     constexpr size_t maxClassName = 256;
     fHelperClassName = new WCHAR[maxClassName];
@@ -384,7 +382,7 @@ LRESULT CALLBACK HelperWindowProc(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lP
         EdgeWebView* view = reinterpret_cast<EdgeWebView *>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
         const uint32_t rgba = view->getBackgroundColor();
 
-        if (rgba != COLOR_TRANSPARENT) {
+        if (rgba != 0) {
             RECT rc;
             GetClientRect(hwnd, &rc);
             const COLORREF bgr = ((rgba & 0xff000000) >> 24) | ((rgba & 0x00ff0000) >> 8)

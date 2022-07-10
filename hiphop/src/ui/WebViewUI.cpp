@@ -20,6 +20,7 @@
 
 #include "WebViewUI.hpp"
 
+#include "extra/CSSColor.hpp"
 #include "extra/Path.hpp"
 
 #define HTML_INDEX_PATH "/ui/index.html"
@@ -28,7 +29,7 @@ USE_NAMESPACE_DISTRHO
 
 WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor)
     : WebViewUIBase(widthCssPx, heightCssPx)
-    , fBackgroundColor(backgroundCssColor)
+    , fBackgroundColor(CSSColor::fromHex(backgroundCssColor))
     , fJsUiReady(false)
     , fPlatformWindow(0)
     , fWebView(nullptr)
