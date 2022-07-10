@@ -26,9 +26,9 @@
 
 USE_NAMESPACE_DISTRHO
 
-WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor)
+WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor)
     : WebViewUIBase(widthCssPx, heightCssPx)
-    , fBackgroundColor(backgroundColor)
+    , fBackgroundColor(backgroundCssColor)
     , fJsUiReady(false)
     , fPlatformWindow(0)
     , fWebView(nullptr)

@@ -18,6 +18,8 @@
 
 #include "WebViewBase.hpp"
 
+#include "extra/CSSColor.hpp"
+
 // This could be moved into dpf.js but then JavaScript code should be checking
 // for the platform type in order to insert JS_POST_MESSAGE_SHIM. Leaving
 // platform-dependent code in a single place (C++) for a cleaner approach.
@@ -71,9 +73,9 @@ uint32_t WebViewBase::getBackgroundColor()
     return fBackgroundColor;
 }
 
-void WebViewBase::setBackgroundColor(uint32_t rgba)
+void WebViewBase::setBackgroundColor(const char* cssColor)
 {
-    fBackgroundColor = rgba;
+    fBackgroundColor = CSSColor::fromHex(cssColor);
 }
 
 uintptr_t WebViewBase::getParent()

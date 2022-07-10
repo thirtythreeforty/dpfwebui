@@ -25,7 +25,7 @@ BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam);
 USE_NAMESPACE_DISTRHO
 
 WindowsWebViewUI::WindowsWebViewUI(uint baseWidth, uint baseHeight,
-        uint32_t backgroundColor, bool startLoading)
+        const char* backgroundCssColor, bool startLoading)
     : WebViewUI(baseWidth, baseHeight, backgroundColor)
     , fHostHWnd(0)
 {

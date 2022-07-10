@@ -28,7 +28,7 @@ public:
     // helps eliminating flicker when opening the plugin user interface.
 
     WebGainExampleUI()
-        : WebUI(600 /*width*/, 300 /*width*/, 0xD4B6EFFF /*background*/, false /*load*/)
+        : WebUI(600 /*width*/, 300 /*width*/, "#d4b6ef" /*background*/, false /*load*/)
     {
         // Web view not ready yet. Calls to runScript() or any DPF methods mapped
         // by WebUI are forbidden. Mapped methods are those that have their

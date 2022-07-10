@@ -25,8 +25,8 @@
 USE_NAMESPACE_DISTRHO
 
 MacWebViewUI::MacWebViewUI(uint baseWidth, uint baseHeight,
-        uint32_t backgroundColor, bool startLoading)
-    : WebViewUI(baseWidth, baseHeight, backgroundColor)
+        const char* backgroundCssColor, bool startLoading)
+    : WebViewUI(baseWidth, baseHeight, backgroundCssColor)
     , fWindow(0)
 {
     if (isDryRun()) {

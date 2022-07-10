@@ -39,7 +39,7 @@ typedef WebUIBase WebViewUIBase; // file://  + Native interface [postMessage()]
 class WebViewUI : public WebViewUIBase, private WebViewEventHandler
 {
 public:
-    WebViewUI(uint widthCssPx, uint heightCssPx, uint32_t backgroundColor);
+    WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor);
     virtual ~WebViewUI();
 
     uintptr_t getPlatformWindow() const { return fPlatformWindow; }
@@ -87,7 +87,7 @@ private:
 
     typedef std::vector<JSValue> MessageBuffer;
 
-    uint32_t      fBackgroundColor;
+    String        fBackgroundColor;
     bool          fJsUiReady;
     uintptr_t     fPlatformWindow;
     WebViewBase*  fWebView;

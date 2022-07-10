@@ -24,7 +24,7 @@
 USE_NAMESPACE_DISTRHO
 
 LinuxWebViewUI::LinuxWebViewUI(uint baseWidth, uint baseHeight,
-        uint32_t backgroundColor, bool startLoading)
+        const char* backgroundCssColor, bool startLoading)
     : WebViewUI(baseWidth, baseHeight, backgroundColor)
 {
     if (isDryRun()) {

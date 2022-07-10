@@ -28,7 +28,7 @@ class WindowsWebViewUI : public WebViewUI
 {
 public:
     WindowsWebViewUI(uint baseWidth = 0, uint baseHeight = 0,
-        uint32_t backgroundColor = 0xffffffff, bool startLoading = true);
+        const char* backgroundCssColor = "#fff", bool startLoading = true);
     virtual ~WindowsWebViewUI();
 
     void openSystemWebBrowser(String& url) override;

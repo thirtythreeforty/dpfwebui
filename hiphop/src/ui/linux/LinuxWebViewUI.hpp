@@ -32,7 +32,7 @@ class LinuxWebViewUI : public WebViewUI
 {
 public:
     LinuxWebViewUI(uint baseWidth = 0, uint baseHeight = 0,
-        uint32_t backgroundColor = 0xffffffff, bool startLoading = true);
+        const char* backgroundCssColor = "#fff", bool startLoading = true);
     virtual ~LinuxWebViewUI();
 
     void openSystemWebBrowser(String& url) override;
