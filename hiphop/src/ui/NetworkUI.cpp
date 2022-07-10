@@ -175,7 +175,7 @@ void NetworkUI::stateChanged(const char* key, const char* value)
             fPort = findAvailablePort();
             setState("_ws_port", std::to_string(fPort).c_str());
         } else {
-            d_stderr(LOG_TAG " : reusing port %d", fPort);
+            //d_stderr(LOG_TAG " : reusing port %d", fPort);
         }
         if (fPort != -1) {
             initServer();
@@ -338,10 +338,10 @@ int NetworkUI::findAvailablePort()
         d_stderr(LOG_TAG " : failed close(), errno %d", errno);
     }
 
-    if (port != -1) {
-        d_stderr(LOG_TAG " : found available port %d", port);
-    } else {
+    if (port == -1) {
         d_stderr2(LOG_TAG " : could not find available port");
+    } else {
+        //d_stderr(LOG_TAG " : found available port %d", port);
     }
 
     return port;

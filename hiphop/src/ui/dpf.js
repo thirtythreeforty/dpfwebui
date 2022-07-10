@@ -130,12 +130,12 @@ class UI extends UIBase() {
             if (this._socket.readyState == WebSocket.OPEN) {
                 this._socket.send(JSON.stringify(args));
             } else {
-                console.log(`Cannot send message, socket state is ${this._socket.readyState}.`);
+                this._log(`Cannot send message, socket state is ${this._socket.readyState}.`);
             }
         } else if (DISTRHO.env.plugin) {
             window.host.postMessage(args);
         } else if (DISTRHO.env.dev) {
-            console.log(`stub: postMessage(${args})`);
+            this._log(`Stub postMessage(${args})`);
         }
     }
 
@@ -233,7 +233,8 @@ class UI extends UIBase() {
 //
 function UIBase() { return class {
 
-    constructor() {
+    constructor(opt) {
+        this._opt = opt || {};
         this._resolve = {};
         this._cache = {};
         this._socket = null;
@@ -271,7 +272,7 @@ function UIBase() { return class {
             this._socket = new WebSocket(`ws://${document.location.host}`);
 
             this._socket.addEventListener('open', (_) => {
-                console.log('UI: connected');
+                this._log('Connected');
 
                 clearInterval(reconnectTimer);
                 pingTimer = setInterval(this._ping.bind(this), 1000 * pingPeriod);
@@ -281,7 +282,7 @@ function UIBase() { return class {
             });
 
             this._socket.addEventListener('close', (_) => {
-                console.log(`UI: reconnecting in ${reconnectPeriod} sec...`);
+                this._log(`Reconnecting in ${reconnectPeriod} sec...`);
 
                 this._cancelAllRequests();
                 this.messageChannelClosed();
@@ -334,7 +335,7 @@ function UIBase() { return class {
     // Compute latency when response to ping is received
     pong() {
         this._latency = (new Date).getTime() - this._pingSendTime;
-        console.log(`UI: latency = ${this._latency}ms`);
+        this._log(`Latency = ${this._latency}ms`);
     }
 
     // Handle incoming message
@@ -372,6 +373,13 @@ function UIBase() { return class {
             }
 
             this._resolve[method] = [];
+        }
+    }
+
+    // Optional debug messages
+    _log(message) {
+        if (this._opt.log) {
+            console.log(`UI: ${message}`);
         }
     }
 

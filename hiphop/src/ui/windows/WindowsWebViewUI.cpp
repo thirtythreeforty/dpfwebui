@@ -26,7 +26,7 @@ USE_NAMESPACE_DISTRHO
 
 WindowsWebViewUI::WindowsWebViewUI(uint baseWidth, uint baseHeight,
         const char* backgroundCssColor, bool startLoading)
-    : WebViewUI(baseWidth, baseHeight, backgroundColor)
+    : WebViewUI(baseWidth, baseHeight, backgroundCssColor)
     , fHostHWnd(0)
 {
     if (isDryRun()) {
