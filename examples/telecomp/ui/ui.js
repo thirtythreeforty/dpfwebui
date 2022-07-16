@@ -34,16 +34,14 @@ class TeleCompExampleUI extends DISTRHO.UI {
 
         // Do not navigate when clicking credits and open system browser instead
         helper.bindSystemBrowser(this, document.querySelector('#credits > a'));
-        
+
         // Setup view to suit environment
         if (env.plugin) {
             this._setupForPluginEmbeddedWebView();
-        } else {
-            if (! env.dev) {
-                this._setupForExternalClients();
-            } else {
-                this._setupForDevelopment();
-            }
+        } else if (env.network) {
+            this._setupForNetworkClients();
+        } else if (env.dev) {
+            this._setupForDevelopment();
         }
 
         // Make the knobs control plugin parameters
@@ -76,7 +74,7 @@ class TeleCompExampleUI extends DISTRHO.UI {
         }));
     }
 
-    _setupForExternalClients() {
+    _setupForNetworkClients() {
         // Center the user interface within the web browser viewport
         document.getElementById('overscan').style.background = 'rgba(0,0,0,0.5)';
         const main = document.getElementById('main');

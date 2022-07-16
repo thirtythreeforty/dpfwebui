@@ -126,16 +126,28 @@ class UI extends UIBase() {
     // Non-DPF method for sending a message to the host
     // void WebViewUI::postMessage(const JSValue& args)
     postMessage(...args) {
-        if (DISTRHO.env.network) {
+        const env = DISTRHO.env;
+        const socketSend = args => {
             if (this._socket.readyState == WebSocket.OPEN) {
                 this._socket.send(JSON.stringify(args));
             } else {
                 this._log(`Cannot send message, socket state is ${this._socket.readyState}.`);
             }
-        } else if (DISTRHO.env.plugin) {
-            window.host.postMessage(args);
-        } else if (DISTRHO.env.dev) {
-            this._log(`Stub postMessage(${args})`);
+        }
+
+        if (env.plugin) {
+            if (env.network) {
+                socketSend(args);
+            } else {
+                window.host.postMessage(args);
+            }
+        } else {
+            if (env.dev) {
+                this._log(`Stub postMessage(${args})`);
+            } else if (env.network) {
+                socketSend(args);
+            }
+
         }
     }
 
@@ -241,22 +253,27 @@ function UIBase() { return class {
         this._latency = 0;
         this._pingSendTime = 0;
 
-        if (DISTRHO.env.network) {
-            this._initSocketMessageChannel();
+        const env = DISTRHO.env;
 
-        } else if (DISTRHO.env.plugin) {
-            this._initNativeMessageChannel();
-
-            // Call WebUI::ready() to let the host know the JS UI has completed
-            // setting up. This causes the initialization message buffer to be
-            // flushed so any messages generated while the web view was still
-            // loading can be processed. Since this involves message passing, it
-            // will not cause any UI methods to be triggered synchronously and
-            // is safe to indirectly call from super() in subclass constructors.
-            this._call('ready');
-
-        } else if (DISTRHO.env.dev) {
-            setTimeout(this.messageChannelOpen.bind(this), 0);
+        if (env.plugin) {
+            if (env.network) {
+                this._initSocketMessageChannel();
+            } else {
+                this._initNativeMessageChannel();
+                // Call WebUI::ready() to let the host know the JS UI has completed
+                // setting up. This causes the initialization message buffer to be
+                // flushed so any messages generated while the web view was still
+                // loading can be processed. Since this involves message passing, it
+                // will not cause any UI methods to be triggered synchronously and
+                // is safe to indirectly call from super() in subclass constructors.
+                this._call('ready');
+            }
+        } else {
+            if (env.dev) {
+                setTimeout(this.messageChannelOpen.bind(this), 0);
+            } else if (env.network) {
+                this._initSocketMessageChannel();
+            }
         }
     }
 
@@ -713,9 +730,9 @@ class UIHelperPrivate {
         // Determine the running environment. This information could be prepared
         // on the native side and then 1) injected into the web view, or 2)
         // injected into dpf.js before it is served (so it also works for HTTP
-        // clients). But the simplicity of the client-side heuristics below far
-        // outweighs the complexity of the aforementioned server-side solution,
-        // with equal results in practice.
+        // clients). But the simplicity of the client-side heuristics below
+        // outweighs the complexity of the server-side solution with same
+        // results in practice.
         let env = {};
 
         if (window.host !== undefined) {
@@ -729,7 +746,13 @@ class UIHelperPrivate {
         }
 
         env.network = window.location.protocol.indexOf('http') == 0;
-        env.dev = !env.plugin && !env.network;
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('env') == 'dev') {
+            env.dev = true;
+        } else {
+            env.dev = !env.plugin && !env.network; // ie. open file index.html
+        }
         
         return Object.freeze(env);
     }
