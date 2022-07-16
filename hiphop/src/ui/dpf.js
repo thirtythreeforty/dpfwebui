@@ -748,7 +748,7 @@ class UIHelperPrivate {
         env.network = window.location.protocol.indexOf('http') == 0;
 
         const params = new URLSearchParams(window.location.search);
-        if (params.get('env') == 'dev') {
+        if (params.get('dev') == '1') {
             env.dev = true;
         } else {
             env.dev = !env.plugin && !env.network; // ie. open file index.html
