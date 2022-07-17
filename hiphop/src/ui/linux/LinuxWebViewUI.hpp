@@ -38,6 +38,7 @@ public:
     void openSystemWebBrowser(String& url) override;
 
 protected:
+    void      sizeRequest(const UiBlock& block) override;
     uintptr_t createStandaloneWindow() override;
     void      processStandaloneEvents() override;
 

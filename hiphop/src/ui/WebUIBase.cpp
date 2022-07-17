@@ -137,41 +137,6 @@ void WebUIBase::initHandlers()
         postMessage({"UI", "getInitHeightCSS", static_cast<double>(getInitHeightCSS())}, context);
     });
 
-    fHandler["getWidth"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getWidth", static_cast<double>(getWidth())}, context);
-    });
-
-    fHandler["getHeight"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getHeight", static_cast<double>(getHeight())}, context);
-    });
-
-    fHandler["isResizable"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "isResizable", isResizable()}, context);
-    });
-
-    // Resizing needs to be done in the main thread, use queue()
-
-    fHandler["setWidth"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*context*/) {
-        queue([this, args]() {
-            setWidth(static_cast<uint>(args[0].getNumber()));
-        });
-    });
-
-    fHandler["setHeight"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*context*/) {
-        queue([this, args]() {
-            setHeight(static_cast<uint>(args[0].getNumber()));
-        });
-    });
-
-    fHandler["setSize"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*context*/) {
-        queue([this, args]() {
-            setSize(
-                static_cast<uint>(args[0].getNumber()), // width
-                static_cast<uint>(args[1].getNumber())  // height
-            );
-        });
-    });
-
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
     fHandler["sendNote"] = std::make_pair(3, [this](const JSValue& args, uintptr_t /*context*/) {
         sendNote(
