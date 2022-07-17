@@ -69,8 +69,6 @@ protected:
 #endif
     void sizeChanged(uint width, uint height) override;
 
-    virtual void sizeRequest(const UiBlock& block);
-    
     virtual void onDocumentReady() {}
 
     virtual uintptr_t createStandaloneWindow() = 0;
