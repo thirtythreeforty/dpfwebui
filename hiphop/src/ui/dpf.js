@@ -46,8 +46,11 @@ class UI extends UIBase() {
     }
 
     // void UI::setSize(uint width, uint height)
+    // This method is only supported in the plugin embedded web view
     setSize(width, height) {
-        this._call('setSize', width, height);
+        if (DISTRHO.env.plugin) {
+            window.host.postMessage(['UI', 'setSize', width, height]);
+        }
     }
 
     // void UI::sendNote(uint8_t channel, uint8_t note, uint8_t velocity)

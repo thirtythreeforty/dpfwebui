@@ -233,11 +233,9 @@ void WebViewUI::handleWebViewLoadFinished()
 
 void WebViewUI::handleWebViewScriptMessage(const JSValue& args)
 {
-#if ! defined(HIPHOP_NETWORK_UI)
+//#if ! defined(HIPHOP_NETWORK_UI)
     handleMessage(args, 0);
-#else
-    (void)args;
-#endif
+//#endif
 }
 
 void WebViewUI::handleWebViewConsole(const String& tag, const String& text)
