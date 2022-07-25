@@ -226,6 +226,15 @@ void CocoaWebView::onSetParent(uintptr_t parent)
     }
 }
 
+- (void)cancelOperation:(id)sender
+{
+    if (self.cppView->getKeyboardFocus()) {
+        // Avoid crash when hitting Escape with keyboard focus enabled
+    } else {
+        [super cancelOperation:sender];
+    }
+}
+
 @end
 
 @implementation DistrhoWebViewDelegate
