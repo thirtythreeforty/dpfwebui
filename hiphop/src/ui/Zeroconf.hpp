@@ -90,11 +90,11 @@ public:
         unpublish();
 
 #if DISTRHO_OS_LINUX
-        typedef std::vector<const char*> CStringArrayVector;
+        typedef std::vector<const char*> CStringVector;
 
         const char* const bin = "avahi-publish";
         const std::string sport = std::to_string(port);
-        CStringArrayVector argv = { bin, "-s", name, type, sport.c_str() };
+        CStringVector argv = { bin, "-s", name, type, sport.c_str() };
         const size_t offset = argv.size(); // for freeing below
 
         for (KeyValuePairsVector::const_iterator it = txtData.cbegin(); it != txtData.cend(); ++it) {
@@ -113,7 +113,7 @@ public:
             d_stderr2("Zeroconf : failed publish()");
         }
 
-        for (CStringArrayVector::const_iterator it = argv.cbegin() + offset ; it != argv.cend(); ++it) {
+        for (CStringVector::const_iterator it = argv.cbegin() + offset ; it != argv.cend(); ++it) {
             delete *it;
         }
 #elif DISTRHO_OS_MAC
@@ -170,8 +170,8 @@ public:
         std::strcat(service, type);
         std::strcat(service, ".local");
 
-        typedef std::vector<PCWSTR> CWideStringArrayVector;
-        CWideStringArrayVector keys, values;
+        typedef std::vector<PCWSTR> CWideStringVector;
+        CWideStringVector keys, values;
         for (KeyValuePairsVector::const_iterator it = txtData.cbegin(); it != txtData.cend(); ++it) {
             PWSTR key = new WCHAR[255], value = new WCHAR[255];
             mbstowcs(key, it->key, 255);
