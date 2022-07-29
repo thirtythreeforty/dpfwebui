@@ -27,6 +27,8 @@
 #include "extra/UIEx.hpp"
 #include "extra/JSValue.hpp"
 
+#define DESTINATION_ALL 0
+
 START_NAMESPACE_DISTRHO
 
 class WebUIBase : public UIEx
@@ -59,12 +61,12 @@ protected:
     void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) override;
 #endif
 
-    virtual void postMessage(const JSValue& args, uintptr_t context) = 0;
-    virtual void onMessageReceived(const JSValue& args, uintptr_t context);
+    virtual void postMessage(const JSValue& args, uintptr_t destination) = 0;
+    virtual void onMessageReceived(const JSValue& args, uintptr_t origin);
 
-    void handleMessage(const JSValue& args, uintptr_t context);
+    void handleMessage(const JSValue& args, uintptr_t origin);
 
-    typedef std::function<void(const JSValue& args, uintptr_t context)> MessageHandler;
+    typedef std::function<void(const JSValue& args, uintptr_t origin)> MessageHandler;
     typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
     typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
 

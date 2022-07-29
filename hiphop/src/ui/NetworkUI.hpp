@@ -47,8 +47,8 @@ public:
     void setState(const char* key, const char* value);
 
 protected:
-    void broadcastMessage(const JSValue& args, Client origin = nullptr);
-    void postMessage(const JSValue& args, uintptr_t context) override;
+    void broadcastMessage(const JSValue& args, Client exclude = nullptr);
+    void postMessage(const JSValue& args, uintptr_t destination) override;
 
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_STATE

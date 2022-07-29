@@ -101,7 +101,9 @@ class UI extends UIBase() {
     // Non-DPF method for grabbing or releasing the keyboard focus
     // void WebViewUI::setKeyboardFocus()
     setKeyboardFocus(focus) {
-        this._call('setKeyboardFocus', focus);
+        if (DISTRHO.env.plugin) {
+            this._call('setKeyboardFocus', focus);
+        }
     }
 
     // Non-DPF method for opening the default system browser

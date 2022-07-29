@@ -28,6 +28,8 @@
 # include "NetworkUI.hpp"
 #endif
 
+#define ORIGIN_EMBEDDED_WEB_VIEW 0
+
 START_NAMESPACE_DISTRHO
 
 #if defined(HIPHOP_NETWORK_UI)
@@ -60,7 +62,7 @@ protected:
     void setKeyboardFocus(bool focus);
 
 #if ! defined(HIPHOP_NETWORK_UI)
-    void postMessage(const JSValue& args, uintptr_t context) override;
+    void postMessage(const JSValue& args, uintptr_t origin) override;
 #endif
 
     void uiIdle() override;

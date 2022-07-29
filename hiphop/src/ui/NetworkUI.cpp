@@ -137,17 +137,17 @@ void NetworkUI::setState(const char* key, const char* value)
     fStates[key] = value;
 }
 
-void NetworkUI::broadcastMessage(const JSValue& args, Client origin)
+void NetworkUI::broadcastMessage(const JSValue& args, Client exclude)
 {
-    fServer.broadcast(args.toJSON(), /*exclude*/origin);
+    fServer.broadcast(args.toJSON(), exclude);
 }
 
-void NetworkUI::postMessage(const JSValue& args, uintptr_t context)
+void NetworkUI::postMessage(const JSValue& args, uintptr_t destination)
 {
-    if (context == 0) {
+    if (destination == DESTINATION_ALL) {
         fServer.broadcast(args.toJSON());
     } else {
-        fServer.send(args.toJSON(), reinterpret_cast<Client>(context));
+        fServer.send(args.toJSON(), reinterpret_cast<Client>(destination));
     }
 }
 
@@ -214,81 +214,81 @@ void NetworkUI::initHandlers()
 {
     // Broadcast parameter updates to all clients except the originating one
     const MessageHandler& parameterHandlerSuper = fHandler["setParameterValue"].second;
-    fHandler["setParameterValue"] = std::make_pair(2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t context) {
-        queue([this, parameterHandlerSuper, args, context] {
+    fHandler["setParameterValue"] = std::make_pair(2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t origin) {
+        queue([this, parameterHandlerSuper, args, origin] {
             const uint32_t index = static_cast<uint32_t>(args[0].getNumber());
             const float value = static_cast<float>(args[1].getNumber());
             fParameters[index] = value;
             fParameterLock = true; // avoid echo
-            parameterHandlerSuper(args, context);
+            parameterHandlerSuper(args, origin);
         });
 
         const JSValue msg = JSValue({"UI", "parameterChanged"}) + args;
-        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(context));
+        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
     // Broadcast state updates to all clients except the originating one
     const MessageHandler& stateHandlerSuper = fHandler["setState"].second;
-    fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t context) {
-        queue([this, stateHandlerSuper, args, context] {
+    fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t origin) {
+        queue([this, stateHandlerSuper, args, origin] {
             const String key = args[0].getString();
             const String value = args[1].getString();
             fStates[key.buffer()] = value.buffer();
-            stateHandlerSuper(args, context);
+            stateHandlerSuper(args, origin);
         });
 
         const JSValue msg = JSValue({"UI", "stateChanged"}) + args;
-        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(context));
+        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
     });
 #endif
 
     // Custom method for exchanging UI-only messages between clients
-    fHandler["broadcast"] = std::make_pair(1, [this](const JSValue& args, uintptr_t context) {
+    fHandler["broadcast"] = std::make_pair(1, [this](const JSValue& args, uintptr_t origin) {
         const JSValue msg = JSValue({"UI", "messageReceived"}) + args;
-        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(context));
+        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
     });
 
 #if HIPHOP_UI_ZEROCONF
-    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()}, context);
+    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+        postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()}, origin);
     });
 
-    fHandler["setZeroconfPublished"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*context*/) {
+    fHandler["setZeroconfPublished"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
         fZeroconfPublish = args[0].getBoolean();
         setState("_zc_published", fZeroconfPublish ? "true" : "false");
         zeroconfStateUpdated();
     });
 
-    fHandler["getZeroconfId"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getZeroconfId", fZeroconfId}, context);
+    fHandler["getZeroconfId"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+        postMessage({"UI", "getZeroconfId", fZeroconfId}, origin);
     });
 
-    fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getZeroconfName", fZeroconfName}, context);
+    fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+        postMessage({"UI", "getZeroconfName", fZeroconfName}, origin);
     });
 
-    fHandler["setZeroconfName"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*context*/) {
+    fHandler["setZeroconfName"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
         fZeroconfName = args[0].getString();
         setState("_zc_name", fZeroconfName);
         zeroconfStateUpdated();
     });
 #else
-    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "isZeroconfPublished", false}, context);
+    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+        postMessage({"UI", "isZeroconfPublished", false}, origin);
     });
 
-    fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getZeroconfName", ""}, context);
+    fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+        postMessage({"UI", "getZeroconfName", ""}, origin);
     });
 #endif
 
-    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "getPublicUrl", getPublicUrl()}, context);
+    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+        postMessage({"UI", "getPublicUrl", getPublicUrl()}, origin);
     });
 
-    fHandler["ping"] = std::make_pair(0, [this](const JSValue&, uintptr_t context) {
-        postMessage({"UI", "pong"}, context);
+    fHandler["ping"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+        postMessage({"UI", "pong"}, origin);
     });
 }
 
