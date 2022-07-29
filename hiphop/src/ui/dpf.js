@@ -742,23 +742,35 @@ class UIHelperPrivate {
             }
         });
 
-        const style = (css) => {
+        // Disable pinch zoom. Might still be desirable for web browsers.
+        const optDisablePinchZoom = env.plugin ? 'touch-action: pan-x pan-y;' : '';
+
+        // Disable I-beam for text, disable image drag, disable selection, disable overflow.
+        const applyStyle = () => {
+            const css =
+                `*:not(a) {
+                    cursor: default;
+                }
+                img {
+                    user-drag: none;
+                    -webkit-user-drag: none;
+                }
+                body {
+                    user-select: none;
+                    -webkit-user-select: none;
+                    overflow: hidden;
+                    ${optDisablePinchZoom}
+                }`;
+
             document.head.insertAdjacentHTML('beforeend', `<style>${css}</style>`);
         };
 
-        // Cannot call style() right away because dpf.js might have been
-        // injected, in such case document.head will be null.
-        document.addEventListener('DOMContentLoaded', (_) => {
-            style('*:not(a) { cursor: default; }'); // disable I-beam for text
-            style('img { user-drag: none; -webkit-user-drag: none; }'); // disable image drag
-            style('body { user-select: none; -webkit-user-select: none; }'); // disable selection
-            style('body { overflow: hidden; }'); // disable overflow
-
-            if (env.plugin) {
-                // Disable pinch zoom. Might still be desirable for web browsers.
-                style('body { touch-action: pan-x pan-y; }');
-            }
-        });
+        // document.head is null when dpf.js is injected
+        if (document.head) {
+            applyStyle();
+        } else {
+            document.addEventListener('DOMContentLoaded', applyStyle);
+        }
     }
 
     static buildEnvObject() {
