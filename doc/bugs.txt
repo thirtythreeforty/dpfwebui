@@ -3,8 +3,6 @@
 - (Linux) Broken CSS viewport units (vw/vh/vmin/vmax) on WebKitGTK web view due
   to workaround for https://bugs.webkit.org/show_bug.cgi?id=229227
 
-- (macOS) VST3 plugins fail to load on Ableton Live, work as expected on REAPER.
-
 - (macOS) On REAPER spacebar keystrokes never reach <input> and instead toggle
   the DAW transport. Pressing Return also does not result in the 'change' event.
   Selecting "Send all keyboard input to plug-in" fixes the bug (or feature?)

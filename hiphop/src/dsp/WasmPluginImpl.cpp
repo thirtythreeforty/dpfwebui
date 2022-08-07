@@ -129,6 +129,13 @@ int64_t WasmPlugin::getUniqueId() const
     }
 }
 
+// VST3
+void WasmPlugin::initAudioPort(const bool input, uint32_t index, AudioPort& port)
+{
+    port.groupId = kPortGroupStereo;
+    PluginEx::initAudioPort(input, index, port);
+}
+
 void WasmPlugin::initParameter(uint32_t index, Parameter& parameter)
 {
     try {

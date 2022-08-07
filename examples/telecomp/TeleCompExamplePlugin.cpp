@@ -57,6 +57,13 @@ public:
         return d_cconst('H', 'H', 't', 'c');
     }
 
+    // VST3
+    void initAudioPort(const bool input, uint32_t index, AudioPort& port) override
+    {
+        port.groupId = kPortGroupStereo;
+        ZamCompX2Plugin::initAudioPort(input, index, port);
+    }
+
 private:
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TeleCompExamplePlugin)

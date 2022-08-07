@@ -55,6 +55,13 @@ public:
         return d_cconst('H', 'H', 'w', 'g');
     }
 
+    // VST3
+    void initAudioPort(const bool input, uint32_t index, AudioPort& port) override
+    {
+        port.groupId = kPortGroupStereo;
+        Plugin::initAudioPort(input, index, port);
+    }
+
     void initParameter(uint32_t index, Parameter& parameter) override
     {
         parameter.hints = kParameterIsAutomatable;

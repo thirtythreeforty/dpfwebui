@@ -41,6 +41,7 @@ public:
     uint32_t getVersion() const override;
     int64_t  getUniqueId() const override;
 
+    void  initAudioPort(const bool input, uint32_t index, AudioPort& port) override;
     void  initParameter(uint32_t index, Parameter& parameter) override;
     float getParameterValue(uint32_t index) const override;
     void  setParameterValue(uint32_t index, float value) override;

@@ -267,9 +267,9 @@ class RangeInputWidget extends InputWidget {
 
     static get _attributeDescriptors() {
         return super._attributeDescriptors.concat([
-            { key: 'value', parser: ValueParser.float, default: 0                 },
-            { key: 'min'  , parser: ValueParser.float, default: 0                 },
-            { key: 'max'  , parser: ValueParser.float, default: 1                 },
+            { key: 'value', parser: ValueParser.float, default: 0 },
+            { key: 'min'  , parser: ValueParser.float, default: 0 },
+            { key: 'max'  , parser: ValueParser.float, default: 1 },
             { key: 'scale', parser: ValueParser.scale, default: ValueScale.linear }
         ]);
     }
@@ -823,8 +823,9 @@ class Button extends InputWidget {
 
     static get _attributeDescriptors() {
         return super._attributeDescriptors.concat([
-            { key: 'value', parser: ValueParser.bool  , default: false       },
-            { key: 'mode' , parser: ValueParser.string, default: 'momentary' }
+            { key: 'value'    , parser: ValueParser.bool  , default: false       },
+            { key: 'feedback' , parser: ValueParser.bool  , default: true        },
+            { key: 'mode'     , parser: ValueParser.string, default: 'momentary' }
         ]);
     }
 
@@ -837,11 +838,6 @@ class Button extends InputWidget {
 
     connectedCallback() {
         super.connectedCallback();
-
-        this._color = this._style('color', /*rgb(0,0,0)*/);
-        this._backgroundColor = this._style('background-color' /*rgb(0,0,0)*/);
-        this._borderColor = this._style('border-color' /*rgb(0,0,0)*/);
-        this._selectedColor = this._style('--selected-color', '#000');       
 
         this._root.innerHTML = `<div style="
                                   width: 100%;
@@ -874,10 +870,29 @@ class Button extends InputWidget {
         this._root.appendChild(slot);
         this.style.display = 'inline-block';
 
+        this.reset();
+    }
+
+    reset() {
+        // Reset inline styles
+        this.style.color = '';
+        this.style.borderColor = '';
+        this.style.backgroundColor = '';
+
+        // Read computed styles
+        this._color = this._style('color', /*inherited*/);
+        this._backgroundColor = this._style('background-color' /*rgb(0,0,0)*/);
+        this._borderColor = this._style('border-color' /*rgb(0,0,0)*/);
+        this._selectedColor = this._style('--selected-color', '#000');
+
         this._redraw();
     }
 
     _redraw() {
+        if (! this._opt['feedback']) {
+            return;
+        }
+        
         if (this.value) {
             this.style.color = this._selectedColor;
             this.style.borderColor = this._color;
