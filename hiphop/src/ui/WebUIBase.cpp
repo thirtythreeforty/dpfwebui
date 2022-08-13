@@ -27,15 +27,15 @@ WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx)
     : UIEx(widthCssPx, heightCssPx)
     , fInitWidthCssPx(widthCssPx)
     , fInitHeightCssPx(heightCssPx)
-    , fUiBlockQueued(false)
 {
     initHandlers();
 }
 
 void WebUIBase::queue(const UiBlock& block)
 {
-    fUiBlock = block;
-    fUiBlockQueued = true;
+    fUiQueueMutex.lock();
+    fUiQueue.push(block);
+    fUiQueueMutex.unlock();
 }
 
 bool WebUIBase::isDryRun()
@@ -48,11 +48,15 @@ bool WebUIBase::isDryRun()
 void WebUIBase::uiIdle()
 {
     UIEx::uiIdle();
+    fUiQueueMutex.lock();
 
-    if (fUiBlockQueued) {
-        fUiBlockQueued = false;
-        fUiBlock();
+    while (! fUiQueue.empty()) {
+        const UiBlock block = fUiQueue.front();
+        fUiQueue.pop();
+        block();
     }
+
+    fUiQueueMutex.unlock();
 }
 
 void WebUIBase::parameterChanged(uint32_t index, float value)

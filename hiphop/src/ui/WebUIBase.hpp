@@ -20,9 +20,12 @@
 #define WEB_UI_BASE_HPP
 
 #include <functional>
+#include <queue>
 #include <string>
 #include <unordered_map>
 #include <utility>
+
+#include "distrho/extra/Mutex.hpp"
 
 #include "extra/UIEx.hpp"
 #include "extra/JSValue.hpp"
@@ -75,10 +78,10 @@ protected:
 private:
     void initHandlers();
 
-    uint    fInitWidthCssPx;
-    uint    fInitHeightCssPx;
-    bool    fUiBlockQueued;
-    UiBlock fUiBlock;
+    uint  fInitWidthCssPx;
+    uint  fInitHeightCssPx;
+    Mutex fUiQueueMutex;
+    std::queue<UiBlock> fUiQueue;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 
