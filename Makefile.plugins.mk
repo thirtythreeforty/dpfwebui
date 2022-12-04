@@ -381,7 +381,7 @@ ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
 ifeq ($(HIPHOP_NETWORK_SSL), true)
 MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
-MBEDTLS_GIT_TAG = v3.1.0
+MBEDTLS_GIT_TAG = v3.2.1
 MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
 MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
 MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
@@ -519,7 +519,7 @@ endif
 ifeq ($(WASM_DSP),true)
 ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 WAMR_GIT_URL = https://github.com/bytecodealliance/wasm-micro-runtime
-WAMR_GIT_TAG = WAMR-05-18-2022
+WAMR_GIT_TAG = WAMR-1.1.1
 WAMR_PATH = $(HIPHOP_DEPS_PATH)/wasm-micro-runtime
 WAMR_BUILD_PATH = ${WAMR_PATH}/build-$(HIPHOP_WASM_MODE)
 WAMR_LIB_PATH = $(WAMR_BUILD_PATH)/libvmlib.a
@@ -663,7 +663,7 @@ ifeq ($(WASM_DSP),true)
 ifeq ($(MSYS_MINGW),true)
 NPM_OPT_SET_PATH = export PATH=$$PATH:/opt/node && export NODE_SKIP_PLATFORM_CHECK=1
 ifeq (,$(wildcard /opt/node))
-NPM_VERSION = 16.6.0
+NPM_VERSION = 19.2.0
 NPM_FILENAME = node-v$(NPM_VERSION)-win-x64.zip
 NPM_URL = https://nodejs.org/dist/v$(NPM_VERSION)/$(NPM_FILENAME)
 NPM_BIN = /opt/node/npm
