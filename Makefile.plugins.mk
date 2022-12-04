@@ -430,14 +430,13 @@ endif
 
 TARGETS += $(LWS_LIB_PATH)
 
+LWS_CMAKE_ENV = true
 ifeq ($(LINUX),true)
 LWS_CMAKE_ENV = export CFLAGS=-fPIC
 else ifeq ($(MACOS),true)
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
 LWS_CMAKE_ENV = export CMAKE_OSX_ARCHITECTURES="arm64;x86_64;"
 endif
-else
-LWS_CMAKE_ENV = true
 endif
 
 $(LWS_LIB_PATH): $(LWS_PATH)
