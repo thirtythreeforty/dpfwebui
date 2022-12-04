@@ -227,6 +227,10 @@ endif
 ifeq ($(HIPHOP_NETWORK_UI),true)
 BASE_FLAGS += -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
 LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
+ifeq ($(MACOS),true)
+# Some lws-http.h constants clash with MacOSX.sdk/usr/include/cups/http.h
+BASE_FLAGS += -D_CUPS_CUPS_H_ -D_CUPS_HTTP_H_ -D_CUPS_PPD_H_
+endif
 ifeq ($(HIPHOP_NETWORK_SSL), true)
 BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
 LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH)
