@@ -37,7 +37,7 @@ START_NAMESPACE_DISTRHO
 class WebUIBase : public UIEx
 {
 public:
-    WebUIBase(uint widthCssPx, uint heightCssPx);
+    WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio);
     virtual ~WebUIBase() {}
 
     typedef std::function<void()> UiBlock;

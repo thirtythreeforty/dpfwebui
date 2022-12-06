@@ -45,7 +45,7 @@ include ../../Makefile.plugins.mk
 # --------------------------------------------------------------
 # Enable all possible plugin types
 
-TARGETS += lv2_sep vst vst3
+TARGETS += lv2_sep clap vst3 vst
 
 all: $(TARGETS) $(HIPHOP_TARGET)
 

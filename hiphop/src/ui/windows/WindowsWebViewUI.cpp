@@ -24,9 +24,9 @@ BOOL CALLBACK FindHostWindowProc(HWND hWnd, LPARAM lParam);
 
 USE_NAMESPACE_DISTRHO
 
-WindowsWebViewUI::WindowsWebViewUI(uint baseWidth, uint baseHeight,
+WindowsWebViewUI::WindowsWebViewUI(uint widthCssPx, uint heightCssPx,
         const char* backgroundCssColor, bool startLoading)
-    : WebViewUI(baseWidth, baseHeight, backgroundCssColor)
+    : WebViewUI(widthCssPx, heightCssPx, backgroundCssColor, EdgeWebView::getMonitorScaleFactor(0))
     , fHostHWnd(0)
 {
     if (isDryRun()) {

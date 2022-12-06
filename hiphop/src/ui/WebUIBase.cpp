@@ -23,8 +23,8 @@
 
 USE_NAMESPACE_DISTRHO
 
-WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx)
-    : UIEx(widthCssPx, heightCssPx)
+WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio)
+    : UIEx(initPixelRatio * widthCssPx, initPixelRatio * heightCssPx)
     , fInitWidthCssPx(widthCssPx)
     , fInitHeightCssPx(heightCssPx)
 {

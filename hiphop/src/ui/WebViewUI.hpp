@@ -41,7 +41,8 @@ typedef WebUIBase WebViewUIBase; // file://  + Native interface [postMessage()]
 class WebViewUI : public WebViewUIBase, private WebViewEventHandler
 {
 public:
-    WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor);
+    WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor,
+              float initPixelRatio);
     virtual ~WebViewUI();
 
     uintptr_t getPlatformWindow() const { return fPlatformWindow; }

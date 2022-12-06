@@ -27,8 +27,9 @@
 
 USE_NAMESPACE_DISTRHO
 
-WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor)
-    : WebViewUIBase(widthCssPx, heightCssPx)
+WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor,
+                     float initPixelRatio)
+    : WebViewUIBase(widthCssPx, heightCssPx, initPixelRatio)
     , fBackgroundColor(CSSColor::fromHex(backgroundCssColor))
     , fJsUiReady(false)
     , fPlatformWindow(0)
@@ -65,7 +66,7 @@ void WebViewUI::setWebView(WebViewBase* webView)
     fWebView->setParent(fPlatformWindow);
     fWebView->setBackgroundColor(fBackgroundColor);
 
-    // Convert CSS pixels to native pixels following the web view pixel ratio.
+    // Convert CSS pixels to native following the final web view pixel ratio.
     // Then adjust window size so it correctly wraps web content on high density
     // displays, known as Retina or HiDPI. WebViewBase::getDevicePixelRatio()
     // needs a parent window to be set because scaling can vary across displays.
@@ -76,10 +77,6 @@ void WebViewUI::setWebView(WebViewBase* webView)
     fWebView->realize();
 
     setSize(width, height);
-
-    if (Path::getPluginFormat() == PluginFormat::VST3) {
-        setSize(width, height); // 2x setSize() calls needed for VST3 - DPF bug?
-    }
 }
 
 void WebViewUI::load()

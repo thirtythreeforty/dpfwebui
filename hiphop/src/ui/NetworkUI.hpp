@@ -38,7 +38,7 @@ class WebServerThread;
 class NetworkUI : public WebUIBase, public WebServerHandler
 {
 public:
-    NetworkUI(uint widthCssPx, uint heightCssPx);
+    NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio);
     virtual ~NetworkUI();
 
     String getLocalUrl();

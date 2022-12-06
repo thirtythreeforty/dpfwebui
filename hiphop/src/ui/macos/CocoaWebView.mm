@@ -94,7 +94,7 @@ CocoaWebView::~CocoaWebView()
 float CocoaWebView::getDevicePixelRatio()
 {
     if (fNsWebView.window == nil) {
-        return 1.f;
+        return [NSScreen mainScreen].backingScaleFactor;
     }
     
     return fNsWebView.window.backingScaleFactor;

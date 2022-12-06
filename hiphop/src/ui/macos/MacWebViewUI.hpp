@@ -27,7 +27,7 @@ START_NAMESPACE_DISTRHO
 class MacWebViewUI : public WebViewUI
 {
 public:
-    MacWebViewUI(uint baseWidth = 0, uint baseHeight = 0,
+    MacWebViewUI(uint widthCssPx = 0, uint heightCssPx = 0,
         const char* backgroundCssColor = "#fff", bool startLoading = true);
     virtual ~MacWebViewUI();
 

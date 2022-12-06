@@ -45,8 +45,8 @@
 
 USE_NAMESPACE_DISTRHO
 
-NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx)
-    : WebUIBase(widthCssPx, heightCssPx)
+NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio)
+    : WebUIBase(widthCssPx, heightCssPx, initPixelRatio)
     , fPort(-1)
     , fThread(nullptr)
 #if HIPHOP_UI_ZEROCONF

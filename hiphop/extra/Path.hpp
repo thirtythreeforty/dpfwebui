@@ -58,7 +58,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 START_NAMESPACE_DISTRHO
 
-enum class PluginFormat { Jack, LV2, VST2, VST3, Unknown };
+enum class PluginFormat { Jack, LV2, CLAP, VST3, VST2, Unknown };
 
 namespace PathSubdirectory {
 
@@ -96,13 +96,14 @@ struct Path
         path.truncate(path.rfind(DISTRHO_OS_SEP));
 
         switch (getPluginFormat()) {
-            case PluginFormat::LV2:
+            case PluginFormat::LV2: // LV2 bundles are not regular macOS bundles
                 return path + DISTRHO_OS_SEP_STR + PathSubdirectory::bundleLibrary;
             case PluginFormat::VST2:
 #if defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_WINDOWS)
                 return path + DISTRHO_OS_SEP_STR + PathSubdirectory::nonBundleLibrary;
 #endif
             case PluginFormat::VST3:
+            case PluginFormat::CLAP:
                 return path.truncate(path.rfind(DISTRHO_OS_SEP)) + DISTRHO_OS_SEP_STR + "Resources";
             default:
                 break;
@@ -122,10 +123,12 @@ struct Path
             format = PluginFormat::Jack;
         } else if (strcmp(pfn, "LV2") == 0) {
             format = PluginFormat::LV2;
-        } else if (strcmp(pfn, "VST2") == 0) {
-            format = PluginFormat::VST2;
+        } else if (strcmp(pfn, "CLAP") == 0) {
+            format = PluginFormat::CLAP;
         } else if (strcmp(pfn, "VST3") == 0) {
             format = PluginFormat::VST3;
+        } else if (strcmp(pfn, "VST2") == 0) {
+            format = PluginFormat::VST2;
         } else {
             format = PluginFormat::Unknown;
         }
@@ -149,10 +152,12 @@ struct Path
             if (handle != 0) {
                 if ((dlsym(handle, "lv2_descriptor") != 0) || (dlsym(handle, "lv2ui_descriptor") != 0)) {
                     format = PluginFormat::LV2;
-                } else if (dlsym(handle, "main") != 0) {
-                    format = PluginFormat::VST2;
+                } else if (dlsym(handle, "clap_entry") != 0)
+                    format = PluginFormat::CLAP;
                 } else if (dlsym(handle, "GetPluginFactory") != 0) {
                     format = PluginFormat::VST3;
+                } else if (dlsym(handle, "main") != 0) {
+                    format = PluginFormat::VST2;
                 }
 
                 dlclose(handle);
@@ -167,10 +172,12 @@ struct Path
         } else {
             if ((dlsym(handle, "lv2_descriptor") != 0) || (dlsym(handle, "lv2ui_descriptor") != 0)) {
                 format = PluginFormat::LV2;
-            } else if (dlsym(handle, "VSTPluginMain") != 0) {
-                format = PluginFormat::VST2;
+            } else if (dlsym(handle, "clap_entry") != 0)
+                format = PluginFormat::CLAP;
             } else if (dlsym(handle, "GetPluginFactory") != 0) {
                 format = PluginFormat::VST3;
+            } else if (dlsym(handle, "VSTPluginMain") != 0) {
+                format = PluginFormat::VST2;
             }
 
             dlclose(handle);
@@ -182,10 +189,12 @@ struct Path
 
         if ((GetProcAddress(hm, "lv2_descriptor") != 0) || (GetProcAddress(hm, "lv2ui_descriptor") != 0)) {
             format = PluginFormat::LV2;
-        } else if (GetProcAddress(hm, "VSTPluginMain") != 0) {
-            format = PluginFormat::VST2;
+        } else if (GetProcAddress(hm, "clap_entry") != 0) {
+            format = PluginFormat::CLAP;
         } else if (GetProcAddress(hm, "GetPluginFactory") != 0) {
             format = PluginFormat::VST3;
+        } else if (GetProcAddress(hm, "VSTPluginMain") != 0) {
+            format = PluginFormat::VST2;
         } else {
             format = PluginFormat::Jack;
         }

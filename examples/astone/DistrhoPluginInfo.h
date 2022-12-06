@@ -40,6 +40,12 @@
 #define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/astone"
 
 /**
+   The plugin id when exporting in CLAP format, in reverse URI form.
+   @note This macro is required when building CLAP plugins
+*/
+#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.hiphop.astone"
+
+/**
    Wherever the plugin has a custom %UI.
    @see DISTRHO_UI_USE_NANOVG
    @see UI

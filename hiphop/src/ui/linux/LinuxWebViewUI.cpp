@@ -23,9 +23,9 @@
 
 USE_NAMESPACE_DISTRHO
 
-LinuxWebViewUI::LinuxWebViewUI(uint baseWidth, uint baseHeight,
+LinuxWebViewUI::LinuxWebViewUI(uint widthCssPx, uint heightCssPx,
         const char* backgroundCssColor, bool startLoading)
-    : WebViewUI(baseWidth, baseHeight, backgroundCssColor)
+    : WebViewUI(widthCssPx, heightCssPx, backgroundCssColor, device_pixel_ratio())
 {
     if (isDryRun()) {
         return;

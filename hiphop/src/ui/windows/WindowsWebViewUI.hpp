@@ -27,7 +27,7 @@ START_NAMESPACE_DISTRHO
 class WindowsWebViewUI : public WebViewUI
 {
 public:
-    WindowsWebViewUI(uint baseWidth = 0, uint baseHeight = 0,
+    WindowsWebViewUI(uint widthCssPx = 0, uint heightCssPx = 0,
         const char* backgroundCssColor = "#fff", bool startLoading = true);
     virtual ~WindowsWebViewUI();
 

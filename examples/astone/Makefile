@@ -44,7 +44,7 @@ ifeq ($(HAVE_OPENGL),true)
 TARGETS += lv2_sep
 endif
 
-TARGETS += vst vst3
+TARGETS += clap vst3 vst
 
 all: $(TARGETS) $(HIPHOP_TARGET)
 

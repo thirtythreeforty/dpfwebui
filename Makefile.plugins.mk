@@ -6,36 +6,26 @@
 
 # Location for binaries
 DPF_TARGET_DIR ?= bin
-
 # Location for object files
 DPF_BUILD_DIR ?= build
-
 # Enable built-in websockets server and load content over HTTP
 HIPHOP_NETWORK_UI ?= false
-
 # (WIP) Enable HTTPS and secure WebSockets
 HIPHOP_NETWORK_SSL ?= false
-
 # Automatically inject dpf.js when loading content from file://
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
-
 # Web view implementation on Linux [ gtk | cef ]
 HIPHOP_LINUX_WEBVIEW ?= gtk
-
 # WebAssembly runtime library [ wamr | wasmer ]
 HIPHOP_WASM_RUNTIME ?= wamr
-
 # WebAssembly execution mode - WAMR [ aot | interp ], Wasmer [ jit ]
 HIPHOP_WASM_MODE ?= aot
-
 # Universal build not available for Wasmer DSP
 # Set to false for building current architecture only
 HIPHOP_MACOS_UNIVERSAL ?= false
-
 # Support macOS down to High Sierra when WKWebView was introduced. This setting
 # must be enabled when compiling on newer systems otherwise plugins will crash.
 HIPHOP_MACOS_OLD ?= false
-
 # Build a rough and incomplete JACK application for development purposes
 HIPHOP_MACOS_DEV_STANDALONE ?= false
 
@@ -91,6 +81,7 @@ endif
 # *after* inclusion of this Makefile hence the usage of the 'test' command.
 
 TEST_LV2 = test -d $(DPF_TARGET_DIR)/$(NAME).lv2
+TEST_CLAP = test -d $(DPF_TARGET_DIR)/$(NAME).clap
 TEST_VST3 = test -d $(DPF_TARGET_DIR)/$(NAME).vst3
 TEST_VST2_LINUX = test -f $(DPF_TARGET_DIR)/$(NAME)-vst.so
 TEST_VST2_MACOS = test -d $(DPF_TARGET_DIR)/$(NAME).vst
@@ -101,6 +92,7 @@ TEST_NOBUNDLE = $(TEST_VST2_WINDOWS) || $(TEST_VST2_LINUX) \
                 || $(TEST_JACK_LINUX_OR_MACOS) || $(TEST_JACK_WINDOWS)
 
 LIB_DIR_LV2 = $(DPF_TARGET_DIR)/$(NAME).lv2/lib
+LIB_DIR_CLAP = $(DPF_TARGET_DIR)/$(NAME).clap/Contents/Resources
 LIB_DIR_VST3 = $(DPF_TARGET_DIR)/$(NAME).vst3/Contents/Resources
 LIB_DIR_VST2_MACOS = $(DPF_TARGET_DIR)/$(NAME).vst/Contents/Resources
 LIB_DIR_NOBUNDLE = $(DPF_TARGET_DIR)/$(NAME)-lib
@@ -741,6 +733,10 @@ lxhelper_res:
 		&& mkdir -p $(LIB_DIR_LV2) \
 		&& cp -ru $(LXHELPER_FILES) $(LIB_DIR_LV2) \
 		) || true
+	@($(TEST_CLAP) \
+		&& mkdir -p $(LIB_DIR_CLAP) \
+		&& cp -ru $(LXHELPER_FILES) $(LIB_DIR_CLAP) \
+		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3) \
 		&& cp -ru $(LXHELPER_FILES) $(LIB_DIR_VST3) \
@@ -778,6 +774,11 @@ lib_ui:
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
 		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_LV2)/ui \
 		) || true
+	@($(TEST_CLAP) \
+		&& mkdir -p $(LIB_DIR_CLAP)/ui \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_CLAP)/ui \
+		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_CLAP)/ui \
+		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
@@ -812,6 +813,10 @@ edge_dll:
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2) \
 		&& cp $(WEBVIEW_DLL) $(LIB_DIR_LV2) \
+		) || true
+	@($(TEST_CLAP) \
+		&& mkdir -p $(LIB_DIR_CLAP) \
+		&& cp $(WEBVIEW_DLL) $(LIB_DIR_CLAP) \
 		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3) \
@@ -882,6 +887,10 @@ lib_dsp:
 		&& mkdir -p $(LIB_DIR_LV2)/dsp \
 		&& cp -r $(WASM_BINARY_PATH) $(LIB_DIR_LV2)/dsp/$(WASM_BINARY_FILE) \
 		) || true
+	@($(TEST_CLAP) \
+		&& mkdir -p $(LIB_DIR_CLAP)/dsp \
+		&& cp -r $(WASM_BINARY_PATH) $(LIB_DIR_CLAP)/dsp/$(WASM_BINARY_FILE) \
+		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3)/dsp \
 		&& cp -r $(WASM_BINARY_PATH) $(LIB_DIR_VST3)/dsp/$(WASM_BINARY_FILE) \
@@ -909,6 +918,10 @@ wamr_dll:
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2) \
 		&& cp $(WAMR_DLL_PATH) $(LIB_DIR_LV2) \
+		) || true
+	@($(TEST_CLAP) \
+		&& mkdir -p $(LIB_DIR_CLAP) \
+		&& cp $(WAMR_DLL_PATH) $(LIB_DIR_CLAP) \
 		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3) \
