@@ -167,6 +167,7 @@ void CefHelper::runMainLoop()
             rc = x_fib_handle_events(fDisplay, &event);
 
             if (rc > 0) {
+                //fDialogCallback->Continue({ x_fib_filename() }); // CEF >= 107
                 fDialogCallback->Continue(0, { x_fib_filename() });
                 fDialogCallback = nullptr;
             } else if (rc < 0) {
@@ -248,9 +249,12 @@ void CefHelper::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
     fIpc->write(OP_HANDLE_LOAD_FINISHED);
 }
 
-bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser, CefDialogHandler::FileDialogMode mode,
-                             const CefString& title, const CefString& defaultFilePath,
-                             const std::vector<CefString>& accept_filters, int selectedAcceptFilter,
+bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser,                    
+                             FileDialogMode mode,                              
+                             const CefString& title,                           
+                             const CefString& defaultFilePath,                 
+                             const std::vector<CefString>& acceptFilters,
+                             int selectedAcceptFilter, // remove for CEF >= 107 
                              CefRefPtr<CefFileDialogCallback> callback)
 {
     if (fDialogCallback != nullptr) {
@@ -301,11 +305,11 @@ void CefHelper::realize(const msg_win_cfg_t* config)
     XSync(fDisplay, False);
 
     CefWindowInfo windowInfo;
-    windowInfo.parent_window = fContainer;
-    windowInfo.width = config->size.width;
-    windowInfo.height = config->size.height;
+    const CefRect bounds { 0, 0, static_cast<int>(config->size.width),
+                                 static_cast<int>(config->size.height) };
+    windowInfo.SetAsChild(fContainer, bounds);
 
-    CefBrowserSettings settings;
+    const CefBrowserSettings settings;
 
     fBrowser = CefBrowserHost::CreateBrowserSync(windowInfo, this, "", settings,
         nullptr, nullptr);

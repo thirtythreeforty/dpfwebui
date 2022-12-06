@@ -18,6 +18,7 @@ clean:
 	@make clean -C examples/jitdrum
 	@make clean -C examples/astone
 	@make clean -C examples/hotswap
+	@make clean -C examples/telecomp
 	rm -rf build/*
 
 all: examples

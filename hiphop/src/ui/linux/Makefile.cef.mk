@@ -32,7 +32,10 @@ CEF_WRAPPER_LIB = $(CEF_BUILD_PATH)/libcef_dll_wrapper/libcef_dll_wrapper.a
 
 $(CEF_WRAPPER_LIB):
 	@echo Building CEF C++ wrapper library
-	@mkdir -p $(CEF_BUILD_PATH) && cd $(CEF_BUILD_PATH) && cmake .. && make
+	@mkdir -p $(CEF_BUILD_PATH) \
+		&& cd $(CEF_BUILD_PATH) \
+		&& cmake -DCMAKE_DISABLE_FIND_PACKAGE_Doxygen=TRUE .. \
+		&& make
 
 # ------------------------------------------------------------------------------
 # Build helper binary

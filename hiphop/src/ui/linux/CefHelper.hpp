@@ -75,11 +75,13 @@ public:
 
     // CefDialogHandler
 
-    virtual bool OnFileDialog(CefRefPtr<CefBrowser> browser, CefDialogHandler::FileDialogMode mode,
-                              const CefString& title, const CefString& defaultFilePath,
-                              const std::vector<CefString>& accept_filters, int selectedAcceptFilter,
+    virtual bool OnFileDialog(CefRefPtr<CefBrowser> browser,                      
+                              FileDialogMode mode,                                
+                              const CefString& title,                             
+                              const CefString& defaultFilePath,                 
+                              const std::vector<CefString>& acceptFilters,
+                              int selectedAcceptFilter, // remove for CEF >= 107 
                               CefRefPtr<CefFileDialogCallback> callback) override;
-
 private:
     void runMainLoop();
     void dispatch(const tlv_t& packet);
