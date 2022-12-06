@@ -98,12 +98,12 @@ struct Path
         switch (getPluginFormat()) {
             case PluginFormat::LV2: // LV2 bundles are not regular macOS bundles
                 return path + DISTRHO_OS_SEP_STR + PathSubdirectory::bundleLibrary;
+            case PluginFormat::CLAP:
             case PluginFormat::VST2:
 #if defined(DISTRHO_OS_LINUX) || defined(DISTRHO_OS_WINDOWS)
                 return path + DISTRHO_OS_SEP_STR + PathSubdirectory::nonBundleLibrary;
 #endif
             case PluginFormat::VST3:
-            case PluginFormat::CLAP:
                 return path.truncate(path.rfind(DISTRHO_OS_SEP)) + DISTRHO_OS_SEP_STR + "Resources";
             default:
                 break;
