@@ -159,9 +159,9 @@ FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/ui/%)
 ifeq ($(MACOS),true)
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
 ifeq ($(WASM_DSP),true)
-ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-$(error Universal build is currently unavailable for WAMR)
-endif
+  ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+  $(error Universal build is currently unavailable for WAMR)
+  endif
 endif
 # Non CPU-specific optimization flags, see DPF Makefile.base.mk
 NOOPT = true
@@ -209,136 +209,116 @@ endif
 # Add build flags for web UI dependencies
 
 ifeq ($(WEB_UI),true)
-
-ifeq ($(HIPHOP_NETWORK_UI),true)
-BASE_FLAGS += -DHIPHOP_NETWORK_UI
-ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-$(warning Network UI is enabled - disabling JavaScript framework injection)
-HIPHOP_INJECT_FRAMEWORK_JS = false
-endif
-endif
-ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
-endif
-ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
-BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
-endif
-
-ifeq ($(HIPHOP_NETWORK_UI),true)
-BASE_FLAGS += -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
-LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
-ifeq ($(MACOS),true)
-# Some lws-http.h constants clash with MacOSX.sdk/usr/include/cups/http.h
-BASE_FLAGS += -D_CUPS_CUPS_H_ -D_CUPS_HTTP_H_ -D_CUPS_PPD_H_
-endif
-ifeq ($(HIPHOP_NETWORK_SSL), true)
-BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
-LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH)
-endif
-ifeq ($(WINDOWS),true)
-LINK_FLAGS += -lwebsockets_static
-else
-LINK_FLAGS += -lwebsockets
-endif
-ifeq ($(HIPHOP_NETWORK_SSL), true)
-LINK_FLAGS += -lmbedtls -lmbedcrypto -lmbedx509
-endif
-ifeq ($(LINUX),true)
-LINK_FLAGS += -lcap
-endif
-ifeq ($(WINDOWS),true)
-LINK_FLAGS += -lWs2_32
-endif
-endif
-
-ifeq ($(LINUX),true)
-LINK_FLAGS += -lpthread -ldl
-endif
-ifeq ($(MACOS),true)
-LINK_FLAGS += -framework WebKit 
-endif
-ifeq ($(WINDOWS),true)
-BASE_FLAGS += -I$(EDGE_WEBVIEW2_PATH)/build/native/include -Wno-unknown-pragmas
-LINK_FLAGS += -L$(EDGE_WEBVIEW2_PATH)/build/native/x64 \
-              -lole32 -lShlwapi -lMfplat -lksuser -lmfuuid -lwmcodecdspuuid \
-              -static-libgcc -static-libstdc++ -Wl,-Bstatic \
-              -lstdc++ -lpthread
-endif
+  ifeq ($(HIPHOP_NETWORK_UI),true)
+    BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
+    LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
+    ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+    $(warning Network UI is enabled - disabling JavaScript framework injection)
+    HIPHOP_INJECT_FRAMEWORK_JS = false
+    endif
+    ifeq ($(HIPHOP_NETWORK_SSL), true)
+    BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
+    LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH) -lmbedtls -lmbedcrypto -lmbedx509
+    endif
+    ifeq ($(LINUX),true)
+    LINK_FLAGS += -lcap
+    endif
+    ifeq ($(MACOS),true)
+    # Some lws-http.h constants clash with MacOSX.sdk/usr/include/cups/http.h
+    BASE_FLAGS += -D_CUPS_CUPS_H_ -D_CUPS_HTTP_H_ -D_CUPS_PPD_H_
+    endif
+    ifeq ($(WINDOWS),true)
+    LINK_FLAGS += -lwebsockets_static -lWs2_32
+    else
+    LINK_FLAGS += -lwebsockets
+    endif
+  endif
+  ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+  BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
+  endif
+  ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
+  BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
+  endif
+  ifeq ($(LINUX),true)
+  LINK_FLAGS += -lpthread -ldl
+  endif
+  ifeq ($(MACOS),true)
+  LINK_FLAGS += -framework WebKit 
+  endif
+  ifeq ($(WINDOWS),true)
+  BASE_FLAGS += -I$(EDGE_WEBVIEW2_PATH)/build/native/include -Wno-unknown-pragmas
+  LINK_FLAGS += -L$(EDGE_WEBVIEW2_PATH)/build/native/x64 \
+                -lole32 -lShlwapi -lMfplat -lksuser -lmfuuid -lwmcodecdspuuid \
+                -static-libgcc -static-libstdc++ -Wl,-Bstatic \
+                -lstdc++ -lpthread
+  endif
 endif
 
 # ------------------------------------------------------------------------------
 # Add build flags for AssemblyScript DSP dependencies
 
 ifeq ($(WASM_DSP),true)
-
-BASE_FLAGS += -DHIPHOP_WASM_SUPPORT
-WASM_BYTECODE_FILE = optimized.wasm
-
-ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
-ifeq ($(WINDOWS),true)
-endif
-ifeq ($(HIPHOP_WASM_MODE),aot)
-ifeq ($(CPU_I386_OR_X86_64),true)
-WAMRC_TARGET = x86_64
-endif
-ifeq ($(CPU_ARM_OR_AARCH64),true)
-WAMRC_TARGET = aarch64
-endif
-WASM_BINARY_FILE = $(WAMRC_TARGET).aot
-BASE_FLAGS += -DHIPHOP_WASM_BINARY_COMPILED
-endif
-ifeq ($(HIPHOP_WASM_MODE),interp)
-WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
-endif
-ifeq ($(HIPHOP_WASM_MODE),jit)
-$(error JIT mode is not supported for WAMR)
-endif
-endif
-
-ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
-BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WASMER
-ifeq ($(HIPHOP_WASM_MODE),interp)
-# Both WAMR interp and Wasmer will load bytecode
-HIPHOP_WASM_MODE = jit
-endif
-ifeq ($(HIPHOP_WASM_MODE),jit)
-WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
-else
-$(error Only JIT mode is supported for Wasmer)
-endif
-endif
-
-ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include
-ifeq ($(LINUX_OR_MACOS),true)
-LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
-endif
-ifeq ($(LINUX),true)
-LINK_FLAGS += -lpthread
-endif
-ifeq ($(WINDOWS),true)
-ifeq ($(HIPHOP_WASM_MODE),interp)
-LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
-LINK_FLAGS += -lWs2_32 -lShlwapi
-endif
-endif
-endif
-
-ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
-BASE_FLAGS += -I$(WASMER_PATH)/include
-LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
-ifeq ($(LINUX),true)
-LINK_FLAGS += -lpthread -ldl
-endif
-ifeq ($(MACOS),true)
-LINK_FLAGS += -framework AppKit 
-endif
-ifeq ($(WINDOWS),true)
-LINK_FLAGS += -Wl,-Bstatic -lWs2_32 -lBcrypt -lUserenv -lShlwapi
-endif
-endif
-
+  BASE_FLAGS += -DHIPHOP_WASM_SUPPORT
+  WASM_BYTECODE_FILE = optimized.wasm
+  ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+    BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
+    ifeq ($(HIPHOP_WASM_MODE),aot)
+      ifeq ($(CPU_I386_OR_X86_64),true)
+      WAMRC_TARGET = x86_64
+      endif
+      ifeq ($(CPU_ARM_OR_AARCH64),true)
+      WAMRC_TARGET = aarch64
+      endif
+      WASM_BINARY_FILE = $(WAMRC_TARGET).aot
+      BASE_FLAGS += -DHIPHOP_WASM_BINARY_COMPILED
+    endif
+    ifeq ($(HIPHOP_WASM_MODE),interp)
+    WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
+    endif
+    ifeq ($(HIPHOP_WASM_MODE),jit)
+    $(error JIT mode is not supported for WAMR)
+    endif
+  endif
+  ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
+    BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WASMER
+    ifeq ($(HIPHOP_WASM_MODE),interp)
+    # Both WAMR interp and Wasmer will load bytecode
+    HIPHOP_WASM_MODE = jit
+    endif
+    ifeq ($(HIPHOP_WASM_MODE),jit)
+    WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
+    else
+    $(error Only JIT mode is supported for Wasmer)
+    endif
+  endif
+  ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
+    BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include
+    ifeq ($(LINUX_OR_MACOS),true)
+    LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
+    endif
+    ifeq ($(LINUX),true)
+    LINK_FLAGS += -lpthread
+    endif
+    ifeq ($(WINDOWS),true)
+      ifeq ($(HIPHOP_WASM_MODE),interp)
+      LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
+      LINK_FLAGS += -lWs2_32 -lShlwapi
+      endif
+    endif
+  endif
+  ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
+    BASE_FLAGS += -I$(WASMER_PATH)/include
+    LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
+    ifeq ($(LINUX),true)
+    LINK_FLAGS += -lpthread -ldl
+    endif
+    ifeq ($(MACOS),true)
+    LINK_FLAGS += -framework AppKit 
+    endif
+    ifeq ($(WINDOWS),true)
+    LINK_FLAGS += -Wl,-Bstatic -lWs2_32 -lBcrypt -lUserenv -lShlwapi
+    endif
+  endif
 endif
 
 # ------------------------------------------------------------------------------
@@ -366,16 +346,15 @@ endif
 # Dependency - Build DPF Graphics Library
 
 ifneq ($(WEB_UI),true)
-LIBDGL_PATH = $(DPF_PATH)/build/libdgl.a
-TARGETS += $(LIBDGL_PATH)
+  LIBDGL_PATH = $(DPF_PATH)/build/libdgl.a
+  TARGETS += $(LIBDGL_PATH)
+  ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
+  DGL_MAKE_FLAGS = dgl NOOPT=true DGL_FLAGS="$(MACOS_UNIVERSAL_FLAGS)" \
+  				 DGL_LIBS="$(MACOS_UNIVERSAL_FLAGS)"
+  endif
 
-ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
-DGL_MAKE_FLAGS = dgl NOOPT=true DGL_FLAGS="$(MACOS_UNIVERSAL_FLAGS)" \
-				 DGL_LIBS="$(MACOS_UNIVERSAL_FLAGS)"
-endif
-
-$(LIBDGL_PATH):
-	make -C $(DPF_PATH) $(DGL_MAKE_FLAGS)
+  $(LIBDGL_PATH):
+		make -C $(DPF_PATH) $(DGL_MAKE_FLAGS)
 endif
 
 # ------------------------------------------------------------------------------
