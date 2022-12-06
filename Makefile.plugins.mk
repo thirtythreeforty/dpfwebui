@@ -212,17 +212,18 @@ ifeq ($(WEB_UI),true)
     BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
     LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH) -lmbedtls -lmbedcrypto -lmbedx509
     endif
+    ifeq ($(WINDOWS),true)
+    LINK_FLAGS += -lwebsockets_static -lWs2_32
+    else
+    LINK_FLAGS += -lwebsockets
+    endif
     ifeq ($(LINUX),true)
+    # Add -lcap after -lwebsockets
     LINK_FLAGS += -lcap
     endif
     ifeq ($(MACOS),true)
     # Some lws-http.h constants clash with MacOSX.sdk/usr/include/cups/http.h
     BASE_FLAGS += -D_CUPS_CUPS_H_ -D_CUPS_HTTP_H_ -D_CUPS_PPD_H_
-    endif
-    ifeq ($(WINDOWS),true)
-    LINK_FLAGS += -lwebsockets_static -lWs2_32
-    else
-    LINK_FLAGS += -lwebsockets
     endif
   endif
   ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
