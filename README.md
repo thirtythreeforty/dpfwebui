@@ -19,7 +19,7 @@ the plugin and optionally over the local network.
 * Subset of the `UI` and `Plugin` interfaces ported to JavaScript and [AssemblyScript](https://www.assemblyscript.org)
 * C++ sill possible for DSP development
 * WebKitGTK or CEF on Linux, WKWebView on macOS, Edge WebView2 on Windows
-* VST2 / VST3 / LV2 plugin formats
+* VST3 / VST2 / CLAP / LV2 plugin formats
 * Network UI support, for example for remote control using a tablet
 * Just the powerful basics
 
