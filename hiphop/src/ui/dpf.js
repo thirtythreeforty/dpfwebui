@@ -356,7 +356,7 @@ function UIBase() { return class {
 
     // Compute latency when response to ping is received
     pong() {
-        this._latency = (new Date).getTime() - this._pingSendTime;
+        this._latency = ((new Date).getTime() - this._pingSendTime) / 2;
         this._log(`Latency = ${this._latency}ms`);
     }
 
