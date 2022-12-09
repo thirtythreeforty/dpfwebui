@@ -49,14 +49,15 @@ NOTES FOR WINDOWS
 5. AssemblyScript plugins crash on Carla and Ableton Live when running the
    Wasmer runtime. Work as expected on REAPER, Renoise and Ardour 7. Crash
    reproducible with both MinGW-built static lib and official MSVC wasmer.dll .
-   WAMR interpreter works for all audio hosts but its performance is poor. WAMR
+   WAMR interp mode works for all audio hosts but its performance is poor. WAMR
    ahead-of-time (AOT) works for all audio hosts only when loaded during runtime
    from a MSVC built version of libiwasm.dll . Crashes for all hosts when
    plugins are linked statically to MinGW-built libvmlib.a or MSVC vmlib.lib
    converted to .a by reimp.exe. Also crashes for the MinGW-built libiwasm.dll .
    A version of libiwasm.dll built by MSVC is downloaded automatically by the
    Makefile. The default WebAssembly runtime is WAMR. For debugging look [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/25fc006c3359e0788b42bc9a11923f8ffbe29577/core/iwasm/aot/aot_runtime.c#L1542)
-   and [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/52b6c73d9c2dee4973271a5cb1e2b9242a7a975b/core/iwasm/common/arch/invokeNative_general.c#L10).
+   and [here](https://github.com/bytecodealliance/wasm-micro-runtime/blob/52b6c73d9c2dee4973271a5cb1e2b9242a7a975b/core/iwasm/common/arch/invokeNative_general.c#L10). WAMR is under active development so this
+   information might be outdated as of Dec '22.
    
 
 
