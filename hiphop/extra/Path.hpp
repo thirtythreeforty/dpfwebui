@@ -152,7 +152,7 @@ struct Path
             if (handle != 0) {
                 if ((dlsym(handle, "lv2_descriptor") != 0) || (dlsym(handle, "lv2ui_descriptor") != 0)) {
                     format = PluginFormat::LV2;
-                } else if (dlsym(handle, "clap_entry") != 0)
+                } else if (dlsym(handle, "clap_entry") != 0) {
                     format = PluginFormat::CLAP;
                 } else if (dlsym(handle, "GetPluginFactory") != 0) {
                     format = PluginFormat::VST3;
@@ -172,7 +172,7 @@ struct Path
         } else {
             if ((dlsym(handle, "lv2_descriptor") != 0) || (dlsym(handle, "lv2ui_descriptor") != 0)) {
                 format = PluginFormat::LV2;
-            } else if (dlsym(handle, "clap_entry") != 0)
+            } else if (dlsym(handle, "clap_entry") != 0) {
                 format = PluginFormat::CLAP;
             } else if (dlsym(handle, "GetPluginFactory") != 0) {
                 format = PluginFormat::VST3;

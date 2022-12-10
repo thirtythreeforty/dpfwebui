@@ -69,7 +69,7 @@ typedef struct {
     gboolean       focus;
     Window         focusXWin;
     pthread_t      watchdog;
-    char           injectedJs[262144];
+    char           scripts[262144];
 } context_t;
 
 static void realize(context_t *ctx, const msg_win_cfg_t *config);
@@ -203,12 +203,12 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
 static void navigate(context_t *ctx, const char *url)
 {
     // Inject queued scripts
-    WebKitUserScript *script = webkit_user_script_new(ctx->injectedJs, WEBKIT_USER_CONTENT_INJECT_ALL_FRAMES,
+    WebKitUserScript *script = webkit_user_script_new(ctx->scripts, WEBKIT_USER_CONTENT_INJECT_ALL_FRAMES,
         WEBKIT_USER_SCRIPT_INJECT_AT_DOCUMENT_START, NULL, NULL);
     WebKitUserContentManager *manager = webkit_web_view_get_user_content_manager(ctx->webView);
     webkit_user_content_manager_add_script(manager, script);
     webkit_user_script_unref(script);
-    ctx->injectedJs[0] = '\0'; // already injected on next navigate() call
+    ctx->scripts[0] = '\0'; // already injected on next navigate() call
 
     webkit_web_view_load_uri(ctx->webView, url);
 }
@@ -222,7 +222,7 @@ static void run_script(const context_t *ctx, const char *js)
 
 static void inject_script(context_t *ctx, const char *js)
 {
-    strcat(ctx->injectedJs, (const char *)js);
+    strcat(ctx->scripts, (const char *)js);
 }
 
 static void set_size(context_t *ctx, const msg_win_size_t *size)

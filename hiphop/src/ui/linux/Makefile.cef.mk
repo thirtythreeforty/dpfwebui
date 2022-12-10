@@ -5,7 +5,7 @@
 # Currently only the 64-bit version of CEF is supported though the library is
 # also available on 32-bit platforms. https://bitbucket.org/chromiumembedded/cef/
 
-CEF_DISTRO = cef_binary_93.1.12+ga8ffe4b+chromium-93.0.4577.82_linux64_minimal
+CEF_DISTRO = cef_binary_107.1.12+g65b79a6+chromium-107.0.5304.122_linux64_minimal
 CEF_DISTRO_FILE = $(CEF_DISTRO).tar.bz2
 CEF_PATH = $(HIPHOP_DEPS_PATH)/cef
 CEF_BUILD_PATH = $(CEF_PATH)/build
@@ -84,7 +84,6 @@ CEF_FILES_BIN = \
 	libGLESv2.so \
 	libcef.so \
 	snapshot_blob.bin \
-	swiftshader \
 	v8_context_snapshot.bin
 
 CEF_FILES_RES = \

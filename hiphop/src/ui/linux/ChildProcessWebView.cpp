@@ -112,8 +112,9 @@ ChildProcessWebView::ChildProcessWebView()
 
     injectHostObjectScripts();
 
-    // No drag and drop for GTK or CEF
+    // No drag and drop for GTK and CEF
     setEnvironmentBool("noDragAndDrop", true);
+
 #if defined(HIPHOP_LINUX_WEBVIEW_GTK)
 # if HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT
     // CSS media queries for screen dimensions and CSS viewport units
@@ -179,6 +180,8 @@ void ChildProcessWebView::realize()
 {
     const ::Window parent = (::Window)getParent();
     const unsigned long color = getBackgroundColor() >> 8;
+    const uint width = getWidth();
+    const uint height = getHeight();
 
     // The only reliable way to keep background color while window manager open
     // and close animations are performed is to paint the provided window. This
@@ -189,8 +192,8 @@ void ChildProcessWebView::realize()
 
     // A colored top view is also needed to avoid initial flicker on REAPER
     // because the child process takes non-zero time to start
-    fBackground = XCreateSimpleWindow(fDisplay, parent, 0, 0,
-                                        getWidth(), getHeight(), 0, 0, 0);
+    fBackground = XCreateSimpleWindow(fDisplay, parent, 0, 0, width, height,
+                                        0, 0, 0);
     XMapWindow(fDisplay, fBackground);
     XSetWindowBackground(fDisplay, fBackground, color);
     XClearWindow(fDisplay, fBackground);
@@ -199,7 +202,7 @@ void ChildProcessWebView::realize()
     msg_win_cfg_t config;
     config.parent = static_cast<uintptr_t>(fBackground);
     config.color = color;
-    config.size = { getWidth(), getHeight() };
+    config.size = { width, height };
     fIpc->write(OP_REALIZE, &config, sizeof(config));
 }
 

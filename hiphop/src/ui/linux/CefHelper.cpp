@@ -18,6 +18,7 @@
 
 #include "CefHelper.hpp"
 
+#include <stdexcept>
 #include <sstream>
 
 #include <X11/Xutil.h>
@@ -29,8 +30,26 @@
 
 #define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.hostPostMessage(args);"
 
-static int XErrorHandlerImpl(Display* display, XErrorEvent* event);
-static int XIOErrorHandlerImpl(Display* display);
+static int XErrorHandlerImpl(Display* display, XErrorEvent* event)
+{
+    std::stringstream ss;
+
+    ss << "X error received: "
+       << "type " << event->type << ", "
+       << "serial " << event->serial << ", "
+       << "error_code " << static_cast<int>(event->error_code) << ", "
+       << "request_code " << static_cast<int>(event->request_code) << ", "
+       << "minor_code " << static_cast<int>(event->minor_code);
+
+    d_stderr2(ss.str().c_str());
+    
+    return 0;
+}
+
+static int XIOErrorHandlerImpl(Display* display)
+{
+    return 0;
+}
 
 // Entry point function for all processes
 int main(int argc, char* argv[])
@@ -60,10 +79,10 @@ CefHelper::CefHelper()
     , fDisplay(nullptr)
     , fContainer(0)
     , fBrowser(nullptr)
-    , fInjectedScripts(nullptr)
+    , fScripts(nullptr)
     , fDialogCallback(nullptr)
 {
-    fInjectedScripts = CefListValue::Create();
+    fScripts = CefListValue::Create();
 }
 
 CefHelper::~CefHelper()
@@ -167,8 +186,7 @@ void CefHelper::runMainLoop()
             rc = x_fib_handle_events(fDisplay, &event);
 
             if (rc > 0) {
-                //fDialogCallback->Continue({ x_fib_filename() }); // CEF >= 107
-                fDialogCallback->Continue(0, { x_fib_filename() });
+                fDialogCallback->Continue({ x_fib_filename() });
                 fDialogCallback = nullptr;
             } else if (rc < 0) {
                 fDialogCallback->Cancel();
@@ -215,7 +233,11 @@ bool CefHelper::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                          CefProcessId sourceProcess,
                                          CefRefPtr<CefProcessMessage> message)
 {
-    if ((sourceProcess == PID_RENDERER) && (message->GetName() == "ScriptMessage")) {
+    if (sourceProcess != PID_RENDERER) {
+        return false;
+    }
+
+    if (message->GetName() == "HostPostMessage") {
         const CefRefPtr<CefBinaryValue> val = message->GetArgumentList()->GetBinary(0);
         char payload[val->GetSize()];
         val->GetData(payload, sizeof(payload), 0);
@@ -235,18 +257,102 @@ void CefHelper::OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> commandLine
 void CefHelper::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
                             TransitionType transitionType)
 {
+    // This was needed for older versions of CEF
     // Chromium weird scaling https://magpcss.org/ceforum/viewtopic.php?t=11491
-    const float zoomLevel = std::log(device_pixel_ratio()) / std::log(1.2f);
-    browser->GetHost()->SetZoomLevel(zoomLevel);
+    //const float zoomLevel = std::log(device_pixel_ratio()) / std::log(1.2f);
+    //browser->GetHost()->SetZoomLevel(zoomLevel);
 }
 
 void CefHelper::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
                           int httpStatusCode)
 {
     XMapWindow(fDisplay, fContainer);
-    XSync(fDisplay, False);
-
     fIpc->write(OP_HANDLE_LOAD_FINISHED);
+}
+
+CefRefPtr<CefResourceRequestHandler> 
+CefHelper::GetResourceRequestHandler(CefRefPtr<CefBrowser> browser,
+                                     CefRefPtr<CefFrame> frame,
+                                     CefRefPtr<CefRequest> request,
+                                     bool is_navigation,
+                                     bool is_download,
+                                     const CefString& request_initiator,
+                                     bool& disable_default_handling)
+{
+    return is_navigation && (fScripts->GetSize() > 0) ?
+        /*inject scripts into index.html*/ this : nullptr;
+}
+
+CefResponseFilter::FilterStatus
+CefHelper::Filter(void* data_in,
+                  size_t data_in_size,
+                  size_t& data_in_read,
+                  void* data_out,
+                  size_t data_out_size,
+                  size_t& data_out_written)
+{
+    // Inject scripts before first script in document or before end of body
+    const char* ipos = strstr(static_cast<char*>(data_in), "<script");
+
+    if (ipos == nullptr) {
+        ipos = strstr(static_cast<char*>(data_in), "</body");
+
+        if (ipos == nullptr) {
+            d_stderr2("Could not find injection point for scripts");
+            return RESPONSE_FILTER_ERROR;
+        }
+    }
+
+    const size_t len0 = reinterpret_cast<size_t>(ipos) - reinterpret_cast<size_t>(data_in);
+    
+    try {
+        char* strOut = static_cast<char*>(data_out); // pointer arithmetic below
+        data_out_written = 0;
+
+        size_t len = len0;
+        if (data_out_size < len) throw std::overflow_error("");
+        memcpy(strOut + data_out_written, data_in, len);
+        data_out_written += len;
+        data_out_size -= len;
+
+        len = 8;
+        if (data_out_size < len) throw std::overflow_error("");
+        memcpy(strOut + data_out_written, "<script>", len);
+        data_out_written += len;
+        data_out_size -= len;
+
+        const size_t scriptCount = fScripts->GetSize();
+
+        for (size_t i = 0; i < scriptCount; ++i) {
+            std::string temp = fScripts->GetString(i).ToString();
+            const char* script = temp.c_str();
+            len = strlen(script);
+            if (data_out_size < len) throw std::overflow_error("");
+            memcpy(strOut + data_out_written, script, len);
+            data_out_written += len;
+            data_out_size -= len;
+        }
+
+        len = 9;
+        if (data_out_size < len) throw std::overflow_error("");
+        memcpy(strOut + data_out_written, "</script>", len);
+        data_out_written += len;
+        data_out_size -= len;
+
+        len = data_in_size - len0;
+        if (data_out_size < len) throw std::overflow_error("");
+        memcpy(strOut + data_out_written, ipos, len);
+        data_out_written += len;
+        data_out_size -= len;
+
+        data_in_read = data_in_size;
+
+        return RESPONSE_FILTER_DONE;
+
+    } catch (const std::overflow_error& e) {
+        d_stderr2("Output buffer too small for injecting scripts");
+        return RESPONSE_FILTER_ERROR;
+    }
 }
 
 bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser,                    
@@ -254,21 +360,23 @@ bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser,
                              const CefString& title,                           
                              const CefString& defaultFilePath,                 
                              const std::vector<CefString>& acceptFilters,
-                             int selectedAcceptFilter, // remove for CEF >= 107 
                              CefRefPtr<CefFileDialogCallback> callback)
 {
     if (fDialogCallback != nullptr) {
         callback->Cancel(); // only a single dialog is supported
         return true;
     }
+
     if (x_fib_configure(1 /*current dir*/, defaultFilePath.ToString().c_str()) != 0) {
         callback->Cancel();
         return true;
     }
+
     if (x_fib_configure(1 /*set title*/, title.ToString().c_str()) != 0) {
         callback->Cancel();
         return true;
     }
+
     if (x_fib_cfg_buttons(2 /*show places*/, 1 /*checked*/) != 0) {
         callback->Cancel();
         return true;
@@ -305,35 +413,20 @@ void CefHelper::realize(const msg_win_cfg_t* config)
     XSync(fDisplay, False);
 
     CefWindowInfo windowInfo;
-    const CefRect bounds { 0, 0, static_cast<int>(config->size.width),
-                                 static_cast<int>(config->size.height) };
-    windowInfo.SetAsChild(fContainer, bounds);
+    windowInfo.SetAsChild(fContainer, {});
 
     const CefBrowserSettings settings;
 
     fBrowser = CefBrowserHost::CreateBrowserSync(windowInfo, this, "", settings,
         nullptr, nullptr);
 
-    // Reduce artifacts when resizing
     const ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
-    XSetWindowBackground(fDisplay, w, config->color);
+    XSetWindowBackground(fDisplay, w, config->color); // reduce artifacts when resizing
+    XResizeWindow(fDisplay, w, config->size.width, config->size.height);
 }
 
 void CefHelper::navigate(const char* url)
 {
-    // Injecting a script means queuing it to run right before document starts
-    // loading to ensure they run before any user script. The V8 context must
-    // be already initialized in order to run scripts. V8 init callback fires in
-    // the renderer process. Send the scripts to the renderer process to have
-    // them called from there. Sending a context init event from the renderer
-    // to the browser process to run scripts from the browser process does not
-    // guarantee injected scripts will run before user scripts due to timing.
-
-    CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("InjectScripts");
-    message->GetArgumentList()->SetList(0, fInjectedScripts);
-    fBrowser->GetMainFrame()->SendProcessMessage(PID_RENDERER, message);
-    fInjectedScripts->Clear();
-
     fBrowser->GetMainFrame()->LoadURL(url);
 }
 
@@ -345,7 +438,7 @@ void CefHelper::runScript(const char* js)
 
 void CefHelper::injectScript(const char* js)
 {
-    fInjectedScripts->SetString(fInjectedScripts->GetSize(), js);
+    fScripts->SetString(fScripts->GetSize(), js);
 }
 
 void CefHelper::setSize(const msg_win_size_t* size)
@@ -353,14 +446,13 @@ void CefHelper::setSize(const msg_win_size_t* size)
     const unsigned width = size->width;
     const unsigned height = size->height;
 
+    if (fContainer != 0) {
+        XResizeWindow(fDisplay, fContainer, width, height);
+    }
+
     if (fBrowser != nullptr) {
         ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
         XResizeWindow(fDisplay, w, width, height);
-    }
-
-    if (fContainer != 0) {
-        XResizeWindow(fDisplay, fContainer, width, height);
-        XSync(fDisplay, False);
     }
 }
 
@@ -391,40 +483,14 @@ void CefHelper::setKeyboardFocus(bool keyboardFocus)
     }
 }
 
-CefSubprocess::CefSubprocess()
-{
-    fInjectedScripts = CefListValue::Create();
-}
-
-bool CefSubprocess::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
-                                                   CefRefPtr<CefFrame> frame,
-                                                   CefProcessId sourceProcess,
-                                                   CefRefPtr<CefProcessMessage> message)
-{
-    if ((sourceProcess == PID_BROWSER) && (message->GetName() == "InjectScripts")) {
-        // Note fInjectedScripts belongs to CefSubprocess and never gets cleared
-        fInjectedScripts = message->GetArgumentList()->GetList(0)->Copy();
-        return true;
-    }
-
-    return false;
-}
-
 void CefSubprocess::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
                                            CefRefPtr<CefV8Context> context)
 {
-    // TODO: code in OnContextCreated() will only run for the first loadURL() call
-    fBrowser = browser;
-
-    // V8 context is ready, first define the window.hostPostMessage function.
+    // V8 context is ready, define the window.hostPostMessage function.
     CefRefPtr<CefV8Value> window = context->GetGlobal();
     window->SetValue("hostPostMessage", CefV8Value::CreateFunction("hostPostMessage", this),
                      V8_PROPERTY_ATTRIBUTE_NONE);
-
-    // Then run queued injected scripts
-    for (int i = 0; i < fInjectedScripts->GetSize(); ++i) {
-        frame->ExecuteJavaScript(fInjectedScripts->GetString(i), frame->GetURL(), 0);
-    }
+    fBrowser = browser;
 }
 
 bool CefSubprocess::Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments,
@@ -470,7 +536,7 @@ bool CefSubprocess::Execute(const CefString& name, CefRefPtr<CefV8Value> object,
         }
     }
 
-    CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("ScriptMessage");
+    CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create("HostPostMessage");
     message->GetArgumentList()->SetBinary(0, CefBinaryValue::Create(payload, offset));
     fBrowser->GetMainFrame()->SendProcessMessage(PID_BROWSER, message);
 
@@ -479,25 +545,4 @@ bool CefSubprocess::Execute(const CefString& name, CefRefPtr<CefV8Value> object,
     }
 
     return true;
-}
-
-static int XErrorHandlerImpl(Display* display, XErrorEvent* event)
-{
-    std::stringstream ss;
-
-    ss << "X error received: "
-       << "type " << event->type << ", "
-       << "serial " << event->serial << ", "
-       << "error_code " << static_cast<int>(event->error_code) << ", "
-       << "request_code " << static_cast<int>(event->request_code) << ", "
-       << "minor_code " << static_cast<int>(event->minor_code);
-
-    d_stderr2(ss.str().c_str());
-    
-    return 0;
-}
-
-static int XIOErrorHandlerImpl(Display* display)
-{
-    return 0;
 }

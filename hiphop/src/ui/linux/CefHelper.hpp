@@ -29,9 +29,11 @@
 
 #include "IpcChannel.hpp"
 
+// Main process
 class CefHelper : public CefApp, public CefClient, 
                   public CefBrowserProcessHandler, public CefLoadHandler,
-                  public CefDialogHandler
+                  public CefRequestHandler, public CefResourceRequestHandler,
+                  public CefResponseFilter, public CefDialogHandler
 {
 public:
     CefHelper();
@@ -56,6 +58,11 @@ public:
         return this;
     }
 
+    virtual CefRefPtr<CefRequestHandler> GetRequestHandler() override
+    {
+        return this;
+    }
+
     virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
                                           CefRefPtr<CefFrame> frame,
                                           CefProcessId sourceProcess,
@@ -73,6 +80,43 @@ public:
     virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
                            int httpStatusCode) override;
 
+    // CefRequestHandler
+
+    virtual CefRefPtr<CefResourceRequestHandler> 
+    GetResourceRequestHandler(CefRefPtr<CefBrowser> browser,
+                              CefRefPtr<CefFrame> frame,
+                              CefRefPtr<CefRequest> request,
+                              bool is_navigation,
+                              bool is_download,
+                              const CefString& request_initiator,
+                              bool& disable_default_handling) override;
+
+    // CefResourceRequestHandler
+
+    virtual CefRefPtr<CefResponseFilter>
+    GetResourceResponseFilter(CefRefPtr<CefBrowser> browser,
+                              CefRefPtr<CefFrame> frame,
+                              CefRefPtr<CefRequest> request,
+                              CefRefPtr<CefResponse> response) override
+    {
+        return this;
+    }
+
+    // CefResponseFilter
+
+    virtual bool InitFilter() override
+    {
+        return true;
+    }
+
+    virtual CefResponseFilter::FilterStatus
+    Filter(void* data_in,
+           size_t data_in_size,
+           size_t& data_in_read,
+           void* data_out,
+           size_t data_out_size,
+           size_t& data_out_written) override;
+
     // CefDialogHandler
 
     virtual bool OnFileDialog(CefRefPtr<CefBrowser> browser,                      
@@ -80,7 +124,6 @@ public:
                               const CefString& title,                             
                               const CefString& defaultFilePath,                 
                               const std::vector<CefString>& acceptFilters,
-                              int selectedAcceptFilter, // remove for CEF >= 107 
                               CefRefPtr<CefFileDialogCallback> callback) override;
 private:
     void runMainLoop();
@@ -98,7 +141,7 @@ private:
     ::Window    fContainer;
     
     CefRefPtr<CefBrowser>            fBrowser;
-    CefRefPtr<CefListValue>          fInjectedScripts;
+    CefRefPtr<CefListValue>          fScripts;
     CefRefPtr<CefFileDialogCallback> fDialogCallback;
 
     // Include the CEF default reference counting implementation
@@ -109,31 +152,25 @@ class CefSubprocess : public CefApp, public CefClient,
                       public CefRenderProcessHandler, public CefV8Handler
 {
 public:
-    CefSubprocess();
+    CefSubprocess() {}
     virtual ~CefSubprocess() {}
 
+    // CefApp
     virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override
     {
         return this;
     }
 
-    // CefClient
-    virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
-                                          CefRefPtr<CefFrame> frame,
-                                          CefProcessId sourceProcess,
-                                          CefRefPtr<CefProcessMessage> message) override;
-
     // CefRenderProcessHandler
     virtual void OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
                                   CefRefPtr<CefV8Context> context) override;
-
+    
     // CefV8Handler
     virtual bool Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments,
                          CefRefPtr<CefV8Value>& retval, CefString& exception) override;
 
 private:
-    CefRefPtr<CefBrowser>   fBrowser;
-    CefRefPtr<CefListValue> fInjectedScripts;
+    CefRefPtr<CefBrowser> fBrowser;
 
     IMPLEMENT_REFCOUNTING(CefSubprocess);
 };

@@ -38,7 +38,7 @@ public:
 
         String js = String(
             "window.testInjectedFunction = () => {"
-            "   console.log(`The device pixel ratio is ${window.devicePixelRatio}`);"
+            "   console.log(`webgain: the device pixel ratio is ${window.devicePixelRatio}`);"
             "};"
         );
         injectScript(js);
