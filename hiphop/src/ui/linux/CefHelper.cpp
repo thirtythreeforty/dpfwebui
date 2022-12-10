@@ -279,8 +279,12 @@ CefHelper::GetResourceRequestHandler(CefRefPtr<CefBrowser> browser,
                                      const CefString& request_initiator,
                                      bool& disable_default_handling)
 {
-    return is_navigation && (fScripts->GetSize() > 0) ?
-        /*inject scripts into index.html*/ this : nullptr;
+    if (is_navigation && (fScripts->GetSize() > 0)) {
+        fIndexHtml.clear();
+        return this;
+    }
+
+    return nullptr;
 }
 
 CefResponseFilter::FilterStatus
@@ -291,35 +295,43 @@ CefHelper::Filter(void* data_in,
                   size_t data_out_size,
                   size_t& data_out_written)
 {
+    data_in_read = data_in_size;
+    data_out_written = 0;
+
+    if (data_in_size == 0) {
+        d_stderr2("Could not find injection point for scripts");
+        return RESPONSE_FILTER_ERROR;
+    }
+
+    fIndexHtml += std::string(static_cast<char*>(data_in), data_in_size);
+
     // Inject scripts before first script in document or before end of body
-    const char* ipos = strstr(static_cast<char*>(data_in), "<script");
+    const char* sInStart = fIndexHtml.c_str();
+    const char* sInEnd = strstr(sInStart, "<script");
 
-    if (ipos == nullptr) {
-        ipos = strstr(static_cast<char*>(data_in), "</body");
+    if (sInEnd == nullptr) {
+        sInEnd = strstr(sInStart, "</body");
 
-        if (ipos == nullptr) {
-            d_stderr2("Could not find injection point for scripts");
-            return RESPONSE_FILTER_ERROR;
+        if (sInEnd == nullptr) {
+            return RESPONSE_FILTER_NEED_MORE_DATA;
         }
     }
 
-    const size_t len0 = reinterpret_cast<size_t>(ipos) - reinterpret_cast<size_t>(data_in);
-    
-    try {
-        char* strOut = static_cast<char*>(data_out); // pointer arithmetic below
-        data_out_written = 0;
+    char* sOut = static_cast<char*>(data_out);
+    size_t outSize = data_out_size;
 
-        size_t len = len0;
-        if (data_out_size < len) throw std::overflow_error("");
-        memcpy(strOut + data_out_written, data_in, len);
+    try {
+        size_t len = static_cast<size_t>(sInEnd - sInStart);
+        if (outSize < len) throw std::overflow_error(std::to_string(len));
+        memcpy(sOut + data_out_written, sInStart, len);
         data_out_written += len;
-        data_out_size -= len;
+        outSize -= len;
 
         len = 8;
-        if (data_out_size < len) throw std::overflow_error("");
-        memcpy(strOut + data_out_written, "<script>", len);
+        if (outSize < len) throw std::overflow_error(std::to_string(len));
+        memcpy(sOut + data_out_written, "<script>", len);
         data_out_written += len;
-        data_out_size -= len;
+        outSize -= len;
 
         const size_t scriptCount = fScripts->GetSize();
 
@@ -327,30 +339,28 @@ CefHelper::Filter(void* data_in,
             std::string temp = fScripts->GetString(i).ToString();
             const char* script = temp.c_str();
             len = strlen(script);
-            if (data_out_size < len) throw std::overflow_error("");
-            memcpy(strOut + data_out_written, script, len);
+            if (outSize < len) throw std::overflow_error(std::to_string(len));
+            memcpy(sOut + data_out_written, script, len);
             data_out_written += len;
-            data_out_size -= len;
+            outSize -= len;
         }
 
         len = 9;
-        if (data_out_size < len) throw std::overflow_error("");
-        memcpy(strOut + data_out_written, "</script>", len);
+        if (outSize < len) throw std::overflow_error(std::to_string(len));
+        memcpy(sOut + data_out_written, "</script>", len);
         data_out_written += len;
-        data_out_size -= len;
+        outSize -= len;
 
-        len = data_in_size - len0;
-        if (data_out_size < len) throw std::overflow_error("");
-        memcpy(strOut + data_out_written, ipos, len);
+        len = strlen(sInEnd);
+        if (outSize < len) throw std::overflow_error(std::to_string(len));
+        memcpy(sOut + data_out_written, sInEnd, len);
         data_out_written += len;
-        data_out_size -= len;
-
-        data_in_read = data_in_size;
+        outSize -= len;
 
         return RESPONSE_FILTER_DONE;
 
     } catch (const std::overflow_error& e) {
-        d_stderr2("Output buffer too small for injecting scripts");
+        d_stderr2("Output buffer too small %lu < %s", data_out_size, e.what());
         return RESPONSE_FILTER_ERROR;
     }
 }

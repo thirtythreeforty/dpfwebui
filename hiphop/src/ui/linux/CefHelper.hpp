@@ -19,6 +19,7 @@
 #ifndef CEF_HELPER_HPP
 #define CEF_HELPER_HPP
 
+#include <string>
 #include <vector>
 
 #include <X11/Xlib.h>
@@ -139,6 +140,7 @@ private:
     IpcChannel* fIpc;
     ::Display*  fDisplay;
     ::Window    fContainer;
+    std::string fIndexHtml;
     
     CefRefPtr<CefBrowser>            fBrowser;
     CefRefPtr<CefListValue>          fScripts;
