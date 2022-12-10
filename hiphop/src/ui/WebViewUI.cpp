@@ -167,11 +167,6 @@ void WebViewUI::sizeChanged(uint width, uint height)
     postMessage({"UI", "sizeChanged", width, height}, 0);
 }
 
-void WebViewUI::sizeRequest(const UiBlock& block)
-{
-    block(); // on Linux block execution is queued
-}
-
 void WebViewUI::initHandlers()
 {
     // These handlers only make sense for the plugin embedded web view
@@ -189,24 +184,18 @@ void WebViewUI::initHandlers()
     });
 
     fHandler["setWidth"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
-        sizeRequest([this, args]() {
-            setWidth(static_cast<uint>(args[0].getNumber()));
-        });
+        setWidth(static_cast<uint>(args[0].getNumber()));
     });
 
     fHandler["setHeight"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
-        sizeRequest([this, args]() {
-            setHeight(static_cast<uint>(args[0].getNumber()));
-        });
+        setHeight(static_cast<uint>(args[0].getNumber()));
     });
 
     fHandler["setSize"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*origin*/) {
-        sizeRequest([this, args]() {
-            setSize(
-                static_cast<uint>(args[0].getNumber()), // width
-                static_cast<uint>(args[1].getNumber())  // height
-            );
-        });
+        setSize(
+            static_cast<uint>(args[0].getNumber()), // width
+            static_cast<uint>(args[1].getNumber())  // height
+        );
     });
 
     fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {

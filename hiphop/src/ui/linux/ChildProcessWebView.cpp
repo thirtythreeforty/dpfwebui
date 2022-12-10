@@ -197,7 +197,7 @@ void ChildProcessWebView::realize()
     XMapWindow(fDisplay, fBackground);
     XSetWindowBackground(fDisplay, fBackground, color);
     XClearWindow(fDisplay, fBackground);
-    XSync(fDisplay, False);
+    XFlush(fDisplay);
 
     msg_win_cfg_t config;
     config.parent = static_cast<uintptr_t>(fBackground);
@@ -223,15 +223,13 @@ void ChildProcessWebView::injectScript(String& source)
 
 void ChildProcessWebView::onSize(uint width, uint height)
 {
-    const msg_win_size_t sizePkt = { width, height };
-    fIpc->write(OP_SET_SIZE, &sizePkt, sizeof(sizePkt));
-
-    if (fBackground == 0) {
-        return;
+    if (fBackground != 0) {
+        XResizeWindow(fDisplay, fBackground, width, height);
+        XFlush(fDisplay);
     }
 
-    XResizeWindow(fDisplay, fBackground, width, height);
-    XSync(fDisplay, False);
+    const msg_win_size_t sizePkt = { width, height };
+    fIpc->write(OP_SET_SIZE, &sizePkt, sizeof(sizePkt));
 }
 
 void ChildProcessWebView::onKeyboardFocus(bool focus)

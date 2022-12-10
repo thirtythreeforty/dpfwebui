@@ -410,7 +410,7 @@ void CefHelper::realize(const msg_win_cfg_t* config)
                                0, 0, config->size.width, config->size.height, 0,
                                vinfo.depth, CopyFromParent, vinfo.visual,
                                CWColormap, &attrs);
-    XSync(fDisplay, False);
+    XFlush(fDisplay);
 
     CefWindowInfo windowInfo;
     windowInfo.SetAsChild(fContainer, {});

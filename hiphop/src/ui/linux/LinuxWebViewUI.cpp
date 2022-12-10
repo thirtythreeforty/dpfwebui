@@ -54,11 +54,6 @@ void LinuxWebViewUI::openSystemWebBrowser(String& url)
     }
 }
 
-void LinuxWebViewUI::sizeRequest(const UiBlock& block)
-{
-    queue(block);   // queue for next uiIdle() call
-}
-
 uintptr_t LinuxWebViewUI::createStandaloneWindow()
 {
     // TODO - standalone support
