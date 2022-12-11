@@ -268,6 +268,8 @@ void CefHelper::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> fra
 {
     XMapWindow(fDisplay, fContainer);
     fIpc->write(OP_HANDLE_LOAD_FINISHED);
+    // TODO : look for a better solution than a delay to prevent white flicker
+    usleep(50000L);
 }
 
 CefRefPtr<CefResourceRequestHandler> 

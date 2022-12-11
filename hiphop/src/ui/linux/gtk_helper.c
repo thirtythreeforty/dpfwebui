@@ -335,7 +335,8 @@ static void web_view_load_changed_cb(WebKitWebView *view, WebKitLoadEvent event,
             apply_size(ctx);
             gtk_widget_show_all(GTK_WIDGET(ctx->window));
             ipc_write_simple(ctx, OP_HANDLE_LOAD_FINISHED, NULL, 0);
-            usleep(50000L); // TODO: look for better solution than a 50ms delay to prevent black flicker
+            // TODO : look for a better solution than a delay to prevent black flicker
+            usleep(50000L);
             break;
         default:
             break;
