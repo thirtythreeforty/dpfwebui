@@ -18,7 +18,7 @@
 
 #include "CefHelper.hpp"
 
-#include <stdexcept>
+#include <cstddef>
 #include <sstream>
 
 #include <X11/Xutil.h>
@@ -303,66 +303,42 @@ CefHelper::Filter(void* data_in,
         return RESPONSE_FILTER_ERROR;
     }
 
-    fIndexHtml += std::string(static_cast<char*>(data_in), data_in_size);
-
     // Inject scripts before first script in document or before end of body
-    const char* sInStart = fIndexHtml.c_str();
-    const char* sInEnd = strstr(sInStart, "<script");
 
-    if (sInEnd == nullptr) {
-        sInEnd = strstr(sInStart, "</body");
+    fIndexHtml += std::string(static_cast<char*>(data_in), data_in_size);
+    size_t pos = fIndexHtml.find("<script");
 
-        if (sInEnd == nullptr) {
+    if (pos == std::string::npos) {
+        pos = fIndexHtml.find("</body");
+
+        if (pos == std::string::npos) {
             return RESPONSE_FILTER_NEED_MORE_DATA;
         }
     }
 
-    char* sOut = static_cast<char*>(data_out);
-    size_t outSize = data_out_size;
+    std::string scripts = "<script>";
+    const size_t scriptCount = fScripts->GetSize();
 
-    try {
-        size_t len = static_cast<size_t>(sInEnd - sInStart);
-        if (outSize < len) throw std::overflow_error(std::to_string(len));
-        memcpy(sOut + data_out_written, sInStart, len);
-        data_out_written += len;
-        outSize -= len;
+    for (size_t i = 0; i < scriptCount; ++i) {
+        scripts += fScripts->GetString(i).ToString() + ";";
+    }
 
-        len = 8;
-        if (outSize < len) throw std::overflow_error(std::to_string(len));
-        memcpy(sOut + data_out_written, "<script>", len);
-        data_out_written += len;
-        outSize -= len;
+    scripts += "</script>";
+    
+    fIndexHtml.insert(pos, scripts);
+    const size_t indexSize = fIndexHtml.size();
 
-        const size_t scriptCount = fScripts->GetSize();
-
-        for (size_t i = 0; i < scriptCount; ++i) {
-            std::string temp = fScripts->GetString(i).ToString();
-            const char* script = temp.c_str();
-            len = strlen(script);
-            if (outSize < len) throw std::overflow_error(std::to_string(len));
-            memcpy(sOut + data_out_written, script, len);
-            data_out_written += len;
-            outSize -= len;
-        }
-
-        len = 9;
-        if (outSize < len) throw std::overflow_error(std::to_string(len));
-        memcpy(sOut + data_out_written, "</script>", len);
-        data_out_written += len;
-        outSize -= len;
-
-        len = strlen(sInEnd);
-        if (outSize < len) throw std::overflow_error(std::to_string(len));
-        memcpy(sOut + data_out_written, sInEnd, len);
-        data_out_written += len;
-        outSize -= len;
-
-        return RESPONSE_FILTER_DONE;
-
-    } catch (const std::overflow_error& e) {
-        d_stderr2("Output buffer too small %lu < %s", data_out_size, e.what());
+    if (data_out_size < indexSize) {
+        d_stderr2("Output buffer too small %lu < %lu", data_out_size, indexSize);
         return RESPONSE_FILTER_ERROR;
     }
+
+    fIndexHtml.copy(static_cast<char*>(data_out), indexSize);
+    fIndexHtml.clear();
+    
+    data_out_written = indexSize;
+
+    return RESPONSE_FILTER_DONE;
 }
 
 bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser,                    
