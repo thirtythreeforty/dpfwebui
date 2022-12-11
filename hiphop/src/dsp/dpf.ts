@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// This file attempts to mimic the C++ public plugin interfaces. Low level
-// interactions with the host are strictly confined to index.ts .
+// This file attempts to mimic the C++ public plugin interfaces.
+// See index.ts for the low level host<->plugin bridge implementation.
 
 import { _get_samplerate, _get_time_position, _write_midi_event } from './index'
 

@@ -99,27 +99,27 @@ export default class ASToneExamplePlugin extends DISTRHO.Plugin implements DISTR
     }
 
     initProgramName(index: u32, programName: DISTRHO.String): void {
-        // empty implementation
+        // no-op
     }
 
     loadProgram(index: u32): void {
-        // empty implementation
+        // no-op
     }
 
     initState(index: u32, state: DISTRHO.State): void {
-        // empty implementation
+        // no-op
     }
 
     setState(key: string, value: string): void {
-        // empty implementation
+        // no-op
     }
     
     getState(key: string): string {
-        return '' // empty implementation
+        return ''
     }
 
     deactivate(): void {
-        // empty implementation
+        // no-op
     }
 
 }

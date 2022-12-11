@@ -21,8 +21,8 @@ import PluginImpl from './plugin' // user code
 
 // The interface defined in this file is private to the framework and optimized
 // for integration with the WebAssembly runtime. Do not use it for creating
-// plugins, use the public interface provided by dpf.ts instead. As of Jul '21
-// AssemblyScript strings format has not completely settled down.
+// plugins, use the public interface provided by dpf.ts instead.
+// As of Jul '21 AssemblyScript strings format has not completely settled down.
 // https://github.com/AssemblyScript/assemblyscript/issues/1653. Use C-style
 // strings (UTF-8, null terminated) for all interfaces exposed by this module
 // and perform all string conversions in AssemblyScript.
@@ -49,26 +49,30 @@ export function _write_midi_event(midiEvent: DISTRHO.MidiEvent): bool {
     midiOffset += 4
     raw_midi_events.setUint32(midiOffset, midiEvent.data.length, /*LE*/true)
     midiOffset += 4
+
     for (let i = 0; i < midiEvent.data.length; ++i) {
         raw_midi_events.setUint8(midiOffset, midiEvent.data[i])
         midiOffset++
     }
+
     return write_midi_event()
 }
 
 export function _get_time_position(): DISTRHO.TimePosition {
     get_time_position()
+    
     let pos = new DISTRHO.TimePosition
     pos.playing = <bool>_rw_int32_0
     pos.frame = _rw_int64_0
+
     return pos
 }
 
 // Keep get_label(), get_maker() and get_license() as function exports. They
 // could be replaced with globals initialized to these function return values
 // for simpler implementation, but in the future index.ts will be automatically
-// injected into the Wasm VM (just like done with dpf.js for the web view) and
-// plugin implementations moved to "linked modules". Under such scheme the
+// injected into the Wasm VM (like optionally done with dpf.js for the web view)
+// and plugin implementations moved to "linked modules". Under such scheme the
 // guarantee that pluginInstance is already init'd at this point no longer holds.
 
 export function get_label(): ArrayBuffer {
@@ -115,6 +119,7 @@ export function set_parameter_value(index: u32, value: f32): void {
 export function init_program_name(index: u32): ArrayBuffer {
     let programName = new DISTRHO.String
     pluginInstance.initProgramName(index, programName)
+
     return wtf16_to_c_string(programName.value)
 }
 

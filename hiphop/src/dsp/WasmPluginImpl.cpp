@@ -463,7 +463,7 @@ void WasmPlugin::onModuleLoad()
 
 void WasmPlugin::checkInstance(const char* caller) const
 {
-    if (!fRuntime->hasInstance()) {
+    if (! fRuntime->hasInstance()) {
         throw std::runtime_error(std::string(caller) + "() : missing wasm instance");
     }
 }

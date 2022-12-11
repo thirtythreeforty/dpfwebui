@@ -249,7 +249,7 @@ static void apply_size(const context_t *ctx)
 
     char js[1024];
 
-    sprintf(js, "document.documentElement.style.width  = '%dpx';"
+    sprintf(js, "document.documentElement.style.width = '%dpx';"
                 "document.documentElement.style.height = '%dpx';",
                 width, height);
     run_script(ctx, js);

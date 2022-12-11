@@ -43,11 +43,11 @@ export default class HotSwapExamplePlugin extends DISTRHO.Plugin implements DIST
     }
 
     activate(): void {
-        // empty implementation
+        // no-op
     }
 
     run(inputs: Float32Array[], outputs: Float32Array[], midiEvents: DISTRHO.MidiEvent[]): void {
-        // empty implementation
+        // no-op
     }
 
     /**
@@ -55,39 +55,39 @@ export default class HotSwapExamplePlugin extends DISTRHO.Plugin implements DIST
      */
 
     initParameter(index: u32, parameter: DISTRHO.Parameter): void {
-        // empty implementation
+        // no-op
     }
 
     getParameterValue(index: u32): f32 {
-        return 0 // empty implementation
+        return 0
     }
 
     setParameterValue(index: u32, value: f32): void {
-        // empty implementation
+        // no-op
     }
 
     initProgramName(index: u32, programName: DISTRHO.String): void {
-        // empty implementation
+        // no-op
     }
 
     loadProgram(index: u32): void {
-        // empty implementation
+        // no-op
     }
 
     initState(index: u32, state: DISTRHO.State): void {
-        // empty implementation
+        // no-op
     }
 
     setState(key: string, value: string): void {
-        // empty implementation
+        // no-op
     }
     
     getState(key: string): string {
-        return '' // empty implementation
+        return ''
     }
 
     deactivate(): void {
-        // empty implementation
+        // no-op
     }
 
 }
