@@ -21,7 +21,7 @@
 
 #include "DistrhoUI.hpp"
 
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 # if ! DISTRHO_PLUGIN_WANT_STATE
 #  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
 # endif
@@ -39,14 +39,15 @@ public:
     virtual ~UIEx() {}
 
 protected:
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
 
     bool writeSharedMemory(const unsigned char* data, size_t size, size_t offset = 0,
                            uint32_t hints = 0);
 
     virtual void sharedMemoryReady() {}
-    
+
+# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
     virtual void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
     {
         (void)data;
@@ -54,11 +55,11 @@ protected:
         (void)hints;
     }
 
-#if defined(HIPHOP_WASM_SUPPORT)
-    void sideloadWasmBinary(const unsigned char* data, size_t size);
-#endif
-    
     void uiIdle() override;
+# endif
+# if defined(HIPHOP_WASM_SUPPORT)
+    void sideloadWasmBinary(const unsigned char* data, size_t size);
+# endif
 #endif // HIPHOP_SHARED_MEMORY_SIZE
 
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -66,7 +67,7 @@ protected:
 #endif
 
 private:
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     SharedMemoryImpl fMemory;
 #endif
 

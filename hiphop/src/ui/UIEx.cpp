@@ -24,7 +24,7 @@ UIEx::UIEx(uint width, uint height)
     : UI(width, height)
 {}
 
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
                              uint32_t hints)
 {
@@ -38,7 +38,7 @@ bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offs
     }
 }
 
-#if defined(HIPHOP_WASM_SUPPORT)
+# if defined(HIPHOP_WASM_SUPPORT)
 void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
 {
     // Send binary to the Plugin instance. This could be also achieved using the
@@ -46,10 +46,8 @@ void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
     
     writeSharedMemory(data, size, 0, kShMemHintInternal | kShMemHintWasmBinary);
 }
-#endif
-#endif // HIPHOP_SHARED_MEMORY_SIZE
-
-#if HIPHOP_SHARED_MEMORY_SIZE
+# endif
+# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
 void UIEx::uiIdle()
 {
     // ExternalWindow does not implement the IdleCallback methods. If uiIdle()
@@ -64,14 +62,15 @@ void UIEx::uiIdle()
         fMemory.setRead(origin);
     }
 }
-#endif
+# endif
+#endif // HIPHOP_SHARED_MEMORY_SIZE
 
 #if DISTRHO_PLUGIN_WANT_STATE
 void UIEx::stateChanged(const char* key, const char* value)
 {
     (void)key;
     (void)value;
-#if HIPHOP_SHARED_MEMORY_SIZE
+# if defined(HIPHOP_SHARED_MEMORY_SIZE)
     if (std::strcmp(key, "_shmem_file") == 0) {
         if (fMemory.connect(value) != nullptr) {
             sharedMemoryReady();
@@ -79,6 +78,6 @@ void UIEx::stateChanged(const char* key, const char* value)
             d_stderr2("Could not connect to shared memory");
         }
     }
-#endif
+# endif
 }
 #endif

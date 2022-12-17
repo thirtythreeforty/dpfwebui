@@ -25,7 +25,7 @@
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NAME "JITDrum"
+#define DISTRHO_PLUGIN_NAME "JITdrum"
 
 /**
    Number of audio inputs the plugin has.

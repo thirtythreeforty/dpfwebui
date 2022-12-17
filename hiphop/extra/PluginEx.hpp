@@ -21,7 +21,7 @@
 
 #include "DistrhoPlugin.hpp"
 
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 # if ! DISTRHO_PLUGIN_WANT_STATE
 #  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
 # endif
@@ -43,7 +43,7 @@ public:
     void setState(const char* key, const char* value) override;
 #endif
 
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 protected:
     SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
 
@@ -52,12 +52,14 @@ protected:
 
     virtual void sharedMemoryReady() {}
 
+# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
     virtual void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) 
     {
         (void)data;
         (void)size;
         (void)hints;
     }
+# endif
 #endif
 
 private:
@@ -65,7 +67,7 @@ private:
     uint32_t fStateIndexWsPort;
     int fWebServerPort;
 #endif
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     uint32_t fStateIndexShMemFile;
     uint32_t fStateIndexShMemData;
     SharedMemoryImpl fMemory;

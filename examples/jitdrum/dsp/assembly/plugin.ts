@@ -29,7 +29,7 @@ export default class JITDrumExamplePlugin extends DISTRHO.Plugin implements DIST
     private a: f32  // amplitude
 
     getLabel(): string {
-        return 'JITDrum'
+        return 'JITdrum'
     }
 
     getMaker(): string {

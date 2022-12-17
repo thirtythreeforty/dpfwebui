@@ -54,9 +54,9 @@ public:
 #if DISTRHO_PLUGIN_WANT_STATE
     void   initState(uint32_t index, State& state) override;
     void   setState(const char* key, const char* value) override;
-#if DISTRHO_PLUGIN_WANT_FULL_STATE
+# if DISTRHO_PLUGIN_WANT_FULL_STATE
     String getState(const char* key) const override;
-#endif
+# endif
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
     void activate() override;
@@ -69,8 +69,10 @@ public:
     void run(const float** inputs, float** outputs, uint32_t frames) override;
 #endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
+# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
     void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) override;
+# endif
     void loadWasmBinary(const unsigned char* data, size_t size);
 #endif // HIPHOP_SHARED_MEMORY_SIZE
 

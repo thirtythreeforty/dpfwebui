@@ -151,12 +151,12 @@ void WebViewUI::stateChanged(const char* key, const char* value)
 {
     WebViewUIBase::stateChanged(key, value);
 
-#if defined(HIPHOP_NETWORK_UI)
+# if defined(HIPHOP_NETWORK_UI)
     if ((std::strcmp(key, "_ws_port") == 0) && (fWebView != nullptr)) {
         String url = getLocalUrl();
         fWebView->navigate(url);
     }
-#endif
+# endif
 }
 #endif
 

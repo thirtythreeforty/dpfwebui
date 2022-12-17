@@ -79,18 +79,20 @@ void WebUIBase::stateChanged(const char* key, const char* value)
 }
 #endif
 
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
 void WebUIBase::sharedMemoryReady()
 {
     postMessage({"UI", "sharedMemoryReady"}, DESTINATION_ALL);
 }
 
+# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
 void WebUIBase::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
 {
     (void)size;
     String b64Data = String::asBase64(data, size);
     postMessage({"UI", "_sharedMemoryChanged", b64Data, hints}, DESTINATION_ALL);
 }
+# endif
 #endif
 
 void WebUIBase::onMessageReceived(const JSValue& args, uintptr_t origin)
@@ -174,7 +176,7 @@ void WebUIBase::initHandlers()
     });
 #endif
 
-#if DISTRHO_PLUGIN_WANT_STATE && HIPHOP_SHARED_MEMORY_SIZE
+#if DISTRHO_PLUGIN_WANT_STATE && defined(HIPHOP_SHARED_MEMORY_SIZE)
     fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*origin*/) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         writeSharedMemory(
@@ -185,7 +187,7 @@ void WebUIBase::initHandlers()
         );
     });
 
-#if defined(HIPHOP_WASM_SUPPORT)
+# if defined(HIPHOP_WASM_SUPPORT)
     fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         sideloadWasmBinary(
@@ -193,7 +195,7 @@ void WebUIBase::initHandlers()
             static_cast<size_t>(data.size())
         );
     });
-#endif
+# endif
 #endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_SHARED_MEMORY_SIZE
 
     // It is not possible to implement JS synchronous calls that return values

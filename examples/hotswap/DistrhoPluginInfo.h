@@ -20,6 +20,11 @@
 #define HIPHOP_SHARED_MEMORY_SIZE 1048576 // 1 MiB
 
 /**
+   Notify Plugin or UI when the other side writes to the shared memory.@n
+ */
+#define HIPHOP_SHARED_MEMORY_WRITE_CALLBACK 1
+
+/**
    Enable WebAssembly System Interface (WASI).
    @note This feature is only available for the Wasmer runtime.
  */

@@ -251,7 +251,7 @@ void WasmPlugin::setState(const char* key, const char* value)
     }
 }
 
-#if DISTRHO_PLUGIN_WANT_FULL_STATE
+# if DISTRHO_PLUGIN_WANT_FULL_STATE
 String WasmPlugin::getState(const char* key) const
 {
     try {
@@ -269,7 +269,7 @@ String WasmPlugin::getState(const char* key) const
         return String();
     }
 }
-#endif
+# endif
 
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
@@ -350,7 +350,8 @@ void WasmPlugin::deactivate()
     }
 }
 
-#if HIPHOP_SHARED_MEMORY_SIZE
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
+# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
 void WasmPlugin::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
 {
     if (hints & (kShMemHintInternal | kShMemHintWasmBinary)) {
@@ -361,6 +362,7 @@ void WasmPlugin::sharedMemoryChanged(const unsigned char* data, size_t size, uin
         }
     }
 }
+# endif
 
 void WasmPlugin::loadWasmBinary(const unsigned char* data, size_t size)
 {
