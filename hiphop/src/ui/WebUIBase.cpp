@@ -85,14 +85,15 @@ void WebUIBase::sharedMemoryReady()
     postMessage({"UI", "sharedMemoryReady"}, DESTINATION_ALL);
 }
 
-# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
 void WebUIBase::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
 {
-    (void)size;
+# if HIPHOP_SHARED_MEMORY_CHANGED_JS_CALLBACK
     String b64Data = String::asBase64(data, size);
     postMessage({"UI", "_sharedMemoryChanged", b64Data, hints}, DESTINATION_ALL);
-}
+# else
+    (void)size;
 # endif
+}
 #endif
 
 void WebUIBase::onMessageReceived(const JSValue& args, uintptr_t origin)

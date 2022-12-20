@@ -47,7 +47,6 @@ void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
     writeSharedMemory(data, size, 0, kShMemHintInternal | kShMemHintWasmBinary);
 }
 # endif
-# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
 void UIEx::uiIdle()
 {
     // ExternalWindow does not implement the IdleCallback methods. If uiIdle()
@@ -62,7 +61,6 @@ void UIEx::uiIdle()
         fMemory.setRead(origin);
     }
 }
-# endif
 #endif // HIPHOP_SHARED_MEMORY_SIZE
 
 #if DISTRHO_PLUGIN_WANT_STATE

@@ -131,7 +131,7 @@ void PluginEx::setState(const char* key, const char* value)
         fWebServerPort = std::atoi(value);
     }
 # endif
-# if defined(HIPHOP_SHARED_MEMORY_SIZE) && HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
+# if defined(HIPHOP_SHARED_MEMORY_SIZE)
     constexpr int origin = kSharedMemoryWriteOriginUI;
     if ((std::strcmp(key, "_shmem_data") == 0) && ! fMemory.isRead(origin)) {
         sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(origin),

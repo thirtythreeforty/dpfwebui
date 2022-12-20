@@ -52,14 +52,12 @@ protected:
 
     virtual void sharedMemoryReady() {}
 
-# if HIPHOP_SHARED_MEMORY_WRITE_CALLBACK
     virtual void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) 
     {
         (void)data;
         (void)size;
         (void)hints;
     }
-# endif
 #endif
 
 private:
