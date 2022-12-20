@@ -18,7 +18,12 @@
 
 window.DISTRHO = (() => {
 
-class UI extends UIBase() {
+class UI {
+
+    constructor(opt) {
+        this._opt = opt || {};        
+        this._initMessageChannel();
+    }
 
     // uint UI::getWidth()
     async getWidth() {
@@ -74,24 +79,16 @@ class UI extends UIBase() {
     }
 
     // void UI::sizeChanged(uint width, uint height)
-    sizeChanged(width, height) {
-        // default empty implementation
-    }
+    sizeChanged(width, height) {}
 
     // void UI::parameterChanged(uint32_t index, float value)
-    parameterChanged(index, value) {
-        // default empty implementation
-    }
+    parameterChanged(index, value) {}
 
     // void UI::programLoaded(uint32_t index)
-    programLoaded(index) {
-        // default empty implementation
-    }
+    programLoaded(index) {}
 
     // void UI::stateChanged(const char* key, const char* value)
-    stateChanged(key, value) {
-        // default empty implementation
-    }
+    stateChanged(key, value) {}
    
     // bool ExternalWindow::isStandalone()
     async isStandalone() {
@@ -164,19 +161,13 @@ class UI extends UIBase() {
 
     // Non-DPF callback method for receiving messages from the host
     // void WebUIBase::onMessageReceived(const JSValue& args)
-    messageReceived(args) {
-        // default empty implementation
-    }
+    messageReceived(args) {}
 
-    // Non-DPF local callback that fires when the message channel is open
-    messageChannelOpen() {
-        // default empty implementation
-    }
+    // Non-DPF callback method that fires when the message channel is open
+    messageChannelOpen() {}
 
-    // Non-DPF local callback that fires when the message channel is closed
-    messageChannelClosed() {
-        // default empty implementation
-    }
+    // Non-DPF callback method that fires when the message channel is closed
+    messageChannelClosed() {}
 
     // Non-DPF method that writes to memory shared with DISTRHO::PluginEx instance
     // void UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset, uint32_t hints)
@@ -186,15 +177,11 @@ class UI extends UIBase() {
 
     // Non-DPF callback method that notifies when shared memory is ready to use
     // void UIEx::sharedMemoryReady()
-    sharedMemoryReady() {
-        // default empty implementation
-    }
+    sharedMemoryReady() {}
 
     // Non-DPF callback method that notifies when shared memory has been written
     // void UIEx::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
-    sharedMemoryChanged(data /*Uint8Array*/, hints /*Number*/) {
-        // default empty implementation
-    }
+    sharedMemoryChanged(data /*Uint8Array*/, hints /*Number*/) {}
 
     // Non-DPF method that loads binary into DISTRHO::WasmPlugin instance
     // void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
@@ -242,16 +229,11 @@ class UI extends UIBase() {
         return this._latency;
     }
 
-}
+    //
+    // Private methods
+    //
 
-//
-// JavaScript does not implement forward class declarations.
-// Trick for keeping public interface UI at top of this file.
-//
-function UIBase() { return class {
-
-    constructor(opt) {
-        this._opt = opt || {};
+    _initMessageChannel() {
         this._resolve = {};
         this._cache = {};
         this._socket = null;
@@ -405,7 +387,7 @@ function UIBase() { return class {
         }
     }
 
-}/*class*/ }/*function*/
+}
 
 //
 // Public utility functions

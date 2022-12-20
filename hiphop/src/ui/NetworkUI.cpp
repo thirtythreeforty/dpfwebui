@@ -183,7 +183,7 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         return;
     }
 
-#if HIPHOP_UI_ZEROCONF
+# if HIPHOP_UI_ZEROCONF
     if (std::strcmp(key, "_zc_publish") == 0) {
         fZeroconfPublish = std::strcmp(value, "true") == 0;
         zeroconfStateUpdated();
@@ -197,7 +197,7 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         zeroconfStateUpdated();
         return;
     }
-#endif
+# endif
 
     fStates[key] = value;
 
