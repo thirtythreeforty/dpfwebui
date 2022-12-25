@@ -19,6 +19,8 @@
 #ifndef PLUGIN_EX_HPP
 #define PLUGIN_EX_HPP
 
+#include <map>
+
 #include "DistrhoPlugin.hpp"
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
@@ -39,8 +41,11 @@ public:
     virtual ~PluginEx() {}
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    void initState(uint32_t index, State& state) override;
-    void setState(const char* key, const char* value) override;
+    void   initState(uint32_t index, State& state) override;
+    void   setState(const char* key, const char* value) override;
+# if DISTRHO_PLUGIN_WANT_FULL_STATE
+    String getState(const char* key) const override;
+# endif
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
@@ -74,6 +79,10 @@ private:
     uint32_t fStateIndexZeroconfPublish;
     uint32_t fStateIndexZeroconfId;
     uint32_t fStateIndexZeroconfName;
+#endif
+#if DISTRHO_PLUGIN_WANT_FULL_STATE
+    typedef std::map<String,String> StateMap;
+    StateMap fState;
 #endif
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEx)
 

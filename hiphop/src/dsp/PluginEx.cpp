@@ -64,7 +64,7 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
     // stateCount is the last user state index
 #if defined(HIPHOP_NETWORK_UI)
     , fStateIndexWsPort(stateCount + __COUNTER__)
-    , fWebServerPort(0)
+    , fWebServerPort(-1)
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     , fStateIndexShMemFile(stateCount + __COUNTER__)
@@ -120,6 +120,9 @@ void PluginEx::initState(uint32_t index, State& state)
         state.defaultValue = DISTRHO_PLUGIN_NAME;
     }
 # endif
+# if DISTRHO_PLUGIN_WANT_FULL_STATE
+    fState[state.key] = state.defaultValue;
+# endif
 }
 
 void PluginEx::setState(const char* key, const char* value)
@@ -139,7 +142,24 @@ void PluginEx::setState(const char* key, const char* value)
         fMemory.setRead(origin);
     }
 # endif
+# if DISTRHO_PLUGIN_WANT_FULL_STATE
+    fState[String(key)] = value;
+# endif
 }
+
+# if DISTRHO_PLUGIN_WANT_FULL_STATE
+String PluginEx::getState(const char* key) const
+{
+    StateMap::const_iterator it = fState.find(String(key));
+
+    if (it == fState.end()) {
+        return String();
+    }
+    
+    return it->second;
+}
+# endif
+
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
