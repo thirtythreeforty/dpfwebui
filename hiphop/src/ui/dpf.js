@@ -373,7 +373,7 @@ class UI {
     _cancelAllRequests() {
         for (let method in this._resolve) {
             for (let callback of this._resolve[method]) {
-                callback.reject(...args);
+                callback.reject();
             }
 
             this._resolve[method] = [];
