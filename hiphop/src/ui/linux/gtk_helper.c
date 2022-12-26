@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
         // text, leaving out images and pixel values. Work around this by
         // unsetting DPI scaling before gtk_init() [following line for clarity]
         unsetenv("GDK_DPI_SCALE");
-        // And later setting zoom like done in CefHelper [see realize()]
+        // And later setting zoom for compensating [see realize()]
         ctx.zoom = dpiScale * /*explain this?*/xdpi_scale();
         // Text also follows Xft.dpi, re-set GDK_DPI_SCALE to counteract effect.
         char temp[8];
