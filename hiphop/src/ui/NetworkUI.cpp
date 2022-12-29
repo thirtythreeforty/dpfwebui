@@ -85,7 +85,7 @@ NetworkUI::~NetworkUI()
         fThread = nullptr;
     }
 #if defined(DISTRHO_OS_WINDOWS)
-    WSACleanup();
+    //WSACleanup();
 #endif
 }
 
