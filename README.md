@@ -98,5 +98,6 @@ The complete plugin interface is defined [here](https://github.com/lucianoiam/hi
 
 ### Related projects
 
+[Guinda](https://github.com/lucianoiam/guinda) \
 [Pisco](https://github.com/lucianoiam/pisco)
 
