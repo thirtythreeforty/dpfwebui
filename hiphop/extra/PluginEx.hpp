@@ -49,12 +49,14 @@ public:
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-protected:
     SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
 
     bool writeSharedMemory(const unsigned char* data, size_t size, size_t offset = 0,
                            uint32_t hints = 0);
+#endif
 
+protected:
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     virtual void sharedMemoryReady() {}
 
     virtual void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) 

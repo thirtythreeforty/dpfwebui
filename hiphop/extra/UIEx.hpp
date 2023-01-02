@@ -38,13 +38,19 @@ public:
     UIEx(uint width = 0, uint height = 0);
     virtual ~UIEx() {}
 
-protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
 
     bool writeSharedMemory(const unsigned char* data, size_t size, size_t offset = 0,
                            uint32_t hints = 0);
 
+# if defined(HIPHOP_WASM_SUPPORT)
+    void sideloadWasmBinary(const unsigned char* data, size_t size);
+# endif
+#endif // HIPHOP_SHARED_MEMORY_SIZE
+
+protected:
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     virtual void sharedMemoryReady() {}
 
     virtual void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
@@ -55,10 +61,7 @@ protected:
     }
 
     void uiIdle() override;
-# if defined(HIPHOP_WASM_SUPPORT)
-    void sideloadWasmBinary(const unsigned char* data, size_t size);
-# endif
-#endif // HIPHOP_SHARED_MEMORY_SIZE
+#endif
 
 #if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* key, const char* value) override;
