@@ -204,14 +204,16 @@ endif
 
 ifeq ($(WEB_UI),true)
   ifeq ($(HIPHOP_NETWORK_UI),true)
-    BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
-    LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
+    BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_INCLUDE_PATH) -I$(LWS_BUILD_PATH) \
+    			  -I$(LIBBSON_INCLUDE_PATH)
+    LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib -L$(LIBBSON_BUILD_PATH)/src/libbson \
+    			  -lbson-static-1.0
     ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
     $(warning Network UI is enabled - disabling JavaScript framework injection)
     HIPHOP_INJECT_FRAMEWORK_JS = false
     endif
     ifeq ($(HIPHOP_NETWORK_SSL), true)
-    BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
+    BASE_FLAGS += -I$(MBEDTLS_INCLUDE_PATH) -DHIPHOP_NETWORK_SSL
     LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH) -lmbedtls -lmbedcrypto -lmbedx509
     endif
     ifeq ($(WINDOWS),true)
@@ -361,6 +363,7 @@ ifeq ($(HIPHOP_NETWORK_SSL), true)
 MBEDTLS_GIT_URL = https://github.com/ARMmbed/mbedtls
 MBEDTLS_GIT_TAG = v3.2.1
 MBEDTLS_PATH = $(HIPHOP_DEPS_PATH)/mbedtls
+MBEDTLS_INCLUDE_PATH = $(MBEDTLS_PATH)/include
 MBEDTLS_BUILD_PATH = ${MBEDTLS_PATH}/library
 MBEDTLS_LIB_PATH = $(MBEDTLS_BUILD_PATH)/libmbedtls.a
 
@@ -390,6 +393,7 @@ ifeq ($(HIPHOP_NETWORK_UI),true)
 LWS_GIT_URL = https://github.com/warmcat/libwebsockets
 LWS_GIT_TAG = v4.3.2
 LWS_PATH = $(HIPHOP_DEPS_PATH)/libwebsockets
+LWS_INCLUDE_PATH = $(LWS_PATH)/include
 LWS_BUILD_PATH = ${LWS_PATH}/build
 LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
 
@@ -425,6 +429,33 @@ $(LWS_LIB_PATH): $(LWS_PATH)
 $(LWS_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LWS_GIT_TAG) $(LWS_GIT_URL)
+endif
+endif
+
+# ------------------------------------
+# Dependency - Clone and build libbson
+
+ifeq ($(WEB_UI),true)
+ifeq ($(HIPHOP_NETWORK_UI),true)
+LIBBSON_GIT_URL = https://github.com/mongodb/mongo-c-driver
+LIBBSON_GIT_TAG = 1.23.2
+LIBBSON_PATH = $(HIPHOP_DEPS_PATH)/mongo-c-driver
+LIBBSON_INCLUDE_PATH = $(LIBBSON_PATH)/src/libbson/src/bson
+LIBBSON_BUILD_PATH = ${LIBBSON_PATH}/build
+LIBBSON_LIB_PATH = $(LIBBSON_BUILD_PATH)/src/libbson/libbson-static-1.0.a
+LIBBSON_CMAKE_ARGS = -DENABLE_MONGOC=OFF -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF \
+					 -DENABLE_BSON=ON -DENABLE_STATIC=ON
+
+TARGETS += $(LIBBSON_LIB_PATH)
+
+$(LIBBSON_LIB_PATH): $(LIBBSON_PATH)
+	@echo "Building libbson static library"
+	@mkdir -p $(LIBBSON_BUILD_PATH) && cd $(LIBBSON_BUILD_PATH) \
+		&& cmake .. $(LIBBSON_CMAKE_ARGS) && cmake --build .
+
+$(LIBBSON_PATH):
+	@mkdir -p $(HIPHOP_DEPS_PATH)
+	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LIBBSON_GIT_TAG) $(LIBBSON_GIT_URL)
 endif
 endif
 
