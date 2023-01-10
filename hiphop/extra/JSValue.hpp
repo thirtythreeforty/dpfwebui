@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,15 @@
 
 #include "distrho/extra/String.hpp"
 
-#include "cJSON.h"
+// BSON defines a lot more data types than JSON, like for example binary data.
+// Making the backend transparent requires lots of work and it is unnecessary.
+#if defined(NETWORK_PROTOCOL_TEXT)
+# include "cJSON.h"
+#elif defined(NETWORK_PROTOCOL_BINARY)
+# include "bson.h"
+#else
+# error JSValue backend not configured
+#endif
 
 START_NAMESPACE_DISTRHO
 
@@ -95,14 +103,27 @@ public:
     operator String() const noexcept { return getString(); }
 
     // Serialization/deserialization
+#if defined(NETWORK_PROTOCOL_TEXT)
     String toJSON(bool format = false) const noexcept;
     static JSValue fromJSON(const char* jsonText) noexcept;
+#endif
+#if defined(NETWORK_PROTOCOL_BINARY)
+    void toBSON(uint8_t **data, size_t* size) const noexcept;
+    static JSValue fromBSON(const uint8_t *data, size_t size) noexcept;
+#endif
 
 private:
+#if defined(NETWORK_PROTOCOL_TEXT)
     JSValue(cJSON* impl, bool own) noexcept;
 
-    cJSON* fImpl;
-    bool   fOwn;
+    cJSON*  fImpl;
+#endif
+#if defined(NETWORK_PROTOCOL_BINARY)
+    JSValue(bson_t* impl, bool own) noexcept;
+
+    bson_t* fImpl;
+#endif
+    bool    fOwn;
 
 };
 

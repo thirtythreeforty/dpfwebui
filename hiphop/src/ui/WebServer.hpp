@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,19 +43,22 @@ struct WebServerHandler
 {
     virtual void handleWebServerConnect(Client) {};
     virtual void handleWebServerDisconnect(Client) {};
+    virtual int  handleWebServerRead(Client client, const uint8_t* data, size_t size) = 0;
     virtual int  handleWebServerRead(Client client, const char* data) = 0;
 };
 
 class WebServer
 {
 public:
-    WebServer();
+    WebServer(bool binary);
     virtual ~WebServer();
 
     void init(int port, WebServerHandler* handler, const char* jsInjectTarget = nullptr,
                 const char* jsInjectToken = nullptr);
     void injectScript(const String& script);
+    void send(const uint8_t* data, size_t size, Client client);
     void send(const char* data, Client client);
+    void broadcast(const uint8_t* data, size_t size, Client exclude = nullptr);
     void broadcast(const char* data, Client exclude = nullptr);
     void serve(bool block = true);
     void cancel();
@@ -68,6 +71,8 @@ private:
     int injectScripts(lws_process_html_args* args);
     int handleRead(Client client, void* in, size_t len);
     int handleWrite(Client client);
+
+    bool fBinary;
 
     char                       fMountOrigin[PATH_MAX];
     lws_http_mount             fMount;

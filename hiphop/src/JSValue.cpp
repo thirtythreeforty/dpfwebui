@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 USE_NAMESPACE_DISTRHO
 
+#if defined(NETWORK_PROTOCOL_TEXT)
 JSValue::JSValue() noexcept
     : fImpl(cJSON_CreateNull())
     , fOwn(true)
@@ -282,3 +283,271 @@ JSValue::JSValue(cJSON* impl, bool own) noexcept
     : fImpl(impl)
     , fOwn(own)
 {}
+#endif // NETWORK_PROTOCOL_TEXT
+
+#if defined(NETWORK_PROTOCOL_BINARY)
+JSValue::JSValue() noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(bool b) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(double d) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(String s) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(uint32_t i) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(float f) noexcept
+{
+
+}
+
+JSValue::JSValue(const char* s) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(const JSValue& v) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue& JSValue::operator=(const JSValue& v) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(JSValue&& v) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue& JSValue::operator=(JSValue&& v) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue JSValue::createArray() noexcept
+{
+
+    // TODO
+
+}
+
+JSValue JSValue::createObject() noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::~JSValue()
+{
+
+    // TODO
+
+}
+
+bool JSValue::isNull() const noexcept
+{
+
+    // TODO
+
+}
+
+bool JSValue::isBoolean() const noexcept
+{
+
+    // TODO
+
+}
+
+bool JSValue::isNumber() const noexcept
+{
+
+    // TODO
+
+}
+
+bool JSValue::isString() const noexcept
+{
+
+    // TODO
+
+}
+
+bool JSValue::isArray() const noexcept
+{
+
+    // TODO
+
+}
+
+bool JSValue::isObject() const noexcept
+{
+
+    // TODO
+
+}
+
+bool JSValue::getBoolean() const noexcept
+{
+
+    // TODO
+
+}
+
+double JSValue::getNumber() const noexcept
+{
+
+    // TODO
+
+}
+
+String JSValue::getString() const noexcept
+{
+
+    // TODO
+
+}
+
+int JSValue::getArraySize() const noexcept
+{
+
+    // TODO
+
+}
+
+JSValue JSValue::getArrayItem(int idx) const noexcept
+{
+
+    // TODO
+
+}
+
+JSValue JSValue::getObjectItem(const char* key) const noexcept
+{
+
+    // TODO
+
+}
+
+JSValue JSValue::operator[](int idx) const noexcept
+{
+
+    // TODO
+
+}
+
+JSValue JSValue::operator[](const char* key) const noexcept
+{
+
+    // TODO
+
+}
+
+void JSValue::pushArrayItem(const JSValue& value) noexcept
+{
+
+    // TODO
+
+}
+
+void JSValue::setArrayItem(int idx, const JSValue& value) noexcept
+{
+
+    // TODO
+
+}
+
+void JSValue::insertArrayItem(int idx, const JSValue& value) noexcept
+{
+
+    // TODO
+
+}
+
+void JSValue::setObjectItem(const char* key, const JSValue& value) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue JSValue::sliceArray(int start, int end) const noexcept
+{
+
+    // TODO
+
+}
+
+JSValue& JSValue::operator+=(const JSValue& other)
+{
+
+    // TODO
+
+}
+
+void JSValue::toBSON(uint8_t **data, size_t* size) const noexcept
+{
+
+    // TODO
+
+}
+
+JSValue JSValue::fromBSON(const uint8_t *data, size_t size) noexcept
+{
+
+    // TODO
+
+}
+
+JSValue::JSValue(bson_t* impl, bool own) noexcept
+{
+
+    // TODO
+
+}
+
+#endif // NETWORK_PROTOCOL_BINARY

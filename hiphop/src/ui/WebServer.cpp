@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,9 @@
 
 USE_NAMESPACE_DISTRHO
 
-WebServer::WebServer()
-    : fContext(nullptr)
+WebServer::WebServer(bool binary)
+    : fBinary(binary)
+    , fContext(nullptr)
     , fHandler(nullptr)
 {}
 
@@ -106,8 +107,25 @@ void WebServer::injectScript(const String& script)
     fInjectedScripts.push_back(script);
 }
 
+void WebServer::send(const uint8_t* data, size_t size, Client client)
+{
+    if (! fBinary) {
+        // TODO
+    }
+
+    // TODO
+
+    (void)data;
+    (void)size;
+    (void)client;
+}
+
 void WebServer::send(const char* data, Client client)
 {
+    if (fBinary) {
+        // TODO
+    }
+
     ClientContextMap::iterator it = fClients.find(client);
     if (it == fClients.end()) {
         return;
@@ -122,8 +140,25 @@ void WebServer::send(const char* data, Client client)
     lws_callback_on_writable(client);
 }
 
+void WebServer::broadcast(const uint8_t* data, size_t size, Client exclude)
+{
+    if (! fBinary) {
+        // TODO
+    }
+
+    // TODO
+
+    (void)data;
+    (void)size;
+    (void)exclude;
+}
+
 void WebServer::broadcast(const char* data, Client exclude)
 {
+    if (fBinary) {
+        // TODO
+    }
+
     for (ClientContextMap::iterator it = fClients.begin(); it != fClients.end(); ++it) {
         if (it->first != exclude) {
             send(data, it->first);
@@ -229,11 +264,20 @@ int WebServer::injectScripts(lws_process_html_args* args)
 
 int WebServer::handleRead(Client client, void* in, size_t len)
 {
-    char* data = new char[len + 1];
-    std::memcpy(data, in, len);
-    data[len] = '\0';
-    int rc = fHandler->handleWebServerRead(client, data);
-    delete[] data;
+    int rc;
+
+    if (fBinary) {
+
+        // TODO
+        rc = -1;
+
+    } else {
+        char* data = new char[len + 1];
+        std::memcpy(data, in, len);
+        data[len] = '\0';
+        rc = fHandler->handleWebServerRead(client, data);
+        delete[] data;
+    }
 
     return rc;
 }
@@ -248,12 +292,22 @@ int WebServer::handleWrite(Client client)
         return 0;
     }
 
-    unsigned char* packet = wb.front();
-    wb.pop_front();
+    size_t len;
+    int numBytes;
 
-    const size_t len = std::strlen(reinterpret_cast<const char*>(packet) + LWS_PRE);
-    const int numBytes = lws_write(client, packet + LWS_PRE, len, LWS_WRITE_TEXT);
-    delete[] packet;
+    if (fBinary) {
+
+        // TODO
+        len = 0;
+        numBytes = 0;
+
+    } else {
+        unsigned char* packet = wb.front();
+        wb.pop_front();
+        len = std::strlen(reinterpret_cast<const char*>(packet) + LWS_PRE);
+        numBytes = lws_write(client, packet + LWS_PRE, len, LWS_WRITE_TEXT);
+        delete[] packet;
+    }
 
     if (! wb.empty()) {
         lws_callback_on_writable(client);

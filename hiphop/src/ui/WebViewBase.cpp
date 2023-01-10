@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,6 +119,7 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
 
 void WebViewBase::postMessage(const JSValue& args)
 {
+#if defined(NETWORK_PROTOCOL_TEXT)
     // This method implements something like a "reverse postMessage()" aiming to
     // keep the bridge symmetrical. Global window.host is an EventTarget that
     // can be listened for messages.
@@ -132,6 +133,9 @@ void WebViewBase::postMessage(const JSValue& args)
                     "{detail:" + payload + "}"
                 "));";
     runScript(js);
+#else
+    (void)args;
+#endif
 }
 
 void WebViewBase::injectHostObjectScripts()
@@ -154,10 +158,11 @@ void WebViewBase::handleScriptMessage(const JSValue& args)
             fHandler->handleWebViewConsole(args[1].getString(), args[2].getString());
         }
     } else {
+#if defined(NETWORK_PROTOCOL_TEXT)
         if (fPrintTraffic) {
             d_stderr("cpp<-js : %s", args.toJSON().buffer());
         }
-        
+#endif
         if (fHandler != nullptr) {
             fHandler->handleWebViewScriptMessage(args);
         }

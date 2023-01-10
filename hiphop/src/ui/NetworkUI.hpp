@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,6 +66,7 @@ private:
 #endif
 
     void handleWebServerConnect(Client client) override;
+    int  handleWebServerRead(Client client, const uint8_t* data, size_t size) override;
     int  handleWebServerRead(Client client, const char* data) override;
 
     int              fPort;

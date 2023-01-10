@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ class UI {
     // This method is only supported in the plugin embedded web view
     setSize(width, height) {
         if (DISTRHO.env.plugin) {
-            window.host.postMessage(['UI', 'setSize', width, height]);
+            this._call('setSize', width, height);
         }
     }
 

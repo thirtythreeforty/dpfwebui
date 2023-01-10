@@ -204,8 +204,9 @@ endif
 
 ifeq ($(WEB_UI),true)
   ifeq ($(HIPHOP_NETWORK_UI),true)
-    BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH) \
-    			  -I$(LIBBSON_PATH)/src/libbson/src/bson -I$(LIBBSON_PATH)/build/src/libbson/src/bson
+    BASE_FLAGS += -DHIPHOP_NETWORK_UI -DNETWORK_PROTOCOL_TEXT -I$(LWS_PATH)/include \
+    			  -I$(LWS_BUILD_PATH) -I$(LIBBSON_PATH)/src/libbson/src/bson \
+    			  -I$(LIBBSON_PATH)/build/src/libbson/src/bson
     LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib -L$(LIBBSON_BUILD_PATH)/src/libbson \
     			  -lbson-static-1.0
     ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
@@ -229,6 +230,8 @@ ifeq ($(WEB_UI),true)
     # Some lws-http.h constants clash with MacOSX.sdk/usr/include/cups/http.h
     BASE_FLAGS += -D_CUPS_CUPS_H_ -D_CUPS_HTTP_H_ -D_CUPS_PPD_H_
     endif
+  else
+  	BASE_FLAGS += -DNETWORK_PROTOCOL_TEXT
   endif
   ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
   BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS

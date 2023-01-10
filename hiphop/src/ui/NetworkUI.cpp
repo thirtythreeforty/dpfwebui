@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 #include "src/DistrhoDefines.h"
-#include "bson.h"
+
 #if defined(DISTRHO_OS_WINDOWS)
 # include <Winsock2.h>
 # define IS_EADDRINUSE() (WSAGetLastError() == WSAEADDRINUSE) // errno==0
@@ -49,6 +49,11 @@ USE_NAMESPACE_DISTRHO
 NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio)
     : WebUIBase(widthCssPx, heightCssPx, initPixelRatio)
     , fPort(-1)
+#if defined(NETWORK_PROTOCOL_BINARY)
+    , fServer(/*binary*/true)
+#elif defined(NETWORK_PROTOCOL_TEXT)
+    , fServer(/*binary*/false)
+#endif
     , fThread(nullptr)
 #if HIPHOP_UI_ZEROCONF
     , fZeroconfPublish(false)
@@ -140,16 +145,35 @@ void NetworkUI::setState(const char* key, const char* value)
 
 void NetworkUI::broadcastMessage(const JSValue& args, Client exclude)
 {
+#if defined(NETWORK_PROTOCOL_BINARY)
+    uint8_t* data;
+    size_t size;
+    args.toBSON(&data, &size);
+    fServer.broadcast(data, size, exclude);
+#elif defined(NETWORK_PROTOCOL_TEXT)
     fServer.broadcast(args.toJSON(), exclude);
+#endif
 }
 
 void NetworkUI::postMessage(const JSValue& args, uintptr_t destination)
 {
+#if defined(NETWORK_PROTOCOL_BINARY)
+    uint8_t* data;
+    size_t size;
+    args.toBSON(&data, &size);
+
+    if (destination == DESTINATION_ALL) {
+        fServer.broadcast(data, size);
+    } else {
+        fServer.send(data, size, reinterpret_cast<Client>(destination));
+    }
+#elif defined(NETWORK_PROTOCOL_TEXT)
     if (destination == DESTINATION_ALL) {
         fServer.broadcast(args.toJSON());
     } else {
         fServer.send(args.toJSON(), reinterpret_cast<Client>(destination));
     }
+#endif
 }
 
 void NetworkUI::parameterChanged(uint32_t index, float value)
@@ -380,9 +404,26 @@ void NetworkUI::handleWebServerConnect(Client client)
     });
 }
 
+int NetworkUI::handleWebServerRead(Client client, const uint8_t* data, size_t size)
+{
+#if defined(NETWORK_PROTOCOL_BINARY)
+    handleMessage(JSValue::fromBSON(data, size), reinterpret_cast<uintptr_t>(client));
+#else
+    (void)client;
+    (void)data;
+    (void)size;
+#endif
+    return 0;
+}
+
 int NetworkUI::handleWebServerRead(Client client, const char* data)
 {
+#if defined(NETWORK_PROTOCOL_TEXT)
     handleMessage(JSValue::fromJSON(data), reinterpret_cast<uintptr_t>(client));
+#else
+    (void)client;
+    (void)data;
+#endif
     return 0;
 }
 
