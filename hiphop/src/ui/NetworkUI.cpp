@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "src/DistrhoDefines.h"
+#include "bson.h"
 #if defined(DISTRHO_OS_WINDOWS)
 # include <Winsock2.h>
 # define IS_EADDRINUSE() (WSAGetLastError() == WSAEADDRINUSE) // errno==0
