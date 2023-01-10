@@ -444,13 +444,22 @@ LIBBSON_INCLUDE_PATH = $(LIBBSON_PATH)/src/libbson/src/bson
 LIBBSON_BUILD_PATH = ${LIBBSON_PATH}/build
 LIBBSON_LIB_PATH = $(LIBBSON_BUILD_PATH)/src/libbson/libbson-static-1.0.a
 LIBBSON_CMAKE_ARGS = -DENABLE_MONGOC=OFF -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF \
-					 -DENABLE_BSON=ON -DENABLE_STATIC=ON
+					           -DENABLE_BSON=ON -DENABLE_STATIC=ON -DCMAKE_BUILD_TYPE=Release
+LIBBSON_CMAKE_ENV = true
+
+ifeq ($(WINDOWS),true)
+# build/calc_release_version.py fails on MSYS due to git returning error
+# "fatal: Needed a single revision". Pass version to CMake.
+LIBBSON_CMAKE_ARGS += -G"MSYS Makefiles" -DBUILD_VERSION=$(LIBBSON_GIT_TAG)
+# Prevent "error: implicit declaration of function 'aligned_alloc' [-Werror=implicit-function-declaration]"
+LIBBSON_CMAKE_ENV = export CFLAGS=-std=c99
+endif
 
 TARGETS += $(LIBBSON_LIB_PATH)
 
 $(LIBBSON_LIB_PATH): $(LIBBSON_PATH)
 	@echo "Building libbson static library"
-	@mkdir -p $(LIBBSON_BUILD_PATH) && cd $(LIBBSON_BUILD_PATH) \
+	@mkdir -p $(LIBBSON_BUILD_PATH) && cd $(LIBBSON_BUILD_PATH) && $(LIBBSON_CMAKE_ENV) \
 		&& cmake .. $(LIBBSON_CMAKE_ARGS) && cmake --build .
 
 $(LIBBSON_PATH):
