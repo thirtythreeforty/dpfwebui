@@ -35,7 +35,7 @@ typedef struct lws* Client;
 
 struct ClientContext
 {
-    typedef std::list<unsigned char*> WriteBuffer;
+    typedef std::list<uint8_t*> WriteBuffer;
     WriteBuffer writeBuffer;
 };
 

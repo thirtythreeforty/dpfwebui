@@ -25,7 +25,7 @@ UIEx::UIEx(uint width, uint height)
 {}
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
+bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
                              uint32_t hints)
 {
     if (fMemory.write(kSharedMemoryWriteOriginUI, data, size, offset, hints)) {
@@ -39,7 +39,7 @@ bool UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offs
 }
 
 # if defined(HIPHOP_WASM_SUPPORT)
-void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
+void UIEx::sideloadWasmBinary(const uint8_t* data, size_t size)
 {
     // Send binary to the Plugin instance. This could be also achieved using the
     // state interface by first encoding data into something like Base64.

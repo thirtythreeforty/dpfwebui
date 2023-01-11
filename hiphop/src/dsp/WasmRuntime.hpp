@@ -67,7 +67,7 @@ public:
     virtual ~WasmRuntime();
 
     void load(const char* modulePath);
-    void load(const unsigned char* moduleData, size_t size);
+    void load(const uint8_t* moduleData, size_t size);
 
     bool hasInstance();
     void createInstance(WasmFunctionMap hostFunctions);

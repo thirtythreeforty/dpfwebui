@@ -41,11 +41,11 @@ public:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
 
-    bool writeSharedMemory(const unsigned char* data, size_t size, size_t offset = 0,
+    bool writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0,
                            uint32_t hints = 0);
 
 # if defined(HIPHOP_WASM_SUPPORT)
-    void sideloadWasmBinary(const unsigned char* data, size_t size);
+    void sideloadWasmBinary(const uint8_t* data, size_t size);
 # endif
 #endif // HIPHOP_SHARED_MEMORY_SIZE
 
@@ -53,7 +53,7 @@ protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     virtual void sharedMemoryReady() {}
 
-    virtual void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
+    virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
     {
         (void)data;
         (void)size;

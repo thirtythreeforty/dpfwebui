@@ -170,7 +170,7 @@ class UI {
     messageChannelClosed() {}
 
     // Non-DPF method that writes to memory shared with DISTRHO::PluginEx instance
-    // void UIEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset, uint32_t hints)
+    // void UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset, uint32_t hints)
     writeSharedMemory(data /*Uint8Array*/, offset /*Number*/, hints /*Number*/) {
         this._call('writeSharedMemory', base64EncArr(data), offset || 0, hints || 0);
     }
@@ -180,11 +180,11 @@ class UI {
     sharedMemoryReady() {}
 
     // Non-DPF callback method that notifies when shared memory has been written
-    // void UIEx::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
+    // void UIEx::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
     sharedMemoryChanged(data /*Uint8Array*/, hints /*Number*/) {}
 
     // Non-DPF method that loads binary into DISTRHO::WasmPlugin instance
-    // void UIEx::sideloadWasmBinary(const unsigned char* data, size_t size)
+    // void UIEx::sideloadWasmBinary(const uint8_t* data, size_t size)
     sideloadWasmBinary(data /*Uint8Array*/) {
         this._call('sideloadWasmBinary', base64EncArr(data));
     }

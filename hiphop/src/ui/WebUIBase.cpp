@@ -85,7 +85,7 @@ void WebUIBase::sharedMemoryReady()
     postMessage({"UI", "sharedMemoryReady"}, DESTINATION_ALL);
 }
 
-void WebUIBase::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
+void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
     String b64Data = String::asBase64(data, size);
     postMessage({"UI", "_sharedMemoryChanged", b64Data, hints}, DESTINATION_ALL);
@@ -177,7 +177,7 @@ void WebUIBase::initHandlers()
     fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*origin*/) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         writeSharedMemory(
-            static_cast<const unsigned char*>(data.data()),
+            data.data(),
             static_cast<size_t>(data.size()),
             static_cast<size_t>(args[1].getNumber()),  // offset
             static_cast<uint32_t>(args[2].getNumber()) // hints
@@ -188,7 +188,7 @@ void WebUIBase::initHandlers()
     fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
         sideloadWasmBinary(
-            static_cast<const unsigned char*>(data.data()),
+            data.data(),
             static_cast<size_t>(data.size())
         );
     });

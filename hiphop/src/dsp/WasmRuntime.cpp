@@ -100,7 +100,7 @@ void WasmRuntime::load(const char* modulePath)
     }
 }
 
-void WasmRuntime::load(const unsigned char* moduleData, size_t size)
+void WasmRuntime::load(const uint8_t* moduleData, size_t size)
 {
     if (hasInstance()) {
         destroyInstance();

@@ -37,10 +37,10 @@ enum {
 // Keep the read flag atomic
 struct SharedMemoryState
 {
-    unsigned char readFlag;
-    size_t        dataOffset;
-    size_t        dataSize;
-    uint32_t      hints;
+    uint8_t  readFlag;
+    size_t   dataOffset;
+    size_t   dataSize;
+    uint32_t hints;
 };
 
 // Two states for full duplex usage
@@ -160,7 +160,7 @@ private:
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatefulSharedMemory)
 };
 
-typedef StatefulSharedMemory<unsigned char,HIPHOP_SHARED_MEMORY_SIZE> SharedMemoryImpl;
+typedef StatefulSharedMemory<uint8_t,HIPHOP_SHARED_MEMORY_SIZE> SharedMemoryImpl;
 
 END_NAMESPACE_DISTRHO
 

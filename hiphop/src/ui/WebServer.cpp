@@ -131,7 +131,7 @@ void WebServer::send(const char* data, Client client)
         return;
     }
 
-    unsigned char* packet = new unsigned char[LWS_PRE + std::strlen(data) + 1];
+    uint8_t* packet = new uint8_t[LWS_PRE + std::strlen(data) + 1];
     std::strcpy(reinterpret_cast<char*>(packet) + LWS_PRE, data);
 
     const MutexLocker writeBufferScopedLock(fMutex);
@@ -302,7 +302,7 @@ int WebServer::handleWrite(Client client)
         numBytes = 0;
 
     } else {
-        unsigned char* packet = wb.front();
+        uint8_t* packet = wb.front();
         wb.pop_front();
         len = std::strlen(reinterpret_cast<const char*>(packet) + LWS_PRE);
         numBytes = lws_write(client, packet + LWS_PRE, len, LWS_WRITE_TEXT);

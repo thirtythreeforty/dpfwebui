@@ -351,7 +351,7 @@ void WasmPlugin::deactivate()
 }
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-void WasmPlugin::sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints)
+void WasmPlugin::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
     if (hints & (kShMemHintInternal | kShMemHintWasmBinary)) {
         try {
@@ -362,7 +362,7 @@ void WasmPlugin::sharedMemoryChanged(const unsigned char* data, size_t size, uin
     }
 }
 
-void WasmPlugin::loadWasmBinary(const unsigned char* data, size_t size)
+void WasmPlugin::loadWasmBinary(const uint8_t* data, size_t size)
 {
     // No need to check if the runtime is running
     SCOPED_RUNTIME_LOCK();

@@ -163,7 +163,7 @@ String PluginEx::getState(const char* key) const
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-bool PluginEx::writeSharedMemory(const unsigned char* data, size_t size, size_t offset,
+bool PluginEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
                                  uint32_t hints)
 {
     if (fMemory.write(kSharedMemoryWriteOriginPlugin, data, size, offset, hints)) {

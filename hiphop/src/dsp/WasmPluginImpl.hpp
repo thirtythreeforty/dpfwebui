@@ -70,8 +70,8 @@ public:
 #endif // DISTRHO_PLUGIN_WANT_MIDI_INPUT
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) override;
-    void loadWasmBinary(const unsigned char* data, size_t size);
+    void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) override;
+    void loadWasmBinary(const uint8_t* data, size_t size);
 #endif // HIPHOP_SHARED_MEMORY_SIZE
 
     WasmValueVector getTimePosition(WasmValueVector params);

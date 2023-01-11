@@ -61,7 +61,7 @@ protected:
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     virtual void sharedMemoryReady() override;
-    virtual void sharedMemoryChanged(const unsigned char* data, size_t size, uint32_t hints) override;
+    virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) override;
 #endif
 
     virtual void postMessage(const JSValue& args, uintptr_t destination) = 0;
