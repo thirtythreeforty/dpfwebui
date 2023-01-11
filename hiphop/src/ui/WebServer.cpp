@@ -109,30 +109,13 @@ void WebServer::injectScript(const String& script)
 
 void WebServer::send(const uint8_t* data, size_t size, Client client)
 {
-    if (! fBinary) {
-        // TODO
-    }
-
-    // TODO
-
-    (void)data;
-    (void)size;
-    (void)client;
-}
-
-void WebServer::send(const char* data, Client client)
-{
-    if (fBinary) {
-        // TODO
-    }
-
     ClientContextMap::iterator it = fClients.find(client);
     if (it == fClients.end()) {
         return;
     }
 
-    uint8_t* packet = new uint8_t[LWS_PRE + std::strlen(data) + 1];
-    std::strcpy(reinterpret_cast<char*>(packet) + LWS_PRE, data);
+    ClientContext::WriteBufferPacket packet(LWS_PRE);
+    packet.insert(packet.end(), data, data + size);
 
     const MutexLocker writeBufferScopedLock(fMutex);
     it->second.writeBuffer.push_back(packet);
@@ -140,30 +123,23 @@ void WebServer::send(const char* data, Client client)
     lws_callback_on_writable(client);
 }
 
+void WebServer::send(const char* data, Client client)
+{
+    send(reinterpret_cast<const uint8_t*>(data), std::strlen(data), client);
+}
+
 void WebServer::broadcast(const uint8_t* data, size_t size, Client exclude)
 {
-    if (! fBinary) {
-        // TODO
+    for (ClientContextMap::iterator it = fClients.begin(); it != fClients.end(); ++it) {
+        if (it->first != exclude) {
+            send(data, size, it->first);
+        }
     }
-
-    // TODO
-
-    (void)data;
-    (void)size;
-    (void)exclude;
 }
 
 void WebServer::broadcast(const char* data, Client exclude)
 {
-    if (fBinary) {
-        // TODO
-    }
-
-    for (ClientContextMap::iterator it = fClients.begin(); it != fClients.end(); ++it) {
-        if (it->first != exclude) {
-            send(data, it->first);
-        }
-    }
+    broadcast(reinterpret_cast<const uint8_t*>(data), std::strlen(data), exclude);
 }
 
 void WebServer::serve(bool block)
@@ -267,10 +243,7 @@ int WebServer::handleRead(Client client, void* in, size_t len)
     int rc;
 
     if (fBinary) {
-
-        // TODO
-        rc = -1;
-
+        rc = fHandler->handleWebServerRead(client, static_cast<uint8_t*>(in), len);
     } else {
         char* data = new char[len + 1];
         std::memcpy(data, in, len);
@@ -292,26 +265,15 @@ int WebServer::handleWrite(Client client)
         return 0;
     }
 
-    size_t len;
-    int numBytes;
+    ClientContext::WriteBufferPacket packet = wb.front();
+    wb.pop_front();
 
-    if (fBinary) {
-
-        // TODO
-        len = 0;
-        numBytes = 0;
-
-    } else {
-        uint8_t* packet = wb.front();
-        wb.pop_front();
-        len = std::strlen(reinterpret_cast<const char*>(packet) + LWS_PRE);
-        numBytes = lws_write(client, packet + LWS_PRE, len, LWS_WRITE_TEXT);
-        delete[] packet;
-    }
-
+    size_t dataSize = packet.size() - LWS_PRE;
+    size_t writeSize = lws_write(client, static_cast<unsigned char*>(packet.data() + LWS_PRE),
+                                 dataSize, fBinary ? LWS_WRITE_BINARY : LWS_WRITE_TEXT);
     if (! wb.empty()) {
         lws_callback_on_writable(client);
     }
 
-    return numBytes == static_cast<int>(len) ? 0 : -1;
+    return writeSize == dataSize ? 0 : -1;
 }

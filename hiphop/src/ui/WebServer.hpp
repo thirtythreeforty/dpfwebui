@@ -21,6 +21,7 @@
 
 #include <list>
 #include <unordered_map>
+#include <vector>
 
 #include <limits.h>
 #include <libwebsockets.h>
@@ -35,7 +36,8 @@ typedef struct lws* Client;
 
 struct ClientContext
 {
-    typedef std::list<uint8_t*> WriteBuffer;
+    typedef std::vector<uint8_t> WriteBufferPacket;
+    typedef std::list<WriteBufferPacket> WriteBuffer;
     WriteBuffer writeBuffer;
 };
 
