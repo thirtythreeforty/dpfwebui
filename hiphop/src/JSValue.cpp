@@ -484,11 +484,10 @@ JSValue JSValue::getObjectItem(const char* key) const noexcept
             break;
         case BSON_TYPE_ARRAY:
         case BSON_TYPE_DOCUMENT: {
-            uint32_t arrlen;
-            uint8_t *buf;
-            bson_iter_array(&iter, &arrlen, const_cast<const uint8_t**>(&buf));
-            size_t buflen = static_cast<size_t>(arrlen);
-            v = JSValue(bson_new_from_buffer(&buf, &buflen, nullptr, nullptr), type);
+            uint32_t size;
+            const uint8_t *data;
+            bson_iter_array(&iter, &size, &data);
+            v = JSValue(bson_new_from_data(data, static_cast<size_t>(size)), type);
             break;
         }
         default:
@@ -537,17 +536,17 @@ void JSValue::pushArrayItem(const JSValue& value) noexcept
 
 void JSValue::setArrayItem(int /*idx*/, const JSValue& /*value*/) noexcept
 {
-    throw std::runtime_error("setArrayItem() not implemented");
+    d_stderr2("setArrayItem() not implemented");
 }
 
 void JSValue::insertArrayItem(int /*idx*/, const JSValue& /*value*/) noexcept
 {
-    throw std::runtime_error("insertArrayItem() not implemented");
+    d_stderr2("insertArrayItem() not implemented");
 }
 
 void JSValue::setObjectItem(const char* /*key*/, const JSValue& /*value*/) noexcept
 {
-    throw std::runtime_error("setObjectItem() not implemented");
+    d_stderr2("setObjectItem() not implemented");
 }
 
 const uint8_t* JSValue::toBSON(size_t* size) const noexcept
@@ -558,8 +557,9 @@ const uint8_t* JSValue::toBSON(size_t* size) const noexcept
 
 JSValue JSValue::fromBSON(const uint8_t *data, size_t size, bool asArray) noexcept
 {
-    bson_t* impl = bson_new_from_buffer(const_cast<uint8_t**>(&data), &size, nullptr, nullptr);
-    return JSValue(impl, asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT);
+    bson_t* impl = bson_new_from_data(data, size);
+    bson_type_t type = impl == nullptr ? BSON_TYPE_EOD : (asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT);
+    return JSValue(impl, type);
 }
 
 JSValue::JSValue(bson_t* impl, bson_type_t type) noexcept
