@@ -147,8 +147,7 @@ void NetworkUI::broadcastMessage(const JSValue& args, Client exclude)
 {
 #if defined(NETWORK_PROTOCOL_BINARY)
     size_t size;
-    const uint8_t* data = args.toBSON(&size);
-    fServer.broadcast(data, size, exclude);
+    fServer.broadcast(args.toBSON(&size), size, exclude);
 #elif defined(NETWORK_PROTOCOL_TEXT)
     fServer.broadcast(args.toJSON(), exclude);
 #endif
@@ -158,12 +157,10 @@ void NetworkUI::postMessage(const JSValue& args, uintptr_t destination)
 {
 #if defined(NETWORK_PROTOCOL_BINARY)
     size_t size;
-    const uint8_t* data = args.toBSON(&size);
-
     if (destination == DESTINATION_ALL) {
-        fServer.broadcast(data, size);
+        fServer.broadcast(args.toBSON(&size), size);
     } else {
-        fServer.send(data, size, reinterpret_cast<Client>(destination));
+        fServer.send(args.toBSON(&size), size, reinterpret_cast<Client>(destination));
     }
 #elif defined(NETWORK_PROTOCOL_TEXT)
     if (destination == DESTINATION_ALL) {

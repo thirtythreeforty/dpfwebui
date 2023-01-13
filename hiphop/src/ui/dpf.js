@@ -131,7 +131,22 @@ class UI {
         const env = DISTRHO.env;
         const socketSend = args => {
             if (this._socket.readyState == WebSocket.OPEN) {
-                this._socket.send(JSON.stringify(args));
+                let data;
+
+                if (env.textSocket) {
+                    data = JSON.stringify(args);
+                } else {
+                    const argsObj = args.reduce((o, v, i) => {
+                         o[i] = v;
+                        return o;
+                    }, {});
+
+                    data = (new TextEncoder).encode(DISTRHO.BSON.encode(argsObj)).buffer;
+
+                    if (! env.plugin) console.log(argsObj);
+                }
+
+                this._socket.send(data);
             } else {
                 this._log(`Cannot send message, socket state is ${this._socket.readyState}.`);
             }
@@ -274,6 +289,7 @@ class UI {
 
         const open = () => {
             this._socket = new WebSocket(`ws://${document.location.host}`);
+            this._socket.binaryType = 'arraybuffer';
 
             this._socket.addEventListener('open', (_) => {
                 this._log('Connected');
@@ -297,7 +313,18 @@ class UI {
             });
 
             this._socket.addEventListener('message', (ev) => {
-                this._messageReceived(JSON.parse(ev.data));
+                let args;
+
+                if (DISTRHO.env.textSocket) {
+                    args = JSON.parse(ev.data);
+                } else {
+                    const argsArr = DISTRHO.BSON.decode((new TextDecoder).decode(ev.data));
+                    args = Object.keys(argsArr).map(k => argsArr[k]);
+
+                    if (! env.plugin) console.log(args);
+                }
+
+                this._messageReceived(args);
             });
         };
 
@@ -766,6 +793,8 @@ class UIHelperPrivate {
         } else {
             env.dev = !env.plugin && !env.network; // ie. open file index.html
         }
+
+        env.textSocket = true;
         
         return Object.freeze(env);
     }
@@ -1304,6 +1333,7 @@ window.DISTRHO = {      // Namespace
         plugin             True when running in plugin embedded web view
         network            True when communicating over the network (HTTP & WS)
         dev                True for non-plugin non-HTTP (ie. open file index.html)
+        textSocket         True when the comm protocol uses JSON instead of BSON
         ...                Additional fields defined by web views
     } */
 };

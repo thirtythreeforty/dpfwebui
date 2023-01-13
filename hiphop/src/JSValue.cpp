@@ -509,7 +509,8 @@ JSValue JSValue::operator[](const char* key) const noexcept
 
 void JSValue::pushArrayItem(const JSValue& value) noexcept
 {
-    const char* key = String(bson_count_keys(fImpl) + 1).buffer();
+    String tmp(bson_count_keys(fImpl));
+    const char* key = tmp.buffer();
 
     switch (value.fType) {
         case BSON_TYPE_NULL:
@@ -558,8 +559,13 @@ const uint8_t* JSValue::toBSON(size_t* size) const noexcept
 JSValue JSValue::fromBSON(const uint8_t *data, size_t size, bool asArray) noexcept
 {
     bson_t* impl = bson_new_from_data(data, size);
-    bson_type_t type = impl == nullptr ? BSON_TYPE_EOD : (asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT);
-    return JSValue(impl, type);
+
+    if (impl == nullptr) {
+        d_stderr2("JSValue : could not deserialize BSON document - data size = %lu", size);
+        return JSValue();
+    }
+
+    return JSValue(impl, asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT);
 }
 
 JSValue::JSValue(bson_t* impl, bson_type_t type) noexcept
