@@ -146,9 +146,8 @@ void NetworkUI::setState(const char* key, const char* value)
 void NetworkUI::broadcastMessage(const JSValue& args, Client exclude)
 {
 #if defined(NETWORK_PROTOCOL_BINARY)
-    uint8_t* data;
     size_t size;
-    args.toBSON(&data, &size);
+    const uint8_t* data = args.toBSON(&size);
     fServer.broadcast(data, size, exclude);
 #elif defined(NETWORK_PROTOCOL_TEXT)
     fServer.broadcast(args.toJSON(), exclude);
@@ -158,9 +157,8 @@ void NetworkUI::broadcastMessage(const JSValue& args, Client exclude)
 void NetworkUI::postMessage(const JSValue& args, uintptr_t destination)
 {
 #if defined(NETWORK_PROTOCOL_BINARY)
-    uint8_t* data;
     size_t size;
-    args.toBSON(&data, &size);
+    const uint8_t* data = args.toBSON(&size);
 
     if (destination == DESTINATION_ALL) {
         fServer.broadcast(data, size);
@@ -407,7 +405,7 @@ void NetworkUI::handleWebServerConnect(Client client)
 int NetworkUI::handleWebServerRead(Client client, const uint8_t* data, size_t size)
 {
 #if defined(NETWORK_PROTOCOL_BINARY)
-    handleMessage(JSValue::fromBSON(data, size), reinterpret_cast<uintptr_t>(client));
+    handleMessage(JSValue::fromBSON(data, size, /*asArray*/true), reinterpret_cast<uintptr_t>(client));
 #else
     (void)client;
     (void)data;

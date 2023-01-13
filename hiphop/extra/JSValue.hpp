@@ -106,24 +106,31 @@ public:
 #if defined(NETWORK_PROTOCOL_TEXT)
     String toJSON(bool format = false) const noexcept;
     static JSValue fromJSON(const char* jsonText) noexcept;
-#endif
-#if defined(NETWORK_PROTOCOL_BINARY)
-    void toBSON(uint8_t **data, size_t* size) const noexcept;
-    static JSValue fromBSON(const uint8_t *data, size_t size) noexcept;
+#elif defined(NETWORK_PROTOCOL_BINARY)
+    const uint8_t* toBSON(size_t* size) const noexcept;
+    static JSValue fromBSON(const uint8_t *data, size_t size, bool asArray) noexcept;
 #endif
 
 private:
+
 #if defined(NETWORK_PROTOCOL_TEXT)
-    JSValue(cJSON* impl, bool own) noexcept;
+    JSValue(cJSON* impl) noexcept;
 
-    cJSON*  fImpl;
-#endif
-#if defined(NETWORK_PROTOCOL_BINARY)
-    JSValue(bson_t* impl, bool own) noexcept;
+    cJSON* fImpl;
+#elif defined(NETWORK_PROTOCOL_BINARY)
+    JSValue(bson_t* impl, bson_type_t type) noexcept;
 
-    bson_t* fImpl;
+    void copy(const JSValue& v) noexcept;
+
+    bson_t*     fImpl;
+    bson_type_t fType;
+
+    union {
+        bool   fBool;
+        double fDouble;
+        char*  fString;
+    } fScalar;
 #endif
-    bool    fOwn;
 
 };
 
