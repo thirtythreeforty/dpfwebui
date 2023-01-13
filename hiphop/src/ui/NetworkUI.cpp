@@ -49,11 +49,6 @@ USE_NAMESPACE_DISTRHO
 NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio)
     : WebUIBase(widthCssPx, heightCssPx, initPixelRatio)
     , fPort(-1)
-#if defined(NETWORK_PROTOCOL_BINARY)
-    , fServer(/*binary*/true)
-#elif defined(NETWORK_PROTOCOL_TEXT)
-    , fServer(/*binary*/false)
-#endif
     , fThread(nullptr)
 #if HIPHOP_UI_ZEROCONF
     , fZeroconfPublish(false)

@@ -476,8 +476,11 @@ JSValue JSValue::getObjectItem(const char* key) const noexcept
         case BSON_TYPE_BOOL:
             v = JSValue(bson_iter_bool(&iter));
             break;
+        case BSON_TYPE_INT32:
+        case BSON_TYPE_INT64:
         case BSON_TYPE_DOUBLE:
-            v = JSValue(bson_iter_double(&iter));
+            v = JSValue(bson_iter_as_double(&iter));
+            d_stderr("JSValue : read double %g from key %s", v.fScalar.fDouble, key);
             break;
         case BSON_TYPE_UTF8:
             v = JSValue(bson_iter_utf8(&iter, nullptr));
@@ -520,6 +523,7 @@ void JSValue::pushArrayItem(const JSValue& value) noexcept
             bson_append_bool(fImpl, key, -1, value.fScalar.fBool);
             break;
         case BSON_TYPE_DOUBLE:
+            d_stderr("JSValue : append double %g", value.fScalar.fDouble);
             bson_append_double(fImpl, key, -1, value.fScalar.fDouble);
             break;
         case BSON_TYPE_UTF8:
@@ -563,6 +567,8 @@ JSValue JSValue::fromBSON(const uint8_t *data, size_t size, bool asArray) noexce
     if (impl == nullptr) {
         d_stderr2("JSValue : could not deserialize BSON document - data size = %lu", size);
         return JSValue();
+    } else {
+        d_stderr("JSValue : data size = %lu", size);
     }
 
     return JSValue(impl, asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT);

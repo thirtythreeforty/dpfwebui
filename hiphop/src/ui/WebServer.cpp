@@ -28,9 +28,8 @@
 
 USE_NAMESPACE_DISTRHO
 
-WebServer::WebServer(bool binary)
-    : fBinary(binary)
-    , fContext(nullptr)
+WebServer::WebServer()
+    : fContext(nullptr)
     , fHandler(nullptr)
 {}
 
@@ -107,39 +106,39 @@ void WebServer::injectScript(const String& script)
     fInjectedScripts.push_back(script);
 }
 
-void WebServer::send(const uint8_t* data, size_t size, Client client)
+void WebServer::send(const uint8_t* data, size_t size, Client client, bool binary)
 {
     ClientContextMap::iterator it = fClients.find(client);
     if (it == fClients.end()) {
         return;
     }
 
-    ClientContext::WriteBufferPacket packet(LWS_PRE);
-    packet.insert(packet.end(), data, data + size);
+    WriteBufferFrame frame(binary);
+    frame.data.insert(frame.data.end(), data, data + size);
 
     const MutexLocker writeBufferScopedLock(fMutex);
-    it->second.writeBuffer.push_back(packet);
+    it->second.writeBuffer.push_back(frame);
 
     lws_callback_on_writable(client);
 }
 
 void WebServer::send(const char* data, Client client)
 {
-    send(reinterpret_cast<const uint8_t*>(data), std::strlen(data), client);
+    send(reinterpret_cast<const uint8_t*>(data), std::strlen(data), client, /*binary*/false);
 }
 
-void WebServer::broadcast(const uint8_t* data, size_t size, Client exclude)
+void WebServer::broadcast(const uint8_t* data, size_t size, Client exclude, bool binary)
 {
     for (ClientContextMap::iterator it = fClients.begin(); it != fClients.end(); ++it) {
         if (it->first != exclude) {
-            send(data, size, it->first);
+            send(data, size, it->first, binary);
         }
     }
 }
 
 void WebServer::broadcast(const char* data, Client exclude)
 {
-    broadcast(reinterpret_cast<const uint8_t*>(data), std::strlen(data), exclude);
+    broadcast(reinterpret_cast<const uint8_t*>(data), std::strlen(data), exclude, /*binary*/false);
 }
 
 void WebServer::serve(bool block)
@@ -176,7 +175,7 @@ int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
             server->fHandler->handleWebServerDisconnect(wsi);
             break;
         case LWS_CALLBACK_RECEIVE:
-            rc = server->handleRead(wsi, in, len);
+            rc = server->handleRead(wsi, in, len, lws_frame_is_binary(wsi));
             break;
         case LWS_CALLBACK_SERVER_WRITEABLE: {
             rc = server->handleWrite(wsi);
@@ -238,11 +237,11 @@ int WebServer::injectScripts(lws_process_html_args* args)
     return rc;
 }
 
-int WebServer::handleRead(Client client, void* in, size_t len)
+int WebServer::handleRead(Client client, void* in, size_t len, bool binary)
 {
     int rc;
 
-    if (fBinary) {
+    if (binary) {
         rc = fHandler->handleWebServerRead(client, static_cast<uint8_t*>(in), len);
     } else {
         char* data = new char[len + 1];
@@ -265,12 +264,12 @@ int WebServer::handleWrite(Client client)
         return 0;
     }
 
-    ClientContext::WriteBufferPacket packet = wb.front();
+    WriteBufferFrame frame = wb.front();
     wb.pop_front();
 
-    size_t dataSize = packet.size() - LWS_PRE;
-    size_t writeSize = lws_write(client, static_cast<unsigned char*>(packet.data() + LWS_PRE),
-                                 dataSize, fBinary ? LWS_WRITE_BINARY : LWS_WRITE_TEXT);
+    size_t dataSize = frame.data.size() - LWS_PRE;
+    size_t writeSize = lws_write(client, static_cast<unsigned char*>(frame.data.data() + LWS_PRE),
+                                 dataSize, frame.binary ? LWS_WRITE_BINARY : LWS_WRITE_TEXT);
     if (! wb.empty()) {
         lws_callback_on_writable(client);
     }

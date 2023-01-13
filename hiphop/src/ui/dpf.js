@@ -21,7 +21,7 @@
 class UI {
 
     constructor(opt) {
-        this._opt = opt || {};        
+        this._opt = opt || {};
         this._initMessageChannel();
     }
 
@@ -133,17 +133,15 @@ class UI {
             if (this._socket.readyState == WebSocket.OPEN) {
                 let data;
 
-                if (env.textSocket) {
-                    data = JSON.stringify(args);
-                } else {
+                if (this._opt.binarySocket) {
                     const argsObj = args.reduce((o, v, i) => {
-                         o[i] = v;
+                        o[i] = v;
                         return o;
                     }, {});
 
                     data = (new TextEncoder).encode(DISTRHO.BSON.encode(argsObj)).buffer;
-
-                    if (! env.plugin) console.log(argsObj);
+                } else {
+                    data = JSON.stringify(args);
                 }
 
                 this._socket.send(data);
@@ -315,13 +313,11 @@ class UI {
             this._socket.addEventListener('message', (ev) => {
                 let args;
 
-                if (DISTRHO.env.textSocket) {
-                    args = JSON.parse(ev.data);
-                } else {
+                if (this._opt.binarySocket) {
                     const argsArr = DISTRHO.BSON.decode((new TextDecoder).decode(ev.data));
                     args = Object.keys(argsArr).map(k => argsArr[k]);
-
-                    if (! env.plugin) console.log(args);
+                } else {
+                    args = JSON.parse(ev.data);
                 }
 
                 this._messageReceived(args);
@@ -794,8 +790,6 @@ class UIHelperPrivate {
             env.dev = !env.plugin && !env.network; // ie. open file index.html
         }
 
-        env.textSocket = true;
-        
         return Object.freeze(env);
     }
 
@@ -1333,7 +1327,6 @@ window.DISTRHO = {      // Namespace
         plugin             True when running in plugin embedded web view
         network            True when communicating over the network (HTTP & WS)
         dev                True for non-plugin non-HTTP (ie. open file index.html)
-        textSocket         True when the comm protocol uses JSON instead of BSON
         ...                Additional fields defined by web views
     } */
 };

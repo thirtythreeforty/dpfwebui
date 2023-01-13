@@ -34,10 +34,20 @@ START_NAMESPACE_DISTRHO
 
 typedef struct lws* Client;
 
+struct WriteBufferFrame
+{
+    bool binary;
+    std::vector<uint8_t> data;
+
+    WriteBufferFrame(bool binary)
+        : binary(binary)
+        , data(LWS_PRE)
+    {}
+};
+
 struct ClientContext
 {
-    typedef std::vector<uint8_t> WriteBufferPacket;
-    typedef std::list<WriteBufferPacket> WriteBuffer;
+    typedef std::list<WriteBufferFrame> WriteBuffer;
     WriteBuffer writeBuffer;
 };
 
@@ -52,15 +62,15 @@ struct WebServerHandler
 class WebServer
 {
 public:
-    WebServer(bool binary);
+    WebServer();
     virtual ~WebServer();
 
     void init(int port, WebServerHandler* handler, const char* jsInjectTarget = nullptr,
                 const char* jsInjectToken = nullptr);
     void injectScript(const String& script);
-    void send(const uint8_t* data, size_t size, Client client);
+    void send(const uint8_t* data, size_t size, Client client, bool binary = true);
     void send(const char* data, Client client);
-    void broadcast(const uint8_t* data, size_t size, Client exclude = nullptr);
+    void broadcast(const uint8_t* data, size_t size, Client exclude = nullptr, bool binary = true);
     void broadcast(const char* data, Client exclude = nullptr);
     void serve(bool block = true);
     void cancel();
@@ -71,10 +81,8 @@ private:
     static const char* lwsReplaceFunc(void* data, int index);
 
     int injectScripts(lws_process_html_args* args);
-    int handleRead(Client client, void* in, size_t len);
+    int handleRead(Client client, void* in, size_t len, bool binary);
     int handleWrite(Client client);
-
-    bool fBinary;
 
     char                       fMountOrigin[PATH_MAX];
     lws_http_mount             fMount;
