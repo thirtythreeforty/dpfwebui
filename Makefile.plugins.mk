@@ -12,6 +12,8 @@ DPF_BUILD_DIR ?= build
 HIPHOP_NETWORK_UI ?= false
 # (WIP) Enable HTTPS and secure WebSockets
 HIPHOP_NETWORK_SSL ?= false
+# Use BSON instead JSON for the network protocol
+HIPHOP_MESSAGE_PROTOCOL_BINARY ?= false
 # Automatically inject dpf.js when loading content from file://
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
 # Web view implementation on Linux [ gtk | cef ]
@@ -204,7 +206,7 @@ endif
 
 ifeq ($(WEB_UI),true)
   ifeq ($(HIPHOP_NETWORK_UI),true)
-    BASE_FLAGS += -DHIPHOP_NETWORK_UI -DNETWORK_PROTOCOL_TEXT -I$(LWS_PATH)/include \
+    BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_PATH)/include \
     			  -I$(LWS_BUILD_PATH) -I$(LIBBSON_PATH)/src/libbson/src/bson \
     			  -I$(LIBBSON_PATH)/build/src/libbson/src/bson
     LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib -L$(LIBBSON_BUILD_PATH)/src/libbson \
@@ -230,11 +232,14 @@ ifeq ($(WEB_UI),true)
     # Some lws-http.h constants clash with MacOSX.sdk/usr/include/cups/http.h
     BASE_FLAGS += -D_CUPS_CUPS_H_ -D_CUPS_HTTP_H_ -D_CUPS_PPD_H_
     endif
-  else
-  	BASE_FLAGS += -DNETWORK_PROTOCOL_TEXT
   endif
   ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
   BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
+  endif
+  ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY), true)
+  BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_BINARY
+  else
+  BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_TEXT
   endif
   ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
   BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
@@ -473,7 +478,7 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
+FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/dpf.js
 DPF_JS_INCLUDE_PATH = $(FRAMEWORK_JS_PATH).inc
 
 TARGETS += $(DPF_JS_INCLUDE_PATH)
@@ -794,10 +799,14 @@ ifeq ($(WEB_UI),true)
 HIPHOP_TARGET += lib_ui
 
 ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-COPY_FRAMEWORK_JS = false
+COPY_LIBRARIES_JS = false
 else
-COPY_FRAMEWORK_JS = true
-FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
+COPY_LIBRARIES_JS = true
+ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
+LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/{dpf.js,bson.min.js}
+else
+LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/dpf.js
+endif
 endif
 
 # https://unix.stackexchange.com/questions/178235/how-is-cp-f-different-from-cp-remove-destination
@@ -811,27 +820,27 @@ lib_ui:
 	@($(TEST_LV2) \
 		&& mkdir -p $(LIB_DIR_LV2)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_LV2)/ui \
+		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_LV2)/ui \
 		) || true
 	@($(TEST_CLAP_MACOS) \
 		&& mkdir -p $(LIB_DIR_CLAP_MACOS)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_CLAP_MACOS)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_CLAP_MACOS)/ui \
+		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_CLAP_MACOS)/ui \
 		) || true
 	@($(TEST_VST3) \
 		&& mkdir -p $(LIB_DIR_VST3)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST3)/ui \
+		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_VST3)/ui \
 		) || true
 	@($(TEST_VST2_MACOS) \
 		&& mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_VST2_MACOS)/ui \
+		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_VST2_MACOS)/ui \
 		) || true
 	@($(TEST_NOBUNDLE) \
 		&& mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
 		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
-		&& $(COPY_FRAMEWORK_JS) && cp $(CP_JS_ARGS) $(FRAMEWORK_JS_PATH) $(LIB_DIR_NOBUNDLE)/ui \
+		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_NOBUNDLE)/ui \
 		) || true
 
 clean: clean_lib

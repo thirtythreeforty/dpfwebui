@@ -57,7 +57,7 @@ void WebViewUI::setWebView(WebViewBase* webView)
     
 #if defined(HIPHOP_INJECT_FRAMEWORK_JS) && !defined(HIPHOP_NETWORK_UI) 
     String js = String(
-#include "ui/dpf.js.inc"
+#include "ui/js/dpf.js.inc"
     );
     fWebView->injectScript(js);
 #endif

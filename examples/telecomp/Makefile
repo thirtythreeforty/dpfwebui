@@ -25,6 +25,11 @@ HIPHOP_WEB_UI_PATH = ui
 HIPHOP_NETWORK_UI = true
 
 # --------------------------------------------------------------
+# Enable binary network protocol
+
+HIPHOP_MESSAGE_PROTOCOL_BINARY = true
+
+# --------------------------------------------------------------
 # Files to build
 
 FILES_DSP = \

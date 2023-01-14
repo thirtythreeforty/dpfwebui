@@ -25,9 +25,9 @@
 
 // BSON defines a lot more data types than JSON, like for example binary data.
 // Making the backend transparent requires lots of work and it is unnecessary.
-#if defined(NETWORK_PROTOCOL_TEXT)
+#if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
 # include "cJSON.h"
-#elif defined(NETWORK_PROTOCOL_BINARY)
+#elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
 # include "bson.h"
 #else
 # error JSValue backend not configured
@@ -103,21 +103,21 @@ public:
     operator String() const noexcept { return getString(); }
 
     // Serialization/deserialization
-#if defined(NETWORK_PROTOCOL_TEXT)
+#if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     String toJSON(bool format = false) const noexcept;
     static JSValue fromJSON(const char* jsonText) noexcept;
-#elif defined(NETWORK_PROTOCOL_BINARY)
+#elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
     const uint8_t* toBSON(size_t* size) const noexcept;
     static JSValue fromBSON(const uint8_t *data, size_t size, bool asArray) noexcept;
 #endif
 
 private:
 
-#if defined(NETWORK_PROTOCOL_TEXT)
+#if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     JSValue(cJSON* impl) noexcept;
 
     cJSON* fImpl;
-#elif defined(NETWORK_PROTOCOL_BINARY)
+#elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
     JSValue(bson_t* impl, bson_type_t type) noexcept;
 
     void copy(const JSValue& v) noexcept;
