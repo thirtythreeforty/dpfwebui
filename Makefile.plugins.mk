@@ -802,11 +802,12 @@ ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
 COPY_LIBRARIES_JS = false
 else
 COPY_LIBRARIES_JS = true
-ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
-LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/{dpf.js,bson.min.js}
-else
-LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/dpf.js
-endif
+#ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
+#LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/{dpf.js,bson.min.js}
+#else
+#LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/dpf.js
+#endif
+LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/*.js
 endif
 
 # https://unix.stackexchange.com/questions/178235/how-is-cp-f-different-from-cp-remove-destination
