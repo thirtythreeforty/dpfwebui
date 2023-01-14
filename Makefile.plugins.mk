@@ -206,11 +206,8 @@ endif
 
 ifeq ($(WEB_UI),true)
   ifeq ($(HIPHOP_NETWORK_UI),true)
-    BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_PATH)/include \
-    			  -I$(LWS_BUILD_PATH) -I$(LIBBSON_PATH)/src/libbson/src/bson \
-    			  -I$(LIBBSON_PATH)/build/src/libbson/src/bson
-    LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib -L$(LIBBSON_BUILD_PATH)/src/libbson \
-    			  -lbson-static-1.0
+    BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
+    LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
     ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
     $(warning Network UI is enabled - disabling JavaScript framework injection)
     HIPHOP_INJECT_FRAMEWORK_JS = false
@@ -237,7 +234,9 @@ ifeq ($(WEB_UI),true)
   BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
   endif
   ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY), true)
-  BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_BINARY
+  BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_BINARY -I$(LIBBSON_PATH)/src/libbson/src/bson \
+    			-I$(LIBBSON_PATH)/build/src/libbson/src/bson
+  LINK_FLAGS += -L$(LIBBSON_BUILD_PATH)/src/libbson -lbson-static-1.0
   else
   BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_TEXT
   endif
@@ -443,13 +442,14 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_NETWORK_UI),true)
+ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY), true)
 LIBBSON_GIT_URL = https://github.com/mongodb/mongo-c-driver
 LIBBSON_GIT_TAG = 1.23.2
 LIBBSON_PATH = $(HIPHOP_DEPS_PATH)/mongo-c-driver
 LIBBSON_BUILD_PATH = ${LIBBSON_PATH}/build
 LIBBSON_LIB_PATH = $(LIBBSON_BUILD_PATH)/src/libbson/libbson-static-1.0.a
 LIBBSON_CMAKE_ARGS = -DENABLE_MONGOC=OFF -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF \
-					           -DENABLE_BSON=ON -DENABLE_STATIC=ON -DCMAKE_BUILD_TYPE=Release
+					 -DENABLE_BSON=ON -DENABLE_STATIC=ON -DCMAKE_BUILD_TYPE=Release
 LIBBSON_CMAKE_ENV = true
 
 ifeq ($(WINDOWS),true)
@@ -470,6 +470,7 @@ $(LIBBSON_LIB_PATH): $(LIBBSON_PATH)
 $(LIBBSON_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LIBBSON_GIT_TAG) $(LIBBSON_GIT_URL)
+endif
 endif
 endif
 
