@@ -275,7 +275,9 @@ JSValue::JSValue(cJSON* impl) noexcept
 JSValue::JSValue() noexcept
     : fImpl(nullptr)
     , fType(BSON_TYPE_NULL)
-{}
+{
+    fScalar.fString = nullptr;
+}
 
 JSValue::JSValue(bool b) noexcept
     : fImpl(nullptr)
@@ -572,7 +574,9 @@ JSValue JSValue::fromBSON(const uint8_t *data, size_t size, bool asArray) noexce
 JSValue::JSValue(bson_t* impl, bson_type_t type) noexcept
     : fImpl(impl)
     , fType(type)
-{}
+{
+    fScalar.fString = nullptr;
+}
 
 void JSValue::copy(const JSValue& v) noexcept
 {
