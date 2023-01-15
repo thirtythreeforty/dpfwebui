@@ -92,8 +92,8 @@ TEST_VST2_WINDOWS = test -f $(DPF_TARGET_DIR)/$(NAME)-vst.dll
 TEST_JACK_LINUX_OR_MACOS = test -f $(DPF_TARGET_DIR)/$(NAME)
 TEST_JACK_WINDOWS = test -f $(DPF_TARGET_DIR)/$(NAME).exe
 TEST_NOBUNDLE = $(TEST_CLAP_LINUX_OR_WINDOWS) \
-                || $(TEST_VST2_WINDOWS) || $(TEST_VST2_LINUX) \
-                || $(TEST_JACK_LINUX_OR_MACOS) || $(TEST_JACK_WINDOWS)
+				|| $(TEST_VST2_WINDOWS) || $(TEST_VST2_LINUX) \
+				|| $(TEST_JACK_LINUX_OR_MACOS) || $(TEST_JACK_WINDOWS)
 
 LIB_DIR_LV2 = $(DPF_TARGET_DIR)/$(NAME).lv2/lib
 LIB_DIR_CLAP_MACOS = $(DPF_TARGET_DIR)/$(NAME).clap/Contents/Resources
@@ -112,29 +112,29 @@ HIPHOP_FILES_UI  = UIEx.cpp
 
 ifeq ($(WEB_UI),true)
 HIPHOP_FILES_UI += WebUIBase.cpp \
-                   WebViewBase.cpp \
-                   WebViewUI.cpp \
-                   ../JSValue.cpp \
-                   ../cJSON.c
+				   WebViewBase.cpp \
+				   WebViewUI.cpp \
+				   ../JSValue.cpp \
+				   ../cJSON.c
 ifeq ($(HIPHOP_NETWORK_UI),true)
 HIPHOP_FILES_UI += NetworkUI.cpp \
-                   WebServer.cpp
+				   WebServer.cpp
 endif
 ifeq ($(LINUX),true)
 HIPHOP_FILES_UI += linux/LinuxWebViewUI.cpp \
-                   linux/ChildProcessWebView.cpp \
-                   linux/IpcChannel.cpp \
-                   linux/ipc.c \
-                   linux/scaling.c
+				   linux/ChildProcessWebView.cpp \
+				   linux/IpcChannel.cpp \
+				   linux/ipc.c \
+				   linux/scaling.c
 endif
 ifeq ($(MACOS),true)
 HIPHOP_FILES_UI += macos/MacWebViewUI.mm \
-                   macos/CocoaWebView.mm
+				   macos/CocoaWebView.mm
 endif
 ifeq ($(WINDOWS),true)
 HIPHOP_FILES_UI += windows/WindowsWebViewUI.cpp \
-                   windows/EdgeWebView.cpp \
-                   windows/WebView2EventHandler.cpp
+				   windows/EdgeWebView.cpp \
+				   windows/WebView2EventHandler.cpp
 endif
 endif
 
@@ -143,7 +143,7 @@ endif
 
 ifeq ($(WASM_DSP),true)
 HIPHOP_FILES_DSP += WasmPluginImpl.cpp \
-                    WasmRuntime.cpp
+					WasmRuntime.cpp
 endif
 
 FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/dsp/%)
@@ -186,9 +186,9 @@ include $(DPF_PATH)/Makefile.plugins.mk
 # Add shared build flags
 
 BASE_FLAGS += -I$(HIPHOP_INC_PATH) -I$(HIPHOP_SRC_PATH) -I$(DPF_PATH) \
-              -DHIPHOP_PLUGIN_BIN_BASENAME=$(NAME) \
-              -DHIPHOP_PROJECT_ID_HASH=$(shell echo $(NAME):$(HIPHOP_PROJECT_VERSION) \
-                 | shasum -a 256 | head -c 8)
+			  -DHIPHOP_PLUGIN_BIN_BASENAME=$(NAME) \
+			  -DHIPHOP_PROJECT_ID_HASH=$(shell echo $(NAME):$(HIPHOP_PROJECT_VERSION) \
+				 | shasum -a 256 | head -c 8)
 ifeq ($(LINUX),true)
 BASE_FLAGS += -lrt
 endif
@@ -206,36 +206,36 @@ endif
 
 ifeq ($(WEB_UI),true)
   ifeq ($(HIPHOP_NETWORK_UI),true)
-    BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
-    LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
-    ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-    $(warning Network UI is enabled - disabling JavaScript framework injection)
-    HIPHOP_INJECT_FRAMEWORK_JS = false
-    endif
-    ifeq ($(HIPHOP_NETWORK_SSL), true)
-    BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
-    LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH) -lmbedtls -lmbedcrypto -lmbedx509
-    endif
-    ifeq ($(WINDOWS),true)
-    LINK_FLAGS += -lwebsockets_static -lWs2_32
-    else
-    LINK_FLAGS += -lwebsockets
-    endif
-    ifeq ($(LINUX),true)
-    # Add -lcap after -lwebsockets
-    LINK_FLAGS += -lcap
-    endif
-    ifeq ($(MACOS),true)
-    # Some lws-http.h constants clash with MacOSX.sdk/usr/include/cups/http.h
-    BASE_FLAGS += -D_CUPS_CUPS_H_ -D_CUPS_HTTP_H_ -D_CUPS_PPD_H_
-    endif
+	BASE_FLAGS += -DHIPHOP_NETWORK_UI -I$(LWS_PATH)/include -I$(LWS_BUILD_PATH)
+	LINK_FLAGS += -L$(LWS_BUILD_PATH)/lib
+	ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
+	$(warning Network UI is enabled - disabling JavaScript framework injection)
+	HIPHOP_INJECT_FRAMEWORK_JS = false
+	endif
+	ifeq ($(HIPHOP_NETWORK_SSL), true)
+	BASE_FLAGS += -I$(MBEDTLS_PATH)/include -DHIPHOP_NETWORK_SSL
+	LINK_FLAGS += -L$(MBEDTLS_BUILD_PATH) -lmbedtls -lmbedcrypto -lmbedx509
+	endif
+	ifeq ($(WINDOWS),true)
+	LINK_FLAGS += -lwebsockets_static -lWs2_32
+	else
+	LINK_FLAGS += -lwebsockets
+	endif
+	ifeq ($(LINUX),true)
+	# Add -lcap after -lwebsockets
+	LINK_FLAGS += -lcap
+	endif
+	ifeq ($(MACOS),true)
+	# Some lws-http.h constants clash with MacOSX.sdk/usr/include/cups/http.h
+	BASE_FLAGS += -D_CUPS_CUPS_H_ -D_CUPS_HTTP_H_ -D_CUPS_PPD_H_
+	endif
   endif
   ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
   BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
   endif
   ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY), true)
   BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_BINARY -I$(LIBBSON_PATH)/src/libbson/src/bson \
-    			-I$(LIBBSON_PATH)/build/src/libbson/src/bson
+				-I$(LIBBSON_PATH)/build/src/libbson/src/bson
   LINK_FLAGS += -L$(LIBBSON_BUILD_PATH)/src/libbson -lbson-static-1.0
   else
   BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_TEXT
@@ -252,9 +252,9 @@ ifeq ($(WEB_UI),true)
   ifeq ($(WINDOWS),true)
   BASE_FLAGS += -I$(EDGE_WEBVIEW2_PATH)/build/native/include -Wno-unknown-pragmas
   LINK_FLAGS += -L$(EDGE_WEBVIEW2_PATH)/build/native/x64 \
-                -lole32 -lShlwapi -lMfplat -lksuser -lmfuuid -lwmcodecdspuuid \
-                -static-libgcc -static-libstdc++ -Wl,-Bstatic \
-                -lstdc++ -lpthread
+				-lole32 -lShlwapi -lMfplat -lksuser -lmfuuid -lwmcodecdspuuid \
+				-static-libgcc -static-libstdc++ -Wl,-Bstatic \
+				-lstdc++ -lpthread
   endif
 endif
 
@@ -265,63 +265,63 @@ ifeq ($(WASM_DSP),true)
   BASE_FLAGS += -DHIPHOP_WASM_SUPPORT
   WASM_BYTECODE_FILE = optimized.wasm
   ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-    BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
-    ifeq ($(HIPHOP_WASM_MODE),aot)
-      ifeq ($(CPU_I386_OR_X86_64),true)
-      WAMRC_TARGET = x86_64
-      endif
-      ifeq ($(CPU_ARM_OR_AARCH64),true)
-      WAMRC_TARGET = aarch64
-      endif
-      WASM_BINARY_FILE = $(WAMRC_TARGET).aot
-      BASE_FLAGS += -DHIPHOP_WASM_BINARY_COMPILED
-    endif
-    ifeq ($(HIPHOP_WASM_MODE),interp)
-    WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
-    endif
-    ifeq ($(HIPHOP_WASM_MODE),jit)
-    $(error JIT mode is not supported for WAMR)
-    endif
+	BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
+	ifeq ($(HIPHOP_WASM_MODE),aot)
+	  ifeq ($(CPU_I386_OR_X86_64),true)
+	  WAMRC_TARGET = x86_64
+	  endif
+	  ifeq ($(CPU_ARM_OR_AARCH64),true)
+	  WAMRC_TARGET = aarch64
+	  endif
+	  WASM_BINARY_FILE = $(WAMRC_TARGET).aot
+	  BASE_FLAGS += -DHIPHOP_WASM_BINARY_COMPILED
+	endif
+	ifeq ($(HIPHOP_WASM_MODE),interp)
+	WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
+	endif
+	ifeq ($(HIPHOP_WASM_MODE),jit)
+	$(error JIT mode is not supported for WAMR)
+	endif
   endif
   ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
-    BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WASMER
-    ifeq ($(HIPHOP_WASM_MODE),interp)
-    # Both WAMR interp and Wasmer will load bytecode
-    HIPHOP_WASM_MODE = jit
-    endif
-    ifeq ($(HIPHOP_WASM_MODE),jit)
-    WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
-    else
-    $(error Only JIT mode is supported for Wasmer)
-    endif
+	BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WASMER
+	ifeq ($(HIPHOP_WASM_MODE),interp)
+	# Both WAMR interp and Wasmer will load bytecode
+	HIPHOP_WASM_MODE = jit
+	endif
+	ifeq ($(HIPHOP_WASM_MODE),jit)
+	WASM_BINARY_FILE = $(WASM_BYTECODE_FILE)
+	else
+	$(error Only JIT mode is supported for Wasmer)
+	endif
   endif
   ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
-    BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include
-    ifeq ($(LINUX_OR_MACOS),true)
-    LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
-    endif
-    ifeq ($(LINUX),true)
-    LINK_FLAGS += -lpthread
-    endif
-    ifeq ($(WINDOWS),true)
-      ifeq ($(HIPHOP_WASM_MODE),interp)
-      LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
-      LINK_FLAGS += -lWs2_32 -lShlwapi
-      endif
-    endif
+	BASE_FLAGS += -I$(WAMR_PATH)/core/iwasm/include
+	ifeq ($(LINUX_OR_MACOS),true)
+	LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
+	endif
+	ifeq ($(LINUX),true)
+	LINK_FLAGS += -lpthread
+	endif
+	ifeq ($(WINDOWS),true)
+	  ifeq ($(HIPHOP_WASM_MODE),interp)
+	  LINK_FLAGS += -L$(WAMR_BUILD_PATH) -lvmlib
+	  LINK_FLAGS += -lWs2_32 -lShlwapi
+	  endif
+	endif
   endif
   ifeq ($(HIPHOP_WASM_RUNTIME),wasmer)
-    BASE_FLAGS += -I$(WASMER_PATH)/include
-    LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
-    ifeq ($(LINUX),true)
-    LINK_FLAGS += -lpthread -ldl
-    endif
-    ifeq ($(MACOS),true)
-    LINK_FLAGS += -framework AppKit 
-    endif
-    ifeq ($(WINDOWS),true)
-    LINK_FLAGS += -Wl,-Bstatic -lWs2_32 -lBcrypt -lUserenv -lShlwapi
-    endif
+	BASE_FLAGS += -I$(WASMER_PATH)/include
+	LINK_FLAGS += -L$(WASMER_PATH)/lib -lwasmer
+	ifeq ($(LINUX),true)
+	LINK_FLAGS += -lpthread -ldl
+	endif
+	ifeq ($(MACOS),true)
+	LINK_FLAGS += -framework AppKit 
+	endif
+	ifeq ($(WINDOWS),true)
+	LINK_FLAGS += -Wl,-Bstatic -lWs2_32 -lBcrypt -lUserenv -lShlwapi
+	endif
   endif
 endif
 
@@ -354,7 +354,7 @@ ifneq ($(WEB_UI),true)
   TARGETS += $(LIBDGL_PATH)
   ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
   DGL_MAKE_FLAGS = dgl NOOPT=true DGL_FLAGS="$(MACOS_UNIVERSAL_FLAGS)" \
-  				 DGL_LIBS="$(MACOS_UNIVERSAL_FLAGS)"
+				 DGL_LIBS="$(MACOS_UNIVERSAL_FLAGS)"
   endif
 
   $(LIBDGL_PATH):
@@ -405,7 +405,7 @@ LWS_LIB_PATH = $(LWS_BUILD_PATH)/lib/libwebsockets.a
 LWS_CMAKE_ARGS = -DLWS_WITH_SHARED=0 -DLWS_WITHOUT_TESTAPPS=1
 ifeq ($(HIPHOP_NETWORK_SSL),true)
 LWS_CMAKE_ARGS += -DLWS_WITH_SSL=1 -DLWS_WITH_MBEDTLS=1 \
-                  -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
+				  -DLWS_MBEDTLS_INCLUDE_DIRS=../../mbedtls/include
 else
 LWS_CMAKE_ARGS += -DLWS_WITH_SSL=0
 endif
@@ -420,7 +420,8 @@ TARGETS += $(LWS_LIB_PATH)
 LWS_CMAKE_ENV = true
 ifeq ($(LINUX),true)
 LWS_CMAKE_ENV = export CFLAGS=-fPIC
-else ifeq ($(MACOS),true)
+endif
+ifeq ($(MACOS),true)
 ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
 LWS_CMAKE_ENV = export CMAKE_OSX_ARCHITECTURES="arm64;x86_64;"
 endif
@@ -450,8 +451,15 @@ LIBBSON_BUILD_PATH = ${LIBBSON_PATH}/build
 LIBBSON_LIB_PATH = $(LIBBSON_BUILD_PATH)/src/libbson/libbson-static-1.0.a
 LIBBSON_CMAKE_ARGS = -DENABLE_MONGOC=OFF -DENABLE_TESTS=OFF -DENABLE_EXAMPLES=OFF \
 					 -DENABLE_BSON=ON -DENABLE_STATIC=ON -DCMAKE_BUILD_TYPE=Release
-LIBBSON_CMAKE_ENV = true
 
+TARGETS += $(LIBBSON_LIB_PATH)
+
+LIBBSON_CMAKE_ENV = true
+ifeq ($(MACOS),true)
+ifeq ($(HIPHOP_MACOS_UNIVERSAL),true)
+LIBBSON_CMAKE_ENV = export CMAKE_OSX_ARCHITECTURES="arm64;x86_64;"
+endif
+endif
 ifeq ($(WINDOWS),true)
 # build/calc_release_version.py fails on MSYS due to git returning error
 # "fatal: Needed a single revision". Pass version to CMake.
@@ -459,8 +467,6 @@ LIBBSON_CMAKE_ARGS += -G"MSYS Makefiles" -DBUILD_VERSION=$(LIBBSON_GIT_TAG)
 # Prevent "error: implicit declaration of function 'aligned_alloc' [-Werror=implicit-function-declaration]"
 LIBBSON_CMAKE_ENV = export CFLAGS=-std=c99
 endif
-
-TARGETS += $(LIBBSON_LIB_PATH)
 
 $(LIBBSON_LIB_PATH): $(LIBBSON_PATH)
 	@echo "Building libbson static library"
@@ -819,31 +825,31 @@ endif
 lib_ui:
 	@echo "Copying web UI files"
 	@for LIB_JS_FILE in $(LIB_JS_FILES) ; do \
-        ($(TEST_LV2) \
-            && mkdir -p $(LIB_DIR_LV2)/ui \
-            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
-            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_LV2)/ui \
-            ) || true ; \
-        ($(TEST_CLAP_MACOS) \
-            && mkdir -p $(LIB_DIR_CLAP_MACOS)/ui \
-            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_CLAP_MACOS)/ui \
-            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_CLAP_MACOS)/ui \
-            ) || true ; \
-        ($(TEST_VST3) \
-            && mkdir -p $(LIB_DIR_VST3)/ui \
-            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
-            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST3)/ui \
-            ) || true ; \
-        ($(TEST_VST2_MACOS) \
-            && mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
-            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
-            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST2_MACOS)/ui \
-            ) || true ; \
-        ($(TEST_NOBUNDLE) \
-            && mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
-            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
-            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_NOBUNDLE)/ui \
-            ) || true ; \
+		($(TEST_LV2) \
+			&& mkdir -p $(LIB_DIR_LV2)/ui \
+			&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
+			&& $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_LV2)/ui \
+			) || true ; \
+		($(TEST_CLAP_MACOS) \
+			&& mkdir -p $(LIB_DIR_CLAP_MACOS)/ui \
+			&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_CLAP_MACOS)/ui \
+			&& $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_CLAP_MACOS)/ui \
+			) || true ; \
+		($(TEST_VST3) \
+			&& mkdir -p $(LIB_DIR_VST3)/ui \
+			&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
+			&& $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST3)/ui \
+			) || true ; \
+		($(TEST_VST2_MACOS) \
+			&& mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
+			&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
+			&& $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST2_MACOS)/ui \
+			) || true ; \
+		($(TEST_NOBUNDLE) \
+			&& mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
+			&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
+			&& $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_NOBUNDLE)/ui \
+			) || true ; \
 	done
 
 clean: clean_lib
