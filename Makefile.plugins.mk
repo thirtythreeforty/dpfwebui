@@ -800,15 +800,14 @@ ifeq ($(WEB_UI),true)
 HIPHOP_TARGET += lib_ui
 
 ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-COPY_LIBRARIES_JS = false
+COPY_LIB_JS = false
 else
-COPY_LIBRARIES_JS = true
-#ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
-#LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/{dpf.js,bson.min.js}
-#else
-#LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/dpf.js
-#endif
-LIBRARIES_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/*.js
+COPY_LIB_JS = true
+LIB_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js
+LIB_JS_FILES = $(LIB_JS_PATH)/dpf.js
+ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
+LIB_JS_FILES += $(LIB_JS_PATH)/bson.min.js
+endif
 endif
 
 # https://unix.stackexchange.com/questions/178235/how-is-cp-f-different-from-cp-remove-destination
@@ -819,31 +818,33 @@ endif
 
 lib_ui:
 	@echo "Copying web UI files"
-	@($(TEST_LV2) \
-		&& mkdir -p $(LIB_DIR_LV2)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
-		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_LV2)/ui \
-		) || true
-	@($(TEST_CLAP_MACOS) \
-		&& mkdir -p $(LIB_DIR_CLAP_MACOS)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_CLAP_MACOS)/ui \
-		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_CLAP_MACOS)/ui \
-		) || true
-	@($(TEST_VST3) \
-		&& mkdir -p $(LIB_DIR_VST3)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
-		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_VST3)/ui \
-		) || true
-	@($(TEST_VST2_MACOS) \
-		&& mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
-		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_VST2_MACOS)/ui \
-		) || true
-	@($(TEST_NOBUNDLE) \
-		&& mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
-		&& $(COPY_LIBRARIES_JS) && cp $(CP_JS_ARGS) $(LIBRARIES_JS_PATH) $(LIB_DIR_NOBUNDLE)/ui \
-		) || true
+	@for LIB_JS_FILE in $(LIB_JS_FILES) ; do \
+        ($(TEST_LV2) \
+            && mkdir -p $(LIB_DIR_LV2)/ui \
+            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
+            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_LV2)/ui \
+            ) || true ; \
+        ($(TEST_CLAP_MACOS) \
+            && mkdir -p $(LIB_DIR_CLAP_MACOS)/ui \
+            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_CLAP_MACOS)/ui \
+            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_CLAP_MACOS)/ui \
+            ) || true ; \
+        ($(TEST_VST3) \
+            && mkdir -p $(LIB_DIR_VST3)/ui \
+            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
+            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST3)/ui \
+            ) || true ; \
+        ($(TEST_VST2_MACOS) \
+            && mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
+            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
+            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST2_MACOS)/ui \
+            ) || true ; \
+        ($(TEST_NOBUNDLE) \
+            && mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
+            && cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
+            && $(COPY_LIB_JS) && cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_NOBUNDLE)/ui \
+            ) || true ; \
+	done
 
 clean: clean_lib
 

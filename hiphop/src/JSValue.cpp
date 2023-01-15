@@ -271,7 +271,6 @@ JSValue::JSValue(cJSON* impl) noexcept
 #endif // HIPHOP_MESSAGE_PROTOCOL_TEXT
 
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-
 JSValue::JSValue() noexcept
     : fImpl(nullptr)
     , fType(BSON_TYPE_NULL)
