@@ -141,9 +141,8 @@ void NetworkUI::setState(const char* key, const char* value)
 void NetworkUI::broadcastMessage(const JSValue& args, Client exclude)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    size_t size = 0;
-    const uint8_t* data = args.toBSON(&size);
-    fServer.broadcast(data, size, exclude);
+    JSValue::BinaryData data = args.toBSON();
+    fServer.broadcast(data.data(), data.size(), exclude);
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     fServer.broadcast(args.toJSON(), exclude);
 #endif
@@ -152,12 +151,11 @@ void NetworkUI::broadcastMessage(const JSValue& args, Client exclude)
 void NetworkUI::postMessage(const JSValue& args, uintptr_t destination)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    size_t size = 0;
-    const uint8_t* data = args.toBSON(&size);
+    JSValue::BinaryData data = args.toBSON();
     if (destination == DESTINATION_ALL) {
-        fServer.broadcast(data, size);
+        fServer.broadcast(data.data(), data.size());
     } else {
-        fServer.send(args.toBSON(&size), size, reinterpret_cast<Client>(destination));
+        fServer.send(data.data(), data.size(), reinterpret_cast<Client>(destination));
     }
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     if (destination == DESTINATION_ALL) {
@@ -399,7 +397,8 @@ void NetworkUI::handleWebServerConnect(Client client)
 int NetworkUI::handleWebServerRead(Client client, const uint8_t* data, size_t size)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    handleMessage(JSValue::fromBSON(data, size, /*asArray*/true), reinterpret_cast<uintptr_t>(client));
+    JSValue::BinaryData binData(data, data + size);
+    handleMessage(JSValue::fromBSON(binData, /*asArray*/true), reinterpret_cast<uintptr_t>(client));
 #else
     (void)client;
     (void)data;

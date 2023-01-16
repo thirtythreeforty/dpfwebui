@@ -20,6 +20,7 @@
 #define JS_VALUE_HPP
 
 #include <initializer_list>
+#include <vector>
 
 #include "distrho/extra/String.hpp"
 
@@ -38,6 +39,8 @@ START_NAMESPACE_DISTRHO
 class JSValue
 {
 public:
+    typedef std::vector<uint8_t> BinaryData;
+
     // Constructors
     JSValue() noexcept;
     JSValue(bool b) noexcept;
@@ -48,6 +51,7 @@ public:
     JSValue(uint32_t i) noexcept;
     JSValue(float f) noexcept;
     JSValue(const char* s) noexcept;
+    JSValue(const BinaryData& data) noexcept;
     JSValue(std::initializer_list<JSValue> l) noexcept;
 
     // Copy and move semantics
@@ -71,14 +75,15 @@ public:
     bool isArray() const noexcept;
     bool isObject() const noexcept;
 
-    bool    getBoolean() const noexcept;
-    double  getNumber() const noexcept;
-    String  getString() const noexcept;
-    int     getArraySize() const noexcept;
-    JSValue getArrayItem(int idx) const noexcept;
-    JSValue getObjectItem(const char* key) const noexcept;
-    JSValue operator[](int idx) const noexcept;
-    JSValue operator[](const char* key) const noexcept;
+    bool       getBoolean() const noexcept;
+    double     getNumber() const noexcept;
+    String     getString() const noexcept;
+    BinaryData getBinaryData() const noexcept;
+    int        getArraySize() const noexcept;
+    JSValue    getArrayItem(int idx) const noexcept;
+    JSValue    getObjectItem(const char* key) const noexcept;
+    JSValue    operator[](int idx) const noexcept;
+    JSValue    operator[](const char* key) const noexcept;
 
     // Setters
     void pushArrayItem(const JSValue& value) noexcept;
@@ -107,8 +112,8 @@ public:
     String toJSON(bool format = false) const noexcept;
     static JSValue fromJSON(const char* jsonText) noexcept;
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    const uint8_t* toBSON(size_t* size) const noexcept;
-    static JSValue fromBSON(const uint8_t *data, size_t size, bool asArray) noexcept;
+    BinaryData toBSON() const noexcept;
+    static JSValue fromBSON(const BinaryData& data, bool asArray) noexcept;
 #endif
 
 private:
@@ -118,18 +123,22 @@ private:
 
     cJSON* fImpl;
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    JSValue(bson_t* impl, bson_type_t type) noexcept;
+    JSValue(bson_type_t type, bson_t* array) noexcept;
 
     void copy(const JSValue& v) noexcept;
+    void move(JSValue&& v) noexcept;
+    void destroy() noexcept;
 
-    bson_t*     fImpl;
     bson_type_t fType;
 
     union {
-        bool   fBool;
-        double fDouble;
-        char*  fString;
-    } fScalar;
+        bool        fBool;
+        double      fDouble;
+        char*       fString;
+        BinaryData* fData;
+        bson_t*     fArray;
+    };
+
 #endif
 
 };

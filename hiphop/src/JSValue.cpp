@@ -19,6 +19,7 @@
 #include <stdexcept>
 
 #include "extra/JSValue.hpp"
+#include "extra/Base64.hpp"
 
 USE_NAMESPACE_DISTRHO
 
@@ -93,6 +94,10 @@ JSValue::JSValue(float f) noexcept
 
 JSValue::JSValue(const char* s) noexcept
     : fImpl(cJSON_CreateString(s))
+{}
+
+JSValue::JSValue(const BinaryData& data) noexcept
+    : fImpl(cJSON_CreateString(String::asBase64(data.data(), data.size())))
 {}
 
 JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
@@ -202,6 +207,11 @@ String JSValue::getString() const noexcept
     return String(cJSON_GetStringValue(fImpl));
 }
 
+JSValue::BinaryData JSValue::getBinaryData() const noexcept
+{
+    return d_getChunkFromBase64String(cJSON_GetStringValue(fImpl));
+}
+
 int JSValue::getArraySize() const noexcept
 {
     return cJSON_GetArraySize(fImpl);
@@ -272,59 +282,53 @@ JSValue::JSValue(cJSON* impl) noexcept
 
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
 JSValue::JSValue() noexcept
-    : fImpl(nullptr)
-    , fType(BSON_TYPE_NULL)
-{
-    fScalar.fString = nullptr;
-}
+    : fType(BSON_TYPE_NULL)
+    , fArray(nullptr)
+{}
 
 JSValue::JSValue(bool b) noexcept
-    : fImpl(nullptr)
-    , fType(BSON_TYPE_BOOL)
-{
-    fScalar.fBool = b;
-}
+    : fType(BSON_TYPE_BOOL)
+    , fBool(b)
+{}
 
 JSValue::JSValue(double d) noexcept
-    : fImpl(nullptr)
-    , fType(BSON_TYPE_DOUBLE)
-{
-    fScalar.fDouble = d;
-}
+    : fType(BSON_TYPE_DOUBLE)
+    , fDouble(d)
+{}
 
 JSValue::JSValue(String s) noexcept
-    : fImpl(nullptr)
-    , fType(BSON_TYPE_UTF8)
+    : fType(BSON_TYPE_UTF8)
 {
-    fScalar.fString = new char[s.length() + 1];
-    std::strcpy(fScalar.fString, s.buffer());
+    fString = new char[s.length() + 1];
+    std::strcpy(fString, s.buffer());
 }
 
 JSValue::JSValue(uint32_t i) noexcept
-    : fImpl(nullptr)
-    , fType(BSON_TYPE_DOUBLE)
-{
-    fScalar.fDouble = static_cast<double>(i);
-}
+    : fType(BSON_TYPE_DOUBLE)
+    , fDouble(static_cast<double>(i))
+{}
 
 JSValue::JSValue(float f) noexcept
-    : fImpl(nullptr)
-    , fType(BSON_TYPE_DOUBLE)
-{
-    fScalar.fDouble = static_cast<double>(f);
-}
+    : fType(BSON_TYPE_DOUBLE)
+    , fDouble(static_cast<double>(f))
+{}
 
 JSValue::JSValue(const char* s) noexcept
-    : fImpl(nullptr)
-    , fType(BSON_TYPE_UTF8)
+    : fType(BSON_TYPE_UTF8)
 {
-    fScalar.fString = new char[std::strlen(s) + 1];
-    std::strcpy(fScalar.fString, s);
+    fString = new char[std::strlen(s) + 1];
+    std::strcpy(fString, s);
+}
+
+JSValue::JSValue(const BinaryData& data) noexcept
+    : fType(BSON_TYPE_BINARY)
+{
+    fData = new BinaryData(data.begin(), data.end());
 }
 
 JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
-    : fImpl(bson_new())
-    , fType(BSON_TYPE_ARRAY)
+    : fType(BSON_TYPE_ARRAY)
+    , fArray(bson_new())
 {
     for (std::initializer_list<JSValue>::const_iterator it = l.begin(); it != l.end(); ++it) {
         pushArrayItem(*it);
@@ -338,14 +342,7 @@ JSValue::JSValue(const JSValue& v) noexcept
 
 JSValue& JSValue::operator=(const JSValue& v) noexcept
 {
-    if (fImpl != nullptr) {
-        bson_destroy(fImpl);
-    }
-
-    if (fType == BSON_TYPE_UTF8) {
-        delete[] fScalar.fString;
-    }
-
+    destroy();
     copy(v);
 
     return *this;
@@ -353,29 +350,14 @@ JSValue& JSValue::operator=(const JSValue& v) noexcept
 
 JSValue::JSValue(JSValue&& v) noexcept
 {
-    fImpl = v.fImpl;
-    fType = v.fType;
-    fScalar = v.fScalar;
-    v.fImpl = nullptr;
-    v.fType = BSON_TYPE_EOD;
+    move(std::move(v));
 }
 
 JSValue& JSValue::operator=(JSValue&& v) noexcept
 {
     if (this != &v) {
-        if (fImpl != nullptr) {
-            bson_destroy(fImpl);
-        }
-
-        if (fType == BSON_TYPE_UTF8) {
-            delete[] fScalar.fString;
-        }
-
-        fImpl = v.fImpl;
-        fType = v.fType;
-        fScalar = v.fScalar;
-        v.fImpl = nullptr;
-        v.fType = BSON_TYPE_EOD;
+        destroy();
+        move(std::move(v));
     }
 
    return *this;
@@ -383,25 +365,17 @@ JSValue& JSValue::operator=(JSValue&& v) noexcept
 
 JSValue JSValue::createArray() noexcept
 {
-    return JSValue(bson_new(), BSON_TYPE_ARRAY);
+    return JSValue(BSON_TYPE_ARRAY, bson_new());
 }
 
 JSValue JSValue::createObject() noexcept
 {
-    return JSValue(bson_new(), BSON_TYPE_DOCUMENT);
+    return JSValue(BSON_TYPE_DOCUMENT, bson_new());
 }
 
 JSValue::~JSValue()
 {
-    if (fImpl != nullptr) {
-        bson_destroy(fImpl);
-        fImpl = nullptr;
-    }
-
-    if (fType == BSON_TYPE_UTF8) {
-        delete[] fScalar.fString;
-        fScalar.fString = nullptr;
-    }
+    destroy();
 }
 
 bool JSValue::isNull() const noexcept
@@ -436,22 +410,27 @@ bool JSValue::isObject() const noexcept
 
 bool JSValue::getBoolean() const noexcept
 {
-    return fScalar.fString;
+    return fString;
 }
 
 double JSValue::getNumber() const noexcept
 {
-    return fScalar.fDouble;
+    return fDouble;
 }
 
 String JSValue::getString() const noexcept
 {
-    return String(fScalar.fString);
+    return String(fString);
+}
+
+JSValue::BinaryData JSValue::getBinaryData() const noexcept
+{
+    return *fData;
 }
 
 int JSValue::getArraySize() const noexcept
 {
-    return bson_count_keys(fImpl);
+    return bson_count_keys(fArray);
 }
 
 JSValue JSValue::getArrayItem(int idx) const noexcept
@@ -462,7 +441,7 @@ JSValue JSValue::getArrayItem(int idx) const noexcept
 JSValue JSValue::getObjectItem(const char* key) const noexcept
 {
     bson_iter_t iter;
-    bson_iter_init(&iter, fImpl);
+    bson_iter_init(&iter, fArray);
 
     if (! bson_iter_find(&iter, key)) {
         return JSValue();
@@ -485,12 +464,19 @@ JSValue JSValue::getObjectItem(const char* key) const noexcept
         case BSON_TYPE_UTF8:
             v = JSValue(bson_iter_utf8(&iter, nullptr));
             break;
+        case BSON_TYPE_BINARY: {
+            uint32_t len;
+            const uint8_t* data;
+            bson_iter_binary(&iter, nullptr, &len, &data);
+            v = JSValue(BinaryData(data, data + static_cast<size_t>(len)));
+            break;
+        }
         case BSON_TYPE_ARRAY:
         case BSON_TYPE_DOCUMENT: {
             uint32_t size;
             const uint8_t *data;
             bson_iter_array(&iter, &size, &data);
-            v = JSValue(bson_new_from_data(data, static_cast<size_t>(size)), type);
+            v = JSValue(type, bson_new_from_data(data, static_cast<size_t>(size)));
             break;
         }
         default:
@@ -512,27 +498,32 @@ JSValue JSValue::operator[](const char* key) const noexcept
 
 void JSValue::pushArrayItem(const JSValue& value) noexcept
 {
-    String tmp(bson_count_keys(fImpl));
+    String tmp(bson_count_keys(fArray));
     const char* key = tmp.buffer();
 
     switch (value.fType) {
         case BSON_TYPE_NULL:
-            bson_append_null(fImpl, key, -1);
+            bson_append_null(fArray, key, -1);
             break;
         case BSON_TYPE_BOOL:
-            bson_append_bool(fImpl, key, -1, value.fScalar.fBool);
+            bson_append_bool(fArray, key, -1, value.fBool);
             break;
         case BSON_TYPE_DOUBLE:
-            bson_append_double(fImpl, key, -1, value.fScalar.fDouble);
+            bson_append_double(fArray, key, -1, value.fDouble);
             break;
         case BSON_TYPE_UTF8:
-            bson_append_utf8(fImpl, key, -1, value.fScalar.fString, -1);
+            bson_append_utf8(fArray, key, -1, value.fString, -1);
+            break;
+        case BSON_TYPE_BINARY:
+            bson_append_binary(fArray, key, -1, BSON_SUBTYPE_BINARY, fData->data(),
+                                static_cast<uint32_t>(fData->size()));
             break;
         case BSON_TYPE_ARRAY:
-            bson_append_array(fImpl, key, -1, value.fImpl);
+            bson_append_array(fArray, key, -1, value.fArray);
             break;
         case BSON_TYPE_DOCUMENT:
-            bson_append_document(fImpl, key, -1, value.fImpl);
+            bson_append_document(fArray, key, -1, value.fArray);
+            break;
         default:
             break;
     }
@@ -553,45 +544,78 @@ void JSValue::setObjectItem(const char* /*key*/, const JSValue& /*value*/) noexc
     d_stderr2("setObjectItem() not implemented");
 }
 
-const uint8_t* JSValue::toBSON(size_t* size) const noexcept
+JSValue::BinaryData JSValue::toBSON() const noexcept
 {
-    *size = fImpl->len;
-    return bson_get_data(fImpl);
+    const uint8_t* data = bson_get_data(fArray);
+    return BinaryData(data, data + fArray->len);
 }
 
-JSValue JSValue::fromBSON(const uint8_t *data, size_t size, bool asArray) noexcept
+JSValue JSValue::fromBSON(const BinaryData& data, bool asArray) noexcept
 {
-    bson_t* impl = bson_new_from_data(data, size);
+    bson_t* array = bson_new_from_data(data.data(), data.size());
 
-    if (impl == nullptr) {
+    if (array == nullptr) {
         return JSValue();
     }
 
-    return JSValue(impl, asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT);
+    return JSValue(asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT, array);
 }
 
-JSValue::JSValue(bson_t* impl, bson_type_t type) noexcept
-    : fImpl(impl)
-    , fType(type)
-{
-    fScalar.fString = nullptr;
-}
+JSValue::JSValue(bson_type_t type, bson_t* array) noexcept
+    : fType(type)
+    , fArray(array)
+{}
 
 void JSValue::copy(const JSValue& v) noexcept
 {
     fType = v.fType;
 
-    if ((fType == BSON_TYPE_DOCUMENT) || (fType == BSON_TYPE_ARRAY)) {
-        fImpl = bson_copy(v.fImpl);
-    } else {
-        fImpl = nullptr;
+    switch (v.fType) {
+        case BSON_TYPE_BOOL:
+            fBool = v.fBool;
+            break;
+        case BSON_TYPE_DOUBLE:
+            fDouble = v.fDouble;
+            break;
+        case BSON_TYPE_UTF8:
+            fString = new char[std::strlen(v.fString) + 1];
+            std::strcpy(fString, v.fString);
+            break;
+        case BSON_TYPE_BINARY:
+            fData = new BinaryData(v.fData->begin(), v.fData->end());
+            break;
+        case BSON_TYPE_ARRAY:
+        case BSON_TYPE_DOCUMENT:
+            fArray = bson_copy(v.fArray);
+            break;
+        default:
+            break;
+    }
+}
 
-        if (fType == BSON_TYPE_UTF8) {
-            fScalar.fString = new char[std::strlen(v.fScalar.fString) + 1];
-            std::strcpy(fScalar.fString, v.fScalar.fString);
-        } else {
-            fScalar = v.fScalar;
-        }
+void JSValue::move(JSValue&& v) noexcept
+{
+    fType = v.fType;
+    fArray = v.fArray;
+    v.fType = BSON_TYPE_EOD;
+    v.fArray = nullptr;
+}
+
+void JSValue::destroy() noexcept
+{
+    switch (fType) {
+        case BSON_TYPE_UTF8:
+            delete[] fString;
+            break;
+        case BSON_TYPE_BINARY:
+            delete fData;
+            break;
+        case BSON_TYPE_ARRAY:
+        case BSON_TYPE_DOCUMENT:
+            bson_destroy(fArray);
+            break;
+        default:
+            break;
     }
 }
 
