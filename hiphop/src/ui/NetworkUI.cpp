@@ -141,7 +141,7 @@ void NetworkUI::setState(const char* key, const char* value)
 void NetworkUI::broadcastMessage(const Variant& args, Client exclude)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    Variant::BinaryData data = args.toBSON();
+    BinaryData data = args.toBSON();
     fServer.broadcast(data.data(), data.size(), exclude);
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     fServer.broadcast(args.toJSON(), exclude);
@@ -151,7 +151,7 @@ void NetworkUI::broadcastMessage(const Variant& args, Client exclude)
 void NetworkUI::postMessage(const Variant& args, uintptr_t destination)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    Variant::BinaryData data = args.toBSON();
+    BinaryData data = args.toBSON();
     if (destination == DESTINATION_ALL) {
         fServer.broadcast(data.data(), data.size());
     } else {

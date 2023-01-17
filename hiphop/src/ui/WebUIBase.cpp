@@ -97,7 +97,7 @@ void WebUIBase::sharedMemoryReady()
 
 void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
-    Variant::BinaryData binData(data, data + size);
+    BinaryData binData(data, data + size);
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
     postMessage({"UI", "sharedMemoryChanged", binData, hints}, DESTINATION_ALL);
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
@@ -190,7 +190,7 @@ void WebUIBase::initHandlers()
 #if DISTRHO_PLUGIN_WANT_STATE && defined(HIPHOP_SHARED_MEMORY_SIZE)
     setMessageHandler("writeSharedMemory", 2, [this](const Variant& args, uintptr_t /*origin*/) {
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-        Variant::BinaryData data = args[0].getBinaryData();
+        BinaryData data = args[0].getBinaryData();
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
 # endif

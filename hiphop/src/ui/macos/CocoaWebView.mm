@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -265,9 +265,6 @@ void CocoaWebView::onSetParent(uintptr_t parent)
     [openPanel release];
 }
 
-// Avoid clashing with macOS WebKit class Variant by explicitly stating namespace
-typedef DISTRHO::Variant JS_Value;
-
 - (void)userContentController:(WKUserContentController *)controller didReceiveScriptMessage:(WKScriptMessage *)message
 {
     (void)controller;
@@ -276,7 +273,7 @@ typedef DISTRHO::Variant JS_Value;
         return;
     }
 
-    JS_Value args = JS_Value::createArray();
+    Variant args = Variant::createArray();
 
     for (id objcArg : (NSArray *)message.body) {
         if (CFGetTypeID(objcArg) == CFBooleanGetTypeID()) {
@@ -286,7 +283,7 @@ typedef DISTRHO::Variant JS_Value;
         } else if ([objcArg isKindOfClass:[NSString class]]) {
             args.pushArrayItem([objcArg cStringUsingEncoding:NSUTF8StringEncoding]);
         } else {
-            args.pushArrayItem(JS_Value()); // null
+            args.pushArrayItem(Variant()); // null
         }
     }
 
