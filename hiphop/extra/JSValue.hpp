@@ -87,9 +87,9 @@ public:
 
     // Setters
     void pushArrayItem(const JSValue& value) noexcept;
-    void setArrayItem(int idx, const JSValue& value) noexcept;
-    void insertArrayItem(int idx, const JSValue& value) noexcept;
-    void setObjectItem(const char* key, const JSValue& value) noexcept;
+    void setArrayItem(int idx, const JSValue& value) /*noexcept*/;
+    void insertArrayItem(int idx, const JSValue& value) /*noexcept*/;
+    void setObjectItem(const char* key, const JSValue& value) /*noexcept*/;
 
     // Operations on arrays
     JSValue sliceArray(int start, int end = -1) const noexcept;
@@ -112,7 +112,7 @@ public:
     String toJSON(bool format = false) const noexcept;
     static JSValue fromJSON(const char* jsonText) noexcept;
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    BinaryData toBSON() const noexcept;
+    BinaryData toBSON() const;
     static JSValue fromBSON(const BinaryData& data, bool asArray) noexcept;
 #endif
 

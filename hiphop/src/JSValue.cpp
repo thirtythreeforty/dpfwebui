@@ -242,17 +242,17 @@ void JSValue::pushArrayItem(const JSValue& value) noexcept
     cJSON_AddItemToArray(fImpl, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSValue::setArrayItem(int idx, const JSValue& value) noexcept
+void JSValue::setArrayItem(int idx, const JSValue& value) /*noexcept*/
 {
     cJSON_ReplaceItemInArray(fImpl, idx, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSValue::insertArrayItem(int idx, const JSValue& value) noexcept
+void JSValue::insertArrayItem(int idx, const JSValue& value) /*noexcept*/
 {
     cJSON_InsertItemInArray(fImpl, idx, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSValue::setObjectItem(const char* key, const JSValue& value) noexcept
+void JSValue::setObjectItem(const char* key, const JSValue& value) /*noexcept*/
 {
     if (cJSON_HasObjectItem(fImpl, key)) {
         cJSON_ReplaceItemInObject(fImpl, key, cJSON_Duplicate(value.fImpl, true));
@@ -529,24 +529,29 @@ void JSValue::pushArrayItem(const JSValue& value) noexcept
     }
 }
 
-void JSValue::setArrayItem(int /*idx*/, const JSValue& /*value*/) noexcept
+void JSValue::setArrayItem(int /*idx*/, const JSValue& /*value*/) /*noexcept*/
 {
-    d_stderr2("setArrayItem() not implemented");
+    throw std::runtime_error("setArrayItem() not implemented");
 }
 
-void JSValue::insertArrayItem(int /*idx*/, const JSValue& /*value*/) noexcept
+void JSValue::insertArrayItem(int /*idx*/, const JSValue& /*value*/) /*noexcept*/
 {
-    d_stderr2("insertArrayItem() not implemented");
+    throw std::runtime_error("insertArrayItem() not implemented");
 }
 
-void JSValue::setObjectItem(const char* /*key*/, const JSValue& /*value*/) noexcept
+void JSValue::setObjectItem(const char* /*key*/, const JSValue& /*value*/) /*noexcept*/
 {
-    d_stderr2("setObjectItem() not implemented");
+    throw std::runtime_error("setObjectItem() not implemented");
 }
 
-JSValue::BinaryData JSValue::toBSON() const noexcept
+JSValue::BinaryData JSValue::toBSON() const
 {
+    if ((fType != BSON_TYPE_ARRAY) && (fType != BSON_TYPE_DOCUMENT)) {
+        throw std::runtime_error("toBSON() only works for array and document types");
+    }
+
     const uint8_t* data = bson_get_data(fArray);
+    
     return BinaryData(data, data + fArray->len);
 }
 
