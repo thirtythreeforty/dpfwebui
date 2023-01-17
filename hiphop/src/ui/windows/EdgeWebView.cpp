@@ -27,7 +27,7 @@
 #include <winuser.h>
 
 #include "extra/macro.h"
-#include "extra/JSValue.hpp"
+#include "extra/Variant.hpp"
 #include "extra/Path.hpp"
 
 #include "DistrhoPluginInfo.h"
@@ -340,7 +340,7 @@ HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
 
     LPWSTR jsonStr;
     ICoreWebView2WebMessageReceivedEventArgs_get_WebMessageAsJson(eventArgs, &jsonStr);
-    JSValue value = JSValue::fromJSON(TO_LPCSTR(jsonStr));
+    Variant value = Variant::fromJSON(TO_LPCSTR(jsonStr));
 
     if (value.isArray()) {
         handleScriptMessage(value);

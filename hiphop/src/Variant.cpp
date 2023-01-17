@@ -18,14 +18,14 @@
 
 #include <stdexcept>
 
-#include "extra/JSValue.hpp"
+#include "extra/Variant.hpp"
 #include "extra/Base64.hpp"
 
 USE_NAMESPACE_DISTRHO
 
-JSValue JSValue::sliceArray(int start, int end) const noexcept
+Variant Variant::sliceArray(int start, int end) const noexcept
 {
-    JSValue arr = createArray();
+    Variant arr = createArray();
 
     if (! isArray()) {
         return arr;
@@ -52,7 +52,7 @@ JSValue JSValue::sliceArray(int start, int end) const noexcept
     return arr;
 }
 
-JSValue& JSValue::operator+=(const JSValue& other)
+Variant& Variant::operator+=(const Variant& other)
 {
     if (! isArray() || ! other.isArray()) {
         throw std::runtime_error("Only summing arrays is implemented");
@@ -68,51 +68,51 @@ JSValue& JSValue::operator+=(const JSValue& other)
 }
 
 #if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-JSValue::JSValue() noexcept
+Variant::Variant() noexcept
     : fImpl(cJSON_CreateNull())
 {}
 
-JSValue::JSValue(bool b) noexcept
+Variant::Variant(bool b) noexcept
     : fImpl(b ? cJSON_CreateTrue() : cJSON_CreateFalse())
 {}
 
-JSValue::JSValue(double d) noexcept
+Variant::Variant(double d) noexcept
     : fImpl(cJSON_CreateNumber(d))
 {}
 
-JSValue::JSValue(String s) noexcept
+Variant::Variant(String s) noexcept
     : fImpl(cJSON_CreateString(s))
 {}
 
-JSValue::JSValue(uint32_t i) noexcept
+Variant::Variant(uint32_t i) noexcept
     : fImpl(cJSON_CreateNumber(static_cast<double>(i)))
 {}
 
-JSValue::JSValue(float f) noexcept
+Variant::Variant(float f) noexcept
     : fImpl(cJSON_CreateNumber(static_cast<double>(f)))
 {}
 
-JSValue::JSValue(const char* s) noexcept
+Variant::Variant(const char* s) noexcept
     : fImpl(cJSON_CreateString(s))
 {}
 
-JSValue::JSValue(const BinaryData& data) noexcept
+Variant::Variant(const BinaryData& data) noexcept
     : fImpl(cJSON_CreateString(String::asBase64(data.data(), data.size())))
 {}
 
-JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
+Variant::Variant(std::initializer_list<Variant> l) noexcept
     : fImpl(cJSON_CreateArray())
 {
-    for (std::initializer_list<JSValue>::const_iterator it = l.begin(); it != l.end(); ++it) {
+    for (std::initializer_list<Variant>::const_iterator it = l.begin(); it != l.end(); ++it) {
         pushArrayItem(*it);
     }
 }
 
-JSValue::JSValue(const JSValue& v) noexcept
+Variant::Variant(const Variant& v) noexcept
     : fImpl(cJSON_Duplicate(v.fImpl, true))
 {}
 
-JSValue& JSValue::operator=(const JSValue& v) noexcept
+Variant& Variant::operator=(const Variant& v) noexcept
 {
     if (fImpl != nullptr) {
         cJSON_Delete(fImpl);
@@ -123,13 +123,13 @@ JSValue& JSValue::operator=(const JSValue& v) noexcept
     return *this;
 }
 
-JSValue::JSValue(JSValue&& v) noexcept
+Variant::Variant(Variant&& v) noexcept
 {
     fImpl = v.fImpl;
     v.fImpl = nullptr;
 }
 
-JSValue& JSValue::operator=(JSValue&& v) noexcept
+Variant& Variant::operator=(Variant&& v) noexcept
 {
     if (this != &v) {
         if (fImpl != nullptr) {
@@ -143,17 +143,17 @@ JSValue& JSValue::operator=(JSValue&& v) noexcept
    return *this;
 }
 
-JSValue JSValue::createArray() noexcept
+Variant Variant::createArray() noexcept
 {
-    return JSValue(cJSON_CreateArray());
+    return Variant(cJSON_CreateArray());
 }
 
-JSValue JSValue::createObject() noexcept
+Variant Variant::createObject() noexcept
 {
-    return JSValue(cJSON_CreateObject());
+    return Variant(cJSON_CreateObject());
 }
 
-JSValue::~JSValue()
+Variant::~Variant()
 {
     if (fImpl != nullptr) {
         cJSON_Delete(fImpl);
@@ -162,97 +162,97 @@ JSValue::~JSValue()
     fImpl = nullptr;
 }
 
-bool JSValue::isNull() const noexcept
+bool Variant::isNull() const noexcept
 {
     return cJSON_IsNull(fImpl);
 }
 
-bool JSValue::isBoolean() const noexcept
+bool Variant::isBoolean() const noexcept
 {
     return cJSON_IsBool(fImpl);
 }
 
-bool JSValue::isNumber() const noexcept
+bool Variant::isNumber() const noexcept
 {
     return cJSON_IsNumber(fImpl);
 }
 
-bool JSValue::isString() const noexcept
+bool Variant::isString() const noexcept
 {
     return cJSON_IsString(fImpl);
 }
 
-bool JSValue::isArray() const noexcept
+bool Variant::isArray() const noexcept
 {
     return cJSON_IsArray(fImpl);
 }
 
-bool JSValue::isObject() const noexcept
+bool Variant::isObject() const noexcept
 {
     return cJSON_IsObject(fImpl);
 }
 
-bool JSValue::getBoolean() const noexcept
+bool Variant::getBoolean() const noexcept
 {
     return cJSON_IsTrue(fImpl);
 }
 
-double JSValue::getNumber() const noexcept
+double Variant::getNumber() const noexcept
 {
     return cJSON_GetNumberValue(fImpl);
 }
 
-String JSValue::getString() const noexcept
+String Variant::getString() const noexcept
 {
     return String(cJSON_GetStringValue(fImpl));
 }
 
-JSValue::BinaryData JSValue::getBinaryData() const noexcept
+Variant::BinaryData Variant::getBinaryData() const noexcept
 {
     return d_getChunkFromBase64String(cJSON_GetStringValue(fImpl));
 }
 
-int JSValue::getArraySize() const noexcept
+int Variant::getArraySize() const noexcept
 {
     return cJSON_GetArraySize(fImpl);
 }
 
-JSValue JSValue::getArrayItem(int idx) const noexcept
+Variant Variant::getArrayItem(int idx) const noexcept
 {
-    return JSValue(cJSON_Duplicate(cJSON_GetArrayItem(fImpl, idx), true));
+    return Variant(cJSON_Duplicate(cJSON_GetArrayItem(fImpl, idx), true));
 }
 
-JSValue JSValue::getObjectItem(const char* key) const noexcept
+Variant Variant::getObjectItem(const char* key) const noexcept
 {
-    return JSValue(cJSON_Duplicate(cJSON_GetObjectItem(fImpl, key), true));
+    return Variant(cJSON_Duplicate(cJSON_GetObjectItem(fImpl, key), true));
 }
 
-JSValue JSValue::operator[](int idx) const noexcept
+Variant Variant::operator[](int idx) const noexcept
 {
     return getArrayItem(idx);
 }
 
-JSValue JSValue::operator[](const char* key) const noexcept
+Variant Variant::operator[](const char* key) const noexcept
 {
     return getObjectItem(key);
 }
 
-void JSValue::pushArrayItem(const JSValue& value) noexcept
+void Variant::pushArrayItem(const Variant& value) noexcept
 {
     cJSON_AddItemToArray(fImpl, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSValue::setArrayItem(int idx, const JSValue& value) /*noexcept*/
+void Variant::setArrayItem(int idx, const Variant& value) /*noexcept*/
 {
     cJSON_ReplaceItemInArray(fImpl, idx, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSValue::insertArrayItem(int idx, const JSValue& value) /*noexcept*/
+void Variant::insertArrayItem(int idx, const Variant& value) /*noexcept*/
 {
     cJSON_InsertItemInArray(fImpl, idx, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSValue::setObjectItem(const char* key, const JSValue& value) /*noexcept*/
+void Variant::setObjectItem(const char* key, const Variant& value) /*noexcept*/
 {
     if (cJSON_HasObjectItem(fImpl, key)) {
         cJSON_ReplaceItemInObject(fImpl, key, cJSON_Duplicate(value.fImpl, true));
@@ -261,7 +261,7 @@ void JSValue::setObjectItem(const char* key, const JSValue& value) /*noexcept*/
     }
 }
 
-String JSValue::toJSON(bool format) const noexcept
+String Variant::toJSON(bool format) const noexcept
 {
     char* s = format ? cJSON_Print(fImpl) : cJSON_PrintUnformatted(fImpl);
     String jsonText = String(s);
@@ -270,77 +270,77 @@ String JSValue::toJSON(bool format) const noexcept
     return jsonText;
 }
 
-JSValue JSValue::fromJSON(const char* jsonText) noexcept
+Variant Variant::fromJSON(const char* jsonText) noexcept
 {
-    return JSValue(cJSON_Parse(jsonText));
+    return Variant(cJSON_Parse(jsonText));
 }
 
-JSValue::JSValue(cJSON* impl) noexcept
+Variant::Variant(cJSON* impl) noexcept
     : fImpl(impl)
 {}
 #endif // HIPHOP_MESSAGE_PROTOCOL_TEXT
 
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-JSValue::JSValue() noexcept
+Variant::Variant() noexcept
     : fType(BSON_TYPE_NULL)
     , fArray(nullptr)
 {}
 
-JSValue::JSValue(bool b) noexcept
+Variant::Variant(bool b) noexcept
     : fType(BSON_TYPE_BOOL)
     , fBool(b)
 {}
 
-JSValue::JSValue(double d) noexcept
+Variant::Variant(double d) noexcept
     : fType(BSON_TYPE_DOUBLE)
     , fDouble(d)
 {}
 
-JSValue::JSValue(String s) noexcept
+Variant::Variant(String s) noexcept
     : fType(BSON_TYPE_UTF8)
 {
     fString = new char[s.length() + 1];
     std::strcpy(fString, s.buffer());
 }
 
-JSValue::JSValue(uint32_t i) noexcept
+Variant::Variant(uint32_t i) noexcept
     : fType(BSON_TYPE_DOUBLE)
     , fDouble(static_cast<double>(i))
 {}
 
-JSValue::JSValue(float f) noexcept
+Variant::Variant(float f) noexcept
     : fType(BSON_TYPE_DOUBLE)
     , fDouble(static_cast<double>(f))
 {}
 
-JSValue::JSValue(const char* s) noexcept
+Variant::Variant(const char* s) noexcept
     : fType(BSON_TYPE_UTF8)
 {
     fString = new char[std::strlen(s) + 1];
     std::strcpy(fString, s);
 }
 
-JSValue::JSValue(const BinaryData& data) noexcept
+Variant::Variant(const BinaryData& data) noexcept
     : fType(BSON_TYPE_BINARY)
 {
     fData = new BinaryData(data.begin(), data.end());
 }
 
-JSValue::JSValue(std::initializer_list<JSValue> l) noexcept
+Variant::Variant(std::initializer_list<Variant> l) noexcept
     : fType(BSON_TYPE_ARRAY)
     , fArray(bson_new())
 {
-    for (std::initializer_list<JSValue>::const_iterator it = l.begin(); it != l.end(); ++it) {
+    for (std::initializer_list<Variant>::const_iterator it = l.begin(); it != l.end(); ++it) {
         pushArrayItem(*it);
     }
 }
 
-JSValue::JSValue(const JSValue& v) noexcept
+Variant::Variant(const Variant& v) noexcept
 {
     copy(v);
 }
 
-JSValue& JSValue::operator=(const JSValue& v) noexcept
+Variant& Variant::operator=(const Variant& v) noexcept
 {
     destroy();
     copy(v);
@@ -348,12 +348,12 @@ JSValue& JSValue::operator=(const JSValue& v) noexcept
     return *this;
 }
 
-JSValue::JSValue(JSValue&& v) noexcept
+Variant::Variant(Variant&& v) noexcept
 {
     move(std::move(v));
 }
 
-JSValue& JSValue::operator=(JSValue&& v) noexcept
+Variant& Variant::operator=(Variant&& v) noexcept
 {
     if (this != &v) {
         destroy();
@@ -363,112 +363,112 @@ JSValue& JSValue::operator=(JSValue&& v) noexcept
    return *this;
 }
 
-JSValue JSValue::createArray() noexcept
+Variant Variant::createArray() noexcept
 {
-    return JSValue(BSON_TYPE_ARRAY, bson_new());
+    return Variant(BSON_TYPE_ARRAY, bson_new());
 }
 
-JSValue JSValue::createObject() noexcept
+Variant Variant::createObject() noexcept
 {
-    return JSValue(BSON_TYPE_DOCUMENT, bson_new());
+    return Variant(BSON_TYPE_DOCUMENT, bson_new());
 }
 
-JSValue::~JSValue()
+Variant::~Variant()
 {
     destroy();
 }
 
-bool JSValue::isNull() const noexcept
+bool Variant::isNull() const noexcept
 {
     return fType == BSON_TYPE_NULL;
 }
 
-bool JSValue::isBoolean() const noexcept
+bool Variant::isBoolean() const noexcept
 {
     return fType == BSON_TYPE_BOOL;
 }
 
-bool JSValue::isNumber() const noexcept
+bool Variant::isNumber() const noexcept
 {
     return fType == BSON_TYPE_DOUBLE;
 }
 
-bool JSValue::isString() const noexcept
+bool Variant::isString() const noexcept
 {
     return fType == BSON_TYPE_UTF8;
 }
 
-bool JSValue::isArray() const noexcept
+bool Variant::isArray() const noexcept
 {
     return fType == BSON_TYPE_ARRAY;
 }
 
-bool JSValue::isObject() const noexcept
+bool Variant::isObject() const noexcept
 {
     return fType == BSON_TYPE_DOCUMENT;
 }
 
-bool JSValue::getBoolean() const noexcept
+bool Variant::getBoolean() const noexcept
 {
     return fString;
 }
 
-double JSValue::getNumber() const noexcept
+double Variant::getNumber() const noexcept
 {
     return fDouble;
 }
 
-String JSValue::getString() const noexcept
+String Variant::getString() const noexcept
 {
     return String(fString);
 }
 
-JSValue::BinaryData JSValue::getBinaryData() const noexcept
+Variant::BinaryData Variant::getBinaryData() const noexcept
 {
     return *fData;
 }
 
-int JSValue::getArraySize() const noexcept
+int Variant::getArraySize() const noexcept
 {
     return bson_count_keys(fArray);
 }
 
-JSValue JSValue::getArrayItem(int idx) const noexcept
+Variant Variant::getArrayItem(int idx) const noexcept
 {
     return getObjectItem(String(idx).buffer());
 }
 
-JSValue JSValue::getObjectItem(const char* key) const noexcept
+Variant Variant::getObjectItem(const char* key) const noexcept
 {
     bson_iter_t iter;
     bson_iter_init(&iter, fArray);
 
     if (! bson_iter_find(&iter, key)) {
-        return JSValue();
+        return Variant();
     }
 
-    JSValue v;
+    Variant v;
     bson_type_t type = bson_iter_type(&iter);
 
     switch (type) {
         case BSON_TYPE_NULL:
             break;
         case BSON_TYPE_BOOL:
-            v = JSValue(bson_iter_bool(&iter));
+            v = Variant(bson_iter_bool(&iter));
             break;
         case BSON_TYPE_INT32:
         case BSON_TYPE_INT64:
         case BSON_TYPE_DOUBLE:
-            v = JSValue(bson_iter_as_double(&iter));
+            v = Variant(bson_iter_as_double(&iter));
             break;
         case BSON_TYPE_UTF8:
-            v = JSValue(bson_iter_utf8(&iter, nullptr));
+            v = Variant(bson_iter_utf8(&iter, nullptr));
             break;
         case BSON_TYPE_BINARY: {
             uint32_t len;
             const uint8_t* data;
             bson_iter_binary(&iter, nullptr, &len, &data);
-            v = JSValue(BinaryData(data, data + static_cast<size_t>(len)));
+            v = Variant(BinaryData(data, data + static_cast<size_t>(len)));
             break;
         }
         case BSON_TYPE_ARRAY:
@@ -476,7 +476,7 @@ JSValue JSValue::getObjectItem(const char* key) const noexcept
             uint32_t size;
             const uint8_t *data;
             bson_iter_array(&iter, &size, &data);
-            v = JSValue(type, bson_new_from_data(data, static_cast<size_t>(size)));
+            v = Variant(type, bson_new_from_data(data, static_cast<size_t>(size)));
             break;
         }
         default:
@@ -486,17 +486,17 @@ JSValue JSValue::getObjectItem(const char* key) const noexcept
     return v;
 }
 
-JSValue JSValue::operator[](int idx) const noexcept
+Variant Variant::operator[](int idx) const noexcept
 {
     return getArrayItem(idx);
 }
 
-JSValue JSValue::operator[](const char* key) const noexcept
+Variant Variant::operator[](const char* key) const noexcept
 {
     return getObjectItem(key);
 }
 
-void JSValue::pushArrayItem(const JSValue& value) noexcept
+void Variant::pushArrayItem(const Variant& value) noexcept
 {
     String tmp(bson_count_keys(fArray));
     const char* key = tmp.buffer();
@@ -529,22 +529,22 @@ void JSValue::pushArrayItem(const JSValue& value) noexcept
     }
 }
 
-void JSValue::setArrayItem(int /*idx*/, const JSValue& /*value*/) /*noexcept*/
+void Variant::setArrayItem(int /*idx*/, const Variant& /*value*/) /*noexcept*/
 {
     throw std::runtime_error("setArrayItem() not implemented");
 }
 
-void JSValue::insertArrayItem(int /*idx*/, const JSValue& /*value*/) /*noexcept*/
+void Variant::insertArrayItem(int /*idx*/, const Variant& /*value*/) /*noexcept*/
 {
     throw std::runtime_error("insertArrayItem() not implemented");
 }
 
-void JSValue::setObjectItem(const char* /*key*/, const JSValue& /*value*/) /*noexcept*/
+void Variant::setObjectItem(const char* /*key*/, const Variant& /*value*/) /*noexcept*/
 {
     throw std::runtime_error("setObjectItem() not implemented");
 }
 
-JSValue::BinaryData JSValue::toBSON() const
+Variant::BinaryData Variant::toBSON() const
 {
     if ((fType != BSON_TYPE_ARRAY) && (fType != BSON_TYPE_DOCUMENT)) {
         throw std::runtime_error("toBSON() only works for array and document types");
@@ -555,23 +555,23 @@ JSValue::BinaryData JSValue::toBSON() const
     return BinaryData(data, data + fArray->len);
 }
 
-JSValue JSValue::fromBSON(const BinaryData& data, bool asArray) noexcept
+Variant Variant::fromBSON(const BinaryData& data, bool asArray) noexcept
 {
     bson_t* array = bson_new_from_data(data.data(), data.size());
 
     if (array == nullptr) {
-        return JSValue();
+        return Variant();
     }
 
-    return JSValue(asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT, array);
+    return Variant(asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT, array);
 }
 
-JSValue::JSValue(bson_type_t type, bson_t* array) noexcept
+Variant::Variant(bson_type_t type, bson_t* array) noexcept
     : fType(type)
     , fArray(array)
 {}
 
-void JSValue::copy(const JSValue& v) noexcept
+void Variant::copy(const Variant& v) noexcept
 {
     fType = v.fType;
 
@@ -598,7 +598,7 @@ void JSValue::copy(const JSValue& v) noexcept
     }
 }
 
-void JSValue::move(JSValue&& v) noexcept
+void Variant::move(Variant&& v) noexcept
 {
     fType = v.fType;
     fArray = v.fArray;
@@ -606,7 +606,7 @@ void JSValue::move(JSValue&& v) noexcept
     v.fArray = nullptr;
 }
 
-void JSValue::destroy() noexcept
+void Variant::destroy() noexcept
 {
     switch (fType) {
         case BSON_TYPE_UTF8:

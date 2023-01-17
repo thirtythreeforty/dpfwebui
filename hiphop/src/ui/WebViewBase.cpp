@@ -117,7 +117,7 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
     fHandler = handler;
 }
 
-void WebViewBase::postMessage(const JSValue& args)
+void WebViewBase::postMessage(const Variant& args)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     // This method implements something like a "reverse postMessage()" aiming to
@@ -151,7 +151,7 @@ void WebViewBase::handleLoadFinished()
     }
 }
 
-void WebViewBase::handleScriptMessage(const JSValue& args)
+void WebViewBase::handleScriptMessage(const Variant& args)
 {
     if ((args.getArraySize() == 3) && (args[0].getString() == "console")) {
         if (fHandler != nullptr) {

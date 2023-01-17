@@ -126,7 +126,7 @@ class UI {
     }
 
     // Non-DPF method for sending a message to the host
-    // void WebViewUI::postMessage(const JSValue& args)
+    // void WebViewUI::postMessage(const Variant& args)
     postMessage(...args) {
         const env = DISTRHO.env;
         const socketSend = args => {
@@ -167,13 +167,13 @@ class UI {
     }
 
     // Non-DPF method for sending a message to all connected network clients
-    // void NetworkUI::broadcastMessage(const JSValue& args, Client origin)
+    // void NetworkUI::broadcastMessage(const Variant& args, Client origin)
     broadcastMessage(...args) {
         this.postMessage('UI', 'broadcast', ...args)
     }
 
     // Non-DPF callback method for receiving messages from the host
-    // void WebUIBase::onMessageReceived(const JSValue& args)
+    // void WebUIBase::onMessageReceived(const Variant& args)
     messageReceived(args) {}
 
     // Non-DPF callback method that fires when the message channel is open

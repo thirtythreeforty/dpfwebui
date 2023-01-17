@@ -24,14 +24,14 @@
 #include "distrho/extra/String.hpp"
 #include "Window.hpp"
 
-#include "extra/JSValue.hpp"
+#include "extra/Variant.hpp"
 
 START_NAMESPACE_DISTRHO
 
 struct WebViewEventHandler
 {
     virtual void handleWebViewLoadFinished() = 0;
-    virtual void handleWebViewScriptMessage(const JSValue& args) = 0;
+    virtual void handleWebViewScriptMessage(const Variant& args) = 0;
     virtual void handleWebViewConsole(const String& tag, const String& text) = 0;
 };
 
@@ -58,7 +58,7 @@ public:
     void setEnvironmentBool(const char* key, bool value);
     void setEventHandler(WebViewEventHandler* handler);
     
-    void postMessage(const JSValue& args);
+    void postMessage(const Variant& args);
 
     virtual float getDevicePixelRatio() = 0;
     
@@ -75,7 +75,7 @@ protected:
     void injectHostObjectScripts();
     
     void handleLoadFinished();
-    void handleScriptMessage(const JSValue& args);
+    void handleScriptMessage(const Variant& args);
 
 private:
     void addStylesheet(String& source);

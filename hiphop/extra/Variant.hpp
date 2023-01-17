@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef JS_VALUE_HPP
-#define JS_VALUE_HPP
+#ifndef VARIANT_HPP
+#define VARIANT_HPP
 
 #include <initializer_list>
 #include <vector>
@@ -31,41 +31,41 @@
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
 # include "bson.h"
 #else
-# error JSValue backend not configured
+# error Variant backend not configured
 #endif
 
 START_NAMESPACE_DISTRHO
 
-class JSValue
+class Variant
 {
 public:
     typedef std::vector<uint8_t> BinaryData;
 
     // Constructors
-    JSValue() noexcept;
-    JSValue(bool b) noexcept;
-    JSValue(double d) noexcept;
-    JSValue(String s) noexcept;
+    Variant() noexcept;
+    Variant(bool b) noexcept;
+    Variant(double d) noexcept;
+    Variant(String s) noexcept;
 
     // Convenience constructors for plugin code
-    JSValue(uint32_t i) noexcept;
-    JSValue(float f) noexcept;
-    JSValue(const char* s) noexcept;
-    JSValue(const BinaryData& data) noexcept;
-    JSValue(std::initializer_list<JSValue> l) noexcept;
+    Variant(uint32_t i) noexcept;
+    Variant(float f) noexcept;
+    Variant(const char* s) noexcept;
+    Variant(const BinaryData& data) noexcept;
+    Variant(std::initializer_list<Variant> l) noexcept;
 
     // Copy and move semantics
-    JSValue(const JSValue& v) noexcept;
-    JSValue& operator=(const JSValue& v) noexcept;
-    JSValue(JSValue&& v) noexcept;
-    JSValue& operator=(JSValue&& v) noexcept;
+    Variant(const Variant& v) noexcept;
+    Variant& operator=(const Variant& v) noexcept;
+    Variant(Variant&& v) noexcept;
+    Variant& operator=(Variant&& v) noexcept;
 
     // Factory methods
-    static JSValue createArray() noexcept;
-    static JSValue createObject() noexcept;
+    static Variant createArray() noexcept;
+    static Variant createObject() noexcept;
 
     // Destructor
-    ~JSValue();
+    ~Variant();
 
     // Getters
     bool isNull() const noexcept;
@@ -80,23 +80,23 @@ public:
     String     getString() const noexcept;
     BinaryData getBinaryData() const noexcept;
     int        getArraySize() const noexcept;
-    JSValue    getArrayItem(int idx) const noexcept;
-    JSValue    getObjectItem(const char* key) const noexcept;
-    JSValue    operator[](int idx) const noexcept;
-    JSValue    operator[](const char* key) const noexcept;
+    Variant    getArrayItem(int idx) const noexcept;
+    Variant    getObjectItem(const char* key) const noexcept;
+    Variant    operator[](int idx) const noexcept;
+    Variant    operator[](const char* key) const noexcept;
 
     // Setters
-    void pushArrayItem(const JSValue& value) noexcept;
-    void setArrayItem(int idx, const JSValue& value) /*noexcept*/;
-    void insertArrayItem(int idx, const JSValue& value) /*noexcept*/;
-    void setObjectItem(const char* key, const JSValue& value) /*noexcept*/;
+    void pushArrayItem(const Variant& value) noexcept;
+    void setArrayItem(int idx, const Variant& value) /*noexcept*/;
+    void insertArrayItem(int idx, const Variant& value) /*noexcept*/;
+    void setObjectItem(const char* key, const Variant& value) /*noexcept*/;
 
     // Operations on arrays
-    JSValue sliceArray(int start, int end = -1) const noexcept;
+    Variant sliceArray(int start, int end = -1) const noexcept;
 
     // Arithmetic operators
-    JSValue& operator+=(const JSValue& other);
-    friend JSValue operator+(JSValue lhs, const JSValue& rhs)
+    Variant& operator+=(const Variant& other);
+    friend Variant operator+(Variant lhs, const Variant& rhs)
     {
         lhs += rhs;
         return lhs;
@@ -110,23 +110,23 @@ public:
     // Serialization/deserialization
 #if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     String toJSON(bool format = false) const noexcept;
-    static JSValue fromJSON(const char* jsonText) noexcept;
+    static Variant fromJSON(const char* jsonText) noexcept;
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
     BinaryData toBSON() const;
-    static JSValue fromBSON(const BinaryData& data, bool asArray) noexcept;
+    static Variant fromBSON(const BinaryData& data, bool asArray) noexcept;
 #endif
 
 private:
 
 #if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-    JSValue(cJSON* impl) noexcept;
+    Variant(cJSON* impl) noexcept;
 
     cJSON* fImpl;
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    JSValue(bson_type_t type, bson_t* array) noexcept;
+    Variant(bson_type_t type, bson_t* array) noexcept;
 
-    void copy(const JSValue& v) noexcept;
-    void move(JSValue&& v) noexcept;
+    void copy(const Variant& v) noexcept;
+    void move(Variant&& v) noexcept;
     void destroy() noexcept;
 
     bson_type_t fType;
@@ -145,4 +145,4 @@ private:
 
 END_NAMESPACE_DISTRHO
 
-#endif // JS_VALUE_HPP
+#endif // VARIANT_HPP

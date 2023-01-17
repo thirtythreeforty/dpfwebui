@@ -265,8 +265,8 @@ void CocoaWebView::onSetParent(uintptr_t parent)
     [openPanel release];
 }
 
-// Avoid clashing with macOS WebKit class JSValue by explicitly stating namespace
-typedef DISTRHO::JSValue JS_Value;
+// Avoid clashing with macOS WebKit class Variant by explicitly stating namespace
+typedef DISTRHO::Variant JS_Value;
 
 - (void)userContentController:(WKUserContentController *)controller didReceiveScriptMessage:(WKScriptMessage *)message
 {

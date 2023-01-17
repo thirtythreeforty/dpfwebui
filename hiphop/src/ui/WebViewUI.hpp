@@ -63,7 +63,7 @@ protected:
     void setKeyboardFocus(bool focus);
 
 #if ! defined(HIPHOP_NETWORK_UI)
-    void postMessage(const JSValue& args, uintptr_t origin) override;
+    void postMessage(const Variant& args, uintptr_t origin) override;
 #endif
 
     void uiIdle() override;
@@ -83,10 +83,10 @@ private:
     // WebViewEventHandler
 
     virtual void handleWebViewLoadFinished() override;
-    virtual void handleWebViewScriptMessage(const JSValue& args) override;
+    virtual void handleWebViewScriptMessage(const Variant& args) override;
     virtual void handleWebViewConsole(const String& tag, const String& text) override;
 
-    typedef std::vector<JSValue> MessageBuffer;
+    typedef std::vector<Variant> MessageBuffer;
 
     uint32_t      fBackgroundColor;
     bool          fJsUiReady;

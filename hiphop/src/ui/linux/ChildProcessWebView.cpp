@@ -264,7 +264,7 @@ void ChildProcessWebView::handleHelperScriptMessage(const char *payload,
                                                     int payloadSize)
 {
     // Should validate payload is never read past payloadSize 
-    JSValue args = JSValue::createArray();
+    Variant args = Variant::createArray();
     int offset = 0;
 
     while (offset < payloadSize) {
@@ -290,7 +290,7 @@ void ChildProcessWebView::handleHelperScriptMessage(const char *payload,
                 break;
             default:
                 offset += 1;
-                args.pushArrayItem(JSValue()); // null
+                args.pushArrayItem(Variant()); // null
                 break;
         }
     }

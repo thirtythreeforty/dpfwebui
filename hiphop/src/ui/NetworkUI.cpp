@@ -138,20 +138,20 @@ void NetworkUI::setState(const char* key, const char* value)
     fStates[key] = value;
 }
 
-void NetworkUI::broadcastMessage(const JSValue& args, Client exclude)
+void NetworkUI::broadcastMessage(const Variant& args, Client exclude)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    JSValue::BinaryData data = args.toBSON();
+    Variant::BinaryData data = args.toBSON();
     fServer.broadcast(data.data(), data.size(), exclude);
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     fServer.broadcast(args.toJSON(), exclude);
 #endif
 }
 
-void NetworkUI::postMessage(const JSValue& args, uintptr_t destination)
+void NetworkUI::postMessage(const Variant& args, uintptr_t destination)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    JSValue::BinaryData data = args.toBSON();
+    Variant::BinaryData data = args.toBSON();
     if (destination == DESTINATION_ALL) {
         fServer.broadcast(data.data(), data.size());
     } else {
@@ -229,7 +229,7 @@ void NetworkUI::initHandlers()
 {
     // Broadcast parameter updates to all clients except the originating one
     const MessageHandler& parameterHandlerSuper = getMessageHandler("setParameterValue");
-    setMessageHandler("setParameterValue", 2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t origin) {
+    setMessageHandler("setParameterValue", 2, [this, parameterHandlerSuper](const Variant& args, uintptr_t origin) {
         queue([this, parameterHandlerSuper, args, origin] {
             const uint32_t index = static_cast<uint32_t>(args[0].getNumber());
             const float value = static_cast<float>(args[1].getNumber());
@@ -238,14 +238,14 @@ void NetworkUI::initHandlers()
             parameterHandlerSuper(args, origin);
         });
 
-        const JSValue msg = JSValue({"UI", "parameterChanged"}) + args;
+        const Variant msg = Variant({"UI", "parameterChanged"}) + args;
         broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
     // Broadcast state updates to all clients except the originating one
     const MessageHandler& stateHandlerSuper = getMessageHandler("setState");
-    setMessageHandler("setState", 2, [this, stateHandlerSuper](const JSValue& args, uintptr_t origin) {
+    setMessageHandler("setState", 2, [this, stateHandlerSuper](const Variant& args, uintptr_t origin) {
         queue([this, stateHandlerSuper, args, origin] {
             const String key = args[0].getString();
             const String value = args[1].getString();
@@ -253,56 +253,56 @@ void NetworkUI::initHandlers()
             stateHandlerSuper(args, origin);
         });
 
-        const JSValue msg = JSValue({"UI", "stateChanged"}) + args;
+        const Variant msg = Variant({"UI", "stateChanged"}) + args;
         broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
     });
 #endif
 
     // Custom method for exchanging UI-only messages between clients
-    setMessageHandler("broadcast", 1, [this](const JSValue& args, uintptr_t origin) {
-        const JSValue msg = JSValue({"UI", "messageReceived"}) + args;
+    setMessageHandler("broadcast", 1, [this](const Variant& args, uintptr_t origin) {
+        const Variant msg = Variant({"UI", "messageReceived"}) + args;
         broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
     });
 
 #if HIPHOP_UI_ZEROCONF
-    setMessageHandler("isZeroconfPublished", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()}, origin);
     });
 
-    setMessageHandler("setZeroconfPublished", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setZeroconfPublished", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         fZeroconfPublish = args[0].getBoolean();
         setState("_zc_published", fZeroconfPublish ? "true" : "false");
         zeroconfStateUpdated();
     });
 
-    setMessageHandler("getZeroconfId", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getZeroconfId", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getZeroconfId", fZeroconfId}, origin);
     });
 
-    setMessageHandler("getZeroconfName", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getZeroconfName", fZeroconfName}, origin);
     });
 
-    setMessageHandler("setZeroconfName", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setZeroconfName", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         fZeroconfName = args[0].getString();
         setState("_zc_name", fZeroconfName);
         zeroconfStateUpdated();
     });
 #else
-    setMessageHandler("isZeroconfPublished", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "isZeroconfPublished", false}, origin);
     });
 
-    setMessageHandler("getZeroconfName", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getZeroconfName", ""}, origin);
     });
 #endif
 
-    setMessageHandler("getPublicUrl", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getPublicUrl", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getPublicUrl", getPublicUrl()}, origin);
     });
 
-    setMessageHandler("ping", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("ping", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "pong"}, origin);
     });
 }
@@ -381,12 +381,12 @@ void NetworkUI::handleWebServerConnect(Client client)
     queue([this, client] {
         // Send all current parameters and states
         for (ParameterMap::const_iterator it = fParameters.cbegin(); it != fParameters.cend(); ++it) {
-            const JSValue msg = { "UI", "parameterChanged", it->first, it->second };
+            const Variant msg = { "UI", "parameterChanged", it->first, it->second };
             postMessage(msg, reinterpret_cast<uintptr_t>(client));
         }
 
         for (StateMap::const_iterator it = fStates.cbegin(); it != fStates.cend(); ++it) {
-            const JSValue msg = { "UI", "stateChanged", it->first.c_str(), it->second.c_str() };
+            const Variant msg = { "UI", "stateChanged", it->first.c_str(), it->second.c_str() };
             postMessage(msg, reinterpret_cast<uintptr_t>(client));
         }
 
@@ -397,7 +397,7 @@ void NetworkUI::handleWebServerConnect(Client client)
 int NetworkUI::handleWebServerRead(Client client, const ByteVector& data)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    handleMessage(JSValue::fromBSON(data, /*asArray*/true), reinterpret_cast<uintptr_t>(client));
+    handleMessage(Variant::fromBSON(data, /*asArray*/true), reinterpret_cast<uintptr_t>(client));
 #else
     (void)client;
     (void)data;
@@ -408,7 +408,7 @@ int NetworkUI::handleWebServerRead(Client client, const ByteVector& data)
 int NetworkUI::handleWebServerRead(Client client, const char* data)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-    handleMessage(JSValue::fromJSON(data), reinterpret_cast<uintptr_t>(client));
+    handleMessage(Variant::fromJSON(data), reinterpret_cast<uintptr_t>(client));
 #else
     (void)client;
     (void)data;

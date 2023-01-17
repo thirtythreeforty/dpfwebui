@@ -29,7 +29,7 @@
 #if HIPHOP_UI_ZEROCONF
 # include "Zeroconf.hpp"
 #endif
-#include "extra/JSValue.hpp"
+#include "extra/Variant.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -47,8 +47,8 @@ public:
     void setState(const char* key, const char* value);
 
 protected:
-    void broadcastMessage(const JSValue& args, Client exclude = nullptr);
-    void postMessage(const JSValue& args, uintptr_t destination) override;
+    void broadcastMessage(const Variant& args, Client exclude = nullptr);
+    void postMessage(const Variant& args, uintptr_t destination) override;
 
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_STATE

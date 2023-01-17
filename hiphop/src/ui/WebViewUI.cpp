@@ -127,7 +127,7 @@ void WebViewUI::setKeyboardFocus(bool focus)
 }
 
 #if ! defined(HIPHOP_NETWORK_UI)
-void WebViewUI::postMessage(const JSValue& args, uintptr_t /*origin*/)
+void WebViewUI::postMessage(const Variant& args, uintptr_t /*origin*/)
 {
     if (fJsUiReady) {
         fWebView->postMessage(args);
@@ -171,42 +171,42 @@ void WebViewUI::initHandlers()
 {
     // These handlers only make sense for the plugin embedded web view
 
-    setMessageHandler("getWidth", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getWidth", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getWidth", static_cast<double>(getWidth())}, origin);
     });
 
-    setMessageHandler("getHeight", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getHeight", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getHeight", static_cast<double>(getHeight())}, origin);
     });
 
-    setMessageHandler("isResizable", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("isResizable", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "isResizable", isResizable()}, origin);
     });
 
-    setMessageHandler("setWidth", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setWidth", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         setWidth(static_cast<uint>(args[0].getNumber()));
     });
 
-    setMessageHandler("setHeight", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setHeight", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         setHeight(static_cast<uint>(args[0].getNumber()));
     });
 
-    setMessageHandler("setSize", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setSize", 2, [this](const Variant& args, uintptr_t /*origin*/) {
         setSize(
             static_cast<uint>(args[0].getNumber()), // width
             static_cast<uint>(args[1].getNumber())  // height
         );
     });
 
-    setMessageHandler("setKeyboardFocus", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setKeyboardFocus", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         setKeyboardFocus(static_cast<bool>(args[0].getBoolean()));
     });
 
-    setMessageHandler("ready", 0, [this](const JSValue&, uintptr_t /*origin*/) {
+    setMessageHandler("ready", 0, [this](const Variant&, uintptr_t /*origin*/) {
         ready();
     });
 
-    setMessageHandler("openSystemWebBrowser", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("openSystemWebBrowser", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         String url = args[0].getString();
         openSystemWebBrowser(url);
     });
@@ -217,7 +217,7 @@ void WebViewUI::handleWebViewLoadFinished()
     onDocumentReady();
 }
 
-void WebViewUI::handleWebViewScriptMessage(const JSValue& args)
+void WebViewUI::handleWebViewScriptMessage(const Variant& args)
 {
     handleMessage(args, ORIGIN_EMBEDDED_WEB_VIEW);
 }

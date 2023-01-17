@@ -114,7 +114,7 @@ ifeq ($(WEB_UI),true)
 HIPHOP_FILES_UI += WebUIBase.cpp \
 				   WebViewBase.cpp \
 				   WebViewUI.cpp \
-				   ../JSValue.cpp \
+				   ../Variant.cpp \
 				   ../cJSON.c
 ifeq ($(HIPHOP_NETWORK_UI),true)
 HIPHOP_FILES_UI += NetworkUI.cpp \

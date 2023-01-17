@@ -97,7 +97,7 @@ void WebUIBase::sharedMemoryReady()
 
 void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
-    JSValue::BinaryData binData(data, data + size);
+    Variant::BinaryData binData(data, data + size);
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
     postMessage({"UI", "sharedMemoryChanged", binData, hints}, DESTINATION_ALL);
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
@@ -106,13 +106,13 @@ void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t h
 }
 #endif
 
-void WebUIBase::onMessageReceived(const JSValue& args, uintptr_t origin)
+void WebUIBase::onMessageReceived(const Variant& args, uintptr_t origin)
 {
     (void)args;
     (void)origin;
 }
 
-void WebUIBase::handleMessage(const JSValue& args, uintptr_t origin)
+void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
 {
     if (! args.isArray()) {
         d_stderr2("Message must be an array");
@@ -131,7 +131,7 @@ void WebUIBase::handleMessage(const JSValue& args, uintptr_t origin)
         return;
     }
 
-    const JSValue handlerArgs = args.sliceArray(2);
+    const Variant handlerArgs = args.sliceArray(2);
     
     ArgumentCountAndMessageHandler handler = fHandler[key];
     const int argsCount = handlerArgs.getArraySize();
@@ -146,16 +146,16 @@ void WebUIBase::handleMessage(const JSValue& args, uintptr_t origin)
 
 void WebUIBase::initHandlers()
 {
-    setMessageHandler("getInitWidthCSS", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getInitWidthCSS", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getInitWidthCSS", static_cast<double>(getInitWidthCSS())}, origin);
     });
 
-    setMessageHandler("getInitHeightCSS", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getInitHeightCSS", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getInitHeightCSS", static_cast<double>(getInitHeightCSS())}, origin);
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
-    setMessageHandler("sendNote", 3, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("sendNote", 3, [this](const Variant& args, uintptr_t /*origin*/) {
         sendNote(
             static_cast<uint8_t>(args[0].getNumber()),  // channel
             static_cast<uint8_t>(args[1].getNumber()),  // note
@@ -164,14 +164,14 @@ void WebUIBase::initHandlers()
     });
 #endif
 
-    setMessageHandler("editParameter", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("editParameter", 2, [this](const Variant& args, uintptr_t /*origin*/) {
         editParameter(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<bool>(args[1].getBoolean())     // started
         );
     });
 
-    setMessageHandler("setParameterValue", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setParameterValue", 2, [this](const Variant& args, uintptr_t /*origin*/) {
         setParameterValue(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<float>(args[1].getNumber())     // value
@@ -179,7 +179,7 @@ void WebUIBase::initHandlers()
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    setMessageHandler("setState", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setState", 2, [this](const Variant& args, uintptr_t /*origin*/) {
         setState(
             args[0].getString(), // key
             args[1].getString()  // value
@@ -188,9 +188,9 @@ void WebUIBase::initHandlers()
 #endif
 
 #if DISTRHO_PLUGIN_WANT_STATE && defined(HIPHOP_SHARED_MEMORY_SIZE)
-    setMessageHandler("writeSharedMemory", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("writeSharedMemory", 2, [this](const Variant& args, uintptr_t /*origin*/) {
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-        JSValue::BinaryData data = args[0].getBinaryData();
+        Variant::BinaryData data = args[0].getBinaryData();
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
 # endif
@@ -203,9 +203,9 @@ void WebUIBase::initHandlers()
     });
 
 # if defined(HIPHOP_WASM_SUPPORT)
-    setMessageHandler("sideloadWasmBinary", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("sideloadWasmBinary", 1, [this](const Variant& args, uintptr_t /*origin*/) {
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-        JSValue::BinaryData data = args[0].getBinaryData();
+        Variant::BinaryData data = args[0].getBinaryData();
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
 # endif
@@ -221,7 +221,7 @@ void WebUIBase::initHandlers()
     // without resorting to dirty hacks. Use JS async functions instead, and
     // fulfill their promises here.
 
-    setMessageHandler("isStandalone", 0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("isStandalone", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "isStandalone", isStandalone()}, origin);
     });
 }

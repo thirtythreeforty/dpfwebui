@@ -28,7 +28,7 @@
 #include "distrho/extra/Mutex.hpp"
 
 #include "extra/UIEx.hpp"
-#include "extra/JSValue.hpp"
+#include "extra/Variant.hpp"
 #include "extra/StringHash.hpp"
 
 #define DESTINATION_ALL 0
@@ -44,7 +44,7 @@ public:
     typedef std::function<void()> UiBlock;
     void queue(const UiBlock& block);
 
-    typedef std::function<void(const JSValue& args, uintptr_t origin)> MessageHandler;
+    typedef std::function<void(const Variant& args, uintptr_t origin)> MessageHandler;
     const MessageHandler& getMessageHandler(const char* name);
     void setMessageHandler(const char* name, int argCount, const MessageHandler& handler);
 
@@ -68,10 +68,10 @@ protected:
     virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) override;
 #endif
 
-    virtual void postMessage(const JSValue& args, uintptr_t destination) = 0;
-    virtual void onMessageReceived(const JSValue& args, uintptr_t origin);
+    virtual void postMessage(const Variant& args, uintptr_t destination) = 0;
+    virtual void onMessageReceived(const Variant& args, uintptr_t origin);
 
-    void handleMessage(const JSValue& args, uintptr_t origin);
+    void handleMessage(const Variant& args, uintptr_t origin);
 
 private:
     void initHandlers();
