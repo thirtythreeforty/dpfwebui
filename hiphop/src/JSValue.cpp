@@ -515,8 +515,8 @@ void JSValue::pushArrayItem(const JSValue& value) noexcept
             bson_append_utf8(fArray, key, -1, value.fString, -1);
             break;
         case BSON_TYPE_BINARY:
-            bson_append_binary(fArray, key, -1, BSON_SUBTYPE_BINARY, fData->data(),
-                                static_cast<uint32_t>(fData->size()));
+            bson_append_binary(fArray, key, -1, BSON_SUBTYPE_BINARY, value.fData->data(),
+                                static_cast<uint32_t>(value.fData->size()));
             break;
         case BSON_TYPE_ARRAY:
             bson_append_array(fArray, key, -1, value.fArray);

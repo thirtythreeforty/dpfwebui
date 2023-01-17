@@ -394,15 +394,13 @@ void NetworkUI::handleWebServerConnect(Client client)
     });
 }
 
-int NetworkUI::handleWebServerRead(Client client, const uint8_t* data, size_t size)
+int NetworkUI::handleWebServerRead(Client client, const ByteVector& data)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    JSValue::BinaryData binData(data, data + size);
-    handleMessage(JSValue::fromBSON(binData, /*asArray*/true), reinterpret_cast<uintptr_t>(client));
+    handleMessage(JSValue::fromBSON(data, /*asArray*/true), reinterpret_cast<uintptr_t>(client));
 #else
     (void)client;
     (void)data;
-    (void)size;
 #endif
     return 0;
 }

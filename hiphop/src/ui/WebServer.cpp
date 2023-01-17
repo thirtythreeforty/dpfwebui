@@ -113,7 +113,7 @@ void WebServer::send(const uint8_t* data, size_t size, Client client, bool binar
         return;
     }
 
-    WriteBufferFrame frame(binary);
+    ClientContext::FrameData frame(binary);
     frame.data.insert(frame.data.end(), data, data + size);
 
     const MutexLocker writeBufferScopedLock(fMutex);
@@ -239,17 +239,23 @@ int WebServer::injectScripts(lws_process_html_args* args)
 
 int WebServer::handleRead(Client client, void* in, size_t len, bool binary)
 {
-    int rc;
+    int rc = 0;
+
+    ByteVector& rb = fClients[client].readBuffer;
+    rb.insert(rb.end(), static_cast<uint8_t*>(in), static_cast<uint8_t*>(in) + len);
+
+    if (lws_remaining_packet_payload(client) != 0) {
+        return rc;
+    }
 
     if (binary) {
-        rc = fHandler->handleWebServerRead(client, static_cast<uint8_t*>(in), len);
+        rc = fHandler->handleWebServerRead(client, rb);
     } else {
-        char* data = new char[len + 1];
-        std::memcpy(data, in, len);
-        data[len] = '\0';
-        rc = fHandler->handleWebServerRead(client, data);
-        delete[] data;
+        rb.push_back('\0');
+        rc = fHandler->handleWebServerRead(client, reinterpret_cast<const char*>(rb.data()));
     }
+
+    rb.clear();
 
     return rc;
 }
@@ -259,12 +265,12 @@ int WebServer::handleWrite(Client client)
     const MutexLocker writeBufferScopedLock(fMutex);
 
     // Exactly one lws_write() call per LWS_CALLBACK_SERVER_WRITEABLE callback
-    ClientContext::WriteBuffer& wb = fClients[client].writeBuffer;
+    ClientContext::ByteVectorList& wb = fClients[client].writeBuffer;
     if (wb.empty()) {
         return 0;
     }
 
-    WriteBufferFrame frame = wb.front();
+    ClientContext::FrameData frame = wb.front();
     wb.pop_front();
 
     size_t dataSize = frame.data.size() - LWS_PRE;

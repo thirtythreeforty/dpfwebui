@@ -66,7 +66,7 @@ private:
 #endif
 
     void handleWebServerConnect(Client client) override;
-    int  handleWebServerRead(Client client, const uint8_t* data, size_t size) override;
+    int  handleWebServerRead(Client client, const ByteVector& data) override;
     int  handleWebServerRead(Client client, const char* data) override;
 
     int              fPort;

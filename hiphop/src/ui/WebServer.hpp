@@ -33,29 +33,32 @@
 START_NAMESPACE_DISTRHO
 
 typedef struct lws* Client;
-
-struct WriteBufferFrame
-{
-    bool binary;
-    std::vector<uint8_t> data;
-
-    WriteBufferFrame(bool binary)
-        : binary(binary)
-        , data(LWS_PRE)
-    {}
-};
+typedef std::vector<uint8_t> ByteVector;
 
 struct ClientContext
 {
-    typedef std::list<WriteBufferFrame> WriteBuffer;
-    WriteBuffer writeBuffer;
+    struct FrameData
+    {
+        bool binary;
+        ByteVector data;
+
+        FrameData(bool binary)
+            : binary(binary)
+            , data(LWS_PRE)
+        {}
+    };
+
+    typedef std::list<FrameData> ByteVectorList;
+
+    ByteVectorList writeBuffer;
+    ByteVector     readBuffer;
 };
 
 struct WebServerHandler
 {
     virtual void handleWebServerConnect(Client) {};
     virtual void handleWebServerDisconnect(Client) {};
-    virtual int  handleWebServerRead(Client client, const uint8_t* data, size_t size) = 0;
+    virtual int  handleWebServerRead(Client client, const ByteVector& data) = 0;
     virtual int  handleWebServerRead(Client client, const char* data) = 0;
 };
 

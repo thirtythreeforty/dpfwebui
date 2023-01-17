@@ -185,7 +185,8 @@ class UI {
     // Non-DPF method that writes to memory shared with DISTRHO::PluginEx instance
     // void UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset, uint32_t hints)
     writeSharedMemory(data /*Uint8Array*/, offset /*Number*/, hints /*Number*/) {
-        this._call('writeSharedMemory', base64EncArr(data), offset || 0, hints || 0);
+        this._call('writeSharedMemory', this._encodeBinaryDataIfNeeded(data),
+                    offset || 0, hints || 0);
     }
 
     // Non-DPF callback method that notifies when shared memory is ready to use
@@ -199,7 +200,7 @@ class UI {
     // Non-DPF method that loads binary into DISTRHO::WasmPlugin instance
     // void UIEx::sideloadWasmBinary(const uint8_t* data, size_t size)
     sideloadWasmBinary(data /*Uint8Array*/) {
-        this._call('sideloadWasmBinary', base64EncArr(data));
+        this._call('sideloadWasmBinary', this._encodeBinaryDataIfNeeded(data));
     }
 
     // Non-DPF method that returns the plugin UI public URL
@@ -391,9 +392,14 @@ class UI {
         }
     }
 
-    // Helper for decoding received shared memory data
-    _sharedMemoryChanged(b64Data /*String*/, hints /*Number*/) {
+    // Helper for decoding received shared memory data with text-based protocol
+    _b64SharedMemoryChanged(b64Data /*String*/, hints /*Number*/) {
         this.sharedMemoryChanged(base64DecToArr(b64Data), hints);
+    }
+
+    // Encode binary data to base64 when the protocol is text-based
+    _encodeBinaryDataIfNeeded(data) {
+        return this._opt.binarySocket ? data : base64EncArr(data);
     }
 
     // Reject all pending promises on channel disconnection
