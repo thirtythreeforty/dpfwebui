@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,42 +171,42 @@ void WebViewUI::initHandlers()
 {
     // These handlers only make sense for the plugin embedded web view
 
-    fHandler["getWidth"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getWidth", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "getWidth", static_cast<double>(getWidth())}, origin);
     });
 
-    fHandler["getHeight"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getHeight", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "getHeight", static_cast<double>(getHeight())}, origin);
     });
 
-    fHandler["isResizable"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("isResizable", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "isResizable", isResizable()}, origin);
     });
 
-    fHandler["setWidth"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setWidth", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
         setWidth(static_cast<uint>(args[0].getNumber()));
     });
 
-    fHandler["setHeight"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setHeight", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
         setHeight(static_cast<uint>(args[0].getNumber()));
     });
 
-    fHandler["setSize"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setSize", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
         setSize(
             static_cast<uint>(args[0].getNumber()), // width
             static_cast<uint>(args[1].getNumber())  // height
         );
     });
 
-    fHandler["setKeyboardFocus"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setKeyboardFocus", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
         setKeyboardFocus(static_cast<bool>(args[0].getBoolean()));
     });
 
-    fHandler["ready"] = std::make_pair(0, [this](const JSValue&, uintptr_t /*origin*/) {
+    setMessageHandler("ready", 0, [this](const JSValue&, uintptr_t /*origin*/) {
         ready();
     });
 
-    fHandler["openSystemWebBrowser"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("openSystemWebBrowser", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
         String url = args[0].getString();
         openSystemWebBrowser(url);
     });

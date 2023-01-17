@@ -228,8 +228,8 @@ void NetworkUI::onClientConnected(Client client)
 void NetworkUI::initHandlers()
 {
     // Broadcast parameter updates to all clients except the originating one
-    const MessageHandler& parameterHandlerSuper = fHandler["setParameterValue"].second;
-    fHandler["setParameterValue"] = std::make_pair(2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t origin) {
+    const MessageHandler& parameterHandlerSuper = getMessageHandler("setParameterValue");
+    setMessageHandler("setParameterValue", 2, [this, parameterHandlerSuper](const JSValue& args, uintptr_t origin) {
         queue([this, parameterHandlerSuper, args, origin] {
             const uint32_t index = static_cast<uint32_t>(args[0].getNumber());
             const float value = static_cast<float>(args[1].getNumber());
@@ -244,8 +244,8 @@ void NetworkUI::initHandlers()
 
 #if DISTRHO_PLUGIN_WANT_STATE
     // Broadcast state updates to all clients except the originating one
-    const MessageHandler& stateHandlerSuper = fHandler["setState"].second;
-    fHandler["setState"] = std::make_pair(2, [this, stateHandlerSuper](const JSValue& args, uintptr_t origin) {
+    const MessageHandler& stateHandlerSuper = getMessageHandler("setState");
+    setMessageHandler("setState", 2, [this, stateHandlerSuper](const JSValue& args, uintptr_t origin) {
         queue([this, stateHandlerSuper, args, origin] {
             const String key = args[0].getString();
             const String value = args[1].getString();
@@ -259,50 +259,50 @@ void NetworkUI::initHandlers()
 #endif
 
     // Custom method for exchanging UI-only messages between clients
-    fHandler["broadcast"] = std::make_pair(1, [this](const JSValue& args, uintptr_t origin) {
+    setMessageHandler("broadcast", 1, [this](const JSValue& args, uintptr_t origin) {
         const JSValue msg = JSValue({"UI", "messageReceived"}) + args;
         broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
     });
 
 #if HIPHOP_UI_ZEROCONF
-    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("isZeroconfPublished", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()}, origin);
     });
 
-    fHandler["setZeroconfPublished"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setZeroconfPublished", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
         fZeroconfPublish = args[0].getBoolean();
         setState("_zc_published", fZeroconfPublish ? "true" : "false");
         zeroconfStateUpdated();
     });
 
-    fHandler["getZeroconfId"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getZeroconfId", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "getZeroconfId", fZeroconfId}, origin);
     });
 
-    fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getZeroconfName", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "getZeroconfName", fZeroconfName}, origin);
     });
 
-    fHandler["setZeroconfName"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setZeroconfName", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
         fZeroconfName = args[0].getString();
         setState("_zc_name", fZeroconfName);
         zeroconfStateUpdated();
     });
 #else
-    fHandler["isZeroconfPublished"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("isZeroconfPublished", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "isZeroconfPublished", false}, origin);
     });
 
-    fHandler["getZeroconfName"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getZeroconfName", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "getZeroconfName", ""}, origin);
     });
 #endif
 
-    fHandler["getPublicUrl"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getPublicUrl", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "getPublicUrl", getPublicUrl()}, origin);
     });
 
-    fHandler["ping"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("ping", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "pong"}, origin);
     });
 }

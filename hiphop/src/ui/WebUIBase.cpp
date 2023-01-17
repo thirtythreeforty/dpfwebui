@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,16 @@ void WebUIBase::queue(const UiBlock& block)
     fUiQueueMutex.lock();
     fUiQueue.push(block);
     fUiQueueMutex.unlock();
+}
+
+const WebUIBase::MessageHandler& WebUIBase::getMessageHandler(const char* name)
+{
+    return fHandler[String(name)].second;
+}
+
+void WebUIBase::setMessageHandler(const char* name, int argCount, const MessageHandler& handler)
+{
+    fHandler[String(name)] = std::make_pair(argCount, handler);
 }
 
 bool WebUIBase::isDryRun()
@@ -116,14 +126,14 @@ void WebUIBase::handleMessage(const JSValue& args, uintptr_t origin)
 
     String key = args[1].getString();
 
-    if (fHandler.find(key.buffer()) == fHandler.end()) {
+    if (fHandler.find(key) == fHandler.end()) {
         d_stderr2("Unknown WebUI method");
         return;
     }
 
     const JSValue handlerArgs = args.sliceArray(2);
     
-    ArgumentCountAndMessageHandler handler = fHandler[key.buffer()];
+    ArgumentCountAndMessageHandler handler = fHandler[key];
     const int argsCount = handlerArgs.getArraySize();
 
     if (argsCount < handler.first) {
@@ -136,16 +146,16 @@ void WebUIBase::handleMessage(const JSValue& args, uintptr_t origin)
 
 void WebUIBase::initHandlers()
 {
-    fHandler["getInitWidthCSS"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getInitWidthCSS", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "getInitWidthCSS", static_cast<double>(getInitWidthCSS())}, origin);
     });
 
-    fHandler["getInitHeightCSS"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("getInitHeightCSS", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "getInitHeightCSS", static_cast<double>(getInitHeightCSS())}, origin);
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
-    fHandler["sendNote"] = std::make_pair(3, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("sendNote", 3, [this](const JSValue& args, uintptr_t /*origin*/) {
         sendNote(
             static_cast<uint8_t>(args[0].getNumber()),  // channel
             static_cast<uint8_t>(args[1].getNumber()),  // note
@@ -154,14 +164,14 @@ void WebUIBase::initHandlers()
     });
 #endif
 
-    fHandler["editParameter"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("editParameter", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
         editParameter(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<bool>(args[1].getBoolean())     // started
         );
     });
 
-    fHandler["setParameterValue"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setParameterValue", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
         setParameterValue(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<float>(args[1].getNumber())     // value
@@ -169,7 +179,7 @@ void WebUIBase::initHandlers()
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    fHandler["setState"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("setState", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
         setState(
             args[0].getString(), // key
             args[1].getString()  // value
@@ -178,7 +188,7 @@ void WebUIBase::initHandlers()
 #endif
 
 #if DISTRHO_PLUGIN_WANT_STATE && defined(HIPHOP_SHARED_MEMORY_SIZE)
-    fHandler["writeSharedMemory"] = std::make_pair(2, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("writeSharedMemory", 2, [this](const JSValue& args, uintptr_t /*origin*/) {
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
         JSValue::BinaryData data = args[0].getBinaryData();
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
@@ -193,7 +203,7 @@ void WebUIBase::initHandlers()
     });
 
 # if defined(HIPHOP_WASM_SUPPORT)
-    fHandler["sideloadWasmBinary"] = std::make_pair(1, [this](const JSValue& args, uintptr_t /*origin*/) {
+    setMessageHandler("sideloadWasmBinary", 1, [this](const JSValue& args, uintptr_t /*origin*/) {
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
         JSValue::BinaryData data = args[0].getBinaryData();
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
@@ -211,7 +221,7 @@ void WebUIBase::initHandlers()
     // without resorting to dirty hacks. Use JS async functions instead, and
     // fulfill their promises here.
 
-    fHandler["isStandalone"] = std::make_pair(0, [this](const JSValue&, uintptr_t origin) {
+    setMessageHandler("isStandalone", 0, [this](const JSValue&, uintptr_t origin) {
         postMessage({"UI", "isStandalone", isStandalone()}, origin);
     });
 }

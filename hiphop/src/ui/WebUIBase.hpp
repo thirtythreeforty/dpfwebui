@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 
 #include "extra/UIEx.hpp"
 #include "extra/JSValue.hpp"
+#include "extra/StringHash.hpp"
 
 #define DESTINATION_ALL 0
 
@@ -41,8 +42,11 @@ public:
     virtual ~WebUIBase() {}
 
     typedef std::function<void()> UiBlock;
-
     void queue(const UiBlock& block);
+
+    typedef std::function<void(const JSValue& args, uintptr_t origin)> MessageHandler;
+    const MessageHandler& getMessageHandler(const char* name);
+    void setMessageHandler(const char* name, int argCount, const MessageHandler& handler);
 
 protected:
     bool isDryRun();
@@ -69,12 +73,6 @@ protected:
 
     void handleMessage(const JSValue& args, uintptr_t origin);
 
-    typedef std::function<void(const JSValue& args, uintptr_t origin)> MessageHandler;
-    typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
-    typedef std::unordered_map<std::string, ArgumentCountAndMessageHandler> MessageHandlerMap;
-
-    MessageHandlerMap fHandler;
-
 private:
     void initHandlers();
 
@@ -82,6 +80,10 @@ private:
     uint  fInitHeightCssPx;
     Mutex fUiQueueMutex;
     std::queue<UiBlock> fUiQueue;
+
+    typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
+    typedef std::unordered_map<String, ArgumentCountAndMessageHandler> MessageHandlerMap;
+    MessageHandlerMap fHandler;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 
