@@ -29,7 +29,7 @@ START_NAMESPACE_DISTRHO
 typedef std::vector<uint8_t> BinaryData;
 
 template<class T>
-T sliceArray(const T& a, int start, int end = -1)
+T sliceVariantArray(const T& a, int start, int end = -1)
 {
     if (! a.isArray()) {
         throw std::runtime_error("sliceArray() requires an array argument");
@@ -63,7 +63,7 @@ T sliceArray(const T& a, int start, int end = -1)
 }
 
 template<class T>
-T& joinArrays(T& a, const T& b)
+T& joinVariantArrays(T& a, const T& b)
 {
     if (! a.isArray() || ! b.isArray()) {
         throw std::runtime_error("joinArrays() requires two array arguments");

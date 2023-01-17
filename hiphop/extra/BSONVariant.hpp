@@ -84,13 +84,13 @@ public:
     // Operations on arrays
     BSONVariant sliceArray(int start, int end = -1) const
     {
-        return ::sliceArray(*this, start, end);
+        return ::sliceVariantArray(*this, start, end);
     }
 
     // Arithmetic operators
     BSONVariant& operator+=(const BSONVariant& other)
     {
-        return ::joinArrays(*this, other);
+        return ::joinVariantArrays(*this, other);
     }
 
     friend BSONVariant operator+(BSONVariant lhs, const BSONVariant& rhs)

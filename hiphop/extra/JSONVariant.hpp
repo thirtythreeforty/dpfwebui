@@ -84,13 +84,13 @@ public:
     // Operations on arrays
     JSONVariant sliceArray(int start, int end = -1) const
     {
-        return ::sliceArray(*this, start, end);
+        return ::sliceVariantArray(*this, start, end);
     }
 
     // Arithmetic operators
     JSONVariant& operator+=(const JSONVariant& other)
     {
-        return ::joinArrays(*this, other);
+        return ::joinVariantArrays(*this, other);
     }
 
     friend JSONVariant operator+(JSONVariant lhs, const JSONVariant& rhs)
