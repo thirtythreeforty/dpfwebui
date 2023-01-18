@@ -44,9 +44,9 @@ public:
     String getLocalUrl();
     String getPublicUrl();
 
+protected:
     void setState(const char* key, const char* value);
 
-protected:
     void broadcastMessage(const Variant& args, Client exclude = nullptr);
     void postMessage(const Variant& args, uintptr_t destination) override;
 
@@ -68,6 +68,14 @@ private:
     void handleWebServerConnect(Client client) override;
     int  handleWebServerRead(Client client, const ByteVector& data) override;
     int  handleWebServerRead(Client client, const char* data) override;
+
+#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+    String getMethodSignature(const Variant& args) override;
+    void   setMethodSignature(Variant& args, String method) override;
+#endif
+    void notifyAll(Client exclude, const char* method, Variant args = Variant::createArray());
+
+    static uint32_t djb2hash(const char *str);
 
     int              fPort;
     WebServer        fServer;

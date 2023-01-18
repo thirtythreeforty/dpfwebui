@@ -52,8 +52,8 @@ BSONVariant::BSONVariant(const BinaryData& data) noexcept
 }
 
 BSONVariant::BSONVariant(uint32_t i) noexcept
-    : fType(BSON_TYPE_DOUBLE)
-    , fDouble(static_cast<double>(i))
+    : fType(BSON_TYPE_INT32)
+    , fUInt(i)
 {}
 
 BSONVariant::BSONVariant(float f) noexcept
@@ -132,7 +132,7 @@ bool BSONVariant::isBoolean() const noexcept
 
 bool BSONVariant::isNumber() const noexcept
 {
-    return fType == BSON_TYPE_DOUBLE;
+    return (fType == BSON_TYPE_INT32) || (fType == BSON_TYPE_DOUBLE);
 }
 
 bool BSONVariant::isString() const noexcept
@@ -162,7 +162,15 @@ bool BSONVariant::getBoolean() const noexcept
 
 double BSONVariant::getNumber() const noexcept
 {
-    return fDouble;
+    if (fType == BSON_TYPE_INT32) {
+        return static_cast<double>(fUInt);
+    }
+
+    if (fType == BSON_TYPE_DOUBLE) {
+        return fDouble;
+    }
+
+    return 0;
 }
 
 String BSONVariant::getString() const noexcept
@@ -300,6 +308,9 @@ void BSONVariant::copy(const BSONVariant& v) noexcept
         case BSON_TYPE_BOOL:
             fBool = v.fBool;
             break;
+        case BSON_TYPE_INT32:
+            fUInt = v.fUInt;
+            break;
         case BSON_TYPE_DOUBLE:
             fDouble = v.fDouble;
             break;
@@ -364,6 +375,8 @@ BSONVariant BSONVariant::get(const bson_t* bson, const char* key) noexcept
             v = BSONVariant(bson_iter_bool(&iter));
             break;
         case BSON_TYPE_INT32:
+            v = BSONVariant(static_cast<uint32_t>(bson_iter_int32(&iter)));
+            break;
         case BSON_TYPE_INT64:
         case BSON_TYPE_DOUBLE:
             v = BSONVariant(bson_iter_as_double(&iter));
@@ -405,6 +418,9 @@ void BSONVariant::set(bson_t* bson, const char* key, const BSONVariant& value) n
             break;
         case BSON_TYPE_BOOL:
             bson_append_bool(bson, key, -1, value.fBool);
+            break;
+        case BSON_TYPE_INT32:
+            bson_append_int32(bson, key, -1, value.fUInt);
             break;
         case BSON_TYPE_DOUBLE:
             bson_append_double(bson, key, -1, value.fDouble);

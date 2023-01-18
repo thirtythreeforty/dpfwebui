@@ -113,6 +113,7 @@ private:
 
     union {
         bool        fBool;
+        uint32_t    fUInt;
         double      fDouble;
         char*       fString;
         BinaryData* fData;

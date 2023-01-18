@@ -41,6 +41,7 @@ public:
     WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio);
     virtual ~WebUIBase() {}
 
+protected:
     typedef std::function<void()> UiBlock;
     void queue(const UiBlock& block);
 
@@ -48,7 +49,6 @@ public:
     const MethodHandler& getMethodHandler(const char* name);
     void setMethodHandler(const char* name, int argCount, const MethodHandler& handler);
 
-protected:
     bool isDryRun();
     
     uint getInitWidthCSS() const { return fInitWidthCssPx; }
@@ -72,7 +72,11 @@ protected:
     virtual void onMessageReceived(const Variant& args, uintptr_t origin);
 
     void handleMessage(const Variant& args, uintptr_t origin);
-    void notify(const char* method, Variant args, uintptr_t destination);
+    
+    virtual String getMethodSignature(const Variant& args);
+    virtual void   setMethodSignature(Variant& args, String method);
+
+    void notify(uintptr_t destination, const char* method, Variant args = Variant::createArray());
 
 private:
     void setBuiltInMethodHandlers();

@@ -71,13 +71,13 @@ void WebUIBase::uiIdle()
 
 void WebUIBase::parameterChanged(uint32_t index, float value)
 {
-    notify("parameterChanged", { index, value }, DESTINATION_ALL);
+    notify(DESTINATION_ALL, "parameterChanged", { index, value });
 }
 
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
 void WebUIBase::programLoaded(uint32_t index)
 {
-    notify("programLoaded", { index }, DESTINATION_ALL);
+    notify(DESTINATION_ALL, "programLoaded", { index });
 }
 #endif
 
@@ -85,23 +85,23 @@ void WebUIBase::programLoaded(uint32_t index)
 void WebUIBase::stateChanged(const char* key, const char* value)
 {
     UIEx::stateChanged(key, value);
-    notify("stateChanged", { key, value }, DESTINATION_ALL);
+    notify(DESTINATION_ALL, "stateChanged", { key, value });
 }
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 void WebUIBase::sharedMemoryReady()
 {
-    notify("sharedMemoryReady", {}, DESTINATION_ALL);
+    notify(DESTINATION_ALL, "sharedMemoryReady");
 }
 
 void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
     BinaryData binData(data, data + size);
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    notify("sharedMemoryChanged", { binData, hints }, DESTINATION_ALL);
+    notify(DESTINATION_ALL, "sharedMemoryChanged", { binData, hints });
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-    notify("_b64SharedMemoryChanged", { binData, hints }, DESTINATION_ALL);
+    notify(DESTINATION_ALL, "_b64SharedMemoryChanged", { binData, hints });
 # endif
 }
 #endif
@@ -124,16 +124,16 @@ void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
         return;
     }
 
-    String key = args[1].getString();
+    String method = getMethodSignature(args);
 
-    if (fHandler.find(key) == fHandler.end()) {
+    if (fHandler.find(method) == fHandler.end()) {
         d_stderr2("Unknown WebUI method");
         return;
     }
 
     const Variant handlerArgs = args.sliceArray(2);
     
-    ArgumentCountAndMethodHandler handler = fHandler[key];
+    ArgumentCountAndMethodHandler handler = fHandler[method];
     const int argsCount = handlerArgs.getArraySize();
 
     if (argsCount < handler.first) {
@@ -144,26 +144,31 @@ void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
     handler.second(handlerArgs, origin);
 }
 
-void WebUIBase::notify(const char* method, Variant args, uintptr_t destination)
+String WebUIBase::getMethodSignature(const Variant& args)
 {
-    if (args.isNull()) { // allow to pass {} as args
-        args = Variant::createArray();
-    }
+    return args[1].getString();
+}
 
-    args.insertArrayItem(0, method);
+void WebUIBase::setMethodSignature(Variant& args, String method)
+{
+    args.insertArrayItem(1, method);
+}
+
+void WebUIBase::notify(uintptr_t destination, const char* method, Variant args)
+{
     args.insertArrayItem(0, "UI");
-
+    setMethodSignature(args, String(method));
     postMessage(args, destination);
 }
 
 void WebUIBase::setBuiltInMethodHandlers()
 {
     setMethodHandler("getInitWidthCSS", 0, [this](const Variant&, uintptr_t origin) {
-        notify("getInitWidthCSS", { static_cast<double>(getInitWidthCSS()) }, origin);
+        notify(origin, "getInitWidthCSS", { static_cast<double>(getInitWidthCSS()) });
     });
 
     setMethodHandler("getInitHeightCSS", 0, [this](const Variant&, uintptr_t origin) {
-        notify("getInitHeightCSS", { static_cast<double>(getInitHeightCSS()) }, origin);
+        notify(origin, "getInitHeightCSS", { static_cast<double>(getInitHeightCSS()) });
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
@@ -234,6 +239,6 @@ void WebUIBase::setBuiltInMethodHandlers()
     // fulfill their promises here.
 
     setMethodHandler("isStandalone", 0, [this](const Variant&, uintptr_t origin) {
-        notify("isStandalone", { isStandalone() }, origin);
+        notify(origin, "isStandalone", { isStandalone() });
     });
 }

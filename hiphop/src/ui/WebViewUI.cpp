@@ -164,7 +164,7 @@ void WebViewUI::sizeChanged(uint width, uint height)
 {
     WebViewUIBase::sizeChanged(width, height);
     fWebView->setSize(width, height);
-    notify("sizeChanged", { width, height }, 0);
+    notify(0, "sizeChanged", { width, height });
 }
 
 void WebViewUI::setBuiltInMethodHandlers()
@@ -172,15 +172,15 @@ void WebViewUI::setBuiltInMethodHandlers()
     // These handlers only make sense for the plugin embedded web view
 
     setMethodHandler("getWidth", 0, [this](const Variant&, uintptr_t origin) {
-        notify("getWidth", { static_cast<double>(getWidth()) }, origin);
+        notify(origin, "getWidth", { static_cast<double>(getWidth()) });
     });
 
     setMethodHandler("getHeight", 0, [this](const Variant&, uintptr_t origin) {
-        notify("getHeight", { static_cast<double>(getHeight()) }, origin);
+        notify(origin, "getHeight", { static_cast<double>(getHeight()) });
     });
 
     setMethodHandler("isResizable", 0, [this](const Variant&, uintptr_t origin) {
-        notify("isResizable", { isResizable() }, origin);
+        notify(origin, "isResizable", { isResizable() });
     });
 
     setMethodHandler("setWidth", 1, [this](const Variant& args, uintptr_t /*origin*/) {

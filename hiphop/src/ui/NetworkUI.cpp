@@ -238,8 +238,7 @@ void NetworkUI::setBuiltInMethodHandlers()
             parameterHandlerSuper(args, origin);
         });
 
-        const Variant msg = Variant({"UI", "parameterChanged"}) + args;
-        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
+        notifyAll(reinterpret_cast<Client>(origin), "parameterChanged", args);
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -253,20 +252,18 @@ void NetworkUI::setBuiltInMethodHandlers()
             stateHandlerSuper(args, origin);
         });
 
-        const Variant msg = Variant({"UI", "stateChanged"}) + args;
-        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
+        notifyAll(reinterpret_cast<Client>(origin), "stateChanged", args);
     });
 #endif
 
     // Custom method for exchanging UI-only messages between clients
     setMethodHandler("broadcast", 1, [this](const Variant& args, uintptr_t origin) {
-        const Variant msg = Variant({"UI", "messageReceived"}) + args;
-        broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
+        notifyAll(reinterpret_cast<Client>(origin), "messageReceived", args);
     });
 
 #if HIPHOP_UI_ZEROCONF
     setMethodHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
-        notify("isZeroconfPublished", { fZeroconf.isPublished() }, origin);
+        notify(origin, "isZeroconfPublished", { fZeroconf.isPublished() });
     });
 
     setMethodHandler("setZeroconfPublished", 1, [this](const Variant& args, uintptr_t /*origin*/) {
@@ -276,11 +273,11 @@ void NetworkUI::setBuiltInMethodHandlers()
     });
 
     setMethodHandler("getZeroconfId", 0, [this](const Variant&, uintptr_t origin) {
-        notify("getZeroconfId", { fZeroconfId }, origin);
+        notify(origin, "getZeroconfId", { fZeroconfId });
     });
 
     setMethodHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
-        notify("getZeroconfName", { fZeroconfName }, origin);
+        notify(origin, "getZeroconfName", { fZeroconfName });
     });
 
     setMethodHandler("setZeroconfName", 1, [this](const Variant& args, uintptr_t /*origin*/) {
@@ -290,20 +287,20 @@ void NetworkUI::setBuiltInMethodHandlers()
     });
 #else
     setMethodHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
-        notify("isZeroconfPublished", { false }, origin);
+        notify(origin, "isZeroconfPublished", { false });
     });
 
     setMethodHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
-        notify("getZeroconfName", { "" }, origin);
+        notify(origin, "getZeroconfName", { "" });
     });
 #endif
 
     setMethodHandler("getPublicUrl", 0, [this](const Variant&, uintptr_t origin) {
-        notify("getPublicUrl", { getPublicUrl() }, origin);
+        notify(origin, "getPublicUrl", { getPublicUrl() });
     });
 
     setMethodHandler("ping", 0, [this](const Variant&, uintptr_t origin) {
-        notify("pong", {}, origin);
+        notify(origin, "pong");
     });
 }
 
@@ -381,13 +378,13 @@ void NetworkUI::handleWebServerConnect(Client client)
     queue([this, client] {
         // Send all current parameters and states
         for (ParameterMap::const_iterator it = fParameters.cbegin(); it != fParameters.cend(); ++it) {
-            const Variant msg = { "UI", "parameterChanged", it->first, it->second };
-            postMessage(msg, reinterpret_cast<uintptr_t>(client));
+            const Variant args = { it->first, it->second };
+            notify(reinterpret_cast<uintptr_t>(client), "parameterChanged", args);
         }
 
         for (StateMap::const_iterator it = fStates.cbegin(); it != fStates.cend(); ++it) {
-            const Variant msg = { "UI", "stateChanged", it->first.c_str(), it->second.c_str() };
-            postMessage(msg, reinterpret_cast<uintptr_t>(client));
+            const Variant args = { it->first.c_str(), it->second.c_str() };
+            notify(reinterpret_cast<uintptr_t>(client), "stateChanged", args);
         }
 
         onClientConnected(client);
@@ -414,6 +411,37 @@ int NetworkUI::handleWebServerRead(Client client, const char* data)
     (void)data;
 #endif
     return 0;
+}
+
+#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+String NetworkUI::getMethodSignature(const Variant& args)
+{
+    return String(args[1].getNumber());
+}
+
+void NetworkUI::setMethodSignature(Variant& args, String method)
+{
+    args.insertArrayItem(1, djb2hash(method));
+}
+#endif
+
+void NetworkUI::notifyAll(Client exclude, const char* method, Variant args)
+{
+    args.insertArrayItem(0, "UI");
+    setMethodSignature(args, String(method));
+    broadcastMessage(args, exclude);
+}
+
+uint32_t NetworkUI::djb2hash(const char* str)
+{
+    uint32_t hash = 5381;
+    uint32_t c;
+
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c;
+    }
+
+    return hash;
 }
 
 WebServerThread::WebServerThread(WebServer* server) noexcept
