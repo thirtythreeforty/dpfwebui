@@ -133,7 +133,7 @@ class UI {
             if (this._socket.readyState == WebSocket.OPEN) {
                 let data;
 
-                if (this._opt.binarySocket) {
+                if (this._opt.binaryMessageProtocol) {
                     const argsObj = args.reduce((o, v, i) => {
                         o[i] = v;
                         return o;
@@ -280,7 +280,7 @@ class UI {
 
     // Initialize WebSockets-based message channel for network clients
     _initSocketMessageChannel() {
-        if (this._opt.binarySocket && (typeof(BSON) === 'undefined')) {
+        if (this._opt.binaryMessageProtocol && (typeof(BSON) === 'undefined')) {
             throw new Error('Binary socket requires BSON, make sure bson.min.js is loaded.');
         }
 
@@ -318,7 +318,7 @@ class UI {
             this._socket.addEventListener('message', (ev) => {
                 let args;
 
-                if (this._opt.binarySocket) {
+                if (this._opt.binaryMessageProtocol) {
                     const argsArr = BSON.deserialize(ev.data);
                     args = Object.keys(argsArr).map(k => argsArr[k]);
                 } else {
@@ -399,7 +399,7 @@ class UI {
 
     // Encode binary data to base64 when the protocol is text-based
     _encodeBinaryDataIfNeeded(data) {
-        return this._opt.binarySocket ? data : base64EncArr(data);
+        return this._opt.binaryMessageProtocol ? data : base64EncArr(data);
     }
 
     // Reject all pending promises on channel disconnection

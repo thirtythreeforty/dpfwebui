@@ -37,6 +37,10 @@ JSONVariant::JSONVariant(String s) noexcept
     : fImpl(cJSON_CreateString(s))
 {}
 
+JSONVariant::JSONVariant(const BinaryData& data) noexcept
+    : fImpl(cJSON_CreateString(String::asBase64(data.data(), data.size())))
+{}
+
 JSONVariant::JSONVariant(uint32_t i) noexcept
     : fImpl(cJSON_CreateNumber(static_cast<double>(i)))
 {}
@@ -49,16 +53,21 @@ JSONVariant::JSONVariant(const char* s) noexcept
     : fImpl(cJSON_CreateString(s))
 {}
 
-JSONVariant::JSONVariant(const BinaryData& data) noexcept
-    : fImpl(cJSON_CreateString(String::asBase64(data.data(), data.size())))
-{}
-
 JSONVariant::JSONVariant(std::initializer_list<JSONVariant> l) noexcept
     : fImpl(cJSON_CreateArray())
 {
     for (std::initializer_list<JSONVariant>::const_iterator it = l.begin(); it != l.end(); ++it) {
         pushArrayItem(*it);
     }
+}
+
+JSONVariant::~JSONVariant()
+{
+    if (fImpl != nullptr) {
+        cJSON_Delete(fImpl);
+    }
+
+    fImpl = nullptr;
 }
 
 JSONVariant::JSONVariant(const JSONVariant& v) noexcept
@@ -106,15 +115,6 @@ JSONVariant JSONVariant::createObject() noexcept
     return JSONVariant(cJSON_CreateObject());
 }
 
-JSONVariant::~JSONVariant()
-{
-    if (fImpl != nullptr) {
-        cJSON_Delete(fImpl);
-    }
-
-    fImpl = nullptr;
-}
-
 bool JSONVariant::isNull() const noexcept
 {
     return cJSON_IsNull(fImpl);
@@ -133,6 +133,31 @@ bool JSONVariant::isNumber() const noexcept
 bool JSONVariant::isString() const noexcept
 {
     return cJSON_IsString(fImpl);
+}
+
+bool JSONVariant::isBinaryData() const noexcept
+{
+    if (! isString()) {
+        return false;
+    }
+
+    String s = getString();
+    size_t len = s.length();
+    const char *data = s.buffer();
+
+    for (size_t i = 0; i < len; ++i) {
+        if ( ! ((data[i] >= 'A') && (data[i] <= 'Z'))
+            || ((data[i] >= 'a') && (data[i] <= 'z'))
+            || ((data[i] >= '0') && (data[i] <= '9'))
+            ||  (data[i] == '+')
+            ||  (data[i] == '/')
+            ||  (data[i] == '=') ) {
+            return false;
+        }
+
+    }
+
+    return true;
 }
 
 bool JSONVariant::isArray() const noexcept
@@ -195,17 +220,17 @@ void JSONVariant::pushArrayItem(const JSONVariant& value) noexcept
     cJSON_AddItemToArray(fImpl, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSONVariant::setArrayItem(int idx, const JSONVariant& value) /*noexcept*/
+void JSONVariant::setArrayItem(int idx, const JSONVariant& value) noexcept
 {
     cJSON_ReplaceItemInArray(fImpl, idx, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSONVariant::insertArrayItem(int idx, const JSONVariant& value) /*noexcept*/
+void JSONVariant::insertArrayItem(int idx, const JSONVariant& value) noexcept
 {
     cJSON_InsertItemInArray(fImpl, idx, cJSON_Duplicate(value.fImpl, true));
 }
 
-void JSONVariant::setObjectItem(const char* key, const JSONVariant& value) /*noexcept*/
+void JSONVariant::setObjectItem(const char* key, const JSONVariant& value) noexcept
 {
     if (cJSON_HasObjectItem(fImpl, key)) {
         cJSON_ReplaceItemInObject(fImpl, key, cJSON_Duplicate(value.fImpl, true));

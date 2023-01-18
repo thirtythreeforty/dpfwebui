@@ -19,49 +19,49 @@
 #ifndef BSON_VARIANT_HPP
 #define BSON_VARIANT_HPP
 
+#if !defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+# error BSONVariant is only available with HIPHOP_MESSAGE_PROTOCOL_BINARY
+#endif
+
 #include <initializer_list>
 
 #include "distrho/extra/String.hpp"
+#include "bson.h"
 
 #include "VariantHelper.hpp"
-#include "bson.h"
 
 START_NAMESPACE_DISTRHO
 
 class BSONVariant
 {
 public:
-    // Constructors
     BSONVariant() noexcept;
     BSONVariant(bool b) noexcept;
     BSONVariant(double d) noexcept;
     BSONVariant(String s) noexcept;
+    BSONVariant(const BinaryData& data) noexcept;
 
     // Convenience constructors for plugin code
     BSONVariant(uint32_t i) noexcept;
     BSONVariant(float f) noexcept;
     BSONVariant(const char* s) noexcept;
-    BSONVariant(const BinaryData& data) noexcept;
     BSONVariant(std::initializer_list<BSONVariant> l) noexcept;
 
-    // Copy and move semantics
+    ~BSONVariant();
+
     BSONVariant(const BSONVariant& v) noexcept;
     BSONVariant& operator=(const BSONVariant& v) noexcept;
     BSONVariant(BSONVariant&& v) noexcept;
     BSONVariant& operator=(BSONVariant&& v) noexcept;
 
-    // Factory methods
     static BSONVariant createArray() noexcept;
     static BSONVariant createObject() noexcept;
 
-    // Destructor
-    ~BSONVariant();
-
-    // Getters
     bool isNull() const noexcept;
     bool isBoolean() const noexcept;
     bool isNumber() const noexcept;
     bool isString() const noexcept;
+    bool isBinaryData() const noexcept;
     bool isArray() const noexcept;
     bool isObject() const noexcept;
 
@@ -75,19 +75,13 @@ public:
     BSONVariant operator[](int idx) const noexcept;
     BSONVariant operator[](const char* key) const noexcept;
 
-    // Setters
     void pushArrayItem(const BSONVariant& value) noexcept;
-    void setArrayItem(int idx, const BSONVariant& value) /*noexcept*/;
-    void insertArrayItem(int idx, const BSONVariant& value) /*noexcept*/;
-    void setObjectItem(const char* key, const BSONVariant& value) /*noexcept*/;
 
-    // Operations on arrays
     BSONVariant sliceArray(int start, int end = -1) const
     {
         return ::sliceVariantArray(*this, start, end);
     }
 
-    // Arithmetic operators
     BSONVariant& operator+=(const BSONVariant& other)
     {
         return ::joinVariantArrays(*this, other);

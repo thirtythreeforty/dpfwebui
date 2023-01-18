@@ -58,7 +58,7 @@ protected:
     virtual void onClientConnected(Client client);
 
 private:
-    void initHandlers();
+    void setBuiltInMessageHandlers();
     void initServer();
     int  findAvailablePort();
 #if HIPHOP_UI_ZEROCONF

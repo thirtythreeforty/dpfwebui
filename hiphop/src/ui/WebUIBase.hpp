@@ -74,7 +74,7 @@ protected:
     void handleMessage(const Variant& args, uintptr_t origin);
 
 private:
-    void initHandlers();
+    void setBuiltInMessageHandlers();
 
     uint  fInitWidthCssPx;
     uint  fInitHeightCssPx;

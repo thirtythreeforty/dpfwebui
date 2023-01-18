@@ -22,46 +22,42 @@
 #include <initializer_list>
 
 #include "distrho/extra/String.hpp"
+#include "ui/vendor/cJSON.h"
 
 #include "VariantHelper.hpp"
-#include "cJSON.h"
 
 START_NAMESPACE_DISTRHO
 
 class JSONVariant
 {
 public:
-    // Constructors
     JSONVariant() noexcept;
     JSONVariant(bool b) noexcept;
     JSONVariant(double d) noexcept;
     JSONVariant(String s) noexcept;
+    JSONVariant(const BinaryData& data) noexcept;
 
     // Convenience constructors for plugin code
     JSONVariant(uint32_t i) noexcept;
     JSONVariant(float f) noexcept;
     JSONVariant(const char* s) noexcept;
-    JSONVariant(const BinaryData& data) noexcept;
     JSONVariant(std::initializer_list<JSONVariant> l) noexcept;
 
-    // Copy and move semantics
+    ~JSONVariant();
+
     JSONVariant(const JSONVariant& v) noexcept;
     JSONVariant& operator=(const JSONVariant& v) noexcept;
     JSONVariant(JSONVariant&& v) noexcept;
     JSONVariant& operator=(JSONVariant&& v) noexcept;
 
-    // Factory methods
     static JSONVariant createArray() noexcept;
     static JSONVariant createObject() noexcept;
 
-    // Destructor
-    ~JSONVariant();
-
-    // Getters
     bool isNull() const noexcept;
     bool isBoolean() const noexcept;
     bool isNumber() const noexcept;
     bool isString() const noexcept;
+    bool isBinaryData() const noexcept;
     bool isArray() const noexcept;
     bool isObject() const noexcept;
 
@@ -75,19 +71,16 @@ public:
     JSONVariant operator[](int idx) const noexcept;
     JSONVariant operator[](const char* key) const noexcept;
 
-    // Setters
     void pushArrayItem(const JSONVariant& value) noexcept;
-    void setArrayItem(int idx, const JSONVariant& value) /*noexcept*/;
-    void insertArrayItem(int idx, const JSONVariant& value) /*noexcept*/;
-    void setObjectItem(const char* key, const JSONVariant& value) /*noexcept*/;
+    void setArrayItem(int idx, const JSONVariant& value) noexcept;
+    void insertArrayItem(int idx, const JSONVariant& value) noexcept;
+    void setObjectItem(const char* key, const JSONVariant& value) noexcept;
 
-    // Operations on arrays
     JSONVariant sliceArray(int start, int end = -1) const
     {
         return ::sliceVariantArray(*this, start, end);
     }
 
-    // Arithmetic operators
     JSONVariant& operator+=(const JSONVariant& other)
     {
         return ::joinVariantArrays(*this, other);
@@ -99,7 +92,6 @@ public:
         return lhs;
     }
 
-    // Type casting operators
     operator bool()   const noexcept { return getBoolean(); }
     operator double() const noexcept { return getNumber(); }
     operator String() const noexcept { return getString(); }

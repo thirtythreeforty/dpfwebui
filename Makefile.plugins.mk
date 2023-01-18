@@ -114,13 +114,13 @@ ifeq ($(WEB_UI),true)
 HIPHOP_FILES_UI += WebUIBase.cpp \
 				   WebViewBase.cpp \
 				   WebViewUI.cpp \
-				   ../JSONVariant.cpp \
-				   ../cJSON.c
+				   JSONVariant.cpp \
+				   vendor/cJSON.c
 ifeq ($(HIPHOP_NETWORK_UI),true)
 HIPHOP_FILES_UI += NetworkUI.cpp \
 				   WebServer.cpp
 ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
-HIPHOP_FILES_UI += ../BSONVariant.cpp
+HIPHOP_FILES_UI += BSONVariant.cpp
 endif
 endif
 ifeq ($(LINUX),true)

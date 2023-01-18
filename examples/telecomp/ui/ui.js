@@ -27,7 +27,7 @@ const PARAMETERS = [
 class TeleCompExampleUI extends DISTRHO.UI {
 
     constructor() {
-        super({binarySocket: true});
+        super({binaryMessageProtocol: true});
 
         // Automatically display a modal view when connection is lost
         helper.enableOfflineModal(this);

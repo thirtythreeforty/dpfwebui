@@ -28,7 +28,7 @@ WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio)
     , fInitWidthCssPx(widthCssPx)
     , fInitHeightCssPx(heightCssPx)
 {
-    initHandlers();
+    setBuiltInMessageHandlers();
 }
 
 void WebUIBase::queue(const UiBlock& block)
@@ -144,7 +144,7 @@ void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
     handler.second(handlerArgs, origin);
 }
 
-void WebUIBase::initHandlers()
+void WebUIBase::setBuiltInMessageHandlers()
 {
     setMessageHandler("getInitWidthCSS", 0, [this](const Variant&, uintptr_t origin) {
         postMessage({"UI", "getInitWidthCSS", static_cast<double>(getInitWidthCSS())}, origin);

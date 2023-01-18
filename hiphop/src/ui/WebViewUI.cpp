@@ -35,7 +35,7 @@ WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCs
     , fPlatformWindow(0)
     , fWebView(nullptr)
 {
-    initHandlers();
+    setBuiltInMessageHandlers();
 }
 
 WebViewUI::~WebViewUI()
@@ -167,7 +167,7 @@ void WebViewUI::sizeChanged(uint width, uint height)
     postMessage({"UI", "sizeChanged", width, height}, 0);
 }
 
-void WebViewUI::initHandlers()
+void WebViewUI::setBuiltInMessageHandlers()
 {
     // These handlers only make sense for the plugin embedded web view
 

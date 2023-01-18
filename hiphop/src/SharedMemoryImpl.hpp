@@ -20,7 +20,7 @@
 #define SHARED_MEMORY_IMPL_HPP
 
 #include "distrho/extra/String.hpp"
-#include "SharedMemory.hpp"
+#include "extra/SharedMemory.hpp"
 
 // Plugin code should leave MSB off
 #define kShMemHintWasmBinary  0x1

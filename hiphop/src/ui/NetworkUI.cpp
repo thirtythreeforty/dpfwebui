@@ -68,7 +68,7 @@ NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio)
     }
 #endif
 
-    initHandlers();
+    setBuiltInMessageHandlers();
 
     if ((! DISTRHO_PLUGIN_WANT_STATE) || isStandalone()) {
         // Port is not remembered when state support is disabled
@@ -225,7 +225,7 @@ void NetworkUI::onClientConnected(Client client)
     (void)client;
 }
 
-void NetworkUI::initHandlers()
+void NetworkUI::setBuiltInMessageHandlers()
 {
     // Broadcast parameter updates to all clients except the originating one
     const MessageHandler& parameterHandlerSuper = getMessageHandler("setParameterValue");

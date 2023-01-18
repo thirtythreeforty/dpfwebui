@@ -44,6 +44,12 @@ BSONVariant::BSONVariant(String s) noexcept
     std::strcpy(fString, s.buffer());
 }
 
+BSONVariant::BSONVariant(const BinaryData& data) noexcept
+    : fType(BSON_TYPE_BINARY)
+{
+    fData = new BinaryData(data.begin(), data.end());
+}
+
 BSONVariant::BSONVariant(uint32_t i) noexcept
     : fType(BSON_TYPE_DOUBLE)
     , fDouble(static_cast<double>(i))
@@ -61,12 +67,6 @@ BSONVariant::BSONVariant(const char* s) noexcept
     std::strcpy(fString, s);
 }
 
-BSONVariant::BSONVariant(const BinaryData& data) noexcept
-    : fType(BSON_TYPE_BINARY)
-{
-    fData = new BinaryData(data.begin(), data.end());
-}
-
 BSONVariant::BSONVariant(std::initializer_list<BSONVariant> l) noexcept
     : fType(BSON_TYPE_ARRAY)
     , fArray(bson_new())
@@ -74,6 +74,11 @@ BSONVariant::BSONVariant(std::initializer_list<BSONVariant> l) noexcept
     for (std::initializer_list<BSONVariant>::const_iterator it = l.begin(); it != l.end(); ++it) {
         pushArrayItem(*it);
     }
+}
+
+BSONVariant::~BSONVariant()
+{
+    destroy();
 }
 
 BSONVariant::BSONVariant(const BSONVariant& v) noexcept
@@ -114,11 +119,6 @@ BSONVariant BSONVariant::createObject() noexcept
     return BSONVariant(BSON_TYPE_DOCUMENT, bson_new());
 }
 
-BSONVariant::~BSONVariant()
-{
-    destroy();
-}
-
 bool BSONVariant::isNull() const noexcept
 {
     return fType == BSON_TYPE_NULL;
@@ -137,6 +137,11 @@ bool BSONVariant::isNumber() const noexcept
 bool BSONVariant::isString() const noexcept
 {
     return fType == BSON_TYPE_UTF8;
+}
+
+bool BSONVariant::isBinaryData() const noexcept
+{
+    return fType == BSON_TYPE_BINARY;
 }
 
 bool BSONVariant::isArray() const noexcept
@@ -268,21 +273,6 @@ void BSONVariant::pushArrayItem(const BSONVariant& value) noexcept
         default:
             break;
     }
-}
-
-void BSONVariant::setArrayItem(int /*idx*/, const BSONVariant& /*value*/) /*noexcept*/
-{
-    throw std::runtime_error("setArrayItem() not implemented");
-}
-
-void BSONVariant::insertArrayItem(int /*idx*/, const BSONVariant& /*value*/) /*noexcept*/
-{
-    throw std::runtime_error("insertArrayItem() not implemented");
-}
-
-void BSONVariant::setObjectItem(const char* /*key*/, const BSONVariant& /*value*/) /*noexcept*/
-{
-    throw std::runtime_error("setObjectItem() not implemented");
 }
 
 BinaryData BSONVariant::toBSON() const
