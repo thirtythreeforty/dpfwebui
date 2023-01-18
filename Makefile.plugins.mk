@@ -115,7 +115,7 @@ HIPHOP_FILES_UI += WebUIBase.cpp \
 				   WebViewBase.cpp \
 				   WebViewUI.cpp \
 				   JSONVariant.cpp \
-				   vendor/cJSON.c
+				   thirdparty/cJSON.c
 ifeq ($(HIPHOP_NETWORK_UI),true)
 HIPHOP_FILES_UI += NetworkUI.cpp \
 				   WebServer.cpp
@@ -488,7 +488,7 @@ endif
 
 ifeq ($(WEB_UI),true)
 ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
-FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js/dpf.js
+FRAMEWORK_JS_PATH = $(HIPHOP_SRC_PATH)/ui/dpf.js
 DPF_JS_INCLUDE_PATH = $(FRAMEWORK_JS_PATH).inc
 
 TARGETS += $(DPF_JS_INCLUDE_PATH)
@@ -809,10 +809,9 @@ ifeq ($(WEB_UI),true)
 HIPHOP_TARGET += lib_ui_plugin
 ifneq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
 HIPHOP_TARGET += lib_ui_framework
-LIB_JS_PATH = $(HIPHOP_SRC_PATH)/ui/js
-LIB_JS_FILES = $(LIB_JS_PATH)/dpf.js
+LIB_JS_FILES = $(HIPHOP_SRC_PATH)/ui/dpf.js
 ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
-LIB_JS_FILES += $(LIB_JS_PATH)/bson.min.js
+LIB_JS_FILES += $(HIPHOP_SRC_PATH)/ui/thirdparty/bson.min.js
 endif
 endif
 # https://unix.stackexchange.com/questions/178235/how-is-cp-f-different-from-cp-remove-destination

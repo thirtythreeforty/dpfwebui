@@ -22,7 +22,7 @@
 #include <initializer_list>
 
 #include "distrho/extra/String.hpp"
-#include "ui/vendor/cJSON.h"
+#include "ui/thirdparty/cJSON.h"
 
 #include "VariantHelper.hpp"
 

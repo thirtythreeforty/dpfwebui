@@ -416,12 +416,14 @@ int NetworkUI::handleWebServerRead(Client client, const char* data)
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
 String NetworkUI::getMethodSignature(const Variant& args)
 {
-    return String(args[1].getNumber());
+    return WebUIBase::getMethodSignature(args);
+    //return String(args[1].getNumber());
 }
 
 void NetworkUI::setMethodSignature(Variant& args, String method)
 {
-    args.insertArrayItem(1, djb2hash(method));
+    WebUIBase::setMethodSignature(args, method);
+    //args.insertArrayItem(1, djb2hash(method));
 }
 #endif
 
