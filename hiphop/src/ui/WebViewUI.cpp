@@ -35,7 +35,7 @@ WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCs
     , fPlatformWindow(0)
     , fWebView(nullptr)
 {
-    setBuiltInMessageHandlers();
+    setBuiltInMethodHandlers();
 }
 
 WebViewUI::~WebViewUI()
@@ -164,49 +164,49 @@ void WebViewUI::sizeChanged(uint width, uint height)
 {
     WebViewUIBase::sizeChanged(width, height);
     fWebView->setSize(width, height);
-    postMessage({"UI", "sizeChanged", width, height}, 0);
+    notify("sizeChanged", { width, height }, 0);
 }
 
-void WebViewUI::setBuiltInMessageHandlers()
+void WebViewUI::setBuiltInMethodHandlers()
 {
     // These handlers only make sense for the plugin embedded web view
 
-    setMessageHandler("getWidth", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "getWidth", static_cast<double>(getWidth())}, origin);
+    setMethodHandler("getWidth", 0, [this](const Variant&, uintptr_t origin) {
+        notify("getWidth", { static_cast<double>(getWidth()) }, origin);
     });
 
-    setMessageHandler("getHeight", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "getHeight", static_cast<double>(getHeight())}, origin);
+    setMethodHandler("getHeight", 0, [this](const Variant&, uintptr_t origin) {
+        notify("getHeight", { static_cast<double>(getHeight()) }, origin);
     });
 
-    setMessageHandler("isResizable", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "isResizable", isResizable()}, origin);
+    setMethodHandler("isResizable", 0, [this](const Variant&, uintptr_t origin) {
+        notify("isResizable", { isResizable() }, origin);
     });
 
-    setMessageHandler("setWidth", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setMethodHandler("setWidth", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         setWidth(static_cast<uint>(args[0].getNumber()));
     });
 
-    setMessageHandler("setHeight", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setMethodHandler("setHeight", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         setHeight(static_cast<uint>(args[0].getNumber()));
     });
 
-    setMessageHandler("setSize", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setMethodHandler("setSize", 2, [this](const Variant& args, uintptr_t /*origin*/) {
         setSize(
             static_cast<uint>(args[0].getNumber()), // width
             static_cast<uint>(args[1].getNumber())  // height
         );
     });
 
-    setMessageHandler("setKeyboardFocus", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setMethodHandler("setKeyboardFocus", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         setKeyboardFocus(static_cast<bool>(args[0].getBoolean()));
     });
 
-    setMessageHandler("ready", 0, [this](const Variant&, uintptr_t /*origin*/) {
+    setMethodHandler("ready", 0, [this](const Variant&, uintptr_t /*origin*/) {
         ready();
     });
 
-    setMessageHandler("openSystemWebBrowser", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setMethodHandler("openSystemWebBrowser", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         String url = args[0].getString();
         openSystemWebBrowser(url);
     });

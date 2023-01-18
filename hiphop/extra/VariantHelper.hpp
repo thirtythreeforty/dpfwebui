@@ -19,7 +19,6 @@
 #ifndef VARIANT_HELPER_HPP
 #define VARIANT_HELPER_HPP
 
-#include <stdexcept>
 #include <vector>
 
 #include "src/DistrhoDefines.h"
@@ -29,10 +28,10 @@ START_NAMESPACE_DISTRHO
 typedef std::vector<uint8_t> BinaryData;
 
 template<class T>
-T sliceVariantArray(const T& a, int start, int end = -1)
+T sliceVariantArray(const T& a, int start, int end = -1) noexcept
 {
     if (! a.isArray()) {
-        throw std::runtime_error("sliceArray() requires an array argument");
+        return T();
     }
 
     T b = T::createArray();
@@ -63,10 +62,10 @@ T sliceVariantArray(const T& a, int start, int end = -1)
 }
 
 template<class T>
-T& joinVariantArrays(T& a, const T& b)
+T& joinVariantArrays(T& a, const T& b) noexcept
 {
     if (! a.isArray() || ! b.isArray()) {
-        throw std::runtime_error("joinArrays() requires two array arguments");
+        return a;
     }
 
     const int size = b.getArraySize();

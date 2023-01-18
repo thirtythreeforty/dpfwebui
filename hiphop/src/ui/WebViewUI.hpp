@@ -78,7 +78,7 @@ protected:
     virtual void      processStandaloneEvents() = 0;
 
 private:
-    void setBuiltInMessageHandlers();
+    void setBuiltInMethodHandlers();
 
     // WebViewEventHandler
 

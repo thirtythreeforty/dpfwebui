@@ -44,9 +44,9 @@ public:
     typedef std::function<void()> UiBlock;
     void queue(const UiBlock& block);
 
-    typedef std::function<void(const Variant& args, uintptr_t origin)> MessageHandler;
-    const MessageHandler& getMessageHandler(const char* name);
-    void setMessageHandler(const char* name, int argCount, const MessageHandler& handler);
+    typedef std::function<void(const Variant& args, uintptr_t origin)> MethodHandler;
+    const MethodHandler& getMethodHandler(const char* name);
+    void setMethodHandler(const char* name, int argCount, const MethodHandler& handler);
 
 protected:
     bool isDryRun();
@@ -72,18 +72,19 @@ protected:
     virtual void onMessageReceived(const Variant& args, uintptr_t origin);
 
     void handleMessage(const Variant& args, uintptr_t origin);
+    void notify(const char* method, Variant args, uintptr_t destination);
 
 private:
-    void setBuiltInMessageHandlers();
+    void setBuiltInMethodHandlers();
 
     uint  fInitWidthCssPx;
     uint  fInitHeightCssPx;
     Mutex fUiQueueMutex;
     std::queue<UiBlock> fUiQueue;
 
-    typedef std::pair<int, MessageHandler> ArgumentCountAndMessageHandler;
-    typedef std::unordered_map<String, ArgumentCountAndMessageHandler> MessageHandlerMap;
-    MessageHandlerMap fHandler;
+    typedef std::pair<int, MethodHandler> ArgumentCountAndMethodHandler;
+    typedef std::unordered_map<String, ArgumentCountAndMethodHandler> MethodHandlerMap;
+    MethodHandlerMap fHandler;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 

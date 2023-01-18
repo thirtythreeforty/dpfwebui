@@ -76,17 +76,17 @@ public:
     void insertArrayItem(int idx, const JSONVariant& value) noexcept;
     void setObjectItem(const char* key, const JSONVariant& value) noexcept;
 
-    JSONVariant sliceArray(int start, int end = -1) const
+    JSONVariant sliceArray(int start, int end = -1) const noexcept
     {
         return ::sliceVariantArray(*this, start, end);
     }
 
-    JSONVariant& operator+=(const JSONVariant& other)
+    JSONVariant& operator+=(const JSONVariant& other) noexcept
     {
         return ::joinVariantArrays(*this, other);
     }
 
-    friend JSONVariant operator+(JSONVariant lhs, const JSONVariant& rhs)
+    friend JSONVariant operator+(JSONVariant lhs, const JSONVariant& rhs) noexcept
     {
         lhs += rhs;
         return lhs;

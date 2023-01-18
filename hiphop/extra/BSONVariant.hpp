@@ -76,24 +76,27 @@ public:
     BSONVariant operator[](const char* key) const noexcept;
 
     void pushArrayItem(const BSONVariant& value) noexcept;
+    void setArrayItem(int idx, const BSONVariant& value) noexcept;
+    void insertArrayItem(int idx, const BSONVariant& value) noexcept;
+    void setObjectItem(const char* key, const BSONVariant& value) noexcept;
 
-    BSONVariant sliceArray(int start, int end = -1) const
+    BSONVariant sliceArray(int start, int end = -1) const noexcept
     {
         return ::sliceVariantArray(*this, start, end);
     }
 
-    BSONVariant& operator+=(const BSONVariant& other)
+    BSONVariant& operator+=(const BSONVariant& other) noexcept
     {
         return ::joinVariantArrays(*this, other);
     }
 
-    friend BSONVariant operator+(BSONVariant lhs, const BSONVariant& rhs)
+    friend BSONVariant operator+(BSONVariant lhs, const BSONVariant& rhs) noexcept
     {
         lhs += rhs;
         return lhs;
     }
 
-    BinaryData toBSON() const;
+    BinaryData toBSON() const noexcept;
     static BSONVariant fromBSON(const BinaryData& data, bool asArray) noexcept;
 
 private:
@@ -102,6 +105,9 @@ private:
     void copy(const BSONVariant& v) noexcept;
     void move(BSONVariant&& v) noexcept;
     void destroy() noexcept;
+    
+    static BSONVariant get(const bson_t* bson, const char* key) noexcept;
+    static void        set(bson_t* bson, const char* key, const BSONVariant& value) noexcept;
 
     bson_type_t fType;
 

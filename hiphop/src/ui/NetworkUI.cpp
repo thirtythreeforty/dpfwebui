@@ -68,7 +68,7 @@ NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio)
     }
 #endif
 
-    setBuiltInMessageHandlers();
+    setBuiltInMethodHandlers();
 
     if ((! DISTRHO_PLUGIN_WANT_STATE) || isStandalone()) {
         // Port is not remembered when state support is disabled
@@ -225,11 +225,11 @@ void NetworkUI::onClientConnected(Client client)
     (void)client;
 }
 
-void NetworkUI::setBuiltInMessageHandlers()
+void NetworkUI::setBuiltInMethodHandlers()
 {
     // Broadcast parameter updates to all clients except the originating one
-    const MessageHandler& parameterHandlerSuper = getMessageHandler("setParameterValue");
-    setMessageHandler("setParameterValue", 2, [this, parameterHandlerSuper](const Variant& args, uintptr_t origin) {
+    const MethodHandler& parameterHandlerSuper = getMethodHandler("setParameterValue");
+    setMethodHandler("setParameterValue", 2, [this, parameterHandlerSuper](const Variant& args, uintptr_t origin) {
         queue([this, parameterHandlerSuper, args, origin] {
             const uint32_t index = static_cast<uint32_t>(args[0].getNumber());
             const float value = static_cast<float>(args[1].getNumber());
@@ -244,8 +244,8 @@ void NetworkUI::setBuiltInMessageHandlers()
 
 #if DISTRHO_PLUGIN_WANT_STATE
     // Broadcast state updates to all clients except the originating one
-    const MessageHandler& stateHandlerSuper = getMessageHandler("setState");
-    setMessageHandler("setState", 2, [this, stateHandlerSuper](const Variant& args, uintptr_t origin) {
+    const MethodHandler& stateHandlerSuper = getMethodHandler("setState");
+    setMethodHandler("setState", 2, [this, stateHandlerSuper](const Variant& args, uintptr_t origin) {
         queue([this, stateHandlerSuper, args, origin] {
             const String key = args[0].getString();
             const String value = args[1].getString();
@@ -259,51 +259,51 @@ void NetworkUI::setBuiltInMessageHandlers()
 #endif
 
     // Custom method for exchanging UI-only messages between clients
-    setMessageHandler("broadcast", 1, [this](const Variant& args, uintptr_t origin) {
+    setMethodHandler("broadcast", 1, [this](const Variant& args, uintptr_t origin) {
         const Variant msg = Variant({"UI", "messageReceived"}) + args;
         broadcastMessage(msg, /*exclude*/reinterpret_cast<Client>(origin));
     });
 
 #if HIPHOP_UI_ZEROCONF
-    setMessageHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "isZeroconfPublished", fZeroconf.isPublished()}, origin);
+    setMethodHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
+        notify("isZeroconfPublished", { fZeroconf.isPublished() }, origin);
     });
 
-    setMessageHandler("setZeroconfPublished", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setMethodHandler("setZeroconfPublished", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         fZeroconfPublish = args[0].getBoolean();
         setState("_zc_published", fZeroconfPublish ? "true" : "false");
         zeroconfStateUpdated();
     });
 
-    setMessageHandler("getZeroconfId", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "getZeroconfId", fZeroconfId}, origin);
+    setMethodHandler("getZeroconfId", 0, [this](const Variant&, uintptr_t origin) {
+        notify("getZeroconfId", { fZeroconfId }, origin);
     });
 
-    setMessageHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "getZeroconfName", fZeroconfName}, origin);
+    setMethodHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
+        notify("getZeroconfName", { fZeroconfName }, origin);
     });
 
-    setMessageHandler("setZeroconfName", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setMethodHandler("setZeroconfName", 1, [this](const Variant& args, uintptr_t /*origin*/) {
         fZeroconfName = args[0].getString();
         setState("_zc_name", fZeroconfName);
         zeroconfStateUpdated();
     });
 #else
-    setMessageHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "isZeroconfPublished", false}, origin);
+    setMethodHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
+        notify("isZeroconfPublished", { false }, origin);
     });
 
-    setMessageHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "getZeroconfName", ""}, origin);
+    setMethodHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
+        notify("getZeroconfName", { "" }, origin);
     });
 #endif
 
-    setMessageHandler("getPublicUrl", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "getPublicUrl", getPublicUrl()}, origin);
+    setMethodHandler("getPublicUrl", 0, [this](const Variant&, uintptr_t origin) {
+        notify("getPublicUrl", { getPublicUrl() }, origin);
     });
 
-    setMessageHandler("ping", 0, [this](const Variant&, uintptr_t origin) {
-        postMessage({"UI", "pong"}, origin);
+    setMethodHandler("ping", 0, [this](const Variant&, uintptr_t origin) {
+        notify("pong", {}, origin);
     });
 }
 

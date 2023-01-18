@@ -17,6 +17,7 @@
  */
 
 #include <stdexcept>
+#include <string>
 
 #include "extra/BSONVariant.hpp"
 
@@ -181,55 +182,12 @@ int BSONVariant::getArraySize() const noexcept
 
 BSONVariant BSONVariant::getArrayItem(int idx) const noexcept
 {
-    return getObjectItem(String(idx).buffer());
+    return get(fArray, String(idx).buffer());
 }
 
 BSONVariant BSONVariant::getObjectItem(const char* key) const noexcept
 {
-    bson_iter_t iter;
-    bson_iter_init(&iter, fArray);
-
-    if (! bson_iter_find(&iter, key)) {
-        return BSONVariant();
-    }
-
-    BSONVariant v;
-    bson_type_t type = bson_iter_type(&iter);
-
-    switch (type) {
-        case BSON_TYPE_NULL:
-            break;
-        case BSON_TYPE_BOOL:
-            v = BSONVariant(bson_iter_bool(&iter));
-            break;
-        case BSON_TYPE_INT32:
-        case BSON_TYPE_INT64:
-        case BSON_TYPE_DOUBLE:
-            v = BSONVariant(bson_iter_as_double(&iter));
-            break;
-        case BSON_TYPE_UTF8:
-            v = BSONVariant(bson_iter_utf8(&iter, nullptr));
-            break;
-        case BSON_TYPE_BINARY: {
-            uint32_t len;
-            const uint8_t* data;
-            bson_iter_binary(&iter, nullptr, &len, &data);
-            v = BSONVariant(BinaryData(data, data + static_cast<size_t>(len)));
-            break;
-        }
-        case BSON_TYPE_ARRAY:
-        case BSON_TYPE_DOCUMENT: {
-            uint32_t size;
-            const uint8_t *data;
-            bson_iter_array(&iter, &size, &data);
-            v = BSONVariant(type, bson_new_from_data(data, static_cast<size_t>(size)));
-            break;
-        }
-        default:
-            break;
-    }
-
-    return v;
+    return get(fArray, key);
 }
 
 BSONVariant BSONVariant::operator[](int idx) const noexcept
@@ -239,49 +197,81 @@ BSONVariant BSONVariant::operator[](int idx) const noexcept
 
 BSONVariant BSONVariant::operator[](const char* key) const noexcept
 {
-    return getObjectItem(key);
+    return get(fArray, key);
 }
 
 void BSONVariant::pushArrayItem(const BSONVariant& value) noexcept
 {
-    String tmp(bson_count_keys(fArray));
-    const char* key = tmp.buffer();
-
-    switch (value.fType) {
-        case BSON_TYPE_NULL:
-            bson_append_null(fArray, key, -1);
-            break;
-        case BSON_TYPE_BOOL:
-            bson_append_bool(fArray, key, -1, value.fBool);
-            break;
-        case BSON_TYPE_DOUBLE:
-            bson_append_double(fArray, key, -1, value.fDouble);
-            break;
-        case BSON_TYPE_UTF8:
-            bson_append_utf8(fArray, key, -1, value.fString, -1);
-            break;
-        case BSON_TYPE_BINARY:
-            bson_append_binary(fArray, key, -1, BSON_SUBTYPE_BINARY, value.fData->data(),
-                                static_cast<uint32_t>(value.fData->size()));
-            break;
-        case BSON_TYPE_ARRAY:
-            bson_append_array(fArray, key, -1, value.fArray);
-            break;
-        case BSON_TYPE_DOCUMENT:
-            bson_append_document(fArray, key, -1, value.fArray);
-            break;
-        default:
-            break;
-    }
+    String key(bson_count_keys(fArray));
+    set(fArray, key.buffer(), value);
 }
 
-BinaryData BSONVariant::toBSON() const
+void BSONVariant::setArrayItem(int idx, const BSONVariant& value) noexcept
 {
-    if ((fType != BSON_TYPE_ARRAY) && (fType != BSON_TYPE_DOCUMENT)) {
-        throw std::runtime_error("toBSON() only works for array and document types");
+    String key(idx);
+    set(fArray, key.buffer(), value);
+}
+
+void BSONVariant::insertArrayItem(int idx, const BSONVariant& value) noexcept
+{
+    if (fArray == nullptr) {
+        d_stderr2("insertArrayItem() fArray is null !!!");
+        return;
     }
 
-    const uint8_t* data = bson_get_data(fArray);
+    bson_iter_t iter;
+
+    if (! bson_iter_init(&iter, fArray)) {
+        return;
+    }
+
+    int keyCount = static_cast<int>(bson_count_keys(fArray));
+
+    if (idx > keyCount) {
+        return;
+    }
+
+    if (idx == keyCount) {
+        pushArrayItem(value);
+        return;
+    }
+
+    bson_t* newArr = bson_new();
+    int newIdx;
+
+    while (bson_iter_next(&iter)) {
+        try {
+            newIdx = std::stoi(bson_iter_key(&iter));
+        } catch (std::invalid_argument const& ex) {
+            bson_destroy(newArr);
+            return;
+        }
+
+        if (newIdx >= idx) {
+            newIdx++;
+        }
+
+        bson_append_iter(newArr, String(newIdx).buffer(), -1, &iter);
+    }
+
+    bson_destroy(fArray);
+    fArray = newArr;
+
+    set(fArray, String(idx).buffer(), value);
+}
+
+void BSONVariant::setObjectItem(const char* key, const BSONVariant& value) noexcept
+{
+    set(fArray, key, value);
+}
+
+BinaryData BSONVariant::toBSON() const noexcept
+{
+    if (fArray == nullptr) {
+        return BinaryData();
+    }
+
+    const uint8_t* data = bson_get_data(fArray);   
     
     return BinaryData(data, data + fArray->len);
 }
@@ -349,6 +339,88 @@ void BSONVariant::destroy() noexcept
         case BSON_TYPE_ARRAY:
         case BSON_TYPE_DOCUMENT:
             bson_destroy(fArray);
+            break;
+        default:
+            break;
+    }
+}
+
+BSONVariant BSONVariant::get(const bson_t* bson, const char* key) noexcept
+{
+    bson_iter_t iter;
+
+    if ((bson == nullptr) || !bson_iter_init(&iter, bson)
+            || !bson_iter_find(&iter, key)) {
+        return BSONVariant();
+    }
+
+    BSONVariant v;
+    bson_type_t type = bson_iter_type(&iter);
+
+    switch (type) {
+        case BSON_TYPE_NULL:
+            break;
+        case BSON_TYPE_BOOL:
+            v = BSONVariant(bson_iter_bool(&iter));
+            break;
+        case BSON_TYPE_INT32:
+        case BSON_TYPE_INT64:
+        case BSON_TYPE_DOUBLE:
+            v = BSONVariant(bson_iter_as_double(&iter));
+            break;
+        case BSON_TYPE_UTF8:
+            v = BSONVariant(bson_iter_utf8(&iter, nullptr));
+            break;
+        case BSON_TYPE_BINARY: {
+            uint32_t len;
+            const uint8_t* data;
+            bson_iter_binary(&iter, nullptr, &len, &data);
+            v = BSONVariant(BinaryData(data, data + static_cast<size_t>(len)));
+            break;
+        }
+        case BSON_TYPE_ARRAY:
+        case BSON_TYPE_DOCUMENT: {
+            uint32_t size;
+            const uint8_t *data;
+            bson_iter_array(&iter, &size, &data);
+            v = BSONVariant(type, bson_new_from_data(data, static_cast<size_t>(size)));
+            break;
+        }
+        default:
+            break;
+    }
+
+    return v;
+}
+
+void BSONVariant::set(bson_t* bson, const char* key, const BSONVariant& value) noexcept
+{
+    if (bson == nullptr) {
+        return;
+    }
+
+    switch (value.fType) {
+        case BSON_TYPE_NULL:
+            bson_append_null(bson, key, -1);
+            break;
+        case BSON_TYPE_BOOL:
+            bson_append_bool(bson, key, -1, value.fBool);
+            break;
+        case BSON_TYPE_DOUBLE:
+            bson_append_double(bson, key, -1, value.fDouble);
+            break;
+        case BSON_TYPE_UTF8:
+            bson_append_utf8(bson, key, -1, value.fString, -1);
+            break;
+        case BSON_TYPE_BINARY:
+            bson_append_binary(bson, key, -1, BSON_SUBTYPE_BINARY, value.fData->data(),
+                                static_cast<uint32_t>(value.fData->size()));
+            break;
+        case BSON_TYPE_ARRAY:
+            bson_append_array(bson, key, -1, value.fArray);
+            break;
+        case BSON_TYPE_DOCUMENT:
+            bson_append_document(bson, key, -1, value.fArray);
             break;
         default:
             break;
