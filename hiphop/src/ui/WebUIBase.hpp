@@ -38,16 +38,19 @@ START_NAMESPACE_DISTRHO
 class WebUIBase : public UIEx
 {
 public:
-    WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio);
+    typedef std::function<Variant(const char*)> FunctionArgumentSerializer;
+
+    WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio,
+                FunctionArgumentSerializer funcArgSerializer = nullptr);
     virtual ~WebUIBase() {}
 
 protected:
     typedef std::function<void()> UiBlock;
     void queue(const UiBlock& block);
 
-    typedef std::function<void(const Variant& args, uintptr_t origin)> MethodHandler;
-    const MethodHandler& getMethodHandler(const char* name);
-    void setMethodHandler(const char* name, int argCount, const MethodHandler& handler);
+    typedef std::function<void(const Variant& args, uintptr_t origin)> FunctionHandler;
+    const FunctionHandler& getFunctionHandler(const char* name);
+    void setFunctionHandler(const char* name, int argCount, const FunctionHandler& handler);
 
     bool isDryRun();
     
@@ -72,23 +75,23 @@ protected:
     virtual void onMessageReceived(const Variant& args, uintptr_t origin);
 
     void handleMessage(const Variant& args, uintptr_t origin);
-    
-    virtual String getMethodSignature(const Variant& args);
-    virtual void   setMethodSignature(Variant& args, String method);
 
-    void notify(uintptr_t destination, const char* method, Variant args = Variant::createArray());
+    void callback(uintptr_t destination, const char* function, Variant args = Variant::createArray());
+
+    Variant serializeFunctionArgument(const char* function);
 
 private:
-    void setBuiltInMethodHandlers();
+    void setBuiltInFunctionHandlers();
 
-    uint  fInitWidthCssPx;
-    uint  fInitHeightCssPx;
+    uint fInitWidthCssPx;
+    uint fInitHeightCssPx;
+    FunctionArgumentSerializer fFuncArgSerializer;
     Mutex fUiQueueMutex;
     std::queue<UiBlock> fUiQueue;
 
-    typedef std::pair<int, MethodHandler> ArgumentCountAndMethodHandler;
-    typedef std::unordered_map<String, ArgumentCountAndMethodHandler> MethodHandlerMap;
-    MethodHandlerMap fHandler;
+    typedef std::pair<int, FunctionHandler> ArgumentCountAndFunctionHandler;
+    typedef std::unordered_map<String, ArgumentCountAndFunctionHandler> FunctionHandlerMap;
+    FunctionHandlerMap fHandler;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebUIBase)
 

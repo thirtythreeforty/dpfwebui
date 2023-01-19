@@ -64,7 +64,8 @@ public:
     bool isBinaryData() const noexcept;
     bool isArray() const noexcept;
     bool isObject() const noexcept;
-
+    
+    String      asString() const noexcept;
     bool        getBoolean() const noexcept;
     double      getNumber() const noexcept;
     String      getString() const noexcept;

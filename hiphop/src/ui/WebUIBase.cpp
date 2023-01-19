@@ -23,12 +23,15 @@
 
 USE_NAMESPACE_DISTRHO
 
-WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio)
+WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio,
+                        FunctionArgumentSerializer funcArgSerializer)
     : UIEx(initPixelRatio * widthCssPx, initPixelRatio * heightCssPx)
     , fInitWidthCssPx(widthCssPx)
     , fInitHeightCssPx(heightCssPx)
+    , fFuncArgSerializer(funcArgSerializer != nullptr ? funcArgSerializer
+                            : [](const char* f) { return f; })
 {
-    setBuiltInMethodHandlers();
+    setBuiltInFunctionHandlers();
 }
 
 void WebUIBase::queue(const UiBlock& block)
@@ -38,14 +41,14 @@ void WebUIBase::queue(const UiBlock& block)
     fUiQueueMutex.unlock();
 }
 
-const WebUIBase::MethodHandler& WebUIBase::getMethodHandler(const char* name)
+const WebUIBase::FunctionHandler& WebUIBase::getFunctionHandler(const char* name)
 {
     return fHandler[String(name)].second;
 }
 
-void WebUIBase::setMethodHandler(const char* name, int argCount, const MethodHandler& handler)
+void WebUIBase::setFunctionHandler(const char* name, int argCount, const FunctionHandler& handler)
 {
-    fHandler[String(name)] = std::make_pair(argCount, handler);
+    fHandler[serializeFunctionArgument(name).asString()] = std::make_pair(argCount, handler);
 }
 
 bool WebUIBase::isDryRun()
@@ -71,13 +74,13 @@ void WebUIBase::uiIdle()
 
 void WebUIBase::parameterChanged(uint32_t index, float value)
 {
-    notify(DESTINATION_ALL, "parameterChanged", { index, value });
+    callback(DESTINATION_ALL, "parameterChanged", { index, value });
 }
 
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
 void WebUIBase::programLoaded(uint32_t index)
 {
-    notify(DESTINATION_ALL, "programLoaded", { index });
+    callback(DESTINATION_ALL, "programLoaded", { index });
 }
 #endif
 
@@ -85,23 +88,23 @@ void WebUIBase::programLoaded(uint32_t index)
 void WebUIBase::stateChanged(const char* key, const char* value)
 {
     UIEx::stateChanged(key, value);
-    notify(DESTINATION_ALL, "stateChanged", { key, value });
+    callback(DESTINATION_ALL, "stateChanged", { key, value });
 }
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 void WebUIBase::sharedMemoryReady()
 {
-    notify(DESTINATION_ALL, "sharedMemoryReady");
+    callback(DESTINATION_ALL, "sharedMemoryReady");
 }
 
 void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
     BinaryData binData(data, data + size);
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    notify(DESTINATION_ALL, "sharedMemoryChanged", { binData, hints });
+    callback(DESTINATION_ALL, "sharedMemoryChanged", { binData, hints });
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-    notify(DESTINATION_ALL, "_b64SharedMemoryChanged", { binData, hints });
+    callback(DESTINATION_ALL, "_b64SharedMemoryChanged", { binData, hints });
 # endif
 }
 #endif
@@ -124,55 +127,51 @@ void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
         return;
     }
 
-    String method = getMethodSignature(args);
+    String function = args[1].asString();
 
-    if (fHandler.find(method) == fHandler.end()) {
-        d_stderr2("Unknown WebUI method");
+    if (fHandler.find(function) == fHandler.end()) {
+        d_stderr2("Unknown WebUI function");
         return;
     }
 
     const Variant handlerArgs = args.sliceArray(2);
     
-    ArgumentCountAndMethodHandler handler = fHandler[method];
+    ArgumentCountAndFunctionHandler handler = fHandler[function];
     const int argsCount = handlerArgs.getArraySize();
 
     if (argsCount < handler.first) {
-        d_stderr2("Missing WebUI method arguments (%d < %d)", argsCount, handler.first);
+        d_stderr2("Missing WebUI function arguments (%d < %d)", argsCount, handler.first);
         return;
     }
 
     handler.second(handlerArgs, origin);
 }
 
-String WebUIBase::getMethodSignature(const Variant& args)
+void WebUIBase::callback(uintptr_t destination, const char* function, Variant args)
 {
-    return args[1].getString();
-}
-
-void WebUIBase::setMethodSignature(Variant& args, String method)
-{
-    args.insertArrayItem(1, method);
-}
-
-void WebUIBase::notify(uintptr_t destination, const char* method, Variant args)
-{
+    args.insertArrayItem(0, serializeFunctionArgument(function));
     args.insertArrayItem(0, "UI");
-    setMethodSignature(args, String(method));
+
     postMessage(args, destination);
 }
 
-void WebUIBase::setBuiltInMethodHandlers()
+Variant WebUIBase::serializeFunctionArgument(const char* function)
 {
-    setMethodHandler("getInitWidthCSS", 0, [this](const Variant&, uintptr_t origin) {
-        notify(origin, "getInitWidthCSS", { static_cast<double>(getInitWidthCSS()) });
+    return fFuncArgSerializer(function);
+}
+
+void WebUIBase::setBuiltInFunctionHandlers()
+{
+    setFunctionHandler("getInitWidthCSS", 0, [this](const Variant&, uintptr_t origin) {
+        callback(origin, "getInitWidthCSS", { static_cast<double>(getInitWidthCSS()) });
     });
 
-    setMethodHandler("getInitHeightCSS", 0, [this](const Variant&, uintptr_t origin) {
-        notify(origin, "getInitHeightCSS", { static_cast<double>(getInitHeightCSS()) });
+    setFunctionHandler("getInitHeightCSS", 0, [this](const Variant&, uintptr_t origin) {
+        callback(origin, "getInitHeightCSS", { static_cast<double>(getInitHeightCSS()) });
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
-    setMethodHandler("sendNote", 3, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("sendNote", 3, [this](const Variant& args, uintptr_t /*origin*/) {
         sendNote(
             static_cast<uint8_t>(args[0].getNumber()),  // channel
             static_cast<uint8_t>(args[1].getNumber()),  // note
@@ -181,14 +180,14 @@ void WebUIBase::setBuiltInMethodHandlers()
     });
 #endif
 
-    setMethodHandler("editParameter", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("editParameter", 2, [this](const Variant& args, uintptr_t /*origin*/) {
         editParameter(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<bool>(args[1].getBoolean())     // started
         );
     });
 
-    setMethodHandler("setParameterValue", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setParameterValue", 2, [this](const Variant& args, uintptr_t /*origin*/) {
         setParameterValue(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<float>(args[1].getNumber())     // value
@@ -196,7 +195,7 @@ void WebUIBase::setBuiltInMethodHandlers()
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    setMethodHandler("setState", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setState", 2, [this](const Variant& args, uintptr_t /*origin*/) {
         setState(
             args[0].getString(), // key
             args[1].getString()  // value
@@ -205,7 +204,7 @@ void WebUIBase::setBuiltInMethodHandlers()
 #endif
 
 #if DISTRHO_PLUGIN_WANT_STATE && defined(HIPHOP_SHARED_MEMORY_SIZE)
-    setMethodHandler("writeSharedMemory", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("writeSharedMemory", 2, [this](const Variant& args, uintptr_t /*origin*/) {
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
         BinaryData data = args[0].getBinaryData();
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
@@ -220,7 +219,7 @@ void WebUIBase::setBuiltInMethodHandlers()
     });
 
 # if defined(HIPHOP_WASM_SUPPORT)
-    setMethodHandler("sideloadWasmBinary", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("sideloadWasmBinary", 1, [this](const Variant& args, uintptr_t /*origin*/) {
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
         Variant::BinaryData data = args[0].getBinaryData();
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
@@ -238,7 +237,7 @@ void WebUIBase::setBuiltInMethodHandlers()
     // without resorting to dirty hacks. Use JS async functions instead, and
     // fulfill their promises here.
 
-    setMethodHandler("isStandalone", 0, [this](const Variant&, uintptr_t origin) {
-        notify(origin, "isStandalone", { isStandalone() });
+    setFunctionHandler("isStandalone", 0, [this](const Variant&, uintptr_t origin) {
+        callback(origin, "isStandalone", { isStandalone() });
     });
 }

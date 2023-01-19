@@ -155,6 +155,28 @@ bool BSONVariant::isObject() const noexcept
     return fType == BSON_TYPE_DOCUMENT;
 }
 
+String BSONVariant::asString() const noexcept
+{
+    switch (fType) {
+        case BSON_TYPE_NULL:
+            return String("null");
+        case BSON_TYPE_BOOL:
+            return String(fBool ? "true" : "false");
+        case BSON_TYPE_INT32:
+            return String(fUInt);
+        case BSON_TYPE_INT64:
+        case BSON_TYPE_DOUBLE:
+            return String(fDouble);
+        case BSON_TYPE_UTF8:
+            return String(fString);
+        case BSON_TYPE_BINARY:
+            return String("[BinaryData]");
+        case BSON_TYPE_ARRAY:
+        case BSON_TYPE_DOCUMENT:
+            return String("[Object]");
+    }
+}
+
 bool BSONVariant::getBoolean() const noexcept
 {
     return fString;

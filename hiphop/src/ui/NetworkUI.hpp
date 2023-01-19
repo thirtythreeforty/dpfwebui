@@ -58,7 +58,7 @@ protected:
     virtual void onClientConnected(Client client);
 
 private:
-    void setBuiltInMethodHandlers();
+    void setBuiltInFunctionHandlers();
     void initServer();
     int  findAvailablePort();
 #if HIPHOP_UI_ZEROCONF
@@ -69,11 +69,7 @@ private:
     int  handleWebServerRead(Client client, const ByteVector& data) override;
     int  handleWebServerRead(Client client, const char* data) override;
 
-#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    String getMethodSignature(const Variant& args) override;
-    void   setMethodSignature(Variant& args, String method) override;
-#endif
-    void notifyAll(Client exclude, const char* method, Variant args = Variant::createArray());
+    void notify(Client exclude, const char* function, Variant args = Variant::createArray());
 
     static uint32_t djb2hash(const char *str);
 

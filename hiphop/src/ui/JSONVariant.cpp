@@ -170,6 +170,11 @@ bool JSONVariant::isObject() const noexcept
     return cJSON_IsObject(fImpl);
 }
 
+String JSONVariant::asString() const noexcept
+{
+    return toJSON();
+}
+
 bool JSONVariant::getBoolean() const noexcept
 {
     return cJSON_IsTrue(fImpl);
