@@ -41,6 +41,10 @@ JSONVariant::JSONVariant(const BinaryData& data) noexcept
     : fImpl(cJSON_CreateString(String::asBase64(data.data(), data.size())))
 {}
 
+JSONVariant::JSONVariant(int32_t i) noexcept
+    : fImpl(cJSON_CreateNumber(static_cast<double>(i)))
+{}
+
 JSONVariant::JSONVariant(uint32_t i) noexcept
     : fImpl(cJSON_CreateNumber(static_cast<double>(i)))
 {}

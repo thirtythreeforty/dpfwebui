@@ -42,6 +42,7 @@ public:
     BSONVariant(const BinaryData& data) noexcept;
 
     // Convenience constructors for plugin code
+    BSONVariant(int32_t i) noexcept;
     BSONVariant(uint32_t i) noexcept;
     BSONVariant(float f) noexcept;
     BSONVariant(const char* s) noexcept;
@@ -114,7 +115,7 @@ private:
 
     union {
         bool        fBool;
-        uint32_t    fUInt;
+        int32_t     fInt;
         double      fDouble;
         char*       fString;
         BinaryData* fData;

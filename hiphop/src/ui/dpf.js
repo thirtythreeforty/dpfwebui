@@ -134,9 +134,9 @@ class UI {
                 let data;
 
                 if (this._opt.binaryMessageProtocol) {
-                    const argsObj = args.reduce((o, v, i) => {
-                        o[i] = v;
-                        return o;
+                    const argsObj = args.reduce((acc, val, idx) => {
+                        acc[idx] = val;
+                        return acc;
                     }, {});
 
                     data = BSON.serialize(argsObj);
@@ -253,6 +253,7 @@ class UI {
         this._socket = null;
         this._latency = 0;
         this._pingSendTime = 0;
+        this._callbackLookup = this;
 
         const env = DISTRHO.env;
 
@@ -280,8 +281,15 @@ class UI {
 
     // Initialize WebSockets-based message channel for network clients
     _initSocketMessageChannel() {
-        if (this._opt.binaryMessageProtocol && (typeof(BSON) === 'undefined')) {
-            throw new Error('Binary socket requires BSON, make sure bson.min.js is loaded.');
+        if (this._opt.binaryMessageProtocol) {
+            if (typeof(BSON) === 'undefined') {
+                throw new Error('Binary socket requires BSON, make sure bson.min.js is loaded.');
+            }
+
+            this._callbackLookup = this._getInstanceFunctions().reduce((acc, func) => {
+                acc[this.constructor.djb2hash(func.name)] = func;
+                return acc;
+            }, {});
         }
 
         const reconnectPeriod = 3;
@@ -340,21 +348,23 @@ class UI {
     }
 
     // Helper for calling UI methods
-    _call(method, ...args) {
-        this.postMessage('UI', method, ...args)
+    _call(funcName, ...args) {
+        const funcArg = this._opt.binaryMessageProtocol ? this.constructor.djb2hash(funcName)
+                        : funcName;
+        this.postMessage('UI', funcArg, ...args)
     }
 
     // Helper for supporting value returning calls using promises
-    _callAndExpectReply(method, cache, ...args) {
-        if (cache && (method in this._cache)) {
-            return new Promise((resolve, _) => resolve(...this._cache[method]));
+    _callAndExpectReply(funcName, cache, ...args) {
+        if (cache && (funcName in this._cache)) {
+            return new Promise((resolve, _) => resolve(...this._cache[funcName]));
         }
-        if (this._resolve[method] === undefined) {
-            this._resolve[method] = [];
+        if (this._resolve[funcName] === undefined) {
+            this._resolve[funcName] = [];
         }
         return new Promise((resolve, reject) => {
-            this._resolve[method].push({resolve: resolve, reject: reject});
-            this._call(method, ...args);
+            this._resolve[funcName].push({resolve: resolve, reject: reject});
+            this._call(funcName, ...args);
         });
     }
 
@@ -377,18 +387,19 @@ class UI {
             return;
         }
 
-        const method = args[1];
+        const func = this._callbackLookup[args[1]],
+              funcName = func.name;
+
         args = args.slice(2);
+        this._cache[funcName] = args;
 
-        this._cache[method] = args;
-
-        if (method in this._resolve) {
-            for (let callback of this._resolve[method]) {
+        if (funcName in this._resolve) {
+            for (let callback of this._resolve[funcName]) {
                 callback.resolve(...args);
             }
-            this._resolve[method] = [];
+            this._resolve[funcName] = [];
         } else {
-            this[method](...args); // call method
+            func.call(this, ...args);
         }
     }
 
@@ -404,12 +415,12 @@ class UI {
 
     // Reject all pending promises on channel disconnection
     _cancelAllRequests() {
-        for (let method in this._resolve) {
-            for (let callback of this._resolve[method]) {
+        for (let funcName in this._resolve) {
+            for (let callback of this._resolve[funcName]) {
                 callback.reject();
             }
 
-            this._resolve[method] = [];
+            this._resolve[funcName] = [];
         }
     }
 
@@ -418,6 +429,32 @@ class UI {
         if (this._opt.log) {
             console.log(`UI: ${message}`);
         }
+    }
+
+    // Binary message protocol support
+    _getInstanceFunctions() {
+        const func = [];
+        let obj = this;
+
+        do {
+            func.push(...Object.getOwnPropertyNames(obj)
+                        .map(name => this[name])
+                        .filter(prop => typeof(prop) === 'function'));
+        } while (obj = Object.getPrototypeOf(obj));
+
+        return func;
+    }
+
+    // Modified version of https://gist.github.com/eplawless/52813b1d8ad9af510d85
+    static djb2hash(str) {
+        let len = str.length;
+        let h = 5381;
+
+        for (let i = 0; i < len; i++) {
+            h = h * 33 ^ str.charCodeAt(i)
+        }
+
+        return h;
     }
 
 }

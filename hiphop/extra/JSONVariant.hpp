@@ -38,6 +38,7 @@ public:
     JSONVariant(const BinaryData& data) noexcept;
 
     // Convenience constructors for plugin code
+    JSONVariant(int32_t i) noexcept;
     JSONVariant(uint32_t i) noexcept;
     JSONVariant(float f) noexcept;
     JSONVariant(const char* s) noexcept;

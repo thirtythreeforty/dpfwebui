@@ -71,7 +71,7 @@ private:
 
     void notify(Client exclude, const char* function, Variant args = Variant::createArray());
 
-    static uint32_t djb2hash(const char *str);
+    static int32_t djb2hash(const char *str);
 
     int              fPort;
     WebServer        fServer;

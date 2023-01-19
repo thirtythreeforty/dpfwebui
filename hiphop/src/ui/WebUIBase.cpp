@@ -43,7 +43,7 @@ void WebUIBase::queue(const UiBlock& block)
 
 const WebUIBase::FunctionHandler& WebUIBase::getFunctionHandler(const char* name)
 {
-    return fHandler[String(name)].second;
+    return fHandler[serializeFunctionArgument(name).asString()].second;
 }
 
 void WebUIBase::setFunctionHandler(const char* name, int argCount, const FunctionHandler& handler)

@@ -51,9 +51,14 @@ BSONVariant::BSONVariant(const BinaryData& data) noexcept
     fData = new BinaryData(data.begin(), data.end());
 }
 
+BSONVariant::BSONVariant(int32_t i) noexcept
+    : fType(BSON_TYPE_INT32)
+    , fInt(i)
+{}
+
 BSONVariant::BSONVariant(uint32_t i) noexcept
     : fType(BSON_TYPE_INT32)
-    , fUInt(i)
+    , fInt(static_cast<int32_t>(i))
 {}
 
 BSONVariant::BSONVariant(float f) noexcept
@@ -163,7 +168,7 @@ String BSONVariant::asString() const noexcept
         case BSON_TYPE_BOOL:
             return String(fBool ? "true" : "false");
         case BSON_TYPE_INT32:
-            return String(fUInt);
+            return String(fInt);
         case BSON_TYPE_INT64:
         case BSON_TYPE_DOUBLE:
             return String(fDouble);
@@ -174,7 +179,11 @@ String BSONVariant::asString() const noexcept
         case BSON_TYPE_ARRAY:
         case BSON_TYPE_DOCUMENT:
             return String("[Object]");
+        default:
+            break;
     }
+
+    return String();
 }
 
 bool BSONVariant::getBoolean() const noexcept
@@ -185,7 +194,7 @@ bool BSONVariant::getBoolean() const noexcept
 double BSONVariant::getNumber() const noexcept
 {
     if (fType == BSON_TYPE_INT32) {
-        return static_cast<double>(fUInt);
+        return static_cast<double>(fInt);
     }
 
     if (fType == BSON_TYPE_DOUBLE) {
@@ -331,7 +340,7 @@ void BSONVariant::copy(const BSONVariant& v) noexcept
             fBool = v.fBool;
             break;
         case BSON_TYPE_INT32:
-            fUInt = v.fUInt;
+            fInt = v.fInt;
             break;
         case BSON_TYPE_DOUBLE:
             fDouble = v.fDouble;
@@ -397,7 +406,7 @@ BSONVariant BSONVariant::get(const bson_t* bson, const char* key) noexcept
             v = BSONVariant(bson_iter_bool(&iter));
             break;
         case BSON_TYPE_INT32:
-            v = BSONVariant(static_cast<uint32_t>(bson_iter_int32(&iter)));
+            v = BSONVariant(bson_iter_int32(&iter));
             break;
         case BSON_TYPE_INT64:
         case BSON_TYPE_DOUBLE:
@@ -442,7 +451,7 @@ void BSONVariant::set(bson_t* bson, const char* key, const BSONVariant& value) n
             bson_append_bool(bson, key, -1, value.fBool);
             break;
         case BSON_TYPE_INT32:
-            bson_append_int32(bson, key, -1, value.fUInt);
+            bson_append_int32(bson, key, -1, value.fInt);
             break;
         case BSON_TYPE_DOUBLE:
             bson_append_double(bson, key, -1, value.fDouble);

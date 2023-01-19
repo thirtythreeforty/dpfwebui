@@ -48,9 +48,9 @@ USE_NAMESPACE_DISTRHO
 
 NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio)
     : WebUIBase(widthCssPx, heightCssPx, initPixelRatio
-//#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-//        , /*FunctionArgumentSerializer*/[](const char* f) { return djb2hash(f); }
-//#endif
+#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+        , /*FunctionArgumentSerializer*/[](const char* f) { return djb2hash(f); }
+#endif
     )
     , fPort(-1)
     , fThread(nullptr)
@@ -425,16 +425,16 @@ void NetworkUI::notify(Client exclude, const char* function, Variant args)
     broadcastMessage(args, exclude);
 }
 
-uint32_t NetworkUI::djb2hash(const char* str)
+int32_t NetworkUI::djb2hash(const char* str)
 {
-    uint32_t hash = 5381;
-    uint32_t c;
+    int32_t h = 5381;
+    int32_t c;
 
     while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
+         h = h * 33 ^ c;
     }
 
-    return hash;
+    return h;
 }
 
 WebServerThread::WebServerThread(WebServer* server) noexcept
