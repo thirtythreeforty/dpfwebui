@@ -117,24 +117,19 @@ void WebUIBase::onMessageReceived(const Variant& args, uintptr_t origin)
 
 void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
 {
-    if (! args.isArray()) {
-        d_stderr2("Message must be an array");
+    if (! args.isArray() || (args.getArraySize() == 0)) {
+        d_stderr2("Message must be a non-empty array");
         return;
     }
 
-    if ((args.getArraySize() < 2) || (args[0].getString() != "UI")) {
-        onMessageReceived(args, origin); // passthrough
-        return;
-    }
-
-    String function = args[1].asString();
+    String function = args[0].asString();
 
     if (fHandler.find(function) == fHandler.end()) {
         d_stderr2("Unknown WebUI function");
         return;
     }
 
-    const Variant handlerArgs = args.sliceArray(2);
+    const Variant handlerArgs = args.sliceArray(1);
     
     ArgumentCountAndFunctionHandler handler = fHandler[function];
     const int argsCount = handlerArgs.getArraySize();
@@ -150,8 +145,6 @@ void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
 void WebUIBase::callback(uintptr_t destination, const char* function, Variant args)
 {
     args.insertArrayItem(0, serializeFunctionArgument(function));
-    args.insertArrayItem(0, "UI");
-
     postMessage(args, destination);
 }
 

@@ -420,8 +420,6 @@ int NetworkUI::handleWebServerRead(Client client, const char* data)
 void NetworkUI::notify(Client exclude, const char* function, Variant args)
 {
     args.insertArrayItem(0, serializeFunctionArgument(function));
-    args.insertArrayItem(0, "UI");
-    
     broadcastMessage(args, exclude);
 }
 

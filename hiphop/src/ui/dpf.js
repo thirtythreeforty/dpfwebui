@@ -169,7 +169,7 @@ class UI {
     // Non-DPF method for sending a message to all connected network clients
     // void NetworkUI::broadcastMessage(const Variant& args, Client origin)
     broadcastMessage(...args) {
-        this.postMessage('UI', 'broadcast', ...args)
+        this.postMessage('broadcast', ...args)
     }
 
     // Non-DPF callback method for receiving messages from the host
@@ -351,7 +351,7 @@ class UI {
     _call(funcName, ...args) {
         const funcArg = this._opt.binaryMessageProtocol ? this.constructor.djb2hash(funcName)
                         : funcName;
-        this.postMessage('UI', funcArg, ...args)
+        this.postMessage(funcArg, ...args)
     }
 
     // Helper for supporting value returning calls using promises
@@ -382,15 +382,10 @@ class UI {
 
     // Handle incoming message
     _messageReceived(args) {
-        if (args[0] != 'UI') {
-            this.messageReceived(args); // passthrough
-            return;
-        }
-
-        const func = this._callbackLookup[args[1]],
+        const func = this._callbackLookup[args[0]],
               funcName = func.name;
 
-        args = args.slice(2);
+        args = args.slice(1);
         this._cache[funcName] = args;
 
         if (funcName in this._resolve) {
@@ -401,6 +396,8 @@ class UI {
         } else {
             func.call(this, ...args);
         }
+
+        this.messageReceived(args);
     }
 
     // Helper for decoding received shared memory data with text-based protocol
