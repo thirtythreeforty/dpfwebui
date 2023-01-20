@@ -382,9 +382,14 @@ class UI {
 
     // Handle incoming message
     _messageReceived(args) {
-        const func = this._callbackLookup[args[0]],
-              funcName = func.name;
+        const func = this._callbackLookup[args[0]];
 
+        if (! func) {
+            this.messageReceived(args); // passthrough
+            return;
+        }
+        
+        const funcName = func.name;
         args = args.slice(1);
         this._cache[funcName] = args;
 
@@ -396,8 +401,6 @@ class UI {
         } else {
             func.call(this, ...args);
         }
-
-        this.messageReceived(args);
     }
 
     // Helper for unwrapping received shared memory data on BSON-based protocol
