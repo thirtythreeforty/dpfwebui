@@ -60,10 +60,10 @@ protected:
         // It is now safe to call runScript() and mapped DPF methods.
     }
 
-    void onMessageReceived(const Variant& args, uintptr_t source) override
+    void onMessageReceived(const Variant& payload, uintptr_t source) override
     {
         // Web view and DOM are guaranteed to be ready here.
-        (void)args;
+        (void)payload;
         (void)source;
     }
 

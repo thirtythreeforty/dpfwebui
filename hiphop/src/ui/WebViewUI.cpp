@@ -27,6 +27,8 @@
 
 USE_NAMESPACE_DISTRHO
 
+uintptr_t kOriginEmbeddedWebView = 0;
+
 WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor,
                      float initPixelRatio)
     : WebViewUIBase(widthCssPx, heightCssPx, initPixelRatio)
@@ -127,12 +129,12 @@ void WebViewUI::setKeyboardFocus(bool focus)
 }
 
 #if ! defined(HIPHOP_NETWORK_UI)
-void WebViewUI::postMessage(const Variant& args, uintptr_t /*destination*/, uintptr_t /*exclude*/)
+void WebViewUI::postMessage(const Variant& payload, uintptr_t /*destination*/, uintptr_t /*exclude*/)
 {
     if (fJsUiReady) {
-        fWebView->postMessage(args);
+        fWebView->postMessage(payload);
     } else {
-        fMessageBuffer.push_back(args);
+        fMessageBuffer.push_back(payload);
     }
 }
 #endif
@@ -217,9 +219,9 @@ void WebViewUI::handleWebViewLoadFinished()
     onDocumentReady();
 }
 
-void WebViewUI::handleWebViewScriptMessage(const Variant& args)
+void WebViewUI::handleWebViewScriptMessage(const Variant& payload)
 {
-    handleMessage(args, ORIGIN_EMBEDDED_WEB_VIEW);
+    handleMessage(payload, kOriginEmbeddedWebView);
 }
 
 void WebViewUI::handleWebViewConsole(const String& tag, const String& text)

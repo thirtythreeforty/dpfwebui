@@ -49,7 +49,7 @@ protected:
     typedef std::function<void()> UiBlock;
     void queue(const UiBlock& block);
 
-    typedef std::function<void(const Variant& args, uintptr_t origin)> FunctionHandler;
+    typedef std::function<void(const Variant& payload, uintptr_t origin)> FunctionHandler;
     const FunctionHandler& getFunctionHandler(const char* name);
     void setFunctionHandler(const char* name, int argCount, const FunctionHandler& handler);
 
@@ -72,10 +72,10 @@ protected:
     virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) override;
 #endif
 
-    virtual void postMessage(const Variant& args, uintptr_t destination, uintptr_t exclude) = 0;
-    virtual void onMessageReceived(const Variant& args, uintptr_t origin);
+    virtual void postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude) = 0;
+    virtual void onMessageReceived(const Variant& payload, uintptr_t origin);
 
-    void handleMessage(const Variant& args, uintptr_t origin);
+    void handleMessage(const Variant& payload, uintptr_t origin);
 
     void callback(const char* function, Variant args = Variant::createArray(),
                     uintptr_t destination = kDestinationAll, uintptr_t exclude = kExcludeNone);

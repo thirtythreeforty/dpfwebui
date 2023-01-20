@@ -117,24 +117,24 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
     fHandler = handler;
 }
 
-void WebViewBase::postMessage(const Variant& args)
+void WebViewBase::postMessage(const Variant& payload)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     // This method implements something like a "reverse postMessage()" aiming to
     // keep the bridge symmetrical. Global window.host is an EventTarget that
     // can be listened for messages.
-    String payload = args.toJSON();
+    String jsonPayload = payload.toJSON();
 
     if (fPrintTraffic) {
-        d_stderr("cpp->js : %s", payload.buffer());
+        d_stderr("cpp->js : %s", jsonPayload.buffer());
     }
     
     String js = "window.host.dispatchEvent(new CustomEvent('message',"
-                    "{detail:" + payload + "}"
+                    "{detail:" + jsonPayload + "}"
                 "));";
     runScript(js);
 #else
-    (void)args;
+    (void)payload;
 #endif
 }
 
@@ -151,20 +151,20 @@ void WebViewBase::handleLoadFinished()
     }
 }
 
-void WebViewBase::handleScriptMessage(const Variant& args)
+void WebViewBase::handleScriptMessage(const Variant& payload)
 {
-    if ((args.getArraySize() == 3) && (args[0].getString() == "console")) {
+    if ((payload.getArraySize() == 3) && (payload[0].getString() == "console")) {
         if (fHandler != nullptr) {
-            fHandler->handleWebViewConsole(args[1].getString(), args[2].getString());
+            fHandler->handleWebViewConsole(payload[1].getString(), payload[2].getString());
         }
     } else {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
         if (fPrintTraffic) {
-            d_stderr("cpp<-js : %s", args.toJSON().buffer());
+            d_stderr("cpp<-js : %s", payload.toJSON().buffer());
         }
 #endif
         if (fHandler != nullptr) {
-            fHandler->handleWebViewScriptMessage(args);
+            fHandler->handleWebViewScriptMessage(payload);
         }
     }
 }

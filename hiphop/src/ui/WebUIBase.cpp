@@ -112,27 +112,27 @@ void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t h
 }
 #endif
 
-void WebUIBase::onMessageReceived(const Variant& args, uintptr_t origin)
+void WebUIBase::onMessageReceived(const Variant& payload, uintptr_t origin)
 {
-    (void)args;
+    (void)payload;
     (void)origin;
 }
 
-void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
+void WebUIBase::handleMessage(const Variant& payload, uintptr_t origin)
 {
-    if (! args.isArray() || (args.getArraySize() == 0)) {
+    if (! payload.isArray() || (payload.getArraySize() == 0)) {
         d_stderr2("Message must be a non-empty array");
         return;
     }
 
-    String function = args[0].asString();
+    String function = payload[0].asString();
 
     if (fHandler.find(function) == fHandler.end()) {
         d_stderr2("Unknown WebUI function");
         return;
     }
 
-    const Variant handlerArgs = args.sliceArray(1);
+    const Variant handlerArgs = payload.sliceArray(1);
     
     ArgumentCountAndFunctionHandler handler = fHandler[function];
     const int argsCount = handlerArgs.getArraySize();

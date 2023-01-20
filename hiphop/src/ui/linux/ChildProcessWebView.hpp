@@ -52,7 +52,7 @@ protected:
 private:
     void ipcReadCallback(const tlv_t& message);
     void handleInit(float devicePixelRatio);
-    void handleHelperScriptMessage(const char *payload, int payloadSize);
+    void handleHelperScriptMessage(const char *payloadBytes, int payloadSize);
 
     ::Display*  fDisplay;
     ::Window    fBackground;

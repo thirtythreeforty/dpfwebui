@@ -39,7 +39,7 @@
 #define fNsWebView    ((DistrhoWebView *)fWebView)
 #define fNsDelegate   ((DistrhoWebViewDelegate *)fDelegate)
 
-#define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.webkit.messageHandlers.host.postMessage(args);"
+#define JS_POST_MESSAGE_SHIM "window.host.postMessage = (payload) => window.webkit.messageHandlers.host.postMessage(payload);"
 
 @interface DistrhoWebView: WKWebView
 @property (readonly, nonatomic) CocoaWebView* cppView;
@@ -273,21 +273,21 @@ void CocoaWebView::onSetParent(uintptr_t parent)
         return;
     }
 
-    Variant args = Variant::createArray();
+    Variant payload = Variant::createArray();
 
     for (id objcArg : (NSArray *)message.body) {
         if (CFGetTypeID(objcArg) == CFBooleanGetTypeID()) {
-            args.pushArrayItem(static_cast<bool>([objcArg boolValue]));
+            payload.pushArrayItem(static_cast<bool>([objcArg boolValue]));
         } else if ([objcArg isKindOfClass:[NSNumber class]]) {
-            args.pushArrayItem([objcArg doubleValue]);
+            payload.pushArrayItem([objcArg doubleValue]);
         } else if ([objcArg isKindOfClass:[NSString class]]) {
-            args.pushArrayItem([objcArg cStringUsingEncoding:NSUTF8StringEncoding]);
+            payload.pushArrayItem([objcArg cStringUsingEncoding:NSUTF8StringEncoding]);
         } else {
-            args.pushArrayItem(Variant()); // null
+            payload.pushArrayItem(Variant()); // null
         }
     }
 
-    self.cppView->didReceiveScriptMessage(args);
+    self.cppView->didReceiveScriptMessage(payload);
 }
 
 @end

@@ -28,7 +28,7 @@
 #include "extra/Path.hpp"
 #include "scaling.h"
 
-#define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.hostPostMessage(args);"
+#define JS_POST_MESSAGE_SHIM "window.host.postMessage = (payload) => window.hostPostMessage(payload);"
 
 static int XErrorHandlerImpl(Display* display, XErrorEvent* event)
 {

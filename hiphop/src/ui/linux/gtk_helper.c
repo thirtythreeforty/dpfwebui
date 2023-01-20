@@ -55,7 +55,7 @@
                                          "    ev.preventDefault();" \
                                          "  });"
 
-#define JS_POST_MESSAGE_SHIM "window.host.postMessage = (args) => window.webkit.messageHandlers.host.postMessage(args);"
+#define JS_POST_MESSAGE_SHIM "window.host.postMessage = (payload) => window.webkit.messageHandlers.host.postMessage(payload);"
 
 typedef struct {
     ipc_t*         ipc;

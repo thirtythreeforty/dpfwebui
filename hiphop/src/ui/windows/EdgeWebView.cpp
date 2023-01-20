@@ -34,7 +34,7 @@
 
 #define WEBVIEW2_DOWNLOAD_URL "https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section"
 
-#define JS_POST_MESSAGE_SHIM  "window.host.postMessage = (args) => window.chrome.webview.postMessage(args);"
+#define JS_POST_MESSAGE_SHIM  "window.host.postMessage = (payload) => window.chrome.webview.postMessage(payload);"
 
 #define WSTR_CONVERTER std::wstring_convert<std::codecvt_utf8<wchar_t>>()
 #define TO_LPCWSTR(s)  WSTR_CONVERTER.from_bytes(s).c_str()

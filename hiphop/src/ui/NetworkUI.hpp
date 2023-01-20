@@ -47,7 +47,7 @@ public:
 protected:
     void setState(const char* key, const char* value);
 
-    void postMessage(const Variant& args, uintptr_t destination, uintptr_t exclude) override;
+    void postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude) override;
 
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_STATE

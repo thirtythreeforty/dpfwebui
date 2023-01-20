@@ -28,9 +28,9 @@
 # include "NetworkUI.hpp"
 #endif
 
-#define ORIGIN_EMBEDDED_WEB_VIEW 0
-
 START_NAMESPACE_DISTRHO
+
+static uintptr_t kOriginEmbeddedWebView;
 
 #if defined(HIPHOP_NETWORK_UI)
 typedef NetworkUI WebViewUIBase; // https:// + WebSockets messaging
@@ -63,7 +63,7 @@ protected:
     void setKeyboardFocus(bool focus);
 
 #if ! defined(HIPHOP_NETWORK_UI)
-    void postMessage(const Variant& args, uintptr_t destination, uintptr_t exclude) override;
+    void postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude) override;
 #endif
 
     void uiIdle() override;
@@ -83,7 +83,7 @@ private:
     // WebViewEventHandler
 
     virtual void handleWebViewLoadFinished() override;
-    virtual void handleWebViewScriptMessage(const Variant& args) override;
+    virtual void handleWebViewScriptMessage(const Variant& payload) override;
     virtual void handleWebViewConsole(const String& tag, const String& text) override;
 
     typedef std::vector<Variant> MessageBuffer;

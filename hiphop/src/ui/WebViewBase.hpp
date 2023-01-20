@@ -31,7 +31,7 @@ START_NAMESPACE_DISTRHO
 struct WebViewEventHandler
 {
     virtual void handleWebViewLoadFinished() = 0;
-    virtual void handleWebViewScriptMessage(const Variant& args) = 0;
+    virtual void handleWebViewScriptMessage(const Variant& payload) = 0;
     virtual void handleWebViewConsole(const String& tag, const String& text) = 0;
 };
 
@@ -58,7 +58,7 @@ public:
     void setEnvironmentBool(const char* key, bool value);
     void setEventHandler(WebViewEventHandler* handler);
     
-    void postMessage(const Variant& args);
+    void postMessage(const Variant& payload);
 
     virtual float getDevicePixelRatio() = 0;
     
@@ -75,7 +75,7 @@ protected:
     void injectHostObjectScripts();
     
     void handleLoadFinished();
-    void handleScriptMessage(const Variant& args);
+    void handleScriptMessage(const Variant& payload);
 
 private:
     void addStylesheet(String& source);

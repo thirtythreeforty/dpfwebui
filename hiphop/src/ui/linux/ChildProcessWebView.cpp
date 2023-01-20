@@ -260,42 +260,42 @@ void ChildProcessWebView::handleInit(float devicePixelRatio)
     fDevicePixelRatio = devicePixelRatio;
 }
 
-void ChildProcessWebView::handleHelperScriptMessage(const char *payload,
+void ChildProcessWebView::handleHelperScriptMessage(const char *payloadBytes,
                                                     int payloadSize)
 {
     // Should validate payload is never read past payloadSize 
-    Variant args = Variant::createArray();
+    Variant payload = Variant::createArray();
     int offset = 0;
 
     while (offset < payloadSize) {
-        const char *type = payload + offset;
+        const char *type = payloadBytes + offset;
         const char *value = type + 1;
 
         switch (*type) {
             case ARG_TYPE_FALSE:
                 offset += 1;
-                args.pushArrayItem(false);
+                payload.pushArrayItem(false);
                 break;
             case ARG_TYPE_TRUE:
                 offset += 1;
-                args.pushArrayItem(true);
+                payload.pushArrayItem(true);
                 break;
             case ARG_TYPE_DOUBLE:
                 offset += 1 + sizeof(double);
-                args.pushArrayItem(*reinterpret_cast<const double *>(value));
+                payload.pushArrayItem(*reinterpret_cast<const double *>(value));
                 break;
             case ARG_TYPE_STRING:
                 offset += 1 /*type*/ + strlen(value) + 1 /*\0*/;
-                args.pushArrayItem(static_cast<const char*>(value));
+                payload.pushArrayItem(static_cast<const char*>(value));
                 break;
             default:
                 offset += 1;
-                args.pushArrayItem(Variant()); // null
+                payload.pushArrayItem(Variant()); // null
                 break;
         }
     }
 
-    handleScriptMessage(args);
+    handleScriptMessage(payload);
 }
 
 IpcReadThread::IpcReadThread(IpcChannel* ipc, IpcReadCallback callback)

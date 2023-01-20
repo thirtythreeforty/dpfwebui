@@ -142,10 +142,10 @@ void NetworkUI::setState(const char* key, const char* value)
     fStates[key] = value;
 }
 
-void NetworkUI::postMessage(const Variant& args, uintptr_t destination, uintptr_t exclude)
+void NetworkUI::postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    BinaryData data = args.toBSON();
+    BinaryData data = payload.toBSON();
     if (destination == kDestinationAll) {
         fServer.broadcast(data.data(), data.size(), reinterpret_cast<Client>(exclude));
     } else {
@@ -153,9 +153,9 @@ void NetworkUI::postMessage(const Variant& args, uintptr_t destination, uintptr_
     }
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
     if (destination == kDestinationAll) {
-        fServer.broadcast(args.toJSON(), reinterpret_cast<Client>(exclude));
+        fServer.broadcast(payload.toJSON(), reinterpret_cast<Client>(exclude));
     } else {
-        fServer.send(args.toJSON(), reinterpret_cast<Client>(destination));
+        fServer.send(payload.toJSON(), reinterpret_cast<Client>(destination));
     }
 #endif
 }

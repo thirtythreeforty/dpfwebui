@@ -126,22 +126,20 @@ class UI {
     }
 
     // Non-DPF method for sending a message to the host
-    // void WebViewUI::postMessage(const Variant& args)
-    postMessage(...args) {
+    // void WebViewUI::postMessage(const Variant& payload)
+    postMessage(...payload) {
         const env = DISTRHO.env;
-        const socketSend = args => {
+        const socketSend = payload => {
             if (this._socket.readyState == WebSocket.OPEN) {
                 let data;
 
                 if (this._opt.binaryMessageProtocol) {
-                    const argsObj = args.reduce((acc, val, idx) => {
+                    data = BSON.serialize(payload.reduce((acc, val, idx) => {
                         acc[idx] = val;
                         return acc;
-                    }, {});
-
-                    data = BSON.serialize(argsObj);
+                    }, {}));
                 } else {
-                    data = JSON.stringify(args);
+                    data = JSON.stringify(payload);
                 }
 
                 this._socket.send(data);
@@ -152,29 +150,29 @@ class UI {
 
         if (env.plugin) {
             if (env.network) {
-                socketSend(args);
+                socketSend(payload);
             } else {
-                window.host.postMessage(args);
+                window.host.postMessage(payload);
             }
         } else {
             if (env.dev) {
-                this._log(`Stub postMessage(${args})`);
+                this._log(`Stub postMessage(${payload})`);
             } else if (env.network) {
-                socketSend(args);
+                socketSend(payload);
             }
 
         }
     }
 
     // Non-DPF method for sending a message to all connected network clients
-    // void NetworkUI::broadcastMessage(const Variant& args, Client origin)
-    broadcastMessage(...args) {
-        this.postMessage('broadcast', ...args)
+    // void NetworkUI::broadcastMessage(const Variant& payload, Client origin)
+    broadcastMessage(...payload) {
+        this.postMessage('broadcast', ...payload)
     }
 
     // Non-DPF callback method for receiving messages from the host
-    // void WebUIBase::onMessageReceived(const Variant& args)
-    messageReceived(args) {}
+    // void WebUIBase::onMessageReceived(const Variant& payload)
+    messageReceived(payload) {}
 
     // Non-DPF callback method that fires when the message channel is open
     messageChannelOpen() {}
@@ -324,16 +322,16 @@ class UI {
             });
 
             this._socket.addEventListener('message', (ev) => {
-                let args;
+                let payload;
 
                 if (this._opt.binaryMessageProtocol) {
-                    const argsArr = BSON.deserialize(ev.data);
-                    args = Object.keys(argsArr).map(k => argsArr[k]);
+                    const payloadArr = BSON.deserialize(ev.data);
+                    payload = Object.keys(payloadArr).map(k => payloadArr[k]);
                 } else {
-                    args = JSON.parse(ev.data);
+                    payload = JSON.parse(ev.data);
                 }
 
-                this._messageReceived(args);
+                this._messageReceived(payload);
             });
         };
 
@@ -381,25 +379,25 @@ class UI {
     }
 
     // Handle incoming message
-    _messageReceived(args) {
-        const func = this._callbackLookup[args[0]];
+    _messageReceived(payload) {
+        const func = this._callbackLookup[payload[0]];
 
         if (! func) {
-            this.messageReceived(args); // passthrough
+            this.messageReceived(payload); // passthrough
             return;
         }
         
         const funcName = func.name;
-        args = args.slice(1);
-        this._cache[funcName] = args;
+        payload = payload.slice(1);
+        this._cache[funcName] = payload;
 
         if (funcName in this._resolve) {
             for (let callback of this._resolve[funcName]) {
-                callback.resolve(...args);
+                callback.resolve(...payload);
             }
             this._resolve[funcName] = [];
         } else {
-            func.call(this, ...args);
+            func.call(this, ...payload);
         }
     }
 
