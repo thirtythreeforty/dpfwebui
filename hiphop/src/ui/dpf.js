@@ -133,7 +133,7 @@ class UI {
             if (this._socket.readyState == WebSocket.OPEN) {
                 let data;
 
-                if (this._opt.binaryMessageProtocol) {
+                if (this._isMessageProtocolBinary) {
                     data = BSON.serialize(payload.reduce((acc, val, idx) => {
                         acc[idx] = val;
                         return acc;
@@ -279,17 +279,6 @@ class UI {
 
     // Initialize WebSockets-based message channel for network clients
     _initSocketMessageChannel() {
-        if (this._opt.binaryMessageProtocol) {
-            if (typeof(BSON) === 'undefined') {
-                throw new Error('Binary socket requires BSON, make sure bson.min.js is loaded.');
-            }
-
-            this._callbackLookup = this._getInstanceFunctions().reduce((acc, func) => {
-                acc[this.constructor.djb2hash(func.name)] = func;
-                return acc;
-            }, {});
-        }
-
         const reconnectPeriod = 3;
         const pingPeriod = 10;
 
@@ -322,9 +311,11 @@ class UI {
             });
 
             this._socket.addEventListener('message', (ev) => {
+                this._probeMessageProtocolIfNeeded(ev.data);
+
                 let payload;
 
-                if (this._opt.binaryMessageProtocol) {
+                if (this._isMessageProtocolBinary) {
                     const payloadArr = BSON.deserialize(ev.data);
                     payload = Object.keys(payloadArr).map(k => payloadArr[k]);
                 } else {
@@ -347,7 +338,7 @@ class UI {
 
     // Helper for calling UI methods
     _call(funcName, ...args) {
-        const funcArg = this._opt.binaryMessageProtocol ? this.constructor.djb2hash(funcName)
+        const funcArg = this._isMessageProtocolBinary ? this.constructor.djb2hash(funcName)
                         : funcName;
         this.postMessage(funcArg, ...args)
     }
@@ -413,7 +404,7 @@ class UI {
 
     // Encode binary data to base64 when the protocol is text-based
     _encodeBinaryDataIfNeeded(data) {
-        return this._opt.binaryMessageProtocol ? data : base64EncArr(data);
+        return this._isMessageProtocolBinary ? data : base64EncArr(data);
     }
 
     // Reject all pending promises on channel disconnection
@@ -424,6 +415,28 @@ class UI {
             }
 
             this._resolve[funcName] = [];
+        }
+    }
+
+    // Detect if the message protocol is text-based or binary
+    _probeMessageProtocolIfNeeded(data) {
+        if (this._probedMessageProtocol) {
+            return;
+        }
+
+        this._probedMessageProtocol = true;
+        this._isMessageProtocolBinary = data instanceof ArrayBuffer;
+        
+        if (this._isMessageProtocolBinary) {
+            if (typeof(BSON) === 'undefined') {
+                throw new Error('Binary socket requires BSON, make sure bson.min.js is loaded.');
+            }
+
+            // Hash all function names
+            this._callbackLookup = this._getInstanceFunctions().reduce((acc, func) => {
+                acc[this.constructor.djb2hash(func.name)] = func;
+                return acc;
+            }, {});
         }
     }
 
