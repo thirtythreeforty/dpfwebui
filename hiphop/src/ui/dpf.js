@@ -165,7 +165,6 @@ class UI {
     }
 
     // Non-DPF method for sending a message to all connected network clients
-    // void NetworkUI::broadcastMessage(const Variant& payload, Client origin)
     broadcastMessage(...payload) {
         this.postMessage('broadcast', ...payload)
     }
