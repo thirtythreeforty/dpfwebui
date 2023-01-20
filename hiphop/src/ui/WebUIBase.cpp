@@ -102,9 +102,9 @@ void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t h
 {
     BinaryData binData(data, data + size);
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    callback(DESTINATION_ALL, "sharedMemoryChanged", { binData, hints });
+    callback(DESTINATION_ALL, "_bsonSharedMemoryChanged", { binData, hints });
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-    callback(DESTINATION_ALL, "_b64SharedMemoryChanged", { binData, hints });
+    callback(DESTINATION_ALL, "_jsonSharedMemoryChanged", { binData, hints });
 # endif
 }
 #endif

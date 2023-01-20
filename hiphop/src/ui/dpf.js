@@ -400,9 +400,14 @@ class UI {
         this.messageReceived(args);
     }
 
-    // Helper for decoding received shared memory data with text-based protocol
-    _b64SharedMemoryChanged(b64Data /*String*/, hints /*Number*/) {
-        this.sharedMemoryChanged(base64DecToArr(b64Data), hints);
+    // Helper for unwrapping received shared memory data on BSON-based protocol
+    _bsonSharedMemoryChanged(data /*Object*/, hints /*Number*/) {
+        this.sharedMemoryChanged(data.buffer, hints);
+    }
+
+    // Helper for decoding received shared memory data on JSON-based protocol
+    _jsonSharedMemoryChanged(data /*String*/, hints /*Number*/) {
+        this.sharedMemoryChanged(base64DecToArr(data), hints);
     }
 
     // Encode binary data to base64 when the protocol is text-based
