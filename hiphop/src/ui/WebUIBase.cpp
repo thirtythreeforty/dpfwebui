@@ -226,10 +226,6 @@ void WebUIBase::setBuiltInFunctionHandlers()
 # endif
 #endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_SHARED_MEMORY_SIZE
 
-    // It is not possible to implement JS synchronous calls that return values
-    // without resorting to dirty hacks. Use JS async functions instead, and
-    // fulfill their promises here.
-
     setFunctionHandler("isStandalone", 0, [this](const Variant&, uintptr_t origin) {
         callback(origin, "isStandalone", { isStandalone() });
     });
