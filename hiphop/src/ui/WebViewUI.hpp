@@ -63,7 +63,7 @@ protected:
     void setKeyboardFocus(bool focus);
 
 #if ! defined(HIPHOP_NETWORK_UI)
-    void postMessage(const Variant& args, uintptr_t origin) override;
+    void postMessage(const Variant& args, uintptr_t destination, uintptr_t exclude) override;
 #endif
 
     void uiIdle() override;

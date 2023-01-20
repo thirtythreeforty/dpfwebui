@@ -142,28 +142,18 @@ void NetworkUI::setState(const char* key, const char* value)
     fStates[key] = value;
 }
 
-void NetworkUI::broadcastMessage(const Variant& args, Client exclude)
+void NetworkUI::postMessage(const Variant& args, uintptr_t destination, uintptr_t exclude)
 {
 #if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
     BinaryData data = args.toBSON();
-    fServer.broadcast(data.data(), data.size(), exclude);
-#elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-    fServer.broadcast(args.toJSON(), exclude);
-#endif
-}
-
-void NetworkUI::postMessage(const Variant& args, uintptr_t destination)
-{
-#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    BinaryData data = args.toBSON();
-    if (destination == DESTINATION_ALL) {
-        fServer.broadcast(data.data(), data.size());
+    if (destination == kDestinationAll) {
+        fServer.broadcast(data.data(), data.size(), reinterpret_cast<Client>(exclude));
     } else {
         fServer.send(data.data(), data.size(), reinterpret_cast<Client>(destination));
     }
 #elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-    if (destination == DESTINATION_ALL) {
-        fServer.broadcast(args.toJSON());
+    if (destination == kDestinationAll) {
+        fServer.broadcast(args.toJSON(), reinterpret_cast<Client>(exclude));
     } else {
         fServer.send(args.toJSON(), reinterpret_cast<Client>(destination));
     }
@@ -242,7 +232,7 @@ void NetworkUI::setBuiltInFunctionHandlers()
             parameterHandlerSuper(args, origin);
         });
 
-        notify(reinterpret_cast<Client>(origin), "parameterChanged", args);
+        callback("parameterChanged", args, kDestinationAll, /*exclude*/origin);
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -256,18 +246,18 @@ void NetworkUI::setBuiltInFunctionHandlers()
             stateHandlerSuper(args, origin);
         });
 
-        notify(reinterpret_cast<Client>(origin), "stateChanged", args);
+        callback("stateChanged", args, kDestinationAll, /*exclude*/origin);
     });
 #endif
 
     // Custom method for exchanging UI-only messages between clients
     setFunctionHandler("broadcast", 1, [this](const Variant& args, uintptr_t origin) {
-        notify(reinterpret_cast<Client>(origin), "messageReceived", args);
+        callback("messageReceived", args, kDestinationAll, /*exclude*/origin);
     });
 
 #if HIPHOP_UI_ZEROCONF
     setFunctionHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "isZeroconfPublished", { fZeroconf.isPublished() });
+        callback("isZeroconfPublished", { fZeroconf.isPublished() }, origin);
     });
 
     setFunctionHandler("setZeroconfPublished", 1, [this](const Variant& args, uintptr_t /*origin*/) {
@@ -277,11 +267,11 @@ void NetworkUI::setBuiltInFunctionHandlers()
     });
 
     setFunctionHandler("getZeroconfId", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "getZeroconfId", { fZeroconfId });
+        callback("getZeroconfId", { fZeroconfId }, origin);
     });
 
     setFunctionHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "getZeroconfName", { fZeroconfName });
+        callback("getZeroconfName", { fZeroconfName }, origin);
     });
 
     setFunctionHandler("setZeroconfName", 1, [this](const Variant& args, uintptr_t /*origin*/) {
@@ -291,20 +281,20 @@ void NetworkUI::setBuiltInFunctionHandlers()
     });
 #else
     setFunctionHandler("isZeroconfPublished", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "isZeroconfPublished", { false });
+        callback("isZeroconfPublished", { false }, origin);
     });
 
     setFunctionHandler("getZeroconfName", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "getZeroconfName", { "" });
+        callback("getZeroconfName", { "" }, origin);
     });
 #endif
 
     setFunctionHandler("getPublicUrl", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "getPublicUrl", { getPublicUrl() });
+        callback("getPublicUrl", { getPublicUrl() }, origin);
     });
 
     setFunctionHandler("ping", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "pong");
+        callback("pong", Variant::createArray(), origin);
     });
 }
 
@@ -383,12 +373,12 @@ void NetworkUI::handleWebServerConnect(Client client)
         // Send all current parameters and states
         for (ParameterMap::const_iterator it = fParameters.cbegin(); it != fParameters.cend(); ++it) {
             const Variant args = { it->first, it->second };
-            callback(reinterpret_cast<uintptr_t>(client), "parameterChanged", args);
+            callback("parameterChanged", args, reinterpret_cast<uintptr_t>(client));
         }
 
         for (StateMap::const_iterator it = fStates.cbegin(); it != fStates.cend(); ++it) {
             const Variant args = { it->first.c_str(), it->second.c_str() };
-            callback(reinterpret_cast<uintptr_t>(client), "stateChanged", args);
+            callback("stateChanged", args, reinterpret_cast<uintptr_t>(client));
         }
 
         onClientConnected(client);
@@ -415,12 +405,6 @@ int NetworkUI::handleWebServerRead(Client client, const char* data)
     (void)data;
 #endif
     return 0;
-}
-
-void NetworkUI::notify(Client exclude, const char* function, Variant args)
-{
-    args.insertArrayItem(0, serializeFunctionArgument(function));
-    broadcastMessage(args, exclude);
 }
 
 int32_t NetworkUI::djb2hash(const char* str)

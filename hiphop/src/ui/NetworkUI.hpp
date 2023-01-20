@@ -47,8 +47,7 @@ public:
 protected:
     void setState(const char* key, const char* value);
 
-    void broadcastMessage(const Variant& args, Client exclude = nullptr);
-    void postMessage(const Variant& args, uintptr_t destination) override;
+    void postMessage(const Variant& args, uintptr_t destination, uintptr_t exclude) override;
 
     void parameterChanged(uint32_t index, float value) override;
 #if DISTRHO_PLUGIN_WANT_STATE
@@ -69,18 +68,16 @@ private:
     int  handleWebServerRead(Client client, const ByteVector& data) override;
     int  handleWebServerRead(Client client, const char* data) override;
 
-    void notify(Client exclude, const char* function, Variant args = Variant::createArray());
-
     static int32_t djb2hash(const char *str);
 
     int              fPort;
     WebServer        fServer;
     WebServerThread* fThread;
 #if HIPHOP_UI_ZEROCONF
-    Zeroconf  fZeroconf;
-    bool      fZeroconfPublish;
-    String    fZeroconfId;
-    String    fZeroconfName;
+    Zeroconf fZeroconf;
+    bool     fZeroconfPublish;
+    String   fZeroconfId;
+    String   fZeroconfName;
 #endif
     typedef std::unordered_map<uint32_t, float> ParameterMap;
     ParameterMap fParameters;

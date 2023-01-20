@@ -31,9 +31,10 @@
 #include "extra/Variant.hpp"
 #include "extra/StringHash.hpp"
 
-#define DESTINATION_ALL 0
-
 START_NAMESPACE_DISTRHO
+
+static uintptr_t kDestinationAll;
+static uintptr_t kExcludeNone;
 
 class WebUIBase : public UIEx
 {
@@ -71,12 +72,13 @@ protected:
     virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) override;
 #endif
 
-    virtual void postMessage(const Variant& args, uintptr_t destination) = 0;
+    virtual void postMessage(const Variant& args, uintptr_t destination, uintptr_t exclude) = 0;
     virtual void onMessageReceived(const Variant& args, uintptr_t origin);
 
     void handleMessage(const Variant& args, uintptr_t origin);
 
-    void callback(uintptr_t destination, const char* function, Variant args = Variant::createArray());
+    void callback(const char* function, Variant args = Variant::createArray(),
+                    uintptr_t destination = kDestinationAll, uintptr_t exclude = kExcludeNone);
 
     Variant serializeFunctionArgument(const char* function);
 

@@ -23,6 +23,9 @@
 
 USE_NAMESPACE_DISTRHO
 
+uintptr_t kDestinationAll = 0;
+uintptr_t kExcludeNone = 0;
+
 WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio,
                         FunctionArgumentSerializer funcArgSerializer)
     : UIEx(initPixelRatio * widthCssPx, initPixelRatio * heightCssPx)
@@ -74,13 +77,13 @@ void WebUIBase::uiIdle()
 
 void WebUIBase::parameterChanged(uint32_t index, float value)
 {
-    callback(DESTINATION_ALL, "parameterChanged", { index, value });
+    callback("parameterChanged", { index, value });
 }
 
 #if DISTRHO_PLUGIN_WANT_PROGRAMS
 void WebUIBase::programLoaded(uint32_t index)
 {
-    callback(DESTINATION_ALL, "programLoaded", { index });
+    callback("programLoaded", { index });
 }
 #endif
 
@@ -88,23 +91,23 @@ void WebUIBase::programLoaded(uint32_t index)
 void WebUIBase::stateChanged(const char* key, const char* value)
 {
     UIEx::stateChanged(key, value);
-    callback(DESTINATION_ALL, "stateChanged", { key, value });
+    callback("stateChanged", { key, value });
 }
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 void WebUIBase::sharedMemoryReady()
 {
-    callback(DESTINATION_ALL, "sharedMemoryReady");
+    callback("sharedMemoryReady");
 }
 
 void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
     BinaryData binData(data, data + size);
 # if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-    callback(DESTINATION_ALL, "_bsonSharedMemoryChanged", { binData, hints });
+    callback("_bsonSharedMemoryChanged", { binData, hints });
 # elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-    callback(DESTINATION_ALL, "_jsonSharedMemoryChanged", { binData, hints });
+    callback("_jsonSharedMemoryChanged", { binData, hints });
 # endif
 }
 #endif
@@ -142,10 +145,10 @@ void WebUIBase::handleMessage(const Variant& args, uintptr_t origin)
     handler.second(handlerArgs, origin);
 }
 
-void WebUIBase::callback(uintptr_t destination, const char* function, Variant args)
+void WebUIBase::callback(const char* function, Variant args, uintptr_t destination, uintptr_t exclude)
 {
     args.insertArrayItem(0, serializeFunctionArgument(function));
-    postMessage(args, destination);
+    postMessage(args, destination, exclude);
 }
 
 Variant WebUIBase::serializeFunctionArgument(const char* function)
@@ -156,11 +159,11 @@ Variant WebUIBase::serializeFunctionArgument(const char* function)
 void WebUIBase::setBuiltInFunctionHandlers()
 {
     setFunctionHandler("getInitWidthCSS", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "getInitWidthCSS", { static_cast<double>(getInitWidthCSS()) });
+        callback("getInitWidthCSS", { static_cast<double>(getInitWidthCSS()) }, origin);
     });
 
     setFunctionHandler("getInitHeightCSS", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "getInitHeightCSS", { static_cast<double>(getInitHeightCSS()) });
+        callback("getInitHeightCSS", { static_cast<double>(getInitHeightCSS()) }, origin);
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
@@ -227,6 +230,6 @@ void WebUIBase::setBuiltInFunctionHandlers()
 #endif // DISTRHO_PLUGIN_WANT_STATE && HIPHOP_SHARED_MEMORY_SIZE
 
     setFunctionHandler("isStandalone", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "isStandalone", { isStandalone() });
+        callback("isStandalone", { isStandalone() }, origin);
     });
 }

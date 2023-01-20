@@ -127,7 +127,7 @@ void WebViewUI::setKeyboardFocus(bool focus)
 }
 
 #if ! defined(HIPHOP_NETWORK_UI)
-void WebViewUI::postMessage(const Variant& args, uintptr_t /*origin*/)
+void WebViewUI::postMessage(const Variant& args, uintptr_t /*destination*/, uintptr_t /*exclude*/)
 {
     if (fJsUiReady) {
         fWebView->postMessage(args);
@@ -164,7 +164,7 @@ void WebViewUI::sizeChanged(uint width, uint height)
 {
     WebViewUIBase::sizeChanged(width, height);
     fWebView->setSize(width, height);
-    callback(0, "sizeChanged", { width, height });
+    callback("sizeChanged", { width, height });
 }
 
 void WebViewUI::setBuiltInFunctionHandlers()
@@ -172,15 +172,15 @@ void WebViewUI::setBuiltInFunctionHandlers()
     // These handlers only make sense for the plugin embedded web view
 
     setFunctionHandler("getWidth", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "getWidth", { static_cast<double>(getWidth()) });
+        callback("getWidth", { static_cast<double>(getWidth()) }, origin);
     });
 
     setFunctionHandler("getHeight", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "getHeight", { static_cast<double>(getHeight()) });
+        callback("getHeight", { static_cast<double>(getHeight()) }, origin);
     });
 
     setFunctionHandler("isResizable", 0, [this](const Variant&, uintptr_t origin) {
-        callback(origin, "isResizable", { isResizable() });
+        callback("isResizable", { isResizable() }, origin);
     });
 
     setFunctionHandler("setWidth", 1, [this](const Variant& args, uintptr_t /*origin*/) {
