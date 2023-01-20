@@ -254,7 +254,6 @@ void BSONVariant::setArrayItem(int idx, const BSONVariant& value) noexcept
 void BSONVariant::insertArrayItem(int idx, const BSONVariant& value) noexcept
 {
     if (fArray == nullptr) {
-        d_stderr2("insertArrayItem() fArray is null !!!");
         return;
     }
 
