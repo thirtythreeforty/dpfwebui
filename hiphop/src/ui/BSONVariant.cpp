@@ -73,11 +73,22 @@ BSONVariant::BSONVariant(const char* s) noexcept
     std::strcpy(fString, s);
 }
 
-BSONVariant::BSONVariant(std::initializer_list<BSONVariant> l) noexcept
+BSONVariant::BSONVariant(std::initializer_list<KeyValue> items) noexcept
+    : fType(BSON_TYPE_DOCUMENT)
+    , fArray(bson_new())
+{
+    for (std::initializer_list<KeyValue>::const_iterator it = items.begin();
+            it != items.end(); ++it) {
+        setObjectItem(it->first, it->second);
+    }
+}
+
+BSONVariant::BSONVariant(std::initializer_list<BSONVariant> items) noexcept
     : fType(BSON_TYPE_ARRAY)
     , fArray(bson_new())
 {
-    for (std::initializer_list<BSONVariant>::const_iterator it = l.begin(); it != l.end(); ++it) {
+    for (std::initializer_list<BSONVariant>::const_iterator it = items.begin();
+            it != items.end(); ++it) {
         pushArrayItem(*it);
     }
 }
@@ -87,42 +98,42 @@ BSONVariant::~BSONVariant()
     destroy();
 }
 
-BSONVariant::BSONVariant(const BSONVariant& v) noexcept
+BSONVariant::BSONVariant(const BSONVariant& var) noexcept
 {
-    copy(v);
+    copy(var);
 }
 
-BSONVariant& BSONVariant::operator=(const BSONVariant& v) noexcept
+BSONVariant& BSONVariant::operator=(const BSONVariant& var) noexcept
 {
     destroy();
-    copy(v);
+    copy(var);
 
     return *this;
 }
 
-BSONVariant::BSONVariant(BSONVariant&& v) noexcept
+BSONVariant::BSONVariant(BSONVariant&& var) noexcept
 {
-    move(std::move(v));
+    move(std::move(var));
 }
 
-BSONVariant& BSONVariant::operator=(BSONVariant&& v) noexcept
+BSONVariant& BSONVariant::operator=(BSONVariant&& var) noexcept
 {
-    if (this != &v) {
+    if (this != &var) {
         destroy();
-        move(std::move(v));
+        move(std::move(var));
     }
 
    return *this;
 }
 
-BSONVariant BSONVariant::createArray() noexcept
+BSONVariant BSONVariant::createObject(std::initializer_list<KeyValue> items) noexcept
 {
-    return BSONVariant(BSON_TYPE_ARRAY, bson_new());
+    return BSONVariant(items);
 }
 
-BSONVariant BSONVariant::createObject() noexcept
+BSONVariant BSONVariant::createArray(std::initializer_list<BSONVariant> items) noexcept
 {
-    return BSONVariant(BSON_TYPE_DOCUMENT, bson_new());
+    return BSONVariant(items);
 }
 
 bool BSONVariant::isNull() const noexcept
@@ -239,19 +250,19 @@ BSONVariant BSONVariant::operator[](const char* key) const noexcept
     return get(fArray, key);
 }
 
-void BSONVariant::pushArrayItem(const BSONVariant& value) noexcept
+void BSONVariant::pushArrayItem(const BSONVariant& var) noexcept
 {
     String key(bson_count_keys(fArray));
-    set(fArray, key.buffer(), value);
+    set(fArray, key.buffer(), var);
 }
 
-void BSONVariant::setArrayItem(int idx, const BSONVariant& value) noexcept
+void BSONVariant::setArrayItem(int idx, const BSONVariant& var) noexcept
 {
     String key(idx);
-    set(fArray, key.buffer(), value);
+    set(fArray, key.buffer(), var);
 }
 
-void BSONVariant::insertArrayItem(int idx, const BSONVariant& value) noexcept
+void BSONVariant::insertArrayItem(int idx, const BSONVariant& var) noexcept
 {
     if (fArray == nullptr) {
         return;
@@ -270,7 +281,7 @@ void BSONVariant::insertArrayItem(int idx, const BSONVariant& value) noexcept
     }
 
     if (idx == keyCount) {
-        pushArrayItem(value);
+        pushArrayItem(var);
         return;
     }
 
@@ -295,12 +306,12 @@ void BSONVariant::insertArrayItem(int idx, const BSONVariant& value) noexcept
     bson_destroy(fArray);
     fArray = newArr;
 
-    set(fArray, String(idx).buffer(), value);
+    set(fArray, String(idx).buffer(), var);
 }
 
-void BSONVariant::setObjectItem(const char* key, const BSONVariant& value) noexcept
+void BSONVariant::setObjectItem(const char* key, const BSONVariant& var) noexcept
 {
-    set(fArray, key, value);
+    set(fArray, key, var);
 }
 
 BinaryData BSONVariant::toBSON() const noexcept
@@ -330,42 +341,42 @@ BSONVariant::BSONVariant(bson_type_t type, bson_t* array) noexcept
     , fArray(array)
 {}
 
-void BSONVariant::copy(const BSONVariant& v) noexcept
+void BSONVariant::copy(const BSONVariant& var) noexcept
 {
-    fType = v.fType;
+    fType = var.fType;
 
-    switch (v.fType) {
+    switch (var.fType) {
         case BSON_TYPE_BOOL:
-            fBool = v.fBool;
+            fBool = var.fBool;
             break;
         case BSON_TYPE_INT32:
-            fInt = v.fInt;
+            fInt = var.fInt;
             break;
         case BSON_TYPE_DOUBLE:
-            fDouble = v.fDouble;
+            fDouble = var.fDouble;
             break;
         case BSON_TYPE_UTF8:
-            fString = new char[std::strlen(v.fString) + 1];
-            std::strcpy(fString, v.fString);
+            fString = new char[std::strlen(var.fString) + 1];
+            std::strcpy(fString, var.fString);
             break;
         case BSON_TYPE_BINARY:
-            fData = new BinaryData(v.fData->begin(), v.fData->end());
+            fData = new BinaryData(var.fData->begin(), var.fData->end());
             break;
         case BSON_TYPE_ARRAY:
         case BSON_TYPE_DOCUMENT:
-            fArray = bson_copy(v.fArray);
+            fArray = bson_copy(var.fArray);
             break;
         default:
             break;
     }
 }
 
-void BSONVariant::move(BSONVariant&& v) noexcept
+void BSONVariant::move(BSONVariant&& var) noexcept
 {
-    fType = v.fType;
-    fArray = v.fArray;
-    v.fType = BSON_TYPE_EOD;
-    v.fArray = nullptr;
+    fType = var.fType;
+    fArray = var.fArray;
+    var.fType = BSON_TYPE_EOD;
+    var.fArray = nullptr;
 }
 
 void BSONVariant::destroy() noexcept
@@ -436,37 +447,37 @@ BSONVariant BSONVariant::get(const bson_t* bson, const char* key) noexcept
     return v;
 }
 
-void BSONVariant::set(bson_t* bson, const char* key, const BSONVariant& value) noexcept
+void BSONVariant::set(bson_t* bson, const char* key, const BSONVariant& var) noexcept
 {
     if (bson == nullptr) {
         return;
     }
 
-    switch (value.fType) {
+    switch (var.fType) {
         case BSON_TYPE_NULL:
             bson_append_null(bson, key, -1);
             break;
         case BSON_TYPE_BOOL:
-            bson_append_bool(bson, key, -1, value.fBool);
+            bson_append_bool(bson, key, -1, var.fBool);
             break;
         case BSON_TYPE_INT32:
-            bson_append_int32(bson, key, -1, value.fInt);
+            bson_append_int32(bson, key, -1, var.fInt);
             break;
         case BSON_TYPE_DOUBLE:
-            bson_append_double(bson, key, -1, value.fDouble);
+            bson_append_double(bson, key, -1, var.fDouble);
             break;
         case BSON_TYPE_UTF8:
-            bson_append_utf8(bson, key, -1, value.fString, -1);
+            bson_append_utf8(bson, key, -1, var.fString, -1);
             break;
         case BSON_TYPE_BINARY:
-            bson_append_binary(bson, key, -1, BSON_SUBTYPE_BINARY, value.fData->data(),
-                                static_cast<uint32_t>(value.fData->size()));
+            bson_append_binary(bson, key, -1, BSON_SUBTYPE_BINARY, var.fData->data(),
+                                static_cast<uint32_t>(var.fData->size()));
             break;
         case BSON_TYPE_ARRAY:
-            bson_append_array(bson, key, -1, value.fArray);
+            bson_append_array(bson, key, -1, var.fArray);
             break;
         case BSON_TYPE_DOCUMENT:
-            bson_append_document(bson, key, -1, value.fArray);
+            bson_append_document(bson, key, -1, var.fArray);
             break;
         default:
             break;

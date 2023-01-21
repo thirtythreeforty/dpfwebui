@@ -46,17 +46,20 @@ public:
     BSONVariant(uint32_t i) noexcept;
     BSONVariant(float f) noexcept;
     BSONVariant(const char* s) noexcept;
-    BSONVariant(std::initializer_list<BSONVariant> l) noexcept;
+
+    typedef std::pair<const char*,BSONVariant> KeyValue;
+    BSONVariant(std::initializer_list<KeyValue> items) noexcept;
+    BSONVariant(std::initializer_list<BSONVariant> items) noexcept;
 
     ~BSONVariant();
 
-    BSONVariant(const BSONVariant& v) noexcept;
-    BSONVariant& operator=(const BSONVariant& v) noexcept;
-    BSONVariant(BSONVariant&& v) noexcept;
-    BSONVariant& operator=(BSONVariant&& v) noexcept;
+    BSONVariant(const BSONVariant& var) noexcept;
+    BSONVariant& operator=(const BSONVariant& var) noexcept;
+    BSONVariant(BSONVariant&& var) noexcept;
+    BSONVariant& operator=(BSONVariant&& var) noexcept;
 
-    static BSONVariant createArray() noexcept;
-    static BSONVariant createObject() noexcept;
+    static BSONVariant createObject(std::initializer_list<KeyValue> items = {}) noexcept;
+    static BSONVariant createArray(std::initializer_list<BSONVariant> items = {}) noexcept;
 
     bool isNull() const noexcept;
     bool isBoolean() const noexcept;
@@ -77,10 +80,10 @@ public:
     BSONVariant operator[](int idx) const noexcept;
     BSONVariant operator[](const char* key) const noexcept;
 
-    void pushArrayItem(const BSONVariant& value) noexcept;
-    void setArrayItem(int idx, const BSONVariant& value) noexcept;
-    void insertArrayItem(int idx, const BSONVariant& value) noexcept;
-    void setObjectItem(const char* key, const BSONVariant& value) noexcept;
+    void pushArrayItem(const BSONVariant& var) noexcept;
+    void setArrayItem(int idx, const BSONVariant& var) noexcept;
+    void insertArrayItem(int idx, const BSONVariant& var) noexcept;
+    void setObjectItem(const char* key, const BSONVariant& var) noexcept;
 
     BSONVariant sliceArray(int start, int end = -1) const noexcept
     {
@@ -104,12 +107,12 @@ public:
 private:
     BSONVariant(bson_type_t type, bson_t* array) noexcept;
 
-    void copy(const BSONVariant& v) noexcept;
-    void move(BSONVariant&& v) noexcept;
+    void copy(const BSONVariant& var) noexcept;
+    void move(BSONVariant&& var) noexcept;
     void destroy() noexcept;
     
     static BSONVariant get(const bson_t* bson, const char* key) noexcept;
-    static void        set(bson_t* bson, const char* key, const BSONVariant& value) noexcept;
+    static void        set(bson_t* bson, const char* key, const BSONVariant& var) noexcept;
 
     bson_type_t fType;
 

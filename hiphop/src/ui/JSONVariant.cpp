@@ -57,10 +57,20 @@ JSONVariant::JSONVariant(const char* s) noexcept
     : fImpl(cJSON_CreateString(s))
 {}
 
-JSONVariant::JSONVariant(std::initializer_list<JSONVariant> l) noexcept
+JSONVariant::JSONVariant(std::initializer_list<KeyValue> items) noexcept
+    : fImpl(cJSON_CreateObject())
+{
+    for (std::initializer_list<KeyValue>::const_iterator it = items.begin();
+            it != items.end(); ++it) {
+        setObjectItem(it->first, it->second);
+    }
+}
+
+JSONVariant::JSONVariant(std::initializer_list<JSONVariant> items) noexcept
     : fImpl(cJSON_CreateArray())
 {
-    for (std::initializer_list<JSONVariant>::const_iterator it = l.begin(); it != l.end(); ++it) {
+    for (std::initializer_list<JSONVariant>::const_iterator it = items.begin();
+            it != items.end(); ++it) {
         pushArrayItem(*it);
     }
 }
@@ -74,49 +84,49 @@ JSONVariant::~JSONVariant()
     fImpl = nullptr;
 }
 
-JSONVariant::JSONVariant(const JSONVariant& v) noexcept
-    : fImpl(cJSON_Duplicate(v.fImpl, true))
+JSONVariant::JSONVariant(const JSONVariant& var) noexcept
+    : fImpl(cJSON_Duplicate(var.fImpl, true))
 {}
 
-JSONVariant& JSONVariant::operator=(const JSONVariant& v) noexcept
+JSONVariant& JSONVariant::operator=(const JSONVariant& var) noexcept
 {
     if (fImpl != nullptr) {
         cJSON_Delete(fImpl);
     }
 
-    fImpl = cJSON_Duplicate(v.fImpl, true);
+    fImpl = cJSON_Duplicate(var.fImpl, true);
 
     return *this;
 }
 
-JSONVariant::JSONVariant(JSONVariant&& v) noexcept
+JSONVariant::JSONVariant(JSONVariant&& var) noexcept
 {
-    fImpl = v.fImpl;
-    v.fImpl = nullptr;
+    fImpl = var.fImpl;
+    var.fImpl = nullptr;
 }
 
-JSONVariant& JSONVariant::operator=(JSONVariant&& v) noexcept
+JSONVariant& JSONVariant::operator=(JSONVariant&& var) noexcept
 {
-    if (this != &v) {
+    if (this != &var) {
         if (fImpl != nullptr) {
             cJSON_Delete(fImpl);
         }
 
-        fImpl = v.fImpl;
-        v.fImpl = nullptr;
+        fImpl = var.fImpl;
+        var.fImpl = nullptr;
     }
 
    return *this;
 }
 
-JSONVariant JSONVariant::createArray() noexcept
+JSONVariant JSONVariant::createObject(std::initializer_list<KeyValue> items) noexcept
 {
-    return JSONVariant(cJSON_CreateArray());
+    return JSONVariant(items);
 }
 
-JSONVariant JSONVariant::createObject() noexcept
+JSONVariant JSONVariant::createArray(std::initializer_list<JSONVariant> items) noexcept
 {
-    return JSONVariant(cJSON_CreateObject());
+    return JSONVariant(items);
 }
 
 bool JSONVariant::isNull() const noexcept

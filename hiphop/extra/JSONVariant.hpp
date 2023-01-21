@@ -20,6 +20,7 @@
 #define JSON_VARIANT_HPP
 
 #include <initializer_list>
+#include <utility>
 
 #include "distrho/extra/String.hpp"
 #include "ui/thirdparty/cJSON.h"
@@ -42,17 +43,20 @@ public:
     JSONVariant(uint32_t i) noexcept;
     JSONVariant(float f) noexcept;
     JSONVariant(const char* s) noexcept;
-    JSONVariant(std::initializer_list<JSONVariant> l) noexcept;
+
+    typedef std::pair<const char*,JSONVariant> KeyValue;
+    JSONVariant(std::initializer_list<KeyValue> items) noexcept;
+    JSONVariant(std::initializer_list<JSONVariant> items) noexcept;
 
     ~JSONVariant();
 
-    JSONVariant(const JSONVariant& v) noexcept;
-    JSONVariant& operator=(const JSONVariant& v) noexcept;
-    JSONVariant(JSONVariant&& v) noexcept;
-    JSONVariant& operator=(JSONVariant&& v) noexcept;
+    JSONVariant(const JSONVariant& var) noexcept;
+    JSONVariant& operator=(const JSONVariant& var) noexcept;
+    JSONVariant(JSONVariant&& var) noexcept;
+    JSONVariant& operator=(JSONVariant&& var) noexcept;
 
-    static JSONVariant createArray() noexcept;
-    static JSONVariant createObject() noexcept;
+    static JSONVariant createObject(std::initializer_list<KeyValue> items = {}) noexcept;
+    static JSONVariant createArray(std::initializer_list<JSONVariant> items = {}) noexcept;
 
     bool isNull() const noexcept;
     bool isBoolean() const noexcept;
@@ -73,10 +77,10 @@ public:
     JSONVariant operator[](int idx) const noexcept;
     JSONVariant operator[](const char* key) const noexcept;
 
-    void pushArrayItem(const JSONVariant& value) noexcept;
-    void setArrayItem(int idx, const JSONVariant& value) noexcept;
-    void insertArrayItem(int idx, const JSONVariant& value) noexcept;
-    void setObjectItem(const char* key, const JSONVariant& value) noexcept;
+    void pushArrayItem(const JSONVariant& var) noexcept;
+    void setArrayItem(int idx, const JSONVariant& var) noexcept;
+    void insertArrayItem(int idx, const JSONVariant& var) noexcept;
+    void setObjectItem(const char* key, const JSONVariant& var) noexcept;
 
     JSONVariant sliceArray(int start, int end = -1) const noexcept
     {
