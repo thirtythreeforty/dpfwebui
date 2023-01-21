@@ -27,55 +27,55 @@ class UI {
 
     // uint UI::getWidth()
     async getWidth() {
-        return this._callAndExpectReply('getWidth', false);
+        return this.call('getWidth');
     }
 
     // uint UI::getHeight()
     async getHeight() {
-        return this._callAndExpectReply('getHeight', false);
+        return this.call('getHeight');
     }
 
     // void UI::setWidth(uint width)
     setWidth(width) {
-        this._call('setWidth', width);
+        this.call('setWidth', width);
     }
 
     // void UI::setHeight(uint height)
     setHeight(height) {
-        this._call('setHeight', height);
+        this.call('setHeight', height);
     }
 
     // bool UI::isResizable()
     async isResizable() {
-        return this._callAndExpectReply('isResizable', true);
+        return this.call('isResizable');
     }
 
     // void UI::setSize(uint width, uint height)
     // This method is only supported in the plugin embedded web view
     setSize(width, height) {
         if (DISTRHO.env.plugin) {
-            this._call('setSize', width, height);
+            this.call('setSize', width, height);
         }
     }
 
     // void UI::sendNote(uint8_t channel, uint8_t note, uint8_t velocity)
     sendNote(channel, note, velocity) {
-        this._call('sendNote', channel, note, velocity);
+        this.call('sendNote', channel, note, velocity);
     }
 
     // void UI::editParameter(uint32_t index, bool started)
     editParameter(index, started) {
-        this._call('editParameter', index, started);
+        this.call('editParameter', index, started);
     }
 
     // void UI::setParameterValue(uint32_t index, float value)
     setParameterValue(index, value) {
-        this._call('setParameterValue', index, value);
+        this.call('setParameterValue', index, value);
     }
 
     // void UI::setState(const char* key, const char* value)
     setState(key, value) {
-        this._call('setState', key, value);
+        this.call('setState', key, value);
     }
 
     // void UI::sizeChanged(uint width, uint height)
@@ -92,14 +92,14 @@ class UI {
    
     // bool ExternalWindow::isStandalone()
     async isStandalone() {
-        return this._callAndExpectReply('isStandalone', true);
+        return this.call('isStandalone');
     }
 
     // Non-DPF method for grabbing or releasing the keyboard focus
     // void WebViewUI::setKeyboardFocus()
     setKeyboardFocus(focus) {
         if (DISTRHO.env.plugin) {
-            this._call('setKeyboardFocus', focus);
+            this.call('setKeyboardFocus', focus);
         }
     }
 
@@ -107,7 +107,7 @@ class UI {
     // void WebViewUI::openSystemWebBrowser(String& url)
     openSystemWebBrowser(url) {
         if (DISTRHO.env.plugin) {
-            this._call('openSystemWebBrowser', url);
+            this.call('openSystemWebBrowser', url);
         } else {
             window.open(url, '_blank');
         }
@@ -116,13 +116,13 @@ class UI {
     // Non-DPF method that returns the UI width in CSS px at initialization time
     // uint WebViewUI::getInitWidthCSS()
     async getInitWidthCSS() {
-        return this._callAndExpectReply('getInitWidthCSS', true);
+        return this.call('getInitWidthCSS');
     }
 
     // Non-DPF method that returns the UI height in CSS px at initialization time
     // uint WebViewUI::getInitHeightCSS()
     async getInitHeightCSS() {
-        return this._callAndExpectReply('getInitHeightCSS', true);
+        return this.call('getInitHeightCSS');
     }
 
     // Non-DPF method for sending a message to the host
@@ -182,7 +182,7 @@ class UI {
     // Non-DPF method that writes to memory shared with DISTRHO::PluginEx instance
     // void UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset, uint32_t hints)
     writeSharedMemory(data /*Uint8Array*/, offset /*Number*/, hints /*Number*/) {
-        this._call('writeSharedMemory', this._encodeBinaryDataIfNeeded(data),
+        this.call('writeSharedMemory', this._encodeBinaryDataIfNeeded(data),
                     offset || 0, hints || 0);
     }
 
@@ -197,7 +197,7 @@ class UI {
     // Non-DPF method that loads binary into DISTRHO::WasmPlugin instance
     // void UIEx::sideloadWasmBinary(const uint8_t* data, size_t size)
     sideloadWasmBinary(data /*Uint8Array*/) {
-        this._call('sideloadWasmBinary', this._encodeBinaryDataIfNeeded(data));
+        this.call('sideloadWasmBinary', this._encodeBinaryDataIfNeeded(data));
     }
 
     // Non-DPF method that returns the plugin UI public URL
@@ -206,33 +206,46 @@ class UI {
         if (DISTRHO.env.dev) {
             return document.location.href;
         } else {
-            return this._callAndExpectReply('getPublicUrl', true);
+            return this.call('getPublicUrl');
         }
     }
 
     // Non-DPF method to check whether the plugin is published using Zeroconf
     async isZeroconfPublished() {
-        return this._callAndExpectReply('isZeroconfPublished', false);
+        return this.call('isZeroconfPublished');
     }
 
     // Non-DPF method for toggling Zeroconf publish state
     setZeroconfPublished(published) {
-        this._call('setZeroconfPublished', published);
+        this.call('setZeroconfPublished', published);
     }
 
     // Non-DPF method for querying Zeroconf plugin instance ID (read-only)
     async getZeroconfId() {
-        return this._callAndExpectReply('getZeroconfId', false);
+        return this.call('getZeroconfId');
     }
 
      // Non-DPF method for querying Zeroconf service name
     async getZeroconfName() {
-        return this._callAndExpectReply('getZeroconfName', false);
+        return this.call('getZeroconfName');
     }
 
     // Non-DPF method for updating Zeroconf service name
     setZeroconfName(name) {
-        this._call('setZeroconfName', name);
+        this.call('setZeroconfName', name);
+    }
+
+    // Non-DPF method for for calling native UI functions
+    call(funcName, ...args) {
+        if (this._resolve[funcName] === undefined) {
+            this._resolve[funcName] = [];
+        }
+        return new Promise((resolve, reject) => {
+            this._resolve[funcName].push({resolve: resolve, reject: reject});
+            const funcArg = this._isMessageProtocolBinary ? this.constructor.djb2hash(funcName)
+                            : funcName;
+            this.postMessage(funcArg, ...args)
+        });
     }
 
     // Non-DPF local getter for approximate network latency in milliseconds
@@ -246,7 +259,6 @@ class UI {
 
     _initMessageChannel() {
         this._resolve = {};
-        this._cache = {};
         this._socket = null;
         this._latency = 0;
         this._pingSendTime = 0;
@@ -265,7 +277,7 @@ class UI {
                 // loading can be processed. Since this involves message passing, it
                 // will not cause any UI methods to be triggered synchronously and
                 // is safe to indirectly call from super() in subclass constructors.
-                this._call('ready');
+                this.call('ready');
             }
         } else {
             if (env.dev) {
@@ -335,31 +347,10 @@ class UI {
         setTimeout(this.messageChannelOpen.bind(this), 0);
     }
 
-    // Helper for calling UI methods
-    _call(funcName, ...args) {
-        const funcArg = this._isMessageProtocolBinary ? this.constructor.djb2hash(funcName)
-                        : funcName;
-        this.postMessage(funcArg, ...args)
-    }
-
-    // Helper for supporting value returning calls using promises
-    _callAndExpectReply(funcName, cache, ...args) {
-        if (cache && (funcName in this._cache)) {
-            return new Promise((resolve, _) => resolve(...this._cache[funcName]));
-        }
-        if (this._resolve[funcName] === undefined) {
-            this._resolve[funcName] = [];
-        }
-        return new Promise((resolve, reject) => {
-            this._resolve[funcName].push({resolve: resolve, reject: reject});
-            this._call(funcName, ...args);
-        });
-    }
-
     // Send a ping message to measure latency
     _ping() {
         this._pingSendTime = (new Date).getTime();
-        this._call('ping');
+        this.call('ping');
     }
 
     // Compute latency when response to ping is received
@@ -379,7 +370,6 @@ class UI {
         
         const funcName = func.name;
         payload = payload.slice(1);
-        this._cache[funcName] = payload;
 
         if (funcName in this._resolve) {
             for (let callback of this._resolve[funcName]) {
