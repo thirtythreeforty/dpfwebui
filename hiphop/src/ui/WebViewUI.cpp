@@ -165,8 +165,11 @@ void WebViewUI::stateChanged(const char* key, const char* value)
 void WebViewUI::sizeChanged(uint width, uint height)
 {
     WebViewUIBase::sizeChanged(width, height);
-    fWebView->setSize(width, height);
-    callback("sizeChanged", { width, height });
+    
+    queue([this, width, height] {
+        fWebView->setSize(width, height);
+        callback("sizeChanged", { width, height });
+    });
 }
 
 void WebViewUI::setBuiltInFunctionHandlers()
