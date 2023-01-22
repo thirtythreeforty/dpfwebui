@@ -25,7 +25,7 @@ USE_NAMESPACE_DISTRHO
 
 BSONVariant::BSONVariant() noexcept
     : fType(BSON_TYPE_NULL)
-    , fArray(nullptr)
+    , fDocument(nullptr)
 {}
 
 BSONVariant::BSONVariant(bool b) noexcept
@@ -75,7 +75,7 @@ BSONVariant::BSONVariant(const char* s) noexcept
 
 BSONVariant::BSONVariant(std::initializer_list<KeyValue> items) noexcept
     : fType(BSON_TYPE_DOCUMENT)
-    , fArray(bson_new())
+    , fDocument(bson_new())
 {
     for (std::initializer_list<KeyValue>::const_iterator it = items.begin();
             it != items.end(); ++it) {
@@ -85,7 +85,7 @@ BSONVariant::BSONVariant(std::initializer_list<KeyValue> items) noexcept
 
 BSONVariant::BSONVariant(std::initializer_list<BSONVariant> items) noexcept
     : fType(BSON_TYPE_ARRAY)
-    , fArray(bson_new())
+    , fDocument(bson_new())
 {
     for (std::initializer_list<BSONVariant>::const_iterator it = items.begin();
             it != items.end(); ++it) {
@@ -227,17 +227,17 @@ BinaryData BSONVariant::getBinaryData() const noexcept
 
 int BSONVariant::getArraySize() const noexcept
 {
-    return bson_count_keys(fArray);
+    return bson_count_keys(fDocument);
 }
 
 BSONVariant BSONVariant::getArrayItem(int idx) const noexcept
 {
-    return get(fArray, String(idx).buffer());
+    return get(fDocument, String(idx).buffer());
 }
 
 BSONVariant BSONVariant::getObjectItem(const char* key) const noexcept
 {
-    return get(fArray, key);
+    return get(fDocument, key);
 }
 
 BSONVariant BSONVariant::operator[](int idx) const noexcept
@@ -247,34 +247,34 @@ BSONVariant BSONVariant::operator[](int idx) const noexcept
 
 BSONVariant BSONVariant::operator[](const char* key) const noexcept
 {
-    return get(fArray, key);
+    return get(fDocument, key);
 }
 
 void BSONVariant::pushArrayItem(const BSONVariant& var) noexcept
 {
-    String key(bson_count_keys(fArray));
-    set(fArray, key.buffer(), var);
+    String key(bson_count_keys(fDocument));
+    set(fDocument, key.buffer(), var);
 }
 
 void BSONVariant::setArrayItem(int idx, const BSONVariant& var) noexcept
 {
     String key(idx);
-    set(fArray, key.buffer(), var);
+    set(fDocument, key.buffer(), var);
 }
 
 void BSONVariant::insertArrayItem(int idx, const BSONVariant& var) noexcept
 {
-    if (fArray == nullptr) {
+    if (fDocument == nullptr) {
         return;
     }
 
     bson_iter_t iter;
 
-    if (! bson_iter_init(&iter, fArray)) {
+    if (! bson_iter_init(&iter, fDocument)) {
         return;
     }
 
-    int keyCount = static_cast<int>(bson_count_keys(fArray));
+    int keyCount = static_cast<int>(bson_count_keys(fDocument));
 
     if (idx > keyCount) {
         return;
@@ -303,42 +303,68 @@ void BSONVariant::insertArrayItem(int idx, const BSONVariant& var) noexcept
         bson_append_iter(newArr, String(newIdx).buffer(), -1, &iter);
     }
 
-    bson_destroy(fArray);
-    fArray = newArr;
+    bson_destroy(fDocument);
+    fDocument = newArr;
 
-    set(fArray, String(idx).buffer(), var);
+    set(fDocument, String(idx).buffer(), var);
 }
 
 void BSONVariant::setObjectItem(const char* key, const BSONVariant& var) noexcept
 {
-    set(fArray, key, var);
+    set(fDocument, key, var);
 }
 
 BinaryData BSONVariant::toBSON() const noexcept
 {
-    if (fArray == nullptr) {
+    if (fDocument == nullptr) {
         return BinaryData();
     }
 
-    const uint8_t* data = bson_get_data(fArray);   
+    const uint8_t* data = bson_get_data(fDocument);   
     
-    return BinaryData(data, data + fArray->len);
+    return BinaryData(data, data + fDocument->len);
 }
 
 BSONVariant BSONVariant::fromBSON(const BinaryData& data, bool asArray) noexcept
 {
-    bson_t* array = bson_new_from_data(data.data(), data.size());
+    bson_t* document = bson_new_from_data(data.data(), data.size());
 
-    if (array == nullptr) {
+    if (document == nullptr) {
         return BSONVariant();
     }
 
-    return BSONVariant(asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT, array);
+    return BSONVariant(asArray ? BSON_TYPE_ARRAY : BSON_TYPE_DOCUMENT, document);
 }
 
-BSONVariant::BSONVariant(bson_type_t type, bson_t* array) noexcept
+String BSONVariant::toJSON(bool extended, bool canonical) const noexcept
+{
+    if (fDocument == nullptr) {
+        return asString();
+    }
+
+    if (extended) {
+        if (canonical) {
+            return String(bson_as_canonical_extended_json(fDocument, nullptr));
+        } else {
+            return String(bson_as_relaxed_extended_json(fDocument, nullptr));
+        }
+    } else {
+        return String(bson_as_json(fDocument, nullptr));
+    }
+}
+
+BSONVariant BSONVariant::fromJSON(const char* jsonText) noexcept
+{
+    bson_t* doc = bson_new_from_json(reinterpret_cast<const uint8_t*>(jsonText),
+                                        -1, nullptr);
+    bson_type_t type = doc != nullptr ? BSON_TYPE_DOCUMENT : BSON_TYPE_EOD;
+
+    return BSONVariant(type, doc);
+}
+
+BSONVariant::BSONVariant(bson_type_t type, bson_t* document) noexcept
     : fType(type)
-    , fArray(array)
+    , fDocument(document)
 {}
 
 void BSONVariant::copy(const BSONVariant& var) noexcept
@@ -364,7 +390,7 @@ void BSONVariant::copy(const BSONVariant& var) noexcept
             break;
         case BSON_TYPE_ARRAY:
         case BSON_TYPE_DOCUMENT:
-            fArray = bson_copy(var.fArray);
+            fDocument = bson_copy(var.fDocument);
             break;
         default:
             break;
@@ -374,9 +400,9 @@ void BSONVariant::copy(const BSONVariant& var) noexcept
 void BSONVariant::move(BSONVariant&& var) noexcept
 {
     fType = var.fType;
-    fArray = var.fArray;
+    fDocument = var.fDocument;
     var.fType = BSON_TYPE_EOD;
-    var.fArray = nullptr;
+    var.fDocument = nullptr;
 }
 
 void BSONVariant::destroy() noexcept
@@ -390,7 +416,7 @@ void BSONVariant::destroy() noexcept
             break;
         case BSON_TYPE_ARRAY:
         case BSON_TYPE_DOCUMENT:
-            bson_destroy(fArray);
+            bson_destroy(fDocument);
             break;
         default:
             break;
@@ -474,10 +500,10 @@ void BSONVariant::set(bson_t* bson, const char* key, const BSONVariant& var) noe
                                 static_cast<uint32_t>(var.fData->size()));
             break;
         case BSON_TYPE_ARRAY:
-            bson_append_array(bson, key, -1, var.fArray);
+            bson_append_array(bson, key, -1, var.fDocument);
             break;
         case BSON_TYPE_DOCUMENT:
-            bson_append_document(bson, key, -1, var.fArray);
+            bson_append_document(bson, key, -1, var.fDocument);
             break;
         default:
             break;

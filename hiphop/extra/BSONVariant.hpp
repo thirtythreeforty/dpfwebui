@@ -101,8 +101,15 @@ public:
         return lhs;
     }
 
+    operator bool()   const noexcept { return getBoolean(); }
+    operator double() const noexcept { return getNumber(); }
+    operator String() const noexcept { return getString(); }
+
     BinaryData toBSON() const noexcept;
     static BSONVariant fromBSON(const BinaryData& data, bool asArray) noexcept;
+    
+    String toJSON(bool extended = false, bool canonical = false) const noexcept;
+    static BSONVariant fromJSON(const char* jsonText) noexcept;
 
 private:
     BSONVariant(bson_type_t type, bson_t* array) noexcept;
@@ -122,7 +129,7 @@ private:
         double      fDouble;
         char*       fString;
         BinaryData* fData;
-        bson_t*     fArray;
+        bson_t*     fDocument;
     };
 
 };
