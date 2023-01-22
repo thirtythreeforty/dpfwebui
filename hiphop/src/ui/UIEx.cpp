@@ -23,12 +23,14 @@
 UIEx::UIEx(uint width, uint height)
     : UI(width, height)
 {
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     if (fMemory.create()) {
         // Allow Plugin instance to locate shared memory
         setState("_shmem_file", fMemory.getDataFilename());
     } else {
         d_stderr2("Could not create shared memory");
     }
+#endif
 }
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
