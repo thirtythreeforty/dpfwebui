@@ -45,7 +45,7 @@ public:
 
     uintptr_t getPlatformWindow() const { return fPlatformWindow; }
 
-    WebViewBase* getWebView() { return fWebView; }
+    WebViewBase& getWebView() { return *fWebView; }
 
     virtual void openSystemWebBrowser(String& url) = 0;
 
