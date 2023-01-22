@@ -40,7 +40,7 @@ public:
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
-
+    
     bool writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0,
                            uint32_t hints = 0);
 
@@ -51,8 +51,6 @@ public:
 
 protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    virtual void sharedMemoryReady() {}
-
     virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
     {
         (void)data;
@@ -61,10 +59,6 @@ protected:
     }
 
     void uiIdle() override;
-#endif
-
-#if DISTRHO_PLUGIN_WANT_STATE
-    void stateChanged(const char* key, const char* value) override;
 #endif
 
 private:

@@ -22,7 +22,14 @@
 
 UIEx::UIEx(uint width, uint height)
     : UI(width, height)
-{}
+{
+    if (fMemory.create()) {
+        // Allow Plugin instance to locate shared memory
+        setState("_shmem_file", fMemory.getDataFilename());
+    } else {
+        d_stderr2("Could not create shared memory");
+    }
+}
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
@@ -62,20 +69,3 @@ void UIEx::uiIdle()
     }
 }
 #endif // HIPHOP_SHARED_MEMORY_SIZE
-
-#if DISTRHO_PLUGIN_WANT_STATE
-void UIEx::stateChanged(const char* key, const char* value)
-{
-    (void)key;
-    (void)value;
-# if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    if (std::strcmp(key, "_shmem_file") == 0) {
-        if (fMemory.connect(value) != nullptr) {
-            sharedMemoryReady();
-        } else {
-            d_stderr2("Could not connect to shared memory");
-        }
-    }
-# endif
-}
-#endif

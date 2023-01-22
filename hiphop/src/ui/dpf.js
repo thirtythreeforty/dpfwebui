@@ -186,10 +186,6 @@ class UI {
                     offset || 0, hints || 0);
     }
 
-    // Non-DPF callback method that notifies when shared memory is ready to use
-    // void UIEx::sharedMemoryReady()
-    sharedMemoryReady() {}
-
     // Non-DPF callback method that notifies when shared memory has been written
     // void UIEx::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
     sharedMemoryChanged(data /*Uint8Array*/, hints /*Number*/) {}

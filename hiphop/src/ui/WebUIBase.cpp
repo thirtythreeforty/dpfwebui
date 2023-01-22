@@ -88,17 +88,11 @@ void WebUIBase::programLoaded(uint32_t index)
 #if DISTRHO_PLUGIN_WANT_STATE
 void WebUIBase::stateChanged(const char* key, const char* value)
 {
-    UIEx::stateChanged(key, value);
     callback("stateChanged", { key, value });
 }
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-void WebUIBase::sharedMemoryReady()
-{
-    callback("sharedMemoryReady");
-}
-
 void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
     BinaryData binData(data, data + size);

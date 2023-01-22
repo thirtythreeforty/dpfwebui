@@ -70,7 +70,6 @@ protected:
 private:
 #if defined(HIPHOP_NETWORK_UI)
     uint32_t fStateIndexWsPort;
-    int fWebServerPort;
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     uint32_t fStateIndexShMemFile;
