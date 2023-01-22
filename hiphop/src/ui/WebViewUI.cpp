@@ -27,7 +27,7 @@
 
 USE_NAMESPACE_DISTRHO
 
-uintptr_t kOriginEmbeddedWebView = 0;
+static const uintptr_t kOriginEmbeddedWebView = 0;
 
 WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCssColor,
                      float initPixelRatio)

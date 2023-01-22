@@ -30,8 +30,6 @@
 
 START_NAMESPACE_DISTRHO
 
-static uintptr_t kOriginEmbeddedWebView;
-
 #if defined(HIPHOP_NETWORK_UI)
 typedef NetworkUI WebViewUIBase; // https:// + WebSockets messaging
 #else

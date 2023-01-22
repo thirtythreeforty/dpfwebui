@@ -33,8 +33,8 @@
 
 START_NAMESPACE_DISTRHO
 
-static uintptr_t kDestinationAll;
-static uintptr_t kExcludeNone;
+static const uintptr_t kDestinationAll = 0;
+static const uintptr_t kExcludeNone = 0;
 
 class WebUIBase : public UIEx
 {

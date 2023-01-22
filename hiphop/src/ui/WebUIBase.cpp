@@ -23,9 +23,6 @@
 
 USE_NAMESPACE_DISTRHO
 
-uintptr_t kDestinationAll = 0;
-uintptr_t kExcludeNone = 0;
-
 WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio,
                         FunctionArgumentSerializer funcArgSerializer)
     : UIEx(initPixelRatio * widthCssPx, initPixelRatio * heightCssPx)
