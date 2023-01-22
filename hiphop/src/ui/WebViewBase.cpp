@@ -17,6 +17,7 @@
  */
 
 #include "WebViewBase.hpp"
+#include "DistrhoPluginInfo.h"
 
 // This could be moved into dpf.js but then JavaScript code should be checking
 // for the platform type in order to insert JS_POST_MESSAGE_SHIM. Leaving
@@ -119,10 +120,7 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
 
 void WebViewBase::postMessage(const Variant& payload)
 {
-#if ! HIPHOP_UI_PROTOCOL_BINARY
-    // This method implements something like a "reverse postMessage()" aiming to
-    // keep the bridge symmetrical. Global window.host is an EventTarget that
-    // can be listened for messages.
+    // Global window.host is an EventTarget that can be listened for messages.
     String jsonPayload = payload.toJSON();
 
     if (fPrintTraffic) {
@@ -133,9 +131,6 @@ void WebViewBase::postMessage(const Variant& payload)
                     "{detail:" + jsonPayload + "}"
                 "));";
     runScript(js);
-#else
-    (void)payload;
-#endif
 }
 
 void WebViewBase::injectHostObjectScripts()

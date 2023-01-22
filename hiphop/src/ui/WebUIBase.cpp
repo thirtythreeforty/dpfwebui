@@ -17,6 +17,7 @@
  */
 
 #include "WebUIBase.hpp"
+#include "DistrhoPluginInfo.h"
 
 #include "distrho/DistrhoPluginUtils.hpp"
 #include "distrho/extra/Base64.hpp"

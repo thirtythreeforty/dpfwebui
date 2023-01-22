@@ -116,13 +116,11 @@ void WebViewUI::ready()
 {
     fJsUiReady = true;
 
-#if ! defined(HIPHOP_NETWORK_UI)
     for (MessageBuffer::iterator it = fMessageBuffer.begin(); it != fMessageBuffer.end(); ++it) {
         fWebView->postMessage(*it);
     }
     
     fMessageBuffer.clear();
-#endif
 }
 
 void WebViewUI::setKeyboardFocus(bool focus)

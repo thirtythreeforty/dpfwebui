@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "src/DistrhoDefines.h"
+#include "DistrhoPluginInfo.h"
 
 #if defined(DISTRHO_OS_WINDOWS)
 # include <Winsock2.h>

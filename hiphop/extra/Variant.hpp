@@ -19,6 +19,8 @@
 #ifndef VARIANT_HPP
 #define VARIANT_HPP
 
+#include "DistrhoPluginInfo.h"
+
 #if HIPHOP_UI_PROTOCOL_BINARY
 # include "BSONVariant.hpp"
 typedef BSONVariant Variant;
