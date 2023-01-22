@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,7 @@
 
 UIEx::UIEx(uint width, uint height)
     : UI(width, height)
-{
-#if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    if (fMemory.create()) {
-        // Allow Plugin instance to locate shared memory
-        setState("_shmem_file", fMemory.getDataFilename());
-    } else {
-        d_stderr2("Could not create shared memory");
-    }
-#endif
-}
+{}
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
@@ -50,21 +41,24 @@ bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
 # if defined(HIPHOP_SUPPORT_WASM)
 void UIEx::sideloadWasmBinary(const uint8_t* data, size_t size)
 {
-    // Send binary to the Plugin instance. This could be also achieved using the
-    // state interface by first encoding data into something like Base64.
-    
+    // Send binary to the Plugin instance
     writeSharedMemory(data, size, 0, kShMemHintInternal | kShMemHintWasmBinary);
 }
 # endif
 void UIEx::uiIdle()
 {
-    // ExternalWindow does not implement the IdleCallback methods. If uiIdle()
-    // is not fast enough for visualizations a custom timer solution needs to be
-    // implemented, or DPF modified so the uiIdle() frequency can be configured.
+    if (! fMemory.isCreatedOrConnected()) {
+        if (fMemory.create()) {
+            // Allow Plugin instance to locate shared memory
+            setState("_shmem_file", fMemory.getDataFilename());
+        } else {
+            return;
+        }
+    }
 
     constexpr int origin = kSharedMemoryWriteOriginPlugin;
 
-    if (fMemory.isCreatedOrConnected() && ! fMemory.isRead(origin)) {
+    if (! fMemory.isRead(origin)) {
         sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(origin),
                             fMemory.getDataSize(origin), fMemory.getHints(origin));
         fMemory.setRead(origin);
