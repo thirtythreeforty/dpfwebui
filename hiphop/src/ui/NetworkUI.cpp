@@ -48,7 +48,7 @@ USE_NAMESPACE_DISTRHO
 
 NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio)
     : WebUIBase(widthCssPx, heightCssPx, initPixelRatio
-#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+#if HIPHOP_UI_PROTOCOL_BINARY
         , /*FunctionArgumentSerializer*/[](const char* f) { return djb2hash(f); }
 #endif
     )
@@ -144,14 +144,14 @@ void NetworkUI::setState(const char* key, const char* value)
 
 void NetworkUI::postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude)
 {
-#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+#if HIPHOP_UI_PROTOCOL_BINARY
     BinaryData data = payload.toBSON();
     if (destination == kDestinationAll) {
         fServer.broadcast(data.data(), data.size(), reinterpret_cast<Client>(exclude));
     } else {
         fServer.send(data.data(), data.size(), reinterpret_cast<Client>(destination));
     }
-#elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
+#else
     if (destination == kDestinationAll) {
         fServer.broadcast(payload.toJSON(), reinterpret_cast<Client>(exclude));
     } else {
@@ -387,7 +387,7 @@ void NetworkUI::handleWebServerConnect(Client client)
 
 int NetworkUI::handleWebServerRead(Client client, const ByteVector& data)
 {
-#if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+#if HIPHOP_UI_PROTOCOL_BINARY
     handleMessage(Variant::fromBSON(data, /*asArray*/true), reinterpret_cast<uintptr_t>(client));
 #else
     (void)client;
@@ -398,7 +398,7 @@ int NetworkUI::handleWebServerRead(Client client, const ByteVector& data)
 
 int NetworkUI::handleWebServerRead(Client client, const char* data)
 {
-#if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
+#if ! HIPHOP_UI_PROTOCOL_BINARY
     handleMessage(Variant::fromJSON(data), reinterpret_cast<uintptr_t>(client));
 #else
     (void)client;

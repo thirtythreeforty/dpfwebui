@@ -44,7 +44,7 @@ public:
     bool writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0,
                            uint32_t hints = 0);
 
-# if defined(HIPHOP_WASM_SUPPORT)
+# if defined(HIPHOP_SUPPORT_WASM)
     void sideloadWasmBinary(const uint8_t* data, size_t size);
 # endif
 #endif // HIPHOP_SHARED_MEMORY_SIZE

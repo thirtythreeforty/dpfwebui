@@ -25,9 +25,9 @@ HIPHOP_WEB_UI_PATH = ui
 HIPHOP_NETWORK_UI = true
 
 # --------------------------------------------------------------
-# Enable binary network protocol
+# Build BSONVariant required by the binary protocol
 
-HIPHOP_MESSAGE_PROTOCOL_BINARY = true
+HIPHOP_SUPPORT_BSON = true
 
 # --------------------------------------------------------------
 # Files to build

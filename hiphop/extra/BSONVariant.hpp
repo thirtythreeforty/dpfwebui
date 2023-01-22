@@ -19,8 +19,8 @@
 #ifndef BSON_VARIANT_HPP
 #define BSON_VARIANT_HPP
 
-#if !defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
-# error BSONVariant is only available with HIPHOP_MESSAGE_PROTOCOL_BINARY
+#if !defined(HIPHOP_SUPPORT_BSON)
+# error BSONVariant requires BSON support enabled by HIPHOP_SUPPORT_BSON
 #endif
 
 #include <initializer_list>

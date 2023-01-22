@@ -19,12 +19,12 @@
 #ifndef VARIANT_HPP
 #define VARIANT_HPP
 
-#if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
-# include "JSONVariant.hpp"
-typedef JSONVariant Variant;
-#elif defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+#if HIPHOP_UI_PROTOCOL_BINARY
 # include "BSONVariant.hpp"
 typedef BSONVariant Variant;
+#else
+# include "JSONVariant.hpp"
+typedef JSONVariant Variant;
 #endif
 
 #endif // VARIANT_HPP

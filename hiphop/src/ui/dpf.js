@@ -133,7 +133,7 @@ class UI {
             if (this._socket.readyState == WebSocket.OPEN) {
                 let data;
 
-                if (this._isMessageProtocolBinary) {
+                if (this._isProtocolBinary) {
                     data = BSON.serialize(payload.reduce((acc, val, idx) => {
                         acc[idx] = val;
                         return acc;
@@ -242,7 +242,7 @@ class UI {
         }
         return new Promise((resolve, reject) => {
             this._resolve[funcName].push({resolve: resolve, reject: reject});
-            const funcArg = this._isMessageProtocolBinary ? this.constructor.djb2hash(funcName)
+            const funcArg = this._isProtocolBinary ? this.constructor.djb2hash(funcName)
                             : funcName;
             this.postMessage(funcArg, ...args)
         });
@@ -322,11 +322,11 @@ class UI {
             });
 
             this._socket.addEventListener('message', (ev) => {
-                this._probeMessageProtocolIfNeeded(ev.data);
+                this._probeProtocolIfNeeded(ev.data);
 
                 let payload;
 
-                if (this._isMessageProtocolBinary) {
+                if (this._isProtocolBinary) {
                     const payloadArr = BSON.deserialize(ev.data);
                     payload = Object.keys(payloadArr).map(k => payloadArr[k]);
                 } else {
@@ -393,7 +393,7 @@ class UI {
 
     // Encode binary data to base64 when the protocol is text-based
     _encodeBinaryDataIfNeeded(data) {
-        return this._isMessageProtocolBinary ? data : base64EncArr(data);
+        return this._isProtocolBinary ? data : base64EncArr(data);
     }
 
     // Reject all pending promises on channel disconnection
@@ -408,15 +408,15 @@ class UI {
     }
 
     // Detect if the message protocol is text-based or binary
-    _probeMessageProtocolIfNeeded(data) {
-        if (this._probedMessageProtocol) {
+    _probeProtocolIfNeeded(data) {
+        if (this._probedProtocol) {
             return;
         }
 
-        this._probedMessageProtocol = true;
-        this._isMessageProtocolBinary = data instanceof ArrayBuffer;
+        this._probedProtocol = true;
+        this._isProtocolBinary = data instanceof ArrayBuffer;
         
-        if (this._isMessageProtocolBinary) {
+        if (this._isProtocolBinary) {
             if (typeof(BSON) === 'undefined') {
                 throw new Error('Binary socket requires BSON, make sure bson.min.js is loaded.');
             }

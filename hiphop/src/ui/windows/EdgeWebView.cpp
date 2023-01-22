@@ -335,7 +335,7 @@ HRESULT EdgeWebView::handleWebView2NavigationCompleted(ICoreWebView2 *sender,
 HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
                                                       ICoreWebView2WebMessageReceivedEventArgs *eventArgs)
 {
-#if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
+#if ! HIPHOP_UI_PROTOCOL_BINARY
     // Edge WebView2 does not provide access to raw values, resort to parsing JSON.
 
     LPWSTR jsonStr;

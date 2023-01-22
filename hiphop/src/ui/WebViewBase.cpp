@@ -119,7 +119,7 @@ void WebViewBase::setEventHandler(WebViewEventHandler* handler)
 
 void WebViewBase::postMessage(const Variant& payload)
 {
-#if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
+#if ! HIPHOP_UI_PROTOCOL_BINARY
     // This method implements something like a "reverse postMessage()" aiming to
     // keep the bridge symmetrical. Global window.host is an EventTarget that
     // can be listened for messages.
@@ -158,7 +158,7 @@ void WebViewBase::handleScriptMessage(const Variant& payload)
             fHandler->handleWebViewConsole(payload[1].getString(), payload[2].getString());
         }
     } else {
-#if defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
+#if ! HIPHOP_UI_PROTOCOL_BINARY
         if (fPrintTraffic) {
             d_stderr("cpp<-js : %s", payload.toJSON().buffer());
         }

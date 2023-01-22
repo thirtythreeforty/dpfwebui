@@ -21,6 +21,12 @@
 #define HIPHOP_UI_ZEROCONF 1
 
 /**
+   Use BSON instead of JSON for communicating over the network
+   @note HIPHOP_SUPPORT_BSON must be enabled
+ */
+#define HIPHOP_UI_PROTOCOL_BINARY 1
+
+/**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.

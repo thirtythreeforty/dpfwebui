@@ -104,9 +104,9 @@ void WebUIBase::sharedMemoryReady()
 void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
     BinaryData binData(data, data + size);
-# if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+# if HIPHOP_UI_PROTOCOL_BINARY
     callback("_bsonSharedMemoryChanged", { binData, hints });
-# elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
+# else
     callback("_jsonSharedMemoryChanged", { binData, hints });
 # endif
 }
@@ -201,9 +201,9 @@ void WebUIBase::setBuiltInFunctionHandlers()
 
 #if DISTRHO_PLUGIN_WANT_STATE && defined(HIPHOP_SHARED_MEMORY_SIZE)
     setFunctionHandler("writeSharedMemory", 2, [this](const Variant& args, uintptr_t /*origin*/) {
-# if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+# if HIPHOP_UI_PROTOCOL_BINARY
         BinaryData data = args[0].getBinaryData();
-# elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
+# else
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
 # endif
         writeSharedMemory(
@@ -214,11 +214,11 @@ void WebUIBase::setBuiltInFunctionHandlers()
         );
     });
 
-# if defined(HIPHOP_WASM_SUPPORT)
+# if defined(HIPHOP_SUPPORT_WASM)
     setFunctionHandler("sideloadWasmBinary", 1, [this](const Variant& args, uintptr_t /*origin*/) {
-# if defined(HIPHOP_MESSAGE_PROTOCOL_BINARY)
+# if HIPHOP_UI_PROTOCOL_BINARY
         Variant::BinaryData data = args[0].getBinaryData();
-# elif defined(HIPHOP_MESSAGE_PROTOCOL_TEXT)
+# else
         std::vector<uint8_t> data = d_getChunkFromBase64String(args[0].getString());
 # endif
         sideloadWasmBinary(

@@ -12,8 +12,8 @@ DPF_BUILD_DIR ?= build
 HIPHOP_NETWORK_UI ?= false
 # (WIP) Enable HTTPS and secure WebSockets
 HIPHOP_NETWORK_SSL ?= false
-# Use BSON instead JSON for the network protocol
-HIPHOP_MESSAGE_PROTOCOL_BINARY ?= false
+# Build a type of Variant backed by libbson
+HIPHOP_SUPPORT_BSON ?= false
 # Automatically inject dpf.js when loading content from file://
 HIPHOP_INJECT_FRAMEWORK_JS ?= false
 # Web view implementation on Linux [ gtk | cef ]
@@ -108,20 +108,23 @@ HIPHOP_FILES_DSP = PluginEx.cpp
 HIPHOP_FILES_UI  = UIEx.cpp
 
 # ------------------------------------------------------------------------------
+# Code shared by both UI and DSP
+HIPHOP_FILES_SHARED += JSONVariant.cpp \
+				       thirdparty/cJSON.c
+ifeq ($(HIPHOP_SUPPORT_BSON),true)
+HIPHOP_FILES_SHARED += BSONVariant.cpp
+endif
+
+# ------------------------------------------------------------------------------
 # Optional support for web UI
 
 ifeq ($(WEB_UI),true)
 HIPHOP_FILES_UI += WebUIBase.cpp \
 				   WebViewBase.cpp \
-				   WebViewUI.cpp \
-				   JSONVariant.cpp \
-				   thirdparty/cJSON.c
+				   WebViewUI.cpp
 ifeq ($(HIPHOP_NETWORK_UI),true)
 HIPHOP_FILES_UI += NetworkUI.cpp \
 				   WebServer.cpp
-ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
-HIPHOP_FILES_UI += BSONVariant.cpp
-endif
 endif
 ifeq ($(LINUX),true)
 HIPHOP_FILES_UI += linux/LinuxWebViewUI.cpp \
@@ -141,6 +144,9 @@ HIPHOP_FILES_UI += windows/WindowsWebViewUI.cpp \
 endif
 endif
 
+FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/ui/%)
+FILES_UI += $(HIPHOP_FILES_SHARED:%=$(HIPHOP_SRC_PATH)/%)
+
 # ------------------------------------------------------------------------------
 # Optional support for AssemblyScript DSP
 
@@ -150,7 +156,7 @@ HIPHOP_FILES_DSP += WasmPluginImpl.cpp \
 endif
 
 FILES_DSP += $(HIPHOP_FILES_DSP:%=$(HIPHOP_SRC_PATH)/dsp/%)
-FILES_UI += $(HIPHOP_FILES_UI:%=$(HIPHOP_SRC_PATH)/ui/%)
+FILES_DSP += $(HIPHOP_FILES_SHARED:%=$(HIPHOP_SRC_PATH)/%)
 
 # ------------------------------------------------------------------------------
 # Optional support for macOS universal binaries, keep this before DPF include.
@@ -236,12 +242,10 @@ ifeq ($(WEB_UI),true)
   ifeq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
   BASE_FLAGS += -DHIPHOP_INJECT_FRAMEWORK_JS
   endif
-  ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY), true)
-  BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_BINARY -I$(LIBBSON_PATH)/src/libbson/src/bson \
+  ifeq ($(HIPHOP_SUPPORT_BSON), true)
+  BASE_FLAGS += -DHIPHOP_SUPPORT_BSON -I$(LIBBSON_PATH)/src/libbson/src/bson \
 				-I$(LIBBSON_PATH)/build/src/libbson/src/bson
   LINK_FLAGS += -L$(LIBBSON_BUILD_PATH)/src/libbson -lbson-static-1.0
-  else
-  BASE_FLAGS += -DHIPHOP_MESSAGE_PROTOCOL_TEXT
   endif
   ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
   BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
@@ -265,7 +269,7 @@ endif
 # Add build flags for AssemblyScript DSP dependencies
 
 ifeq ($(WASM_DSP),true)
-  BASE_FLAGS += -DHIPHOP_WASM_SUPPORT
+  BASE_FLAGS += -DHIPHOP_SUPPORT_WASM
   WASM_BYTECODE_FILE = optimized.wasm
   ifeq ($(HIPHOP_WASM_RUNTIME),wamr)
 	BASE_FLAGS += -DHIPHOP_WASM_RUNTIME_WAMR
@@ -444,9 +448,7 @@ endif
 # ------------------------------------
 # Dependency - Clone and build libbson
 
-ifeq ($(WEB_UI),true)
-ifeq ($(HIPHOP_NETWORK_UI),true)
-ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY), true)
+ifeq ($(HIPHOP_SUPPORT_BSON), true)
 LIBBSON_GIT_URL = https://github.com/mongodb/mongo-c-driver
 LIBBSON_GIT_TAG = 1.23.2
 LIBBSON_PATH = $(HIPHOP_DEPS_PATH)/mongo-c-driver
@@ -479,8 +481,6 @@ $(LIBBSON_LIB_PATH): $(LIBBSON_PATH)
 $(LIBBSON_PATH):
 	@mkdir -p $(HIPHOP_DEPS_PATH)
 	@git -C $(HIPHOP_DEPS_PATH) clone --depth 1 --branch $(LIBBSON_GIT_TAG) $(LIBBSON_GIT_URL)
-endif
-endif
 endif
 
 # ------------------------------------------------------------------------------
@@ -810,8 +810,8 @@ HIPHOP_TARGET += lib_ui_plugin
 ifneq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
 HIPHOP_TARGET += lib_ui_framework
 LIB_JS_FILES = $(HIPHOP_SRC_PATH)/ui/dpf.js
-ifeq ($(HIPHOP_MESSAGE_PROTOCOL_BINARY),true)
-LIB_JS_FILES += $(HIPHOP_SRC_PATH)/ui/thirdparty/bson.min.js
+ifeq ($(HIPHOP_SUPPORT_BSON),true)
+LIB_JS_FILES += $(HIPHOP_SRC_PATH)/thirdparty/bson.min.js
 endif
 endif
 # https://unix.stackexchange.com/questions/178235/how-is-cp-f-different-from-cp-remove-destination
