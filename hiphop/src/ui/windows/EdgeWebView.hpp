@@ -90,6 +90,7 @@ private:
     HWND    fHelperHwnd;
     HHOOK   fKeyboardHook;
     String  fUrl;
+    bool    fReady;
     
     typedef std::list<String> StringList;
     StringList fInjectedScripts;

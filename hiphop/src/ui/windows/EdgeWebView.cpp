@@ -50,6 +50,7 @@ EdgeWebView::EdgeWebView()
     : fHelperClassName(nullptr)
     , fHelperHwnd(0)
     , fKeyboardHook(0)
+    , fReady(false)
     , fHandler(nullptr)
     , fController(nullptr)
     , fView(nullptr)
@@ -228,10 +229,10 @@ void EdgeWebView::navigate(String& url)
 
 void EdgeWebView::runScript(String& source)
 {
-    // For the plugin specific use case fView==nullptr means a programming error.
-    // There is no point in queuing these, just wait for the view to load its
-    // contents before trying to run scripts. Otherwise use injectScript().
-    assert(fView != nullptr);
+    if ((fView == nullptr) || ! fReady) {
+        return;
+    }
+
     ICoreWebView2_ExecuteScript(fView, TO_LPCWSTR(source), 0);
 }
 
@@ -316,6 +317,8 @@ HRESULT EdgeWebView::handleWebView2ControllerCompleted(HRESULT result,
     if (!fUrl.isEmpty()) {
         ICoreWebView2_Navigate(fView, TO_LPCWSTR(fUrl));
     }
+
+    fReady = true;
 
     return S_OK;
 }
