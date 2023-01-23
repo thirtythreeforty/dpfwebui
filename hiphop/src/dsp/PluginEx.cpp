@@ -131,6 +131,7 @@ void PluginEx::setState(const char* key, const char* value)
     }
 # endif
 # if DISTRHO_PLUGIN_WANT_FULL_STATE
+#  if defined(HIPHOP_SHARED_MEMORY_SIZE)
     if (std::strcmp("_shmem_file", key) == 0) {
         // There is no way to make a distinction between a persistent and
         // volatile state using the DPF interface. Let host save _shmem_file
@@ -138,6 +139,7 @@ void PluginEx::setState(const char* key, const char* value)
         // The default value will be used by the UI instead [see initState()].
         return;
     }
+#  endif
     fState[String(key)] = value;
 # endif
 }
@@ -161,9 +163,9 @@ String PluginEx::getState(const char* key) const
 bool PluginEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
                                  uint32_t hints)
 {
-    if (! fMemory.isCreatedOrConnected() || ! fMemory.write(
+    if (fMemory.isCreatedOrConnected() && fMemory.write(
             kShMemWriteOriginPlugin, data, size, offset, hints)) {
-        return false;
+        return true;
     }
 
     return false;

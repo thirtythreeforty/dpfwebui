@@ -88,7 +88,9 @@ void WebUIBase::programLoaded(uint32_t index)
 #if DISTRHO_PLUGIN_WANT_STATE
 void WebUIBase::stateChanged(const char* key, const char* value)
 {
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
     UIEx::stateChanged(key, value);
+#endif
     callback("stateChanged", { key, value });
 }
 #endif
