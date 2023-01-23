@@ -28,13 +28,10 @@ UIEx::UIEx(uint width, uint height)
 bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
                              uint32_t hints)
 {
-    if (fMemory.write(kSharedMemoryWriteOriginUI, data, size, offset, hints)) {
+    if (fMemory.isCreatedOrConnected()
+            && fMemory.write(kShMemWriteOriginUI, data, size, offset, hints)) {
         // Notify Plugin instance there is new data available for reading
         setState("_shmem_data", ""/*arbitrary non-null*/);
-        return true;
-    } else {
-        d_stderr2("Could not write shared memory (ui->plugin)");
-        return false;
     }
 }
 
@@ -42,26 +39,24 @@ bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
 void UIEx::sideloadWasmBinary(const uint8_t* data, size_t size)
 {
     // Send binary to the Plugin instance
-    writeSharedMemory(data, size, 0, kShMemHintInternal | kShMemHintWasmBinary);
+    writeSharedMemory(data, size, 0, kShMemHintWasmBinary);
 }
 # endif
 void UIEx::uiIdle()
 {
-    if (! fMemory.isCreatedOrConnected()) {
-        if (fMemory.create()) {
-            // Allow Plugin instance to locate shared memory
-            setState("_shmem_file", fMemory.getDataFilename());
-        } else {
-            return;
-        }
-    }
+    constexpr int origin = kShMemWriteOriginPlugin;
 
-    constexpr int origin = kSharedMemoryWriteOriginPlugin;
-
-    if (! fMemory.isRead(origin)) {
+    if (fMemory.isCreatedOrConnected() && ! fMemory.isRead(origin)) {
         sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(origin),
                             fMemory.getDataSize(origin), fMemory.getHints(origin));
         fMemory.setRead(origin);
+    }
+}
+
+void UIEx::stateChanged(const char* key, const char* value)
+{
+    if ((std::strcmp(key, "_shmem_file") == 0) && ! fMemory.isCreatedOrConnected()) {
+        fMemory.connect(value);
     }
 }
 #endif // HIPHOP_SHARED_MEMORY_SIZE

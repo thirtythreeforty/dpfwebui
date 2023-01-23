@@ -58,6 +58,8 @@ protected:
         (void)hints;
     }
 
+    void stateChanged(const char* key, const char* value) override;
+
     void uiIdle() override;
 #endif
 

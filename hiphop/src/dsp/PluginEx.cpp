@@ -74,7 +74,11 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
     , fStateIndexZeroconfId(stateCount + __COUNTER__)
     , fStateIndexZeroconfName(stateCount + __COUNTER__)
 #endif
-{}
+{
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
+    fMemory.create();
+#endif
+}
 
 #if DISTRHO_PLUGIN_WANT_STATE
 void PluginEx::initState(uint32_t index, State& state)
@@ -90,6 +94,7 @@ void PluginEx::initState(uint32_t index, State& state)
 # if defined(HIPHOP_SHARED_MEMORY_SIZE)
     if (index == fStateIndexShMemFile) {
         state.key = "_shmem_file";
+        state.defaultValue = fMemory.getDataFilename();
     } else if (index == fStateIndexShMemData) {
         state.key = "_shmem_data";
     }
@@ -116,16 +121,7 @@ void PluginEx::setState(const char* key, const char* value)
     (void)key;
     (void)value;
 # if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    if ((std::strcmp(key, "_shmem_file") == 0) && (value[0] != '\0')) {
-        fMemory.close();
-        if (fMemory.connect(value) != nullptr) {
-            sharedMemoryReady();
-        } else {
-            d_stderr2("Could not connect to shared memory");
-        }
-    }
-
-    constexpr int origin = kSharedMemoryWriteOriginUI;
+    constexpr int origin = kShMemWriteOriginUI;
     
     if ((std::strcmp(key, "_shmem_data") == 0) && fMemory.isCreatedOrConnected()
             && ! fMemory.isRead(origin)) {
@@ -135,6 +131,13 @@ void PluginEx::setState(const char* key, const char* value)
     }
 # endif
 # if DISTRHO_PLUGIN_WANT_FULL_STATE
+    if (std::strcmp("_shmem_file", key) == 0) {
+        // There is no way to make a distinction between a persistent and
+        // volatile state using the DPF interface. Let host save _shmem_file
+        // [via getState()], but ignore it during restore [here in setState()].
+        // The default value will be used by the UI instead [see initState()].
+        return;
+    }
     fState[String(key)] = value;
 # endif
 }
@@ -142,10 +145,6 @@ void PluginEx::setState(const char* key, const char* value)
 # if DISTRHO_PLUGIN_WANT_FULL_STATE
 String PluginEx::getState(const char* key) const
 {
-    if (std::strcmp(key, "_shmem_file") == 0) {
-        return String(); // do not save
-    }
-    
     StateMap::const_iterator it = fState.find(String(key));
 
     if (it == fState.end()) {
@@ -163,7 +162,7 @@ bool PluginEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset
                                  uint32_t hints)
 {
     if (! fMemory.isCreatedOrConnected() || ! fMemory.write(
-            kSharedMemoryWriteOriginPlugin, data, size, offset, hints)) {
+            kShMemWriteOriginPlugin, data, size, offset, hints)) {
         return false;
     }
 

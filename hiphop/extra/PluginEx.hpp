@@ -57,8 +57,6 @@ public:
 
 protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    virtual void sharedMemoryReady() {}
-
     virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) 
     {
         (void)data;

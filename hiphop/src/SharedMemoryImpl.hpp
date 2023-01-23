@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,19 @@
 #include "distrho/extra/String.hpp"
 #include "extra/SharedMemory.hpp"
 
-// Plugin code should leave MSB off
-#define kShMemHintWasmBinary  0x1
-#define kShMemHintInternal    0x8000
-
 START_NAMESPACE_DISTRHO
+
+// Plugin code should leave MSB off
+const uint32_t kShMemHintInternal = 0x8000;
+
+enum {
+    kShMemHintWasmBinary = kShMemHintInternal | 0x1
+};
 
 // Used for determining who should read changes to the shared memory
 enum {
-    kSharedMemoryWriteOriginPlugin = 0,
-    kSharedMemoryWriteOriginUI     = 1
+    kShMemWriteOriginPlugin = 0,
+    kShMemWriteOriginUI     = 1
 };
 
 // Keep the read flag atomic

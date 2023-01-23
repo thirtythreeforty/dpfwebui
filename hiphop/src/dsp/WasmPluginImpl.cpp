@@ -353,7 +353,7 @@ void WasmPlugin::deactivate()
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 void WasmPlugin::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
-    if (hints & (kShMemHintInternal | kShMemHintWasmBinary)) {
+    if (hints & kShMemHintWasmBinary) {
         try {
             loadWasmBinary(data, size);
         } catch (const std::exception& ex) {

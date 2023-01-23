@@ -88,6 +88,7 @@ void WebUIBase::programLoaded(uint32_t index)
 #if DISTRHO_PLUGIN_WANT_STATE
 void WebUIBase::stateChanged(const char* key, const char* value)
 {
+    UIEx::stateChanged(key, value);
     callback("stateChanged", { key, value });
 }
 #endif
