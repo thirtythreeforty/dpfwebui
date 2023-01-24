@@ -381,7 +381,11 @@ void NetworkUI::handleWebServerConnect(Client client)
             const Variant args = { it->first.c_str(), it->second.c_str() };
             callback("stateChanged", args, reinterpret_cast<uintptr_t>(client));
         }
-
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
+        if (getSharedMemory().isCreatedOrConnected()) {
+            callback("sharedMemoryReady");
+        }
+#endif
         onClientConnected(client);
     });
 }

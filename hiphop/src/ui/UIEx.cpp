@@ -60,6 +60,7 @@ void UIEx::stateChanged(const char* key, const char* value)
 {
     if ((std::strcmp(key, "_shmem_file") == 0) && ! fMemory.isCreatedOrConnected()) {
         fMemory.connect(value);
+        sharedMemoryReady();
     }
 }
 #endif // HIPHOP_SHARED_MEMORY_SIZE

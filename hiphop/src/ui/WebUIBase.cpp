@@ -96,6 +96,11 @@ void WebUIBase::stateChanged(const char* key, const char* value)
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
+void WebUIBase::sharedMemoryReady()
+{
+    callback("sharedMemoryReady");
+}
+
 void WebUIBase::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
 {
     BinaryData binData(data, data + size);

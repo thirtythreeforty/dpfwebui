@@ -68,6 +68,7 @@ protected:
     void stateChanged(const char* key, const char* value) override;
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
+    virtual void sharedMemoryReady() override;
     virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) override;
 #endif
 
