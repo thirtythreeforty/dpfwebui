@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ class HotSwapExampleUI extends DISTRHO.UI {
         reader.onload = (_) => {
             const data = new Uint8Array(reader.result);
             console.log(`Send file of ${data.length} bytes to Plugin instance`);
-            this.sideloadWasmBinary(data);
+            this.writeSharedMemory(data);
         };
 
         reader.readAsArrayBuffer(file);

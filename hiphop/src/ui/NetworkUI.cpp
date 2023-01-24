@@ -382,7 +382,7 @@ void NetworkUI::handleWebServerConnect(Client client)
             callback("stateChanged", args, reinterpret_cast<uintptr_t>(client));
         }
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-        if (getSharedMemory().isCreatedOrConnected()) {
+        if (getSharedMemory() != nullptr) {
             callback("sharedMemoryReady");
         }
 #endif

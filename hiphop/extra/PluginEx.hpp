@@ -27,7 +27,7 @@
 # if ! DISTRHO_PLUGIN_WANT_STATE
 #  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
 # endif
-# include "SharedMemoryImpl.hpp"
+# include "extra/SharedMemory.hpp"
 #endif 
 
 START_NAMESPACE_DISTRHO
@@ -49,19 +49,17 @@ public:
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
-
-    bool writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0,
-                           uint32_t hints = 0);
+    uint8_t* getSharedMemory() const noexcept;
+    bool     writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0) const noexcept;
 #endif
 
 protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) 
+    virtual void sharedMemoryChanged(uint8_t* data, size_t size, size_t offset)
     {
         (void)data;
         (void)size;
-        (void)hints;
+        (void)offset;
     }
 #endif
 
@@ -72,7 +70,7 @@ private:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     uint32_t fStateIndexShMemFile;
     uint32_t fStateIndexShMemData;
-    SharedMemoryImpl fMemory;
+    SharedMemory<uint8_t,HIPHOP_SHARED_MEMORY_SIZE> fMemory;
 #endif
 #if HIPHOP_UI_ZEROCONF
     uint32_t fStateIndexZeroconfPublish;

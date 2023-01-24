@@ -25,35 +25,25 @@ UIEx::UIEx(uint width, uint height)
 {}
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
-                             uint32_t hints)
+uint8_t* UIEx::getSharedMemory() const noexcept
 {
-    if (fMemory.isCreatedOrConnected()
-            && fMemory.write(kShMemWriteOriginUI, data, size, offset, hints)) {
-        // Notify Plugin instance there is new data available for reading
-        setState("_shmem_data", ""/*arbitrary non-null*/);
-        return true;
-    }
-
-    return false;
+    return fMemory.getDataPointer();
 }
 
-# if defined(HIPHOP_SUPPORT_WASM)
-void UIEx::sideloadWasmBinary(const uint8_t* data, size_t size)
+bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset) noexcept
 {
-    // Send binary to the Plugin instance
-    writeSharedMemory(data, size, 0, kShMemHintWasmBinary);
-}
-# endif
-void UIEx::uiIdle()
-{
-    constexpr int origin = kShMemWriteOriginPlugin;
+    uint8_t* ptr = fMemory.getDataPointer();
 
-    if (fMemory.isCreatedOrConnected() && ! fMemory.isRead(origin)) {
-        sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(origin),
-                            fMemory.getDataSize(origin), fMemory.getHints(origin));
-        fMemory.setRead(origin);
+    if (ptr == nullptr) {
+        return false;
     }
+
+    std::memcpy(ptr + offset, data, size);
+
+    String metadata = String(size) + String(';') + String(offset);
+    setState("_shmem_data", metadata.buffer()); // notify Plugin
+
+    return true;
 }
 
 void UIEx::stateChanged(const char* key, const char* value)

@@ -180,25 +180,14 @@ class UI {
     messageChannelClosed() {}
 
     // Non-DPF method that writes to memory shared with DISTRHO::PluginEx instance
-    // void UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset, uint32_t hints)
-    writeSharedMemory(data /*Uint8Array*/, offset /*Number*/, hints /*Number*/) {
-        this.call('writeSharedMemory', this._encodeBinaryDataIfNeeded(data),
-                    offset || 0, hints || 0);
+    // void UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset)
+    writeSharedMemory(data /*Uint8Array*/, offset) {
+        this.call('writeSharedMemory', this._encodeBinaryDataIfNeeded(data), offset || 0);
     }
 
     // Non-DPF callback method that notifies when shared memory is ready to use
     // void UIEx::sharedMemoryReady()
     sharedMemoryReady() {}
-
-    // Non-DPF callback method that notifies when shared memory has been written
-    // void UIEx::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
-    sharedMemoryChanged(data /*Uint8Array*/, hints /*Number*/) {}
-
-    // Non-DPF method that loads binary into DISTRHO::WasmPlugin instance
-    // void UIEx::sideloadWasmBinary(const uint8_t* data, size_t size)
-    sideloadWasmBinary(data /*Uint8Array*/) {
-        this.call('sideloadWasmBinary', this._encodeBinaryDataIfNeeded(data));
-    }
 
     // Non-DPF method that returns the plugin UI public URL
     // String NetworkUI::getPublicUrl()
@@ -379,16 +368,6 @@ class UI {
         } else {
             func.call(this, ...payload);
         }
-    }
-
-    // Helper for unwrapping received shared memory data on BSON-based protocol
-    _bsonSharedMemoryChanged(data /*Object*/, hints /*Number*/) {
-        this.sharedMemoryChanged(data.buffer, hints);
-    }
-
-    // Helper for decoding received shared memory data on JSON-based protocol
-    _jsonSharedMemoryChanged(data /*String*/, hints /*Number*/) {
-        this.sharedMemoryChanged(base64DecToArr(data), hints);
     }
 
     // Encode binary data to base64 when the protocol is text-based

@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <random>
+#include <stdexcept>
 
 #include "distrho/extra/Sleep.hpp"
 #include "distrho/extra/Thread.hpp"
@@ -110,6 +111,15 @@ public:
 
         // Call run() in plugin.ts, see source file for more plugin methods.
         WasmPlugin::run(inputs, outputs, frames, midiEvents, midiEventCount);
+    }
+
+    void sharedMemoryChanged(uint8_t* data, size_t size, size_t offset) override
+    {
+        try {
+            loadWasmBinary(data + offset, size);
+        } catch (const std::exception& ex) {
+            d_stderr2(ex.what());
+        }
     }
 
 private:

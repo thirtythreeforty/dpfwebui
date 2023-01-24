@@ -350,18 +350,6 @@ void WasmPlugin::deactivate()
     }
 }
 
-#if defined(HIPHOP_SHARED_MEMORY_SIZE)
-void WasmPlugin::sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
-{
-    if (hints & kShMemHintWasmBinary) {
-        try {
-            loadWasmBinary(data, size);
-        } catch (const std::exception& ex) {
-            d_stderr2(ex.what());
-        }
-    }
-}
-
 void WasmPlugin::loadWasmBinary(const uint8_t* data, size_t size)
 {
     // No need to check if the runtime is running
@@ -380,7 +368,6 @@ void WasmPlugin::loadWasmBinary(const uint8_t* data, size_t size)
         fRuntime->callFunction("activate");
     }
 }
-#endif // HIPHOP_SHARED_MEMORY_SIZE
 
 WasmValueVector WasmPlugin::getTimePosition(WasmValueVector params)
 {

@@ -69,7 +69,6 @@ protected:
 #endif
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     virtual void sharedMemoryReady() override;
-    virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints) override;
 #endif
 
     virtual void postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude) = 0;

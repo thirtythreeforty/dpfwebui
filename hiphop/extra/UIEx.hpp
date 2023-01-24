@@ -25,7 +25,7 @@
 # if ! DISTRHO_PLUGIN_WANT_STATE
 #  error Shared memory support requires DISTRHO_PLUGIN_WANT_STATE
 # endif
-# include "SharedMemoryImpl.hpp"
+# include "extra/SharedMemory.hpp"
 #endif 
 
 START_NAMESPACE_DISTRHO
@@ -39,35 +39,20 @@ public:
     virtual ~UIEx() {}
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    SharedMemoryImpl& getSharedMemory() noexcept { return fMemory; }
-    
-    bool writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0,
-                           uint32_t hints = 0);
-
-# if defined(HIPHOP_SUPPORT_WASM)
-    void sideloadWasmBinary(const uint8_t* data, size_t size);
-# endif
-#endif // HIPHOP_SHARED_MEMORY_SIZE
+    uint8_t* getSharedMemory() const noexcept;
+    bool     writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0) noexcept;
+#endif
 
 protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     virtual void sharedMemoryReady() {}
 
-    virtual void sharedMemoryChanged(const uint8_t* data, size_t size, uint32_t hints)
-    {
-        (void)data;
-        (void)size;
-        (void)hints;
-    }
-
     void stateChanged(const char* key, const char* value) override;
-
-    void uiIdle() override;
 #endif
 
 private:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    SharedMemoryImpl fMemory;
+    SharedMemory<uint8_t,HIPHOP_SHARED_MEMORY_SIZE> fMemory;
 #endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIEx)

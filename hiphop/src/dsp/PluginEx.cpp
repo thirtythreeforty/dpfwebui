@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstdlib>
+
 #include "extra/PluginEx.hpp"
 
 // This is ugly but __COUNTER__ alone cannot solve the problem
@@ -121,13 +123,12 @@ void PluginEx::setState(const char* key, const char* value)
     (void)key;
     (void)value;
 # if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    constexpr int origin = kShMemWriteOriginUI;
-    
-    if ((std::strcmp(key, "_shmem_data") == 0) && fMemory.isCreatedOrConnected()
-            && ! fMemory.isRead(origin)) {
-        sharedMemoryChanged(fMemory.getDataPointer() + fMemory.getDataOffset(origin),
-                            fMemory.getDataSize(origin), fMemory.getHints(origin));
-        fMemory.setRead(origin);
+    if (std::strcmp(key, "_shmem_data") == 0) {
+        char* v2;
+        size_t size = std::strtol(value, &v2, 10);
+        size_t offset = std::strtol(v2 + 1, nullptr, 10);
+        sharedMemoryChanged(getSharedMemory(), size, offset);
+        return;
     }
 # endif
 # if DISTRHO_PLUGIN_WANT_FULL_STATE
@@ -160,14 +161,21 @@ String PluginEx::getState(const char* key) const
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-bool PluginEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
-                                 uint32_t hints)
+uint8_t* PluginEx::getSharedMemory() const noexcept
 {
-    if (fMemory.isCreatedOrConnected() && fMemory.write(
-            kShMemWriteOriginPlugin, data, size, offset, hints)) {
-        return true;
+    return fMemory.getDataPointer();
+}
+
+bool PluginEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset) const noexcept
+{
+    uint8_t* ptr = fMemory.getDataPointer();
+
+    if (ptr == nullptr) {
+        return false;
     }
 
-    return false;
+    std::memcpy(ptr + offset, data, size);
+
+    return true;
 }
 #endif
