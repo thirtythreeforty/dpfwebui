@@ -31,13 +31,13 @@ enum {
     kShMemHintWasmBinary = kShMemHintInternal | 0x1
 };
 
-// Used for determining who should read changes to the shared memory
+// Used for determining who reads changes
 enum {
     kShMemWriteOriginPlugin = 0,
     kShMemWriteOriginUI     = 1
 };
 
-// Keep the read flag atomic
+// Information for the receiver
 struct SharedMemoryState
 {
     uint8_t  readFlag;
@@ -46,19 +46,18 @@ struct SharedMemoryState
     uint32_t hints;
 };
 
-// Two states for full duplex usage
+// One state for each direction
 struct SharedMemoryHeader
 {
     SharedMemoryState state[2];
 };
 
 // This class wraps SharedMemory and adds a header
-template<class S, size_t N>
-class StatefulSharedMemory
+class SharedMemoryImpl
 {
 public:
-    StatefulSharedMemory() {}
-    virtual ~StatefulSharedMemory() {}
+    SharedMemoryImpl() {}
+    virtual ~SharedMemoryImpl() {}
 
     bool create()
     {
@@ -77,7 +76,7 @@ public:
         return true;
     }
 
-    S* connect(const char* const filename2)
+    uint8_t* connect(const char* const filename2)
     {
         return fImpl.connect(filename2);
     }
@@ -93,11 +92,7 @@ public:
     }
 
     size_t getSize() const noexcept {
-        return N;
-    }
-
-    size_t getSizeBytes() const noexcept {
-        return N * sizeof(S);
+        return HIPHOP_SHARED_MEMORY_SIZE - sizeof(SharedMemoryHeader);
     }
 
     bool isRead(int origin) const noexcept
@@ -125,9 +120,11 @@ public:
         return getState(origin).dataSize;
     }
 
-    S* getDataPointer() const noexcept
+    // Underlying mmap() guarantees aligned pointer
+    // https://stackoverflow.com/questions/42259495/does-mmap-return-aligned-pointer-values
+    uint8_t* getDataPointer() const noexcept
     {
-        return fImpl.getDataPointer() + sizeof(SharedMemoryHeader);
+        return fImpl.getDataPointer();
     }
 
     const char* getDataFilename() const noexcept
@@ -135,7 +132,7 @@ public:
         return fImpl.getDataFilename();
     }
 
-    bool write(int origin, const S* data, size_t size, size_t offset, uint32_t hints)
+    bool write(int origin, const uint8_t* data, size_t size, size_t offset, uint32_t hints)
     {
         if (size > (getSize() - offset)) {
             return false;
@@ -143,7 +140,7 @@ public:
         
         SharedMemoryState& state = getState(origin);
 
-        std::memcpy(getDataPointer() + offset, data, sizeof(S) * size);
+        std::memcpy(getDataPointer() + offset, data, size);
         
         state.dataOffset = offset;
         state.dataSize = size;
@@ -155,15 +152,14 @@ public:
 private:
     SharedMemoryState& getState(int origin) const noexcept
     {
-        return reinterpret_cast<SharedMemoryHeader*>(fImpl.getDataPointer())->state[origin];
+        uint8_t* hdr = fImpl.getDataPointer() + HIPHOP_SHARED_MEMORY_SIZE - sizeof(SharedMemoryHeader);
+        return reinterpret_cast<SharedMemoryHeader*>(hdr)->state[origin];
     }
 
-    SharedMemory<S,N> fImpl;
+    SharedMemory<uint8_t,HIPHOP_SHARED_MEMORY_SIZE> fImpl;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatefulSharedMemory)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SharedMemoryImpl)
 };
-
-typedef StatefulSharedMemory<uint8_t,HIPHOP_SHARED_MEMORY_SIZE> SharedMemoryImpl;
 
 END_NAMESPACE_DISTRHO
 

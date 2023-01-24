@@ -32,7 +32,10 @@ bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset,
             && fMemory.write(kShMemWriteOriginUI, data, size, offset, hints)) {
         // Notify Plugin instance there is new data available for reading
         setState("_shmem_data", ""/*arbitrary non-null*/);
+        return true;
     }
+
+    return false;
 }
 
 # if defined(HIPHOP_SUPPORT_WASM)
