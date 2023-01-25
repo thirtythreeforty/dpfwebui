@@ -113,7 +113,7 @@ public:
         WasmPlugin::run(inputs, outputs, frames, midiEvents, midiEventCount);
     }
 
-    void sharedMemoryChanged(uint8_t* data, size_t size, size_t offset) override
+    void sharedMemoryWritten(uint8_t* data, size_t size, size_t offset) override
     {
         try {
             loadWasmBinary(data + offset, size);

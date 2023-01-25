@@ -185,10 +185,6 @@ class UI {
         this.call('writeSharedMemory', this._encodeBinaryDataIfNeeded(data), offset || 0);
     }
 
-    // Non-DPF callback method that notifies when shared memory is ready to use
-    // void UIEx::sharedMemoryReady()
-    sharedMemoryReady() {}
-
     // Non-DPF method that returns the plugin UI public URL
     // String NetworkUI::getPublicUrl()
     async getPublicUrl() {

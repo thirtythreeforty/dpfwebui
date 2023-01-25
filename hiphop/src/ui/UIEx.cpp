@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
+#include <cstring>
 
 #include "extra/UIEx.hpp"
 
@@ -25,7 +25,7 @@ UIEx::UIEx(uint width, uint height)
 {}
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-uint8_t* UIEx::getSharedMemory() const noexcept
+uint8_t* UIEx::getSharedMemoryPointer() const noexcept
 {
     return fMemory.getDataPointer();
 }
@@ -41,16 +41,17 @@ bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset) no
     std::memcpy(ptr + offset, data, size);
 
     String metadata = String(size) + String(';') + String(offset);
-    setState("_shmem_data", metadata.buffer()); // notify Plugin
+    setState("_shmem_data", metadata.buffer());
 
     return true;
 }
 
-void UIEx::stateChanged(const char* key, const char* value)
+void UIEx::uiIdle()
 {
-    if ((std::strcmp(key, "_shmem_file") == 0) && ! fMemory.isCreatedOrConnected()) {
-        fMemory.connect(value);
-        sharedMemoryReady();
+    // setState() fails for VST3 when called from constructor
+    if (! fMemory.isCreatedOrConnected() && fMemory.create()) {
+        setState("_shmem_file", fMemory.getDataFilename());
+        sharedMemoryPointerUpdated(fMemory.getDataPointer());
     }
 }
 #endif // HIPHOP_SHARED_MEMORY_SIZE

@@ -76,11 +76,7 @@ PluginEx::PluginEx(uint32_t parameterCount, uint32_t programCount, uint32_t stat
     , fStateIndexZeroconfId(stateCount + __COUNTER__)
     , fStateIndexZeroconfName(stateCount + __COUNTER__)
 #endif
-{
-#if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    fMemory.create();
-#endif
-}
+{}
 
 #if DISTRHO_PLUGIN_WANT_STATE
 void PluginEx::initState(uint32_t index, State& state)
@@ -96,7 +92,6 @@ void PluginEx::initState(uint32_t index, State& state)
 # if defined(HIPHOP_SHARED_MEMORY_SIZE)
     if (index == fStateIndexShMemFile) {
         state.key = "_shmem_file";
-        state.defaultValue = fMemory.getDataFilename();
     } else if (index == fStateIndexShMemData) {
         state.key = "_shmem_data";
     }
@@ -123,24 +118,22 @@ void PluginEx::setState(const char* key, const char* value)
     (void)key;
     (void)value;
 # if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    if (std::strcmp(key, "_shmem_data") == 0) {
+    // Do not persist _shmem_* values by returning before setting fState
+    if ((std::strcmp("_shmem_file", key) == 0) && (value[0] != '\0')) {
+        if (fMemory.isCreatedOrConnected()) {
+            fMemory.close();
+        }
+        sharedMemoryPointerUpdated(fMemory.connect(value));
+        return;
+    } else if (std::strcmp(key, "_shmem_data") == 0) {
         char* v2;
         size_t size = std::strtol(value, &v2, 10);
         size_t offset = std::strtol(v2 + 1, nullptr, 10);
-        sharedMemoryChanged(getSharedMemory(), size, offset);
+        sharedMemoryWritten(getSharedMemoryPointer(), size, offset);
         return;
     }
 # endif
 # if DISTRHO_PLUGIN_WANT_FULL_STATE
-#  if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    if (std::strcmp("_shmem_file", key) == 0) {
-        // There is no way to make a distinction between a persistent and
-        // volatile state using the DPF interface. Let host save _shmem_file
-        // [via getState()], but ignore it during restore [here in setState()].
-        // The default value will be used by the UI instead [see initState()].
-        return;
-    }
-#  endif
     fState[String(key)] = value;
 # endif
 }
@@ -161,7 +154,7 @@ String PluginEx::getState(const char* key) const
 #endif // DISTRHO_PLUGIN_WANT_STATE
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-uint8_t* PluginEx::getSharedMemory() const noexcept
+uint8_t* PluginEx::getSharedMemoryPointer() const noexcept
 {
     return fMemory.getDataPointer();
 }

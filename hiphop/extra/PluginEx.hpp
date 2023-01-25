@@ -49,13 +49,18 @@ public:
 #endif
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    uint8_t* getSharedMemory() const noexcept;
+    uint8_t* getSharedMemoryPointer() const noexcept;
     bool     writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0) const noexcept;
 #endif
 
 protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    virtual void sharedMemoryChanged(uint8_t* data, size_t size, size_t offset)
+    virtual void sharedMemoryPointerUpdated(uint8_t* ptr)
+    {
+        (void)ptr;
+    }
+
+    virtual void sharedMemoryWritten(uint8_t* data, size_t size, size_t offset)
     {
         (void)data;
         (void)size;

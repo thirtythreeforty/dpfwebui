@@ -67,9 +67,6 @@ protected:
 #if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* key, const char* value) override;
 #endif
-#if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    virtual void sharedMemoryReady() override;
-#endif
 
     virtual void postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude) = 0;
     virtual void onMessageReceived(const Variant& payload, uintptr_t origin);
