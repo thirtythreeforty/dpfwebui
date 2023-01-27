@@ -35,6 +35,12 @@ WebUIBase::WebUIBase(uint widthCssPx, uint heightCssPx, float initPixelRatio,
     setBuiltInFunctionHandlers();
 }
 
+void WebUIBase::callback(const char* function, Variant args, uintptr_t destination, uintptr_t exclude)
+{
+    args.insertArrayItem(0, serializeFunctionArgument(function));
+    postMessage(args, destination, exclude);
+}
+
 void WebUIBase::queue(const UiBlock& block)
 {
     fUiQueueMutex.lock();
@@ -123,12 +129,6 @@ void WebUIBase::handleMessage(const Variant& payload, uintptr_t origin)
     }
 
     handler.second(handlerArgs, origin);
-}
-
-void WebUIBase::callback(const char* function, Variant args, uintptr_t destination, uintptr_t exclude)
-{
-    args.insertArrayItem(0, serializeFunctionArgument(function));
-    postMessage(args, destination, exclude);
 }
 
 Variant WebUIBase::serializeFunctionArgument(const char* function)

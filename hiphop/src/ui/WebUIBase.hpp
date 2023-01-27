@@ -45,6 +45,9 @@ public:
                 FunctionArgumentSerializer funcArgSerializer = nullptr);
     virtual ~WebUIBase() {}
 
+    void callback(const char* function, Variant args = Variant::createArray(),
+                    uintptr_t destination = kDestinationAll, uintptr_t exclude = kExcludeNone);
+
 protected:
     typedef std::function<void()> UiBlock;
     void queue(const UiBlock& block);
@@ -72,9 +75,6 @@ protected:
     virtual void onMessageReceived(const Variant& payload, uintptr_t origin);
 
     void handleMessage(const Variant& payload, uintptr_t origin);
-
-    void callback(const char* function, Variant args = Variant::createArray(),
-                    uintptr_t destination = kDestinationAll, uintptr_t exclude = kExcludeNone);
 
     Variant serializeFunctionArgument(const char* function);
 
