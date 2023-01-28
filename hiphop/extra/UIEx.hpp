@@ -36,7 +36,7 @@ class UIEx : public UI
 {
 public:
     UIEx(uint width = 0, uint height = 0);
-    virtual ~UIEx() {}
+    virtual ~UIEx();
 
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     uint8_t* getSharedMemoryPointer() const noexcept;

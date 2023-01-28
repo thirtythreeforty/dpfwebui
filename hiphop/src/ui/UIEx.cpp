@@ -24,6 +24,13 @@ UIEx::UIEx(uint width, uint height)
     : UI(width, height)
 {}
 
+UIEx::~UIEx()
+{
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
+    setState("_shmem_file", "");
+#endif
+}
+
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
 uint8_t* UIEx::getSharedMemoryPointer() const noexcept
 {
