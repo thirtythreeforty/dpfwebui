@@ -59,11 +59,18 @@ ChildProcessWebView::ChildProcessWebView()
 {
     fDisplay = XOpenDisplay(0);
 
+    if (fDisplay == 0) {
+        d_stderr("Could not open display");
+        cleanup();
+        return;
+    }
+
     fPipeFd[0][0] = -1;
     fPipeFd[0][1] = -1;
 
     if (pipe(fPipeFd[0]) == -1) {
         d_stderr("Could not create host->helper pipe - %s", strerror(errno));
+        cleanup();
         return;
     }
 
@@ -72,6 +79,7 @@ ChildProcessWebView::ChildProcessWebView()
 
     if (pipe(fPipeFd[1]) == -1) {
         d_stderr("Could not create helper->host pipe - %s", strerror(errno));
+        cleanup();
         return;
     }
 
