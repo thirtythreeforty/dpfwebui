@@ -176,7 +176,7 @@ void ChildProcessWebView::realize()
     XMapWindow(fDisplay, fBackground);
     XSetWindowBackground(fDisplay, fBackground, color);
     XClearWindow(fDisplay, fBackground);
-    XFlush(fDisplay);
+    XSync(fDisplay, False);
 
     msg_win_cfg_t config;
     config.parent = static_cast<uintptr_t>(fBackground);
@@ -212,7 +212,7 @@ void ChildProcessWebView::onSize(uint width, uint height)
 
     if (fBackground != 0) {
         XResizeWindow(fDisplay, fBackground, width, height);
-        XFlush(fDisplay);
+        XSync(fDisplay, False);
     }
 
     const msg_win_size_t sizePkt = { width, height };
