@@ -98,6 +98,7 @@ ChildProcessWebView::ChildProcessWebView()
 
     if (status != 0) {
         d_stderr("Could not spawn helper child process - %s", strerror(errno));
+        cleanup();
         return;
     }
 
