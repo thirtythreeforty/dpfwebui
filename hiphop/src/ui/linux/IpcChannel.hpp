@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,22 +30,25 @@ START_NAMESPACE_DISTRHO
 class IpcChannel
 {
 public:
-    IpcChannel(int fdr, int fdw);
+    // -1 means block indefinitely
+    IpcChannel(int fdr, int fdw, int readTimeoutMs = -1, int writeTimeoutMs = -1);
     virtual ~IpcChannel();
 
     int getFdRead() const;
     int getFdWrite() const;
 
-    int read(tlv_t* packet, int timeoutMs = 0) const;
+    int read(tlv_t* packet) const;
 
     int write(msg_opcode_t opcode) const;
     int write(msg_opcode_t opcode, String& str) const;
     int write(msg_opcode_t opcode, const void* payload, int payloadSize) const; 
 
 private:
-    int waitAndRead(tlv_t* packet) const;
+    static int wait(int fd, int timeoutMs);
 
     ipc_t* fIpc;
+    int    fReadTimeoutMs;
+    int    fWriteTimeoutMs;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(IpcChannel)
 

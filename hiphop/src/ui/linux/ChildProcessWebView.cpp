@@ -21,7 +21,6 @@
 #include <cstdio>
 #include <errno.h>
 #include <libgen.h>
-#include <signal.h>
 #include <spawn.h>
 #include <unistd.h>
 #include <linux/limits.h>
@@ -47,6 +46,8 @@ extern char **environ;
 */
 
 USE_NAMESPACE_DISTRHO
+
+#define IF_CHANNEL_CLOSED_RETURN() if (fIpc == nullptr) return
 
 ChildProcessWebView::ChildProcessWebView()
     : fDisplay(0)
@@ -74,7 +75,7 @@ ChildProcessWebView::ChildProcessWebView()
         return;
     }
 
-    fIpc = new IpcChannel(fPipeFd[1][0], fPipeFd[0][1]);
+    fIpc = new IpcChannel(fPipeFd[1][0], fPipeFd[0][1], 100/*read timeout ms*/);
     fIpcThread = new IpcReadThread(fIpc,
         std::bind(&ChildProcessWebView::ipcReadCallback, this, std::placeholders::_1));
     fIpcThread->startThread();
@@ -100,14 +101,15 @@ ChildProcessWebView::ChildProcessWebView()
         return;
     }
 
-    // Busy-wait for init up to 5s
-    for (int i = 0; (i < 500) && (fDevicePixelRatio == 0); i++) {
+    // Wait for init up to 3s
+    for (int i = 0; (i < 300) && (fDevicePixelRatio == 0); i++) {
         usleep(10000L); // 10ms
     }
 
     if (fDevicePixelRatio == 0) {
         d_stderr("Timeout waiting for UI helper init - %s", strerror(errno));
-        fDevicePixelRatio = 1.f;
+        cleanup();
+        return;
     }
 
     injectHostObjectScripts();
@@ -133,41 +135,7 @@ ChildProcessWebView::ChildProcessWebView()
 
 ChildProcessWebView::~ChildProcessWebView()
 {
-    if (fPid != -1) {
-        fIpc->write(OP_TERMINATE);
-#if defined(HIPHOP_LINUX_WEBVIEW_CEF)
-        kill(fPid, SIGTERM); // terminate as soon as possible
-#endif
-        int stat;
-        waitpid(fPid, &stat, 0);
-        fPid = -1;
-    }
-
-    if (fIpcThread != 0) {
-        fIpcThread->stopThread(-1);
-        fIpcThread = 0;
-    }
-
-    if (fIpc != 0) {
-        delete fIpc;
-        fIpc = 0;
-    }
-
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 2; j++) {
-            if ((fPipeFd[i][j] != -1) && (close(fPipeFd[i][j]) == -1)) {
-                d_stderr("Could not close pipe - %s", strerror(errno));
-            }
-
-            fPipeFd[i][j] = -1;
-        }
-    }
-
-    if (fBackground != 0) {
-        XDestroyWindow(fDisplay, fBackground);
-    }
-
-    XCloseDisplay(fDisplay);
+    cleanup();
 }
 
 float ChildProcessWebView::getDevicePixelRatio()
@@ -178,6 +146,8 @@ float ChildProcessWebView::getDevicePixelRatio()
 
 void ChildProcessWebView::realize()
 {
+    IF_CHANNEL_CLOSED_RETURN();
+
     const ::Window parent = (::Window)getParent();
     const unsigned long color = getBackgroundColor() >> 8;
     const uint width = getWidth();
@@ -208,21 +178,29 @@ void ChildProcessWebView::realize()
 
 void ChildProcessWebView::navigate(String& url)
 {
+    IF_CHANNEL_CLOSED_RETURN();
+
     fIpc->write(OP_NAVIGATE, url);
 }
 
 void ChildProcessWebView::runScript(String& source)
 {
+    IF_CHANNEL_CLOSED_RETURN();
+
     fIpc->write(OP_RUN_SCRIPT, source);
 }
 
 void ChildProcessWebView::injectScript(String& source)
 {
+    IF_CHANNEL_CLOSED_RETURN();
+
     fIpc->write(OP_INJECT_SCRIPT, source);
 }
 
 void ChildProcessWebView::onSize(uint width, uint height)
 {
+    IF_CHANNEL_CLOSED_RETURN();
+
     if (fBackground != 0) {
         XResizeWindow(fDisplay, fBackground, width, height);
         XFlush(fDisplay);
@@ -234,6 +212,8 @@ void ChildProcessWebView::onSize(uint width, uint height)
 
 void ChildProcessWebView::onKeyboardFocus(bool focus)
 {
+    IF_CHANNEL_CLOSED_RETURN();
+
     const char val = focus ? 1 : 0;
     fIpc->write(OP_SET_KEYBOARD_FOCUS, &val, sizeof(val));
 }
@@ -298,6 +278,46 @@ void ChildProcessWebView::handleHelperScriptMessage(const char *payloadBytes,
     handleScriptMessage(payload);
 }
 
+void ChildProcessWebView::cleanup()
+{
+    if (fPid != -1) {
+        fIpc->write(OP_TERMINATE);
+        int stat;
+        waitpid(fPid, &stat, 0);
+        fPid = -1;
+    }
+
+    if (fIpcThread != 0) {
+        fIpcThread->stopThread(-1);
+        fIpcThread = 0;
+    }
+
+    if (fIpc != 0) {
+        delete fIpc;
+        fIpc = 0;
+    }
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            if ((fPipeFd[i][j] != -1) && (close(fPipeFd[i][j]) == -1)) {
+                d_stderr("Could not close pipe - %s", strerror(errno));
+            }
+
+            fPipeFd[i][j] = -1;
+        }
+    }
+
+    if (fBackground != 0) {
+        XDestroyWindow(fDisplay, fBackground);
+        fBackground = 0;
+    }
+
+    if (fDisplay != 0) {
+        XCloseDisplay(fDisplay);
+        fDisplay = 0;
+    }
+}
+
 IpcReadThread::IpcReadThread(IpcChannel* ipc, IpcReadCallback callback)
     : Thread("ipc_read_" XSTR(HIPHOP_PROJECT_ID_HASH))
     , fIpc(ipc)
@@ -309,7 +329,7 @@ void IpcReadThread::run()
     tlv_t packet;
 
     while (! shouldThreadExit()) {
-        if (fIpc->read(&packet, 100/*ms*/) == 0) {
+        if (fIpc->read(&packet) == 0) {
             fCallback(packet);
         }
     }

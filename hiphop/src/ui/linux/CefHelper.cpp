@@ -116,7 +116,7 @@ int CefHelper::run(const CefMainArgs& args)
         return -1;
     }
 
-    fIpc = new IpcChannel(fdr, fdw);
+    fIpc = new IpcChannel(fdr, fdw, 50/*read timeout ms*/);
 
     // Install xlib error handlers so that the application won't be terminated
     // on non-fatal errors
@@ -173,7 +173,7 @@ void CefHelper::runMainLoop()
 
         // Read the plugin<->helper IPC pipe
         // Use a non-zero timeout for throotling down CefDoMessageLoopWork()
-        rc = fIpc->read(&packet, 5/*ms*/);
+        rc = fIpc->read(&packet);
 
         if (rc == 0) {
             dispatch(packet);

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -60,7 +62,8 @@ void ipc_destroy(ipc_t *ipc)
 
 int ipc_read(ipc_t *ipc, tlv_t *pkt)
 {
-    if (read(ipc->conf.fd_r, pkt, HEADER_SIZE) != HEADER_SIZE) {
+    if (read(ipc->conf.fd_r, pkt, HEADER_SIZE) == -1) {
+        fprintf(stderr, "ipc : read() header - errno %d\n", errno);
         return -1;
     }
 
@@ -69,7 +72,8 @@ int ipc_read(ipc_t *ipc, tlv_t *pkt)
     if (pkt->l > 0) {
         ipc->buf = malloc(pkt->l);
 
-        if (read(ipc->conf.fd_r, ipc->buf, pkt->l) != pkt->l) {
+        if (read(ipc->conf.fd_r, ipc->buf, pkt->l) == -1) {
+            fprintf(stderr, "ipc : read() %d bytes - errno %d\n", pkt->l, errno);
             return -1;
         }
         
@@ -82,10 +86,12 @@ int ipc_read(ipc_t *ipc, tlv_t *pkt)
 int ipc_write(const ipc_t *ipc, const tlv_t *pkt)
 {
     if (write(ipc->conf.fd_w, pkt, HEADER_SIZE) == -1) {
+        fprintf(stderr, "ipc : write() header - errno %d\n", errno);
         return -1;
     }
 
     if ((pkt->l > 0) && (write(ipc->conf.fd_w, pkt->v, pkt->l) == -1)) {
+        fprintf(stderr, "ipc : write() %d bytes - errno %d\n", pkt->l, errno);
         return -1;
     }
 

@@ -96,12 +96,12 @@ int main(int argc, char* argv[])
     memset(&ctx, 0, sizeof(ctx));
 
     if (argc < 3) {
-        fprintf(stderr, "Invalid argument count");
+        fprintf(stderr, "gtk_helper : invalid argument count\n");
         return -1;
     }
 
     if ((sscanf(argv[1], "%d", &conf.fd_r) == 0) || (sscanf(argv[2], "%d", &conf.fd_w) == 0)) {
-        fprintf(stderr, "Invalid file descriptor");
+        fprintf(stderr, "gtk_helper : invalid file descriptor\n");
         return -1;
     }
 
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 
     ctx.display = XOpenDisplay(NULL);
     if (ctx.display == NULL) {
-        fprintf(stderr, "Cannot open display");
+        fprintf(stderr, "gtk_helper : cannot open display\n");
         return -1;
     }
 
@@ -421,7 +421,7 @@ static gboolean ipc_read_cb(GIOChannel *source, GIOCondition condition, gpointer
     }
 
     if (ipc_read(ctx->ipc, &packet) == -1) {
-        fprintf(stderr, "Could not read from IPC channel - %s\n", strerror(errno));
+        fprintf(stderr, "gtk_helper : could not read from IPC channel - %s\n", strerror(errno));
         return TRUE;
     }
 
@@ -467,7 +467,7 @@ static int ipc_write_simple(const context_t *ctx, msg_opcode_t opcode, const voi
     packet.v = payload;
 
     if ((retval = ipc_write(ctx->ipc, &packet)) == -1) {
-        fprintf(stderr, "Could not write to IPC channel - %s", strerror(errno));
+        fprintf(stderr, "gtk_helper : could not write to IPC channel - %s\n", strerror(errno));
     }
 
     return retval;
