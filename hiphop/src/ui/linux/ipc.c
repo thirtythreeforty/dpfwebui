@@ -26,6 +26,13 @@ struct priv_ipc_t {
     void*      buf;
 };
 
+struct priv_hdr_t {
+    short t;
+    int   l;
+};
+
+#define HEADER_SIZE sizeof(struct priv_hdr_t)
+
 static void ipc_free_buf(ipc_t *ipc)
 {
     if (ipc->buf) {
@@ -53,11 +60,7 @@ void ipc_destroy(ipc_t *ipc)
 
 int ipc_read(ipc_t *ipc, tlv_t *pkt)
 {
-    if (read(ipc->conf.fd_r, &pkt->t, sizeof(pkt->t)) != sizeof(pkt->t)) {
-        return -1;
-    }
-
-    if (read(ipc->conf.fd_r, &pkt->l, sizeof(pkt->l)) != sizeof(pkt->l)) {
+    if (read(ipc->conf.fd_r, pkt, HEADER_SIZE) != HEADER_SIZE) {
         return -1;
     }
 
@@ -78,11 +81,7 @@ int ipc_read(ipc_t *ipc, tlv_t *pkt)
 
 int ipc_write(const ipc_t *ipc, const tlv_t *pkt)
 {
-    if (write(ipc->conf.fd_w, &pkt->t, sizeof(pkt->t)) == -1) {
-        return -1;
-    }
-
-    if (write(ipc->conf.fd_w, &pkt->l, sizeof(pkt->l)) == -1) {
+    if (write(ipc->conf.fd_w, pkt, HEADER_SIZE) == -1) {
         return -1;
     }
 

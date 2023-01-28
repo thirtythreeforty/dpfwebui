@@ -421,7 +421,7 @@ static gboolean ipc_read_cb(GIOChannel *source, GIOCondition condition, gpointer
     }
 
     if (ipc_read(ctx->ipc, &packet) == -1) {
-        fprintf(stderr, "Could not read from IPC channel - %s", strerror(errno));
+        fprintf(stderr, "Could not read from IPC channel - %s\n", strerror(errno));
         return TRUE;
     }
 

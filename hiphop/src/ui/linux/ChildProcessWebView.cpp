@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -308,8 +308,8 @@ void IpcReadThread::run()
 {
     tlv_t packet;
 
-    while (!shouldThreadExit()) {
-        if (fIpc->read(&packet, 100/* ms */) == 0) {
+    while (! shouldThreadExit()) {
+        if (fIpc->read(&packet, 100/*ms*/) == 0) {
             fCallback(packet);
         }
     }
