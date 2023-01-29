@@ -233,6 +233,9 @@ class UI {
         return this._latency;
     }
 
+    // Non-DPF callback method that fires when network latency is updated
+    networkLatencyChanged(latencyMs) {}
+
     // Non-DPF method for for calling native UI functions
     call(funcName, ...args) {
         if (this._resolve[funcName] === undefined) {
@@ -349,6 +352,7 @@ class UI {
     // Compute latency when response to ping is received
     pong() {
         this._latency = ((new Date).getTime() - this._pingSendTime) / 2;
+        this.networkLatencyChanged(this._latency);
         this._log(`Latency = ${this._latency}ms`);
     }
 
