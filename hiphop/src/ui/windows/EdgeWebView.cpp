@@ -338,7 +338,6 @@ HRESULT EdgeWebView::handleWebView2NavigationCompleted(ICoreWebView2 *sender,
 HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
                                                       ICoreWebView2WebMessageReceivedEventArgs *eventArgs)
 {
-#if ! HIPHOP_UI_PROTOCOL_BINARY
     // Edge WebView2 does not provide access to raw values, resort to parsing JSON.
 
     LPWSTR jsonStr;
@@ -350,7 +349,7 @@ HRESULT EdgeWebView::handleWebView2WebMessageReceived(ICoreWebView2 *sender,
     }
 
     CoTaskMemFree(jsonStr);
-#endif
+
     (void)sender;
     (void)eventArgs;
 

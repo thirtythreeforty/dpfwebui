@@ -153,11 +153,10 @@ void WebViewBase::handleScriptMessage(const Variant& payload)
             fHandler->handleWebViewConsole(payload[1].getString(), payload[2].getString());
         }
     } else {
-#if ! HIPHOP_UI_PROTOCOL_BINARY
         if (fPrintTraffic) {
             d_stderr("cpp<-js : %s", payload.toJSON().buffer());
         }
-#endif
+        
         if (fHandler != nullptr) {
             fHandler->handleWebViewScriptMessage(payload);
         }
