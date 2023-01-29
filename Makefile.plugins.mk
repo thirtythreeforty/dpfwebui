@@ -246,6 +246,9 @@ ifeq ($(WEB_UI),true)
   BASE_FLAGS += -DHIPHOP_SUPPORT_BSON -I$(LIBBSON_PATH)/src/libbson/src/bson \
 				-I$(LIBBSON_PATH)/build/src/libbson/src/bson
   LINK_FLAGS += -L$(LIBBSON_BUILD_PATH)/src/libbson -lbson-static-1.0
+  ifeq ($(WINDOWS),true)
+	LINK_FLAGS += -lWs2_32
+	endif
   endif
   ifeq ($(HIPHOP_PRINT_TRAFFIC),true)
   BASE_FLAGS += -DHIPHOP_PRINT_TRAFFIC
