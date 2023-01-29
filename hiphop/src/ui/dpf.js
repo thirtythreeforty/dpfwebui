@@ -302,8 +302,6 @@ class UI {
                 clearInterval(reconnectTimer);
                 pingTimer = setInterval(this._ping.bind(this), 1000 * pingPeriod);
                 this._ping();
-                
-                this.messageChannelOpen();
             });
 
             this._socket.addEventListener('close', (_) => {
@@ -318,7 +316,12 @@ class UI {
             });
 
             this._socket.addEventListener('message', (ev) => {
-                this._probeProtocolIfNeeded(ev.data);
+                if (! this._isProtocolProbed) {
+                    this._isProtocolProbed = true;
+                    this._probeProtocol(ev.data);
+
+                    this.messageChannelOpen();
+                }
 
                 let payload;
 
@@ -395,12 +398,7 @@ class UI {
     }
 
     // Detect if the message protocol is text-based or binary
-    _probeProtocolIfNeeded(data) {
-        if (this._probedProtocol) {
-            return;
-        }
-
-        this._probedProtocol = true;
+    _probeProtocol(data) {
         this._isProtocolBinary = data instanceof ArrayBuffer;
         
         if (this._isProtocolBinary) {
