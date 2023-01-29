@@ -70,6 +70,7 @@ protected:
 #if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* key, const char* value) override;
 #endif
+    void sampleRateChanged(double newSampleRate) override;
 
     virtual void postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude) = 0;
     virtual void onMessageReceived(const Variant& payload, uintptr_t origin);

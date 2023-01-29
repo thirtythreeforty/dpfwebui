@@ -63,6 +63,11 @@ class UI {
         this.call('sendNote', channel, note, velocity);
     }
 
+    // double UI::getSampleRate()
+    async getSampleRate() {
+        return this.call('getSampleRate');
+    }
+
     // void UI::editParameter(uint32_t index, bool started)
     editParameter(index, started) {
         this.call('editParameter', index, started);
@@ -89,6 +94,9 @@ class UI {
 
     // void UI::stateChanged(const char* key, const char* value)
     stateChanged(key, value) {}
+
+    // void UI::sampleRateChanged(double newSampleRate)
+    sampleRateChanged(newSampleRate) {}
    
     // bool ExternalWindow::isStandalone()
     async isStandalone() {
@@ -220,6 +228,11 @@ class UI {
         this.call('setZeroconfName', name);
     }
 
+    // Non-DPF method for getting approximate network latency in milliseconds
+    getNetworkLatency() {
+        return this._latency;
+    }
+
     // Non-DPF method for for calling native UI functions
     call(funcName, ...args) {
         if (this._resolve[funcName] === undefined) {
@@ -231,11 +244,6 @@ class UI {
                             : funcName;
             this.postMessage(funcArg, ...args)
         });
-    }
-
-    // Non-DPF local getter for approximate network latency in milliseconds
-    get latency() {
-        return this._latency;
     }
 
     //

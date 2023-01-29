@@ -98,6 +98,11 @@ void WebUIBase::stateChanged(const char* key, const char* value)
 }
 #endif
 
+void WebUIBase::sampleRateChanged(double newSampleRate)
+{
+    callback("sampleRateChanged", { newSampleRate });
+}
+
 void WebUIBase::onMessageReceived(const Variant& payload, uintptr_t origin)
 {
     (void)payload;
@@ -147,7 +152,7 @@ void WebUIBase::setBuiltInFunctionHandlers()
     });
 
 #if DISTRHO_PLUGIN_WANT_MIDI_INPUT
-    setFunctionHandler("sendNote", 3, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("sendNote", 3, [this](const Variant& args, uintptr_t) {
         sendNote(
             static_cast<uint8_t>(args[0].getNumber()),  // channel
             static_cast<uint8_t>(args[1].getNumber()),  // note
@@ -156,14 +161,18 @@ void WebUIBase::setBuiltInFunctionHandlers()
     });
 #endif
 
-    setFunctionHandler("editParameter", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("getSampleRate", 0, [this](const Variant&, uintptr_t origin) {
+        callback("getSampleRate", { getSampleRate() }, origin);
+    });
+
+    setFunctionHandler("editParameter", 2, [this](const Variant& args, uintptr_t) {
         editParameter(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<bool>(args[1].getBoolean())     // started
         );
     });
 
-    setFunctionHandler("setParameterValue", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setParameterValue", 2, [this](const Variant& args, uintptr_t) {
         setParameterValue(
             static_cast<uint32_t>(args[0].getNumber()), // index
             static_cast<float>(args[1].getNumber())     // value
@@ -171,7 +180,7 @@ void WebUIBase::setBuiltInFunctionHandlers()
     });
 
 #if DISTRHO_PLUGIN_WANT_STATE
-    setFunctionHandler("setState", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setState", 2, [this](const Variant& args, uintptr_t) {
         setState(
             args[0].getString(), // key
             args[1].getString()  // value
@@ -180,7 +189,7 @@ void WebUIBase::setBuiltInFunctionHandlers()
 #endif
 
 #if DISTRHO_PLUGIN_WANT_STATE && defined(HIPHOP_SHARED_MEMORY_SIZE)
-    setFunctionHandler("writeSharedMemory", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("writeSharedMemory", 2, [this](const Variant& args, uintptr_t) {
 # if HIPHOP_UI_PROTOCOL_BINARY
         BinaryData data = args[0].getBinaryData();
 # else

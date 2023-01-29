@@ -188,30 +188,30 @@ void WebViewUI::setBuiltInFunctionHandlers()
         callback("isResizable", { isResizable() }, origin);
     });
 
-    setFunctionHandler("setWidth", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setWidth", 1, [this](const Variant& args, uintptr_t) {
         setWidth(static_cast<uint>(args[0].getNumber()));
     });
 
-    setFunctionHandler("setHeight", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setHeight", 1, [this](const Variant& args, uintptr_t) {
         setHeight(static_cast<uint>(args[0].getNumber()));
     });
 
-    setFunctionHandler("setSize", 2, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setSize", 2, [this](const Variant& args, uintptr_t) {
         setSize(
             static_cast<uint>(args[0].getNumber()), // width
             static_cast<uint>(args[1].getNumber())  // height
         );
     });
 
-    setFunctionHandler("setKeyboardFocus", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setKeyboardFocus", 1, [this](const Variant& args, uintptr_t) {
         setKeyboardFocus(static_cast<bool>(args[0].getBoolean()));
     });
 
-    setFunctionHandler("ready", 0, [this](const Variant&, uintptr_t /*origin*/) {
+    setFunctionHandler("ready", 0, [this](const Variant&, uintptr_t) {
         ready();
     });
 
-    setFunctionHandler("openSystemWebBrowser", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("openSystemWebBrowser", 1, [this](const Variant& args, uintptr_t) {
         String url = args[0].getString();
         openSystemWebBrowser(url);
     });

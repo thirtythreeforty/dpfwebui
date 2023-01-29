@@ -261,7 +261,7 @@ void NetworkUI::setBuiltInFunctionHandlers()
         callback("isZeroconfPublished", { fZeroconf.isPublished() }, origin);
     });
 
-    setFunctionHandler("setZeroconfPublished", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setZeroconfPublished", 1, [this](const Variant& args, uintptr_t) {
         fZeroconfPublish = args[0].getBoolean();
         setState("_zc_published", fZeroconfPublish ? "true" : "false");
         zeroconfStateUpdated();
@@ -275,7 +275,7 @@ void NetworkUI::setBuiltInFunctionHandlers()
         callback("getZeroconfName", { fZeroconfName }, origin);
     });
 
-    setFunctionHandler("setZeroconfName", 1, [this](const Variant& args, uintptr_t /*origin*/) {
+    setFunctionHandler("setZeroconfName", 1, [this](const Variant& args, uintptr_t) {
         fZeroconfName = args[0].getString();
         setState("_zc_name", fZeroconfName);
         zeroconfStateUpdated();
