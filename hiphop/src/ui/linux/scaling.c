@@ -45,6 +45,7 @@ float xft_dpi()
     XrmInitialize();
 
     char* rms = XResourceManagerString(display);
+    float dpi = 96.f;
 
     if (rms != NULL) {
         XrmDatabase sdb = XrmGetStringDatabase(rms);
@@ -56,16 +57,18 @@ float xft_dpi()
             if (XrmGetResource(sdb, "Xft.dpi", "String", &type, &ret)
                     && (ret.addr != NULL) && (type != NULL)
                     && (strncmp("String", type, 6) == 0)) {
-                float dpi = (float)atof(ret.addr);
+                float xftDpi = (float)atof(ret.addr);
 
-                if (dpi > 0) {
-                    return dpi;
+                if (xftDpi > 0) {
+                    dpi = xftDpi;
                 }
             }
         }
     }
 
-    return 96.f;
+    XCloseDisplay(display);
+
+    return dpi;
 }
 
 float xdisplay_dpi()

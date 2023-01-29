@@ -52,6 +52,7 @@ USE_NAMESPACE_DISTRHO
 ChildProcessWebView::ChildProcessWebView()
     : fDisplay(0)
     , fBackground(0)
+    , fPipeFd {{-1, -1}, {-1, -1}}
     , fPid(-1)
     , fIpc(nullptr)
     , fIpcThread(nullptr)
@@ -65,17 +66,11 @@ ChildProcessWebView::ChildProcessWebView()
         return;
     }
 
-    fPipeFd[0][0] = -1;
-    fPipeFd[0][1] = -1;
-
     if (pipe(fPipeFd[0]) == -1) {
         d_stderr("Could not create host->helper pipe - %s", strerror(errno));
         cleanup();
         return;
     }
-
-    fPipeFd[1][0] = -1;
-    fPipeFd[1][1] = -1;
 
     if (pipe(fPipeFd[1]) == -1) {
         d_stderr("Could not create helper->host pipe - %s", strerror(errno));
@@ -289,21 +284,21 @@ void ChildProcessWebView::handleHelperScriptMessage(const char *payloadBytes,
 
 void ChildProcessWebView::cleanup()
 {
-    if (fPid != -1) {
-        fIpc->write(OP_TERMINATE);
-        int stat;
-        waitpid(fPid, &stat, 0);
-        fPid = -1;
+    if (fIpc != 0) {
+        if (fPid != -1) {
+            fIpc->write(OP_TERMINATE);
+            int stat;
+            waitpid(fPid, &stat, 0);
+            fPid = -1;
+        }
+
+        delete fIpc;
+        fIpc = 0;
     }
 
     if (fIpcThread != 0) {
         fIpcThread->stopThread(-1);
         fIpcThread = 0;
-    }
-
-    if (fIpc != 0) {
-        delete fIpc;
-        fIpc = 0;
     }
 
     for (int i = 0; i < 2; i++) {
