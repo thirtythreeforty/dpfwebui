@@ -53,6 +53,7 @@ NetworkUI::NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio)
         , /*FunctionArgumentSerializer*/[](const char* f) { return djb2hash(f); }
 #endif
     )
+    , fServerInit(false)
     , fPort(-1)
     , fThread(nullptr)
 #if HIPHOP_UI_ZEROCONF
@@ -179,7 +180,7 @@ void NetworkUI::stateChanged(const char* key, const char* value)
         return;
     }
 
-    if (std::strcmp(key, "_ws_port") == 0) {
+    if ((std::strcmp(key, "_ws_port") == 0) && ! fServerInit) {
         fPort = std::atoi(value);
         if (fPort == -1) {
             fPort = findAvailablePort();
@@ -301,6 +302,7 @@ void NetworkUI::setBuiltInFunctionHandlers()
 
 void NetworkUI::initServer()
 {
+    fServerInit = true;
     fServer.init(fPort, this);
     fThread = new WebServerThread(&fServer);
     d_stderr(LOG_TAG " : server up @ %s", getPublicUrl().buffer());

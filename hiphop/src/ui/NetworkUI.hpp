@@ -70,6 +70,7 @@ private:
 
     static int32_t djb2hash(const char *str);
 
+    bool             fServerInit;
     int              fPort;
     WebServer        fServer;
     WebServerThread* fThread;

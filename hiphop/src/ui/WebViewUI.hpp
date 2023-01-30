@@ -87,6 +87,7 @@ private:
     typedef std::vector<Variant> MessageBuffer;
 
     uint32_t      fBackgroundColor;
+    bool          fNavigate;
     bool          fJsUiReady;
     uintptr_t     fPlatformWindow;
     WebViewBase*  fWebView;
