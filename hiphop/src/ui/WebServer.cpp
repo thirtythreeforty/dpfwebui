@@ -41,9 +41,16 @@ void WebServer::init(int port, WebServerHandler* handler, const char* jsInjectTa
 
     lws_set_log_level(LLL_ERR|LLL_WARN/*|LLL_DEBUG*/, 0);
 
-    std::memset(fProtocol, 0, sizeof(fProtocol));
-    fProtocol[0].name = LWS_PROTOCOL_NAME;
-    fProtocol[0].callback = WebServer::lwsCallback;
+    std::memset(fProtocols, 0, sizeof(fProtocols));
+    fProtocols[0].name = LWS_PROTOCOL_NAME;
+    fProtocols[0].callback = WebServer::lwsCallback;
+
+    std::memset(fExtensions, 0, sizeof(fExtensions));
+    fExtensions[0].name = "permessage-deflate";
+    fExtensions[0].callback = lws_extension_callback_pm_deflate;
+    fExtensions[0].client_offer = "permessage-deflate"
+                                  "; client_no_context_takeover"
+                                  "; client_max_window_bits";
 
     std::strcpy(fMountOrigin, Path::getPluginLibrary() + "/ui/");
 
@@ -69,12 +76,13 @@ void WebServer::init(int port, WebServerHandler* handler, const char* jsInjectTa
 #endif
 
     std::memset(&fContextInfo, 0, sizeof(fContextInfo));
-    fContextInfo.port      = port;
-    fContextInfo.protocols = fProtocol;
-    fContextInfo.mounts    = &fMount;
-    fContextInfo.uid       = -1;
-    fContextInfo.gid       = -1;
-    fContextInfo.user      = this;
+    fContextInfo.port       = port;
+    fContextInfo.protocols  = fProtocols;
+    //fContextInfo.extensions = fExtensions;
+    fContextInfo.mounts     = &fMount;
+    fContextInfo.uid        = -1;
+    fContextInfo.gid        = -1;
+    fContextInfo.user       = this;
 
 #if defined(HIPHOP_NETWORK_SSL)
     // SSL (WIP)

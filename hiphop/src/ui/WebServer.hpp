@@ -90,7 +90,8 @@ private:
     char                       fMountOrigin[PATH_MAX];
     lws_http_mount             fMount;
     lws_protocol_vhost_options fMountOptions;
-    lws_protocols              fProtocol[2];
+    lws_protocols              fProtocols[2];
+    lws_extension              fExtensions[2];
     lws_context_creation_info  fContextInfo;
     lws_context*               fContext;
 
