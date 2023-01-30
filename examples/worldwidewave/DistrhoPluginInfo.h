@@ -15,6 +15,11 @@
  */
 
 /**
+   Shared memory size in bytes.@n
+ */
+#define HIPHOP_SHARED_MEMORY_SIZE 1048576 // 1 MiB = ~22s @ 8-bit 48000 Hz
+
+/**
    Publish UI URL using mDNS/DNS-SD, also known as Zeroconf or Bonjour.
    @note Requires avahi-publish on Linux / Windows 10 or newer / works out of the box on macOS.
  */
@@ -24,14 +29,14 @@
    Use BSON instead of JSON for communicating over the network
    @note HIPHOP_SUPPORT_BSON must be enabled
  */
-#define HIPHOP_UI_PROTOCOL_BINARY 0
+#define HIPHOP_UI_PROTOCOL_BINARY 1
 
 /**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NAME "ZComp"
+#define DISTRHO_PLUGIN_NAME "World Wide Wave"
 
 /**
    Number of audio inputs the plugin has.
@@ -49,13 +54,13 @@
    The plugin URI when exporting in LV2 format.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/zcomp"
+#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/worldwidewave"
 
 /**
    The plugin id when exporting in CLAP format, in reverse URI form.
    @note This macro is required when building CLAP plugins
 */
-#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.hiphop.zcomp"
+#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.hiphop.worldwidewave"
 
 /**
    Wherever the plugin has a custom %UI.
@@ -110,7 +115,7 @@
    @see Plugin::initProgramName(uint32_t, String&)
    @see Plugin::loadProgram(uint32_t)
  */
-#define DISTRHO_PLUGIN_WANT_PROGRAMS 1
+#define DISTRHO_PLUGIN_WANT_PROGRAMS 0
 
 /**
    Wherever the plugin uses internal non-parameter data.
