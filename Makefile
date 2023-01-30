@@ -6,7 +6,7 @@ examples: webui
 
 webui:
 	@make -C examples/webgain
-	@make -C examples/telecomp
+	@make -C examples/zcomp
 
 wasm: webui
 	@make -C examples/jitdrum
@@ -18,7 +18,7 @@ clean:
 	@make clean -C examples/jitdrum
 	@make clean -C examples/astone
 	@make clean -C examples/hotswap
-	@make clean -C examples/telecomp
+	@make clean -C examples/zcomp
 	rm -rf build/*
 
 all: examples

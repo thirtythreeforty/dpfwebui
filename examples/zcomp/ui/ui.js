@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ const PARAMETERS = [
     'stereo', 'sidechain', 'gain', 'output-level'
 ];
 
-class TeleCompExampleUI extends DISTRHO.UI {
+class ZCompExampleUI extends DISTRHO.UI {
 
     constructor() {
         super();

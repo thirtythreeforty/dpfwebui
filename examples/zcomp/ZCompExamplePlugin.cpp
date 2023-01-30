@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,16 @@
 
 START_NAMESPACE_DISTRHO
 
-class TeleCompExamplePlugin : public ZamCompX2Plugin
+class ZCompExamplePlugin : public ZamCompX2Plugin
 {
 public:
-    TeleCompExamplePlugin()
+    ZCompExamplePlugin()
         : ZamCompX2Plugin()
     {}
 
     const char* getLabel() const noexcept override
     {
-        return "TeleComp";
+        return "ZComp";
     }
 
     const char* getDescription() const noexcept override
@@ -54,7 +54,7 @@ public:
 
     int64_t getUniqueId() const noexcept override
     {
-        return d_cconst('H', 'H', 't', 'c');
+        return d_cconst('H', 'H', 'z', 'c');
     }
 
     // VST3
@@ -66,13 +66,13 @@ public:
 
 private:
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TeleCompExamplePlugin)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ZCompExamplePlugin)
 
 };
 
 Plugin* createPlugin()
 {
-    return new TeleCompExamplePlugin;
+    return new ZCompExamplePlugin;
 }
 
 END_NAMESPACE_DISTRHO

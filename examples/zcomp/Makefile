@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = telecomp
+NAME = zcomp
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names
@@ -25,25 +25,20 @@ HIPHOP_WEB_UI_PATH = ui
 HIPHOP_NETWORK_UI = true
 
 # --------------------------------------------------------------
-# Build BSONVariant required by the binary protocol
-
-HIPHOP_SUPPORT_BSON = true
-
-# --------------------------------------------------------------
 # Files to build
 
 FILES_DSP = \
-    TeleCompExamplePlugin.cpp \
+    ZCompExamplePlugin.cpp \
     ZamCompX2Plugin.cpp
 
 FILES_UI  = \
-    TeleCompExampleUI.cpp
+    ZCompExampleUI.cpp
 
 # --------------------------------------------------------------
 # Do some magic
 
 DPF_TARGET_DIR = ../../bin
-DPF_BUILD_DIR = ../../build/telecomp/1/2
+DPF_BUILD_DIR = ../../build/zcomp/1/2
 
 include ../../Makefile.plugins.mk
 

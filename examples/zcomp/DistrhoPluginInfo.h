@@ -24,14 +24,14 @@
    Use BSON instead of JSON for communicating over the network
    @note HIPHOP_SUPPORT_BSON must be enabled
  */
-#define HIPHOP_UI_PROTOCOL_BINARY 1
+#define HIPHOP_UI_PROTOCOL_BINARY 0
 
 /**
    The plugin name.@n
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NAME "TeleComp"
+#define DISTRHO_PLUGIN_NAME "ZComp"
 
 /**
    Number of audio inputs the plugin has.
@@ -49,13 +49,13 @@
    The plugin URI when exporting in LV2 format.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/telecomp"
+#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/zcomp"
 
 /**
    The plugin id when exporting in CLAP format, in reverse URI form.
    @note This macro is required when building CLAP plugins
 */
-#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.hiphop.telecomp"
+#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.hiphop.zcomp"
 
 /**
    Wherever the plugin has a custom %UI.

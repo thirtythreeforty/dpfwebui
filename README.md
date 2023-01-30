@@ -27,7 +27,7 @@ The following language combinations are possible:
 
 DSP|UI |Comments
 ---|---|---------------------------------------------------------------------------
-C++|JS |Web view user interface, see examples [telecomp](https://github.com/lucianoiam/hiphop/tree/master/examples/telecomp) and [webgain](https://github.com/lucianoiam/hiphop/tree/master/examples/webgain).
+C++|JS |Web view user interface, see examples [zcomp](https://github.com/lucianoiam/hiphop/tree/master/examples/zcomp) and [webgain](https://github.com/lucianoiam/hiphop/tree/master/examples/webgain).
 AS |JS |Web view user interface, see example [jitdrum](https://github.com/lucianoiam/hiphop/tree/master/examples/jitdrum).
 AS |C++|DPF Graphics Library (DGL), see example [astone](https://github.com/lucianoiam/hiphop/tree/master/examples/astone).
 C++|C++|No need for this project, use DPF instead.
