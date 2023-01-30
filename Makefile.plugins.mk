@@ -30,6 +30,8 @@ HIPHOP_MACOS_UNIVERSAL ?= false
 HIPHOP_MACOS_OLD ?= false
 # Build a rough and incomplete JACK application for development purposes
 HIPHOP_MACOS_DEV_STANDALONE ?= false
+# Target directory for dpf.js and libraries relative to plugin ui directory
+HIPHOP_JS_LIB_TARGET_PATH ?=
 
 ifeq ($(HIPHOP_PROJECT_VERSION),)
 $(error HIPHOP_PROJECT_VERSION is not set)
@@ -812,6 +814,8 @@ ifeq ($(WEB_UI),true)
 HIPHOP_TARGET += lib_ui_plugin
 ifneq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
 HIPHOP_TARGET += lib_ui_framework
+LIB_UI_DIR = ui
+LIB_JS_PATH = $(LIB_UI_DIR)/$(HIPHOP_JS_LIB_TARGET_PATH)
 LIB_JS_FILES = $(HIPHOP_SRC_PATH)/ui/dpf.js
 ifeq ($(HIPHOP_SUPPORT_BSON),true)
 LIB_JS_FILES += $(HIPHOP_SRC_PATH)/thirdparty/bson.min.js
@@ -826,43 +830,43 @@ endif
 lib_ui_plugin:
 	@echo "Copying plugin web UI files"
 	@($(TEST_LV2) \
-		&& mkdir -p $(LIB_DIR_LV2)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/ui \
+		&& mkdir -p $(LIB_DIR_LV2)/$(LIB_UI_DIR) \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_LV2)/$(LIB_UI_DIR) \
 		) || true
 	@($(TEST_CLAP_MACOS) \
-		&& mkdir -p $(LIB_DIR_CLAP_MACOS)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_CLAP_MACOS)/ui \
+		&& mkdir -p $(LIB_DIR_CLAP_MACOS)/$(LIB_UI_DIR) \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_CLAP_MACOS)/$(LIB_UI_DIR) \
 		) || true
 	@($(TEST_VST3) \
-		&& mkdir -p $(LIB_DIR_VST3)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/ui \
+		&& mkdir -p $(LIB_DIR_VST3)/$(LIB_UI_DIR) \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST3)/$(LIB_UI_DIR) \
 		) || true
 	@($(TEST_VST2_MACOS) \
-		&& mkdir -p $(LIB_DIR_VST2_MACOS)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/ui \
+		&& mkdir -p $(LIB_DIR_VST2_MACOS)/$(LIB_UI_DIR) \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_VST2_MACOS)/$(LIB_UI_DIR) \
 		) || true
 	@($(TEST_NOBUNDLE) \
-		&& mkdir -p $(LIB_DIR_NOBUNDLE)/ui \
-		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/ui \
+		&& mkdir -p $(LIB_DIR_NOBUNDLE)/$(LIB_UI_DIR) \
+		&& cp -r $(HIPHOP_WEB_UI_PATH)/* $(LIB_DIR_NOBUNDLE)/$(LIB_UI_DIR) \
 		) || true
 
 lib_ui_framework:
 	@echo "Copying framework web UI files"
 	@for LIB_JS_FILE in $(LIB_JS_FILES) ; do \
 		($(TEST_LV2) \
-			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_LV2)/ui \
+			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_LV2)/$(LIB_JS_PATH) \
 			) || true ; \
 		($(TEST_CLAP_MACOS) \
-			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_CLAP_MACOS)/ui \
+			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_CLAP_MACOS)/$(LIB_JS_PATH) \
 			) || true ; \
 		($(TEST_VST3) \
-			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST3)/ui \
+			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST3)/$(LIB_JS_PATH) \
 			) || true ; \
 		($(TEST_VST2_MACOS) \
-			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST2_MACOS)/ui \
+			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_VST2_MACOS)/$(LIB_JS_PATH) \
 			) || true ; \
 		($(TEST_NOBUNDLE) \
-			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_NOBUNDLE)/ui \
+			&& cp $(CP_JS_ARGS) $$LIB_JS_FILE $(LIB_DIR_NOBUNDLE)/$(LIB_JS_PATH) \
 			) || true ; \
 	done
 
