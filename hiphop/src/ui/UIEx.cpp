@@ -27,7 +27,7 @@ UIEx::UIEx(uint width, uint height)
 UIEx::~UIEx()
 {
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    setState("_shmem_file", "");
+    setState("_shmem_file", "close");
 #endif
 }
 

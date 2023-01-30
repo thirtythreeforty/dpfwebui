@@ -120,17 +120,18 @@ void PluginEx::setState(const char* key, const char* value)
 # if defined(HIPHOP_SHARED_MEMORY_SIZE)
     // Do not persist _shmem_* values by returning before setting fState
     if (std::strcmp("_shmem_file", key) == 0) {
-        if (fMemory.isCreatedOrConnected()) {
-            fMemory.close();
-        }
-        uint8_t* ptr = nullptr;
         if (value[0] != '\0') {
-            ptr = fMemory.connect(value);
-        }
-        if (ptr == nullptr) { 
-            sharedMemoryDisconnected(); // UI closed
-        } else {
-            sharedMemoryConnected(ptr);
+            if (std::strcmp(value, "close") == 0) {
+                fMemory.close(); // UI closed
+                sharedMemoryDisconnected();
+            } else {
+                uint8_t* ptr = fMemory.connect(value);
+                if (ptr != nullptr) { 
+                    sharedMemoryConnected(ptr);
+                } else {
+                    d_stderr2("PluginEx : could not connect to shared memory");
+                }
+            }
         }
         return;
     } else if (std::strcmp(key, "_shmem_data") == 0) {

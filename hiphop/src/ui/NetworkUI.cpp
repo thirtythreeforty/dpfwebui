@@ -196,16 +196,23 @@ void NetworkUI::stateChanged(const char* key, const char* value)
 
 # if HIPHOP_UI_ZEROCONF
     if (std::strcmp(key, "_zc_publish") == 0) {
-        fZeroconfPublish = std::strcmp(value, "true") == 0;
-        zeroconfStateUpdated();
+        bool publish = std::strcmp(value, "true") == 0;
+        if (fZeroconfPublish != publish) {
+            fZeroconfPublish = publish;
+            zeroconfStateUpdated();
+        }
         return;
     } else if (std::strcmp(key, "_zc_id") == 0) {
-        fZeroconfId = value;
-        zeroconfStateUpdated();
+        if (fZeroconfId != value) {
+            fZeroconfId = value;
+            zeroconfStateUpdated();
+        }
         return;
     } else if (std::strcmp(key, "_zc_name") == 0) {
-        fZeroconfName = value;
-        zeroconfStateUpdated();
+        if (fZeroconfName != value) {
+            fZeroconfName = value;
+            zeroconfStateUpdated();
+        }
         return;
     }
 # endif

@@ -33,7 +33,7 @@ WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCs
                      float initPixelRatio)
     : WebViewUIBase(widthCssPx, heightCssPx, initPixelRatio)
     , fBackgroundColor(CSSColor::fromHex(backgroundCssColor))
-    , fNavigate(false)
+    , fNavigated(false)
     , fJsUiReady(false)
     , fPlatformWindow(0)
     , fWebView(nullptr)
@@ -156,8 +156,8 @@ void WebViewUI::stateChanged(const char* key, const char* value)
 
 # if defined(HIPHOP_NETWORK_UI)
     if ((std::strcmp(key, "_ws_port") == 0) && (fWebView != nullptr)
-            && ! fNavigate) {
-        fNavigate = true;
+            && ! fNavigated) {
+        fNavigated = true;
         String url = getLocalUrl();
         fWebView->navigate(url);
     }
