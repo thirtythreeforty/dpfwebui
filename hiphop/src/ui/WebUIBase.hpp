@@ -72,6 +72,10 @@ protected:
 #endif
     void sampleRateChanged(double newSampleRate) override;
 
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
+    void sharedMemoryCreated(uint8_t* ptr) override;
+#endif
+
     virtual void postMessage(const Variant& payload, uintptr_t destination, uintptr_t exclude) = 0;
     virtual void onMessageReceived(const Variant& payload, uintptr_t origin);
 

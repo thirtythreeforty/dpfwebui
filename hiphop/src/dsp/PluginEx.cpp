@@ -123,10 +123,14 @@ void PluginEx::setState(const char* key, const char* value)
         if (fMemory.isCreatedOrConnected()) {
             fMemory.close();
         }
+        uint8_t* ptr = nullptr;
         if (value[0] != '\0') {
-            sharedMemoryPointerUpdated(fMemory.connect(value));
+            ptr = fMemory.connect(value);
+        }
+        if (ptr == nullptr) { 
+            sharedMemoryDisconnected(); // UI closed
         } else {
-            sharedMemoryPointerUpdated(nullptr); // UI closed
+            sharedMemoryConnected(ptr);
         }
         return;
     } else if (std::strcmp(key, "_shmem_data") == 0) {

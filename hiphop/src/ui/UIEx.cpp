@@ -58,7 +58,7 @@ void UIEx::uiIdle()
     // setState() fails for VST3 when called from constructor
     if (! fMemory.isCreatedOrConnected() && fMemory.create()) {
         setState("_shmem_file", fMemory.getDataFilename());
-        sharedMemoryPointerUpdated(fMemory.getDataPointer());
+        sharedMemoryCreated(fMemory.getDataPointer());
     }
 }
 #endif // HIPHOP_SHARED_MEMORY_SIZE

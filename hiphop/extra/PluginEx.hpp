@@ -55,7 +55,8 @@ public:
 
 protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    virtual void sharedMemoryPointerUpdated(uint8_t* ptr)
+    virtual void sharedMemoryDisconnected() {}
+    virtual void sharedMemoryConnected(uint8_t* ptr)
     {
         (void)ptr;
     }

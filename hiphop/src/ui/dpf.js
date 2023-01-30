@@ -187,6 +187,10 @@ class UI {
     // Non-DPF callback method that fires when the message channel is closed
     messageChannelClosed() {}
 
+    // Non-DPF callback method when memory shared with Plugin is ready to use
+    // void UIEx::sharedMemoryCreated(uint8_t* ptr)
+    sharedMemoryCreated() {}
+
     // Non-DPF method that writes to memory shared with DISTRHO::PluginEx instance
     // void UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset)
     writeSharedMemory(data /*Uint8Array*/, offset) {

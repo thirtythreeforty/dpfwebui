@@ -103,6 +103,13 @@ void WebUIBase::sampleRateChanged(double newSampleRate)
     callback("sampleRateChanged", { newSampleRate });
 }
 
+#if defined(HIPHOP_SHARED_MEMORY_SIZE)
+void WebUIBase::sharedMemoryCreated(uint8_t*)
+{
+    callback("sharedMemoryCreated");
+}
+#endif
+
 void WebUIBase::onMessageReceived(const Variant& payload, uintptr_t origin)
 {
     (void)payload;

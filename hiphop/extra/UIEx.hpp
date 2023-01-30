@@ -47,7 +47,7 @@ protected:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     void uiIdle() override;
 
-    virtual void sharedMemoryPointerUpdated(uint8_t* ptr)
+    virtual void sharedMemoryCreated(uint8_t* ptr)
     {
         (void)ptr;
     }
