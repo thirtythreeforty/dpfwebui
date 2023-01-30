@@ -17,7 +17,7 @@
 /**
    Shared memory size in bytes.@n
  */
-#define HIPHOP_SHARED_MEMORY_SIZE 1048576 // 1 MiB = ~22s @ 8-bit 48000 Hz
+#define HIPHOP_SHARED_MEMORY_SIZE 1048576
 
 /**
    Publish UI URL using mDNS/DNS-SD, also known as Zeroconf or Bonjour.

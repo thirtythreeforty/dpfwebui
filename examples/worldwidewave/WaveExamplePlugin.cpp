@@ -17,6 +17,7 @@
  */
 
 #include "extra/PluginEx.hpp"
+#include "VisualizationData.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -25,6 +26,7 @@ class WaveExamplePlugin : public PluginEx
 public:
     WaveExamplePlugin()
         : PluginEx(0 /*parameters*/, 0 /*programs*/, 0 /*states*/)
+        , fVisData(nullptr)
     {}
 
     const char* getLabel() const noexcept override
@@ -63,10 +65,22 @@ public:
         port.groupId = kPortGroupStereo;
         PluginEx::initAudioPort(input, index, port);
     }
+    
+    void sharedMemoryConnected(uint8_t* ptr) override
+    {
+        fVisData = reinterpret_cast<VisualizationData*>(ptr);
+    }
+
+    void sharedMemoryDisconnected() override
+    {
+        fVisData = nullptr; // see comment in ~WaveExampleUI()
+    }
 
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
-        // TODO
+        if (fVisData != nullptr) {
+            fVisData->addSamples(inputs, frames);
+        }
         
         for (int i = 0; i < 2; ++i) {
             std::memcpy(outputs[i], inputs[i], sizeof(float) * frames);
@@ -74,6 +88,7 @@ public:
     }
 
 private:
+    VisualizationData* fVisData;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveExamplePlugin)
 

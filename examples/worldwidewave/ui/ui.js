@@ -16,14 +16,53 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+const env = DISTRHO.env;
+
 class WaveExampleUI extends DISTRHO.UI {
 
     constructor() {
         super();
 
-        // TODO
+        this._sampleRate = 0;
+        this._sampleCount = 0;
+
+        // Receive low latency visualization data sent using local transport,
+        // skipping network overhead. Plugin embedded web view only.
+
+        if (env.plugin) {
+            window.host.addMessageListener(data => {
+                data.samples = DISTRHO.Base64.decode(data.samples.$binary);
+                this._fixmeProcessVisualizationData(data);
+            });
+        }
 
         document.body.style.visibility = 'visible';
+    }
+
+    sampleRateChanged(newSampleRate) {
+        this._sampleRate = newSampleRate;
+    }
+
+    async messageChannelOpen() {
+        this._sampleRate = await this.getSampleRate();
+    }
+
+    onVisualizationData(data) {
+        // Receive higher latency visualization data sent through WebSocket
+
+        if (! env.plugin) {
+            data.samples = data.samples.buffer;
+            this._fixmeProcessVisualizationData(data);
+        }
+    }
+
+    _fixmeProcessVisualizationData(data) {
+        this._sampleCount += data.samples.length;
+        const s = `Sample count: ${this._sampleCount}`;
+        document.getElementById('output').innerText = s;
+
+        // TODO
+
     }
 
 }
