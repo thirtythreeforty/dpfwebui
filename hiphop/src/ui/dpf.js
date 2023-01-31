@@ -303,6 +303,10 @@ class UI {
             this._socket.addEventListener('open', (_) => {
                 this._log('Connected');
 
+                if (this._isProtocolProbed) {
+                    this.messageChannelOpen();
+                }
+
                 clearInterval(reconnectTimer);
                 pingTimer = setInterval(this._ping.bind(this), 1000 * pingPeriod);
                 this._ping();

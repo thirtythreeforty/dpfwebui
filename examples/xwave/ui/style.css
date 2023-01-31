@@ -11,3 +11,19 @@ body {
     margin: 0;
     background: #0B1824;
 }
+
+#qr-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+#qr-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 10;
+}
