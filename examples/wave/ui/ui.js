@@ -30,7 +30,7 @@ class WaveExampleUI extends DISTRHO.UI {
 
         this._isPlugin = DISTRHO.env.plugin;
 
-        this._buildView();
+        this._initView();
         this._initVisualizationData();
     }
 
@@ -51,7 +51,7 @@ class WaveExampleUI extends DISTRHO.UI {
         }
     }
 
-    _buildView() {
+    _initView() {
         window.customElements.define('x-waveform', WaveformElement);
 
         const el = document.createRange().createContextualFragment(`

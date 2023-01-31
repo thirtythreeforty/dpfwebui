@@ -30,14 +30,14 @@ public:
     ~WaveExampleUI()
     {
         // VisualizationData destructor is synchronized to the addSamples()
-        // method, to ensure deletion does not happen during Plugin::run().
+        // method to ensure deletion does not happen during Plugin::run().
 
         if (fVisData != nullptr) {
             fVisData->~VisualizationData();
         }
 
         // At this point Plugin::run() has finished, it is now safe to let the
-        // WebUI destructor dispose of shared memory. Safety depends on the
+        // WebUI destructor dispose of the shared memory. Safety depends on the
         // assumption that DPF UI->Plugin notifications are synchronous, or that
         // they happen before the next render cycle.
     }
