@@ -16,27 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const env = DISTRHO.env;
+import '/dpf.js';
+import { WaveformElement } from '/thirdparty/x-waveform.js'
+
+function main() {
+    new WaveExampleUI;
+}
 
 class WaveExampleUI extends DISTRHO.UI {
 
     constructor() {
         super();
 
-        this._sampleRate = 0;
-        this._sampleCount = 0;
+        this._isPlugin = DISTRHO.env.plugin;
 
-        // Receive low latency visualization data sent using local transport,
-        // skipping network overhead. Plugin embedded web view only.
-
-        if (env.plugin) {
-            window.host.addMessageListener(data => {
-                data.samples = DISTRHO.Base64.decode(data.samples.$binary);
-                this._fixmeProcessVisualizationData(data);
-            });
-        }
-
-        document.body.style.visibility = 'visible';
+        this._buildView();
+        this._initVisualizationData();
     }
 
     sampleRateChanged(newSampleRate) {
@@ -50,9 +45,36 @@ class WaveExampleUI extends DISTRHO.UI {
     onVisualizationData(data) {
         // Receive higher latency visualization data sent through WebSocket
 
-        if (! env.plugin) {
+        if (this._isPlugin) {
             data.samples = data.samples.buffer;
             this._fixmeProcessVisualizationData(data);
+        }
+    }
+
+    _buildView() {
+        window.customElements.define('x-waveform', WaveformElement);
+
+        const el = document.createRange().createContextualFragment(`
+            <pre id="output"></pre>
+            <x-waveform autoresize></x-waveform>
+        `);
+
+        document.body.prepend(...el.children);
+        document.body.style.visibility = 'visible';
+    }
+
+    _initVisualizationData() {
+        this._sampleRate = 0;
+        this._sampleCount = 0;
+
+        // Register to receive low latency visualization data sent using local
+        // transport, skipping network overhead. Plugin embedded web view only.
+
+        if (this._isPlugin) {
+            window.host.addMessageListener(data => {
+                data.samples = DISTRHO.Base64.decode(data.samples.$binary);
+                this._fixmeProcessVisualizationData(data);
+            });
         }
     }
 
@@ -66,3 +88,5 @@ class WaveExampleUI extends DISTRHO.UI {
     }
 
 }
+
+main();
