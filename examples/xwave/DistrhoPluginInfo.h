@@ -36,7 +36,7 @@
    This is used to identify your plugin before a Plugin instance can be created.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_NAME "Wave"
+#define DISTRHO_PLUGIN_NAME "X-Wave"
 
 /**
    Number of audio inputs the plugin has.
@@ -54,13 +54,13 @@
    The plugin URI when exporting in LV2 format.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/wave"
+#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/xwave"
 
 /**
    The plugin id when exporting in CLAP format, in reverse URI form.
    @note This macro is required when building CLAP plugins
 */
-#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.hiphop.wave"
+#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.hiphop.xwave"
 
 /**
    Wherever the plugin has a custom %UI.

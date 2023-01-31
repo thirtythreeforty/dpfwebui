@@ -9,6 +9,8 @@ OUTPUT_DIR=dist
 git clone --depth 1 --branch $TAG $REMOTE_REPO $LOCAL_REPO 2> /dev/null \
     || (cd $LOCAL_REPO ; git pull)
 
+patch $LOCAL_REPO/src/x-waveform.ts x-waveform.ts.diff
+
 cd $LOCAL_REPO
 npm install
 

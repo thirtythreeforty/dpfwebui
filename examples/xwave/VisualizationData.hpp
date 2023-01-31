@@ -109,7 +109,7 @@ public:
                 { "samples", getSamples(fReadPosNetwork) }
             });
 
-            // ui.js WaveExampleUI.onVisualizationData()
+            // ui.js XWaveExampleUI.onVisualizationData()
             ui.callback("onVisualizationData", Variant::createArray({ visData }));
         }
     }

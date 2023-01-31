@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = wave
+NAME = xwave
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names
@@ -33,16 +33,16 @@ HIPHOP_SUPPORT_BSON = true
 # Files to build
 
 FILES_DSP = \
-    WaveExamplePlugin.cpp
+    XWaveExamplePlugin.cpp
 
 FILES_UI  = \
-    WaveExampleUI.cpp
+    XWaveExampleUI.cpp
 
 # --------------------------------------------------------------
 # Do some magic
 
 DPF_TARGET_DIR = ../../bin
-DPF_BUILD_DIR = ../../build/wave/1/2
+DPF_BUILD_DIR = ../../build/xwave/1/2
 
 include ../../Makefile.plugins.mk
 

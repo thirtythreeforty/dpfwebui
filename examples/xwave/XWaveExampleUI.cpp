@@ -19,15 +19,15 @@
 #include "WebUI.hpp"
 #include "VisualizationData.hpp"
 
-class WaveExampleUI : public WebUI
+class XWaveExampleUI : public WebUI
 {
 public:
-    WaveExampleUI()
-        : WebUI(640 /*width*/, 256 /*height*/, "#000" /*background*/)
+    XWaveExampleUI()
+        : WebUI(640 /*width*/, 160 /*height*/, "#0B1824" /*background*/)
         , fVisData(nullptr)
     {}
 
-    ~WaveExampleUI()
+    ~XWaveExampleUI()
     {
         // VisualizationData destructor is synchronized to the addSamples()
         // method to ensure deletion does not happen during Plugin::run().
@@ -63,5 +63,5 @@ private:
 
 UI* DISTRHO::createUI()
 {
-    return new WaveExampleUI;
+    return new XWaveExampleUI;
 }

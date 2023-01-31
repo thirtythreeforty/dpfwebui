@@ -21,10 +21,10 @@
 
 START_NAMESPACE_DISTRHO
 
-class WaveExamplePlugin : public PluginEx
+class XWaveExamplePlugin : public PluginEx
 {
 public:
-    WaveExamplePlugin()
+    XWaveExamplePlugin()
         : PluginEx(0 /*parameters*/, 0 /*programs*/, 0 /*states*/)
         , fVisData(nullptr)
     {}
@@ -36,12 +36,12 @@ public:
 
     const char* getDescription() const noexcept override
     {
-        return "Audio wave visualizer";
+        return "Audio waveform visualizer";
     }
 
     const char* getMaker() const noexcept override
     {
-        return "Luciano Iam";
+        return "Luciano Iam, George Stagas";
     }
 
     const char* getLicense() const noexcept override
@@ -56,7 +56,7 @@ public:
 
     int64_t getUniqueId() const noexcept override
     {
-        return d_cconst('H', 'H', 'w', 'w');
+        return d_cconst('H', 'H', 'w', 'a');
     }
 
     // VST3
@@ -73,7 +73,7 @@ public:
 
     void sharedMemoryDisconnected() override
     {
-        fVisData = nullptr; // see comment in ~WaveExampleUI()
+        fVisData = nullptr; // see comment in ~XWaveExampleUI()
     }
 
     void run(const float** inputs, float** outputs, uint32_t frames) override
@@ -90,13 +90,13 @@ public:
 private:
     VisualizationData* fVisData;
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveExamplePlugin)
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XWaveExamplePlugin)
 
 };
 
 Plugin* createPlugin()
 {
-    return new WaveExamplePlugin;
+    return new XWaveExamplePlugin;
 }
 
 END_NAMESPACE_DISTRHO
