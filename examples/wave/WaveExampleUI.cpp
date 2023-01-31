@@ -23,7 +23,7 @@ class WaveExampleUI : public WebUI
 {
 public:
     WaveExampleUI()
-        : WebUI(640 /*width*/, 128 /*height*/, "#000" /*background*/)
+        : WebUI(640 /*width*/, 256 /*height*/, "#000" /*background*/)
         , fVisData(nullptr)
     {}
 
