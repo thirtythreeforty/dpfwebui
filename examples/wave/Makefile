@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = worldwidewave
+NAME = wave
 
 # --------------------------------------------------------------
 # Project version for generating unique symbol names
@@ -42,7 +42,7 @@ FILES_UI  = \
 # Do some magic
 
 DPF_TARGET_DIR = ../../bin
-DPF_BUILD_DIR = ../../build/worldwidewave/1/2
+DPF_BUILD_DIR = ../../build/wave/1/2
 
 include ../../Makefile.plugins.mk
 

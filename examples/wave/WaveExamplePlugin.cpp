@@ -31,12 +31,12 @@ public:
 
     const char* getLabel() const noexcept override
     {
-        return "World Wide Wave";
+        return "Wave";
     }
 
     const char* getDescription() const noexcept override
     {
-        return "Audio waveform visualizer";
+        return "Audio wave visualizer";
     }
 
     const char* getMaker() const noexcept override
