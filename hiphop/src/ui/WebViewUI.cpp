@@ -33,10 +33,12 @@ WebViewUI::WebViewUI(uint widthCssPx, uint heightCssPx, const char* backgroundCs
                      float initPixelRatio)
     : WebViewUIBase(widthCssPx, heightCssPx, initPixelRatio)
     , fBackgroundColor(CSSColor::fromHex(backgroundCssColor))
-    , fNavigated(false)
     , fJsUiReady(false)
     , fPlatformWindow(0)
     , fWebView(nullptr)
+#if defined(HIPHOP_NETWORK_UI)
+    , fNavigated(false)
+#endif
 {
     setBuiltInFunctionHandlers();
 }

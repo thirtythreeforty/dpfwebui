@@ -87,11 +87,13 @@ private:
     typedef std::vector<Variant> MessageBuffer;
 
     uint32_t      fBackgroundColor;
-    bool          fNavigated;
     bool          fJsUiReady;
     uintptr_t     fPlatformWindow;
     WebViewBase*  fWebView;
     MessageBuffer fMessageBuffer;
+#if defined(HIPHOP_NETWORK_UI)
+    bool          fNavigated;
+#endif
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WebViewUI)
 

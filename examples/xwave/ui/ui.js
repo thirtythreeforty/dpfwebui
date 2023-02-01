@@ -74,9 +74,6 @@ class XWaveExampleUI extends DISTRHO.UI {
         }
 
         window.customElements.define('x-waveform', WaveformElement);
-        this._waveform = new WaveformElement;
-        document.body.prepend(this._waveform);
-        this._waveform.setAttribute('autoresize', '');
         this._waveform.setAttribute('width', this._waveform.clientWidth 
                                         * DISPLAY_SCALE_X);
 
@@ -143,6 +140,10 @@ class XWaveExampleUI extends DISTRHO.UI {
         this._prevFrameTimeMs = timestampMs;
 
         window.requestAnimationFrame(t => { this._animate(t) });
+    }
+
+    get _waveform() {
+        return document.querySelector('x-waveform');
     }
 
 }
