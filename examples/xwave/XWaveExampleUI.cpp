@@ -23,7 +23,7 @@ class XWaveExampleUI : public WebUI
 {
 public:
     XWaveExampleUI()
-        : WebUI(640 /*width*/, 160 /*height*/, "#0B1824" /*background*/)
+        : WebUI(640 /*width*/, 96 /*height*/, "#0B1824" /*background*/)
         , fVisData(nullptr)
     {}
 

@@ -7,18 +7,18 @@ examples: webui
 webui:
 	@make -C examples/webgain
 	@make -C examples/zcomp
+	@make -C examples/xwave
 
 wasm: webui
 	@make -C examples/jitdrum
-	@make -C examples/xwave
 	@make -C examples/astone
 	@make -C examples/hotswap
 
 clean:
 	@make clean -C examples/webgain
 	@make clean -C examples/zcomp
-	@make clean -C examples/jitdrum
 	@make clean -C examples/xwave
+	@make clean -C examples/jitdrum
 	@make clean -C examples/astone
 	@make clean -C examples/hotswap
 	rm -rf build/*
