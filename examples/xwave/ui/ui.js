@@ -19,13 +19,15 @@
 import '/dpf.js';
 import { WaveformElement } from '/thirdparty/x-waveform.js'
 
+const NETWORK_REFRESH_FREQ = 10; /*kFrequencyNetwork*/
+const DISPLAY_NUM_BINS     = 8;
+const DISPLAY_SCALE_X      = 0.25;
+
+const env = DISTRHO.env, uiHelper = DISTRHO.UIHelper;
+
 function main() {
     new XWaveExampleUI;
 }
-
-const MAX_BUFFER_SIZE = 1048576  // ~22s @ 8-bit 48000 Hz
-
-const env = DISTRHO.env, uiHelper = DISTRHO.UIHelper;
 
 class XWaveExampleUI extends DISTRHO.UI {
 
@@ -75,7 +77,8 @@ class XWaveExampleUI extends DISTRHO.UI {
         this._waveform = new WaveformElement;
         document.body.prepend(this._waveform);
         this._waveform.setAttribute('autoresize', '');
-        this._waveform.setAttribute('width', this._waveform.clientWidth / 4);
+        this._waveform.setAttribute('width', this._waveform.clientWidth 
+                                        * DISPLAY_SCALE_X);
 
         document.body.style.visibility = 'visible';
     }
@@ -96,38 +99,45 @@ class XWaveExampleUI extends DISTRHO.UI {
         const floatSamples = new Float32Array(loResSamples).map(s => s / 255);
         this._sampleBuffer.push(...floatSamples);
 
-        // Limit buffer size in case animation stops running
-        const length = this._sampleBuffer.length;
+        const maxBufferSize = Math.floor(NETWORK_REFRESH_FREQ / 60 * this._sampleRate),
+              numSamples = this._sampleBuffer.length;
 
-        if (length > MAX_BUFFER_SIZE) {
-            this._sampleBuffer.splice(0, length - MAX_BUFFER_SIZE);
+        if (numSamples > maxBufferSize) { // buffer overflow?
+            this._sampleBuffer.splice(0, numSamples - maxBufferSize);
         }
     }
 
     _animate(timestampMs) {
         if (this._prevFrameTimeMs > 0) {
-            const deltaMs = timestampMs - this._prevFrameTimeMs,
-                  numSamplesInFrame = Math.floor(deltaMs / 1000 * this._sampleRate),
-                  binSize = Math.floor(numSamplesInFrame / 8),
-                  numBins = Math.floor(numSamplesInFrame / binSize),
-                  bins = new Float32Array(numBins);
+            const deltaMs = timestampMs - this._prevFrameTimeMs;
 
-            let k = 0;
+            if (deltaMs <= 1000/NETWORK_REFRESH_FREQ) {
+                const numSamples = Math.floor(deltaMs / 1000 * this._sampleRate),
+                      binSize = Math.floor(numSamples / DISPLAY_NUM_BINS),
+                      bins = new Float32Array(DISPLAY_NUM_BINS);
 
-            for (let i = 0; i < numBins; i++) {
-                for (let j = 0; j < binSize; j++) {
-                    bins[i] += this._sampleBuffer[k++];
+                let k = 0;
+
+                for (let i = 0; i < DISPLAY_NUM_BINS; i++) {
+                    for (let j = 0; j < binSize; j++) {
+                        if (k < this._sampleBuffer.length) {
+                            bins[i] += this._sampleBuffer[k++];
+                        } else {
+                            break; // buffer underrun
+                        }
+                    }
+                    bins[i] /= binSize;
                 }
-                bins[i] /= binSize;
+
+                this._sampleBuffer.splice(0, k);
+                this._waveform.analyserData = bins;
+
+                //console.log(`DBG : sr=${this._sampleRate} dt=${deltaMs}ms \
+                //            pop=${k} left=${this._sampleBuffer.length}`);
+
+            } else {
+                this._sampleBuffer = []; // animation was paused
             }
-
-            this._sampleBuffer.splice(0, k);
-            this._waveform.analyserData = bins;
-
-            /*if (! env.plugin) {
-                console.log(`DBG : sr=${this._sampleRate} dt=${deltaMs}ms \
-                            pop=${k} left=${this._sampleBuffer.length}`);
-            }*/
         }
 
         this._prevFrameTimeMs = timestampMs;

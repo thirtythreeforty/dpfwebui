@@ -25,7 +25,6 @@
 #ifndef VISUALIZATION_DATA_HPP
 #define VISUALIZATION_DATA_HPP
 
-// Set to 1 MiB = ~22s @ 8-bit 48000 Hz
 #define SAMPLE_BUFFER_SIZE (HIPHOP_SHARED_MEMORY_SIZE - /* this */1024)
 
 #define REALTIME
@@ -84,13 +83,15 @@ public:
 
     void send(WebUI& ui)
     {
+        // TODO : define kDestinationEmbeddedWebView to target the embedded
+        //        web view from UI::callback() . Detect the embedded web view
+        //        client in WebServer.cpp by inspecting HTTP headers.
+
         double now = static_cast<double>(
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()
             ).count()
         ) / 1000.0;
-
-        // Bypass network for the embedded web view
 
         if ((now - fSendTimeLocal) >= (1.0 / kFrequencyLocal)) {
             fSendTimeLocal = now;
@@ -99,7 +100,7 @@ public:
                 { "samples", getSamples(fReadPosLocal) }
             });
 
-            ui.getWebView().postMessage(visData);
+            ui.getWebView().postMessage(visData); // bypass network
         }
 
         if ((now - fSendTimeNetwork) >= (1.0 / kFrequencyNetwork)) {
@@ -109,7 +110,7 @@ public:
                 { "samples", getSamples(fReadPosNetwork) }
             });
 
-            // ui.js XWaveExampleUI.onVisualizationData()
+            // ui.js : XWaveExampleUI.onVisualizationData()
             ui.callback("onVisualizationData", Variant::createArray({ visData }));
         }
     }
