@@ -27,7 +27,7 @@
 
 #define SAMPLE_BUFFER_SIZE (HIPHOP_SHARED_MEMORY_SIZE - /* this */1024)
 
-#define REALTIME
+#define RT_SAFE
 
 START_NAMESPACE_DISTRHO
 
@@ -43,17 +43,19 @@ public:
         , fReadPosLocal(0)
         , fReadPosNetwork(0)
         , fWritePos(0)
-        , fWriting(false)
+        , fBusy(false)
     {}
 
     ~VisualizationData()
     {
-        while (fWriting.test_and_set());
+        // Block until addSamples() calls fBusy.clear(), to make sure deletion
+        // does not happen while Plugin::run() is writing to the buffer.
+        while (fBusy.test_and_set()) {};
     }
 
-    REALTIME bool addSamples(const float** inputs, uint32_t frames)
+    RT_SAFE bool addSamples(const float** inputs, uint32_t frames)
     {
-        if (fWriting.test_and_set()) {
+        if (fBusy.test_and_set()) {
             return false;
         }
 
@@ -76,7 +78,7 @@ public:
 
         fWritePos = i;
 
-        fWriting.clear();
+        fBusy.clear();
 
         return true;
     }
@@ -148,7 +150,7 @@ private:
     AtomicSize fReadPosLocal;
     AtomicSize fReadPosNetwork;
     AtomicSize fWritePos;
-    AtomicFlag fWriting;
+    AtomicFlag fBusy;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VisualizationData)
 };

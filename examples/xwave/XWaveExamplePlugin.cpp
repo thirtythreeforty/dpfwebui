@@ -71,15 +71,10 @@ public:
         fVisData = reinterpret_cast<VisualizationData*>(ptr);
     }
 
-    void sharedMemoryDisconnected() override
-    {
-        fVisData = nullptr; // see comment in ~XWaveExampleUI()
-    }
-
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
-        if (fVisData != nullptr) {
-            fVisData->addSamples(inputs, frames);
+        if ((fVisData != nullptr) && ! fVisData->addSamples(inputs, frames)) {
+            fVisData = nullptr; // UI closed and shmem gone
         }
         
         for (int i = 0; i < 2; ++i) {
