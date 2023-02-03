@@ -122,8 +122,8 @@ void PluginEx::setState(const char* key, const char* value)
     if (std::strcmp("_shmem_file", key) == 0) {
         if (value[0] != '\0') {
             if (std::strcmp(value, "close") == 0) {
-                fMemory.close(); // UI closed
-                sharedMemoryDisconnected();
+                sharedMemoryWillDisconnect();
+                fMemory.close();
             } else {
                 uint8_t* ptr = fMemory.connect(value);
                 if (ptr != nullptr) { 

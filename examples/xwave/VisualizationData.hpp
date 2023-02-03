@@ -43,22 +43,13 @@ public:
         , fReadPosLocal(0)
         , fReadPosNetwork(0)
         , fWritePos(0)
-        , fBusy(false)
     {}
 
     ~VisualizationData()
-    {
-        // Block until addSamples() calls fBusy.clear(), to make sure deletion
-        // does not happen while Plugin::run() is writing to the buffer.
-        while (fBusy.test_and_set()) {};
-    }
+    {}
 
-    RT_SAFE bool addSamples(const float** inputs, uint32_t frames)
+    RT_SAFE void addSamples(const float** inputs, uint32_t frames)
     {
-        if (fBusy.test_and_set()) {
-            return false;
-        }
-
         size_t i = fWritePos;
         size_t j = 0;
 
@@ -77,10 +68,6 @@ public:
         }
 
         fWritePos = i;
-
-        fBusy.clear();
-
-        return true;
     }
 
     void send(WebUI& ui)
@@ -150,7 +137,6 @@ private:
     AtomicSize fReadPosLocal;
     AtomicSize fReadPosNetwork;
     AtomicSize fWritePos;
-    AtomicFlag fBusy;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VisualizationData)
 };

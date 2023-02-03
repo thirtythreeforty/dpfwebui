@@ -46,6 +46,7 @@ public:
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     uint8_t* getSharedMemoryPointer() const noexcept;
     bool     writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0) noexcept;
+    void     notifySharedMemoryWillDisconnect();
 #endif
 
 protected:

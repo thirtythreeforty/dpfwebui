@@ -27,7 +27,7 @@ UIEx::UIEx(uint width, uint height)
 UIEx::~UIEx()
 {
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
-    setState("_shmem_file", "close");
+    notifySharedMemoryWillDisconnect();
 #endif
 }
 
@@ -51,6 +51,11 @@ bool UIEx::writeSharedMemory(const uint8_t* data, size_t size, size_t offset) no
     setState("_shmem_data", metadata.buffer());
 
     return true;
+}
+
+void UIEx::notifySharedMemoryWillDisconnect()
+{
+    setState("_shmem_file", "close"); // PluginEx::sharedMemoryWillDisconnect()
 }
 
 void UIEx::uiIdle()

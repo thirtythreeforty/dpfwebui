@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <atomic>
+
 #include "extra/PluginEx.hpp"
 #include "VisualizationData.hpp"
 
@@ -65,28 +67,43 @@ public:
         port.groupId = kPortGroupStereo;
         PluginEx::initAudioPort(input, index, port);
     }
-    
+
     void sharedMemoryConnected(uint8_t* ptr) override
     {
         fVisData = reinterpret_cast<VisualizationData*>(ptr);
     }
 
+    void sharedMemoryWillDisconnect() override
+    {
+        if (fVisData != nullptr) {
+            if (fVisDataBusy.test_and_set()) {
+                // fVisDataBusy was true, wait for current render cycle to end.
+                while (fVisDataBusy.test_and_set()) {};
+            } else {
+                // fVisDataBusy was false and now true, free to proceed.
+            }
+            fVisData = nullptr;
+            fVisDataBusy.clear();
+        }
+    }
+
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
-        // TODO : Possible race condition here. Need to move shared memory
-        //        ownership to Plugin and update Plugin & UI interfaces.
-        // https://github.com/DISTRHO/DPF/issues/410#issuecomment-1414435206
-        // https://github.com/DISTRHO/OneKnob-Series/issues/6
-        if ((fVisData != nullptr) && ! fVisData->addSamples(inputs, frames)) {
-            fVisData = nullptr; // UI closed and shmem gone
+        if (! fVisDataBusy.test_and_set()) {
+            if (fVisData != nullptr) {
+                fVisData->addSamples(inputs, frames);
+            }
+            
+            fVisDataBusy.clear();
         }
-        
+
         for (int i = 0; i < 2; ++i) {
             std::memcpy(outputs[i], inputs[i], sizeof(float) * frames);
         }
     }
 
 private:
+    std::atomic_flag   fVisDataBusy;
     VisualizationData* fVisData;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XWaveExamplePlugin)
