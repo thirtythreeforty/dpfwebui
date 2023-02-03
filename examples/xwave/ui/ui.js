@@ -62,13 +62,14 @@ class XWaveExampleUI extends DISTRHO.UI {
 
     _initView() {
         if (env.plugin) {
-            document.body.appendChild(uiHelper.getNetworkDetailsModalButton(this, {
+            const qrButton = uiHelper.getNetworkDetailsModalButton(this, {
                 fill: '#fff',
                 id: 'qr-button',
                 modal: {
                     id: 'qr-modal'
                 }
-            }));
+            });
+            document.body.appendChild(qrButton);
         } else {
             uiHelper.enableOfflineModal(this);
         }
@@ -99,7 +100,7 @@ class XWaveExampleUI extends DISTRHO.UI {
         const maxBufferSize = Math.floor(NETWORK_REFRESH_FREQ / 60 * this._sampleRate),
               numSamples = this._sampleBuffer.length;
 
-        if (numSamples > maxBufferSize) { // buffer overflow?
+        if (numSamples > maxBufferSize) { // avoid buffer overflow
             this._sampleBuffer.splice(0, numSamples - maxBufferSize);
         }
     }
@@ -108,7 +109,9 @@ class XWaveExampleUI extends DISTRHO.UI {
         if (this._prevFrameTimeMs > 0) {
             const deltaMs = timestampMs - this._prevFrameTimeMs;
 
-            if (deltaMs <= 1000/NETWORK_REFRESH_FREQ) {
+            if (deltaMs > 1000/NETWORK_REFRESH_FREQ) {
+                this._sampleBuffer = []; // animation could have been paused
+            } else {
                 const numSamples = Math.floor(deltaMs / 1000 * this._sampleRate),
                       binSize = Math.floor(numSamples / DISPLAY_NUM_BINS),
                       bins = new Float32Array(DISPLAY_NUM_BINS);
@@ -131,9 +134,6 @@ class XWaveExampleUI extends DISTRHO.UI {
 
                 //console.log(`DBG : sr=${this._sampleRate} dt=${deltaMs}ms \
                 //            pop=${k} left=${this._sampleBuffer.length}`);
-
-            } else {
-                this._sampleBuffer = []; // animation was paused
             }
         }
 

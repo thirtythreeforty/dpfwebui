@@ -73,6 +73,10 @@ public:
 
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
+        // TODO : Possible race condition here. Need to move shared memory
+        //        ownership to Plugin and update Plugin & UI interfaces.
+        // https://github.com/DISTRHO/DPF/issues/410#issuecomment-1414435206
+        // https://github.com/DISTRHO/OneKnob-Series/issues/6
         if ((fVisData != nullptr) && ! fVisData->addSamples(inputs, frames)) {
             fVisData = nullptr; // UI closed and shmem gone
         }

@@ -48,6 +48,11 @@ public:
 # endif
 #endif
 
+    // TODO : Move shared memory ownership back to Plugin once the
+    //        Plugin::updateStateValue() call works for all formats
+    // https://github.com/DISTRHO/DPF/issues/410#issuecomment-1414435206
+    // https://github.com/DISTRHO/OneKnob-Series/issues/6
+
 #if defined(HIPHOP_SHARED_MEMORY_SIZE)
     uint8_t* getSharedMemoryPointer() const noexcept;
     bool     writeSharedMemory(const uint8_t* data, size_t size, size_t offset = 0) const noexcept;
