@@ -33,7 +33,11 @@
 
 START_NAMESPACE_DISTRHO
 
+const char * const kWebViewUserAgent = "hiphop/1.0";
+
 static const uintptr_t kDestinationAll = 0;
+static const uintptr_t kDestinationWebView = 1;
+
 static const uintptr_t kExcludeNone = 0;
 
 class WebUIBase : public UIEx

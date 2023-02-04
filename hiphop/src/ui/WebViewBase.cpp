@@ -40,7 +40,7 @@
 
 USE_NAMESPACE_DISTRHO
 
-WebViewBase::WebViewBase()
+WebViewBase::WebViewBase(String /*userAgentComponent*/)
     : fWidth(0)
     , fHeight(0)
     , fBackgroundColor(0)

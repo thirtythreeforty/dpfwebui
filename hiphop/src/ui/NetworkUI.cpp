@@ -150,12 +150,24 @@ void NetworkUI::postMessage(const Variant& payload, uintptr_t destination, uintp
     BinaryData data = payload.toBSON();
     if (destination == kDestinationAll) {
         fServer.broadcast(data.data(), data.size(), reinterpret_cast<Client>(exclude));
+    } else if (destination == kDestinationWebView) {
+        String userAgent(kWebViewUserAgent);
+        Client client = fServer.getClientByUserAgentComponent(userAgent);
+        if (client != nullptr) {
+            fServer.send(data.data(), data.size(), client);
+        }
     } else {
         fServer.send(data.data(), data.size(), reinterpret_cast<Client>(destination));
     }
 #else
     if (destination == kDestinationAll) {
         fServer.broadcast(payload.toJSON(), reinterpret_cast<Client>(exclude));
+    } else if (destination == kDestinationWebView) {
+        String userAgent(kWebViewUserAgent);
+        Client client = fServer.getClientByUserAgentComponent(userAgent);
+        if (client != nullptr) {
+            fServer.send(payload.toJSON(), client);
+        }
     } else {
         fServer.send(payload.toJSON(), reinterpret_cast<Client>(destination));
     }

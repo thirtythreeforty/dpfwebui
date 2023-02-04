@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ struct WebViewEventHandler
 class WebViewBase
 {
 public:
-    WebViewBase();
+    WebViewBase(String userAgentComponent = String());
     virtual ~WebViewBase() {};
 
     uint getWidth();
