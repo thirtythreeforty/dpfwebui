@@ -53,11 +53,8 @@ class XWaveExampleUI extends DISTRHO.UI {
         }
     }
 
-    // Receive higher latency visualization data sent through WebSocket
     onVisualizationData(data) {
-        if (! env.plugin) {
-            this._addSamples(data.samples.buffer);
-        }
+        this._addSamples(data.samples.buffer);
     }
 
     _initView() {
@@ -82,14 +79,6 @@ class XWaveExampleUI extends DISTRHO.UI {
     }
 
     _startVisualization() {
-        // Register to receive low latency visualization data sent using local
-        // transport, skipping network overhead. Plugin embedded web view only.
-        if (env.plugin) {
-            window.host.addMessageListener(data => {
-                this._addSamples(DISTRHO.Base64.decode(data.samples.$binary));
-            });
-        }
-
         this._animate(0);
     }
 

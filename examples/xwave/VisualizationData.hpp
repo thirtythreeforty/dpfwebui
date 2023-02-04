@@ -72,10 +72,6 @@ public:
 
     void send(WebUI& ui)
     {
-        // TODO : define kDestinationEmbeddedWebView to target the embedded
-        //        web view from UI::callback() . Detect the embedded web view
-        //        client in WebServer.cpp by inspecting HTTP headers.
-
         double now = static_cast<double>(
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()
@@ -89,7 +85,8 @@ public:
                 { "samples", getSamples(fReadPosLocal) }
             });
 
-            ui.getWebView().postMessage(visData); // bypass network
+            ui.callback("onVisualizationData", Variant::createArray({ visData }),
+                kDestinationWebView);
         }
 
         if ((now - fSendTimeNetwork) >= (1.0 / kFrequencyNetwork)) {
@@ -99,8 +96,8 @@ public:
                 { "samples", getSamples(fReadPosNetwork) }
             });
 
-            // ui.js : XWaveExampleUI.onVisualizationData()
-            ui.callback("onVisualizationData", Variant::createArray({ visData }));
+            ui.callback("onVisualizationData", Variant::createArray({ visData }),
+                kDestinationAll, /*exclude*/kDestinationWebView);
         }
     }
 
