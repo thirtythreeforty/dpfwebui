@@ -33,7 +33,7 @@ MacWebViewUI::MacWebViewUI(uint widthCssPx, uint heightCssPx,
         return;
     }
 
-    setWebView(new CocoaWebView()); // base class owns web view
+    setWebView(new CocoaWebView(String(kWebViewUserAgent)));
 
     if (startLoading) {
         load();

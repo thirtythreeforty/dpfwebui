@@ -52,12 +52,18 @@
 
 USE_NAMESPACE_DISTRHO
 
-CocoaWebView::CocoaWebView()
+CocoaWebView::CocoaWebView(String userAgentComponent)
 {
     fBackground = [[NSView alloc] initWithFrame:CGRectZero];
     fNsBackground.autoresizesSubviews = YES;
 
-    fWebView = [[DistrhoWebView alloc] initWithFrame:CGRectZero];
+    WKWebViewConfiguration* configuration = [[WKWebViewConfiguration alloc] init];
+    NSString* userAgent = [[NSString alloc] initWithCString:userAgentComponent.buffer() encoding:NSUTF8StringEncoding];
+    configuration.applicationNameForUserAgent = userAgent;
+    [userAgent release];
+
+    fWebView = [[DistrhoWebView alloc] initWithFrame:CGRectZero configuration:configuration];
+    [configuration release];
     fNsWebView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     [fNsBackground addSubview:fNsWebView];
 

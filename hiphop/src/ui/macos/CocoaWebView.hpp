@@ -30,7 +30,7 @@ START_NAMESPACE_DISTRHO
 class CocoaWebView : public WebViewBase
 {
 public:
-    CocoaWebView();
+    CocoaWebView(String userAgentComponent = String());
     virtual ~CocoaWebView();
     
     float getDevicePixelRatio() override;
