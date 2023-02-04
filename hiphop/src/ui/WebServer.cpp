@@ -161,6 +161,17 @@ void WebServer::cancel()
     lws_cancel_service(fContext);
 }
 
+Client WebServer::getClientByUserAgentComponent(String& userAgentComponent)
+{
+    for (ClientContextMap::iterator it = fClients.begin(); it != fClients.end(); ++it) {
+        if (it->second.userAgent.contains(userAgentComponent)) {
+            return it->first;
+        }
+    }
+
+    return nullptr;
+}
+
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
                            void* user, void* in, size_t len)
 {
@@ -174,10 +185,17 @@ int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
             rc = server->injectScripts(args);
             break;
         }
-        case LWS_CALLBACK_ESTABLISHED:
-            server->fClients.emplace(wsi, ClientContext());
+        case LWS_CALLBACK_ESTABLISHED: {
+            char userAgent[1024];
+            if (lws_hdr_copy(wsi, userAgent, sizeof(userAgent), WSI_TOKEN_HTTP_USER_AGENT) < 0) {
+                userAgent[0] = '\0';   
+            }
+            ClientContext ctx;
+            ctx.userAgent = userAgent;
+            server->fClients.emplace(wsi, ctx);
             server->fHandler->handleWebServerConnect(wsi);
             break;
+        }
         case LWS_CALLBACK_CLOSED:
             server->fClients.erase(server->fClients.find(wsi));
             server->fHandler->handleWebServerDisconnect(wsi);

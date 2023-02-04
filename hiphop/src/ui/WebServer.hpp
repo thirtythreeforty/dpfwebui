@@ -39,7 +39,7 @@ struct ClientContext
 {
     struct FrameData
     {
-        bool binary;
+        bool       binary;
         ByteVector data;
 
         FrameData(bool binary)
@@ -50,8 +50,9 @@ struct ClientContext
 
     typedef std::list<FrameData> ByteVectorList;
 
-    ByteVectorList writeBuffer;
+    String         userAgent;
     ByteVector     readBuffer;
+    ByteVectorList writeBuffer;
 };
 
 struct WebServerHandler
@@ -77,6 +78,8 @@ public:
     void broadcast(const char* data, Client exclude = nullptr);
     void serve(bool block = true);
     void cancel();
+
+    Client getClientByUserAgentComponent(String& userAgentComponent);
 
 private:
     static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
