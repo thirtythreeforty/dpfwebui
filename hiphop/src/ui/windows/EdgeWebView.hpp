@@ -86,6 +86,7 @@ private:
     void errorMessageBox(std::wstring message);
     void webViewLoaderErrorMessageBox(HRESULT result);
 
+    String  fUserAgent;
     LPWSTR  fHelperClassName;
     HWND    fHelperHwnd;
     HHOOK   fKeyboardHook;

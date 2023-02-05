@@ -47,7 +47,8 @@ LRESULT CALLBACK KeyboardFilterProc(int nCode, WPARAM wParam, LPARAM lParam);
 USE_NAMESPACE_DISTRHO
 
 EdgeWebView::EdgeWebView(String userAgentComponent)
-    : fHelperClassName(nullptr)
+    : fUserAgent(userAgentComponent)
+    , fHelperClassName(nullptr)
     , fHelperHwnd(0)
     , fKeyboardHook(0)
     , fReady(false)
@@ -289,9 +290,16 @@ HRESULT EdgeWebView::handleWebView2ControllerCompleted(HRESULT result,
     ICoreWebView2_add_NavigationCompleted(fView, fHandler, nullptr);
     ICoreWebView2_add_WebMessageReceived(fView, fHandler, nullptr);
 
-    ICoreWebView2Settings* settings;
-    ICoreWebView2_get_Settings(fView, &settings);
+    ICoreWebView2Settings2* settings;
+    ICoreWebView2_get_Settings(fView, reinterpret_cast<ICoreWebView2Settings**>(&settings));
     ICoreWebView2Settings_put_IsStatusBarEnabled(settings, false);
+    
+    LPWSTR buf;
+    ICoreWebView2Settings2_get_UserAgent(settings, &buf);
+    std::wstring userAgent(buf);
+    userAgent += L" ";
+    userAgent += TO_LPCWSTR(fUserAgent.buffer());
+    ICoreWebView2Settings2_put_UserAgent(settings, userAgent.c_str());
 
     // Run pending requests
 
@@ -314,7 +322,7 @@ HRESULT EdgeWebView::handleWebView2ControllerCompleted(HRESULT result,
         ICoreWebView2_AddScriptToExecuteOnDocumentCreated(fView, TO_LPCWSTR(*it), 0);
     }
 
-    if (!fUrl.isEmpty()) {
+    if (! fUrl.isEmpty()) {
         ICoreWebView2_Navigate(fView, TO_LPCWSTR(fUrl));
     }
 
