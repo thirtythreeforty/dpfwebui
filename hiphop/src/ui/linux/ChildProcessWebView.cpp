@@ -289,8 +289,6 @@ void ChildProcessWebView::cleanup()
     if (fIpc != 0) {
         if (fPid != -1) {
             fIpc->write(OP_TERMINATE);
-            int stat;
-            waitpid(fPid, &stat, 0);
             fPid = -1;
         }
 
