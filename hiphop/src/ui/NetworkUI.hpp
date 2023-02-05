@@ -41,6 +41,8 @@ public:
     NetworkUI(uint widthCssPx, uint heightCssPx, float initPixelRatio);
     virtual ~NetworkUI();
 
+    WebServer& getServer() { return fServer; }
+
     String getLocalUrl();
     String getPublicUrl();
 

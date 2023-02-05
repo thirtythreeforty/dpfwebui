@@ -80,6 +80,7 @@ public:
     void cancel();
 
     Client getClientByUserAgentComponent(String& userAgentComponent);
+    void   setClientUserAgent(Client client, String& userAgent);
 
 private:
     static int lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,

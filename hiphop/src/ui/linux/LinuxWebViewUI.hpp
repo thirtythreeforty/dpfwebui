@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,15 @@ protected:
     uintptr_t createStandaloneWindow() override;
     void      processStandaloneEvents() override;
 
+#if defined(HIPHOP_NETWORK_UI) && defined(HIPHOP_LINUX_WEBVIEW_CEF)
+    void onClientConnected(Client client) override;
+#endif
+
 private:
+#if defined(HIPHOP_NETWORK_UI) && defined(HIPHOP_LINUX_WEBVIEW_CEF)
+    bool fFirstClient;
+#endif
+
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LinuxWebViewUI)
 
 };

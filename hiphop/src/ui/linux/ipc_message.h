@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,12 +46,13 @@ typedef enum {
 typedef struct {
     unsigned width;
     unsigned height;
-} msg_win_size_t;
+} msg_view_size_t;
 
 typedef struct {
-    uintptr_t      parent;
-    uint32_t       color;
-    msg_win_size_t size;
-} msg_win_cfg_t;
+    uintptr_t       parent;
+    uint32_t        color;
+    msg_view_size_t size;
+    char            userAgent[1024];
+} msg_view_cfg_t;
 
 #endif  // IPC_MESSAGE_H

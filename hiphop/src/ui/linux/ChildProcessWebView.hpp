@@ -55,6 +55,7 @@ private:
     void handleHelperScriptMessage(const char *payloadBytes, int payloadSize);
     void cleanup();
 
+    String      fUserAgent;
     ::Display*  fDisplay;
     ::Window    fBackground;
     int         fPipeFd[2][2];

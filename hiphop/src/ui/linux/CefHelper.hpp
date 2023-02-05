@@ -44,46 +44,46 @@ public:
 
     // CefClient
 
-    virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override
+    CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override
     {
         return this;
     }
     
-    virtual CefRefPtr<CefLoadHandler> GetLoadHandler() override
+    CefRefPtr<CefLoadHandler> GetLoadHandler() override
     {
         return this;
     }
     
-    virtual CefRefPtr<CefDialogHandler> GetDialogHandler() override
+    CefRefPtr<CefDialogHandler> GetDialogHandler() override
     {
         return this;
     }
 
-    virtual CefRefPtr<CefRequestHandler> GetRequestHandler() override
+    CefRefPtr<CefRequestHandler> GetRequestHandler() override
     {
         return this;
     }
 
-    virtual bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
-                                          CefRefPtr<CefFrame> frame,
-                                          CefProcessId sourceProcess,
-                                          CefRefPtr<CefProcessMessage> message) override;
+    bool OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
+                                 CefRefPtr<CefFrame> frame,
+                                 CefProcessId sourceProcess,
+                                 CefRefPtr<CefProcessMessage> message) override;
 
     // CefBrowserProcessHandler
 
-    virtual void OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> commandLine) override;
+    void OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> commandLine) override;
 
     // CefLoadHandler
     
-    virtual void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
-                             TransitionType transitionType) override;
+    void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+                    TransitionType transitionType) override;
 
-    virtual void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
-                           int httpStatusCode) override;
+    void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+                   int httpStatusCode) override;
 
     // CefRequestHandler
 
-    virtual CefRefPtr<CefResourceRequestHandler> 
+    CefRefPtr<CefResourceRequestHandler> 
     GetResourceRequestHandler(CefRefPtr<CefBrowser> browser,
                               CefRefPtr<CefFrame> frame,
                               CefRefPtr<CefRequest> request,
@@ -94,7 +94,7 @@ public:
 
     // CefResourceRequestHandler
 
-    virtual CefRefPtr<CefResponseFilter>
+    CefRefPtr<CefResponseFilter>
     GetResourceResponseFilter(CefRefPtr<CefBrowser> browser,
                               CefRefPtr<CefFrame> frame,
                               CefRefPtr<CefRequest> request,
@@ -103,14 +103,20 @@ public:
         return this;
     }
 
+    CefResourceRequestHandler::ReturnValue
+    OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
+                         CefRefPtr<CefFrame> frame,
+                         CefRefPtr<CefRequest> request,
+                         CefRefPtr<CefCallback> callback) override;
+
     // CefResponseFilter
 
-    virtual bool InitFilter() override
+    bool InitFilter() override
     {
         return true;
     }
 
-    virtual CefResponseFilter::FilterStatus
+    CefResponseFilter::FilterStatus
     Filter(void* data_in,
            size_t data_in_size,
            size_t& data_in_read,
@@ -120,26 +126,27 @@ public:
 
     // CefDialogHandler
 
-    virtual bool OnFileDialog(CefRefPtr<CefBrowser> browser,                      
-                              FileDialogMode mode,                                
-                              const CefString& title,                             
-                              const CefString& defaultFilePath,                 
-                              const std::vector<CefString>& acceptFilters,
-                              CefRefPtr<CefFileDialogCallback> callback) override;
+    bool OnFileDialog(CefRefPtr<CefBrowser> browser,                      
+                      FileDialogMode mode,                                
+                      const CefString& title,                             
+                      const CefString& defaultFilePath,                 
+                      const std::vector<CefString>& acceptFilters,
+                      CefRefPtr<CefFileDialogCallback> callback) override;
 private:
     void runMainLoop();
     void dispatch(const tlv_t& packet);
-    void realize(const msg_win_cfg_t* config);
+    void realize(const msg_view_cfg_t* config);
     void navigate(const char* url);
     void runScript(const char* js);
     void injectScript(const char* js);
-    void setSize(const msg_win_size_t* size);
+    void setSize(const msg_view_size_t* size);
     void setKeyboardFocus(bool keyboardFocus);
 
     bool        fRunMainLoop;
     IpcChannel* fIpc;
     ::Display*  fDisplay;
     ::Window    fContainer;
+    std::string fUserAgent;
     std::string fIndexHtml;
     
     CefRefPtr<CefBrowser>            fBrowser;
@@ -158,18 +165,18 @@ public:
     virtual ~CefSubprocess() {}
 
     // CefApp
-    virtual CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override
+    CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() override
     {
         return this;
     }
 
     // CefRenderProcessHandler
-    virtual void OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
-                                  CefRefPtr<CefV8Context> context) override;
+    void OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
+                          CefRefPtr<CefV8Context> context) override;
     
     // CefV8Handler
-    virtual bool Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments,
-                         CefRefPtr<CefV8Value>& retval, CefString& exception) override;
+    bool Execute(const CefString& name, CefRefPtr<CefV8Value> object, const CefV8ValueList& arguments,
+                 CefRefPtr<CefV8Value>& retval, CefString& exception) override;
 
 private:
     CefRefPtr<CefBrowser> fBrowser;

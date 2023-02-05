@@ -50,7 +50,8 @@ USE_NAMESPACE_DISTRHO
 #define IF_CHANNEL_CLOSED_RETURN() if (fIpc == nullptr) return
 
 ChildProcessWebView::ChildProcessWebView(String userAgentComponent)
-    : fDisplay(0)
+    : fUserAgent(userAgentComponent)
+    , fDisplay(0)
     , fBackground(0)
     , fPipeFd {{-1, -1}, {-1, -1}}
     , fPid(-1)
@@ -173,10 +174,11 @@ void ChildProcessWebView::realize()
     XClearWindow(fDisplay, fBackground);
     XSync(fDisplay, False);
 
-    msg_win_cfg_t config;
+    msg_view_cfg_t config = {};
     config.parent = static_cast<uintptr_t>(fBackground);
     config.color = color;
     config.size = { width, height };
+    std::strncpy(config.userAgent, fUserAgent.buffer(), sizeof(config.userAgent) - 1);
     fIpc->write(OP_REALIZE, &config, sizeof(config));
 }
 
@@ -210,7 +212,7 @@ void ChildProcessWebView::onSize(uint width, uint height)
         XSync(fDisplay, False);
     }
 
-    const msg_win_size_t sizePkt = { width, height };
+    const msg_view_size_t sizePkt = { width, height };
     fIpc->write(OP_SET_SIZE, &sizePkt, sizeof(sizePkt));
 }
 

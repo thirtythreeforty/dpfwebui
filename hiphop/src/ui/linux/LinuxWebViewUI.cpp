@@ -1,6 +1,6 @@
 /*
  * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@ USE_NAMESPACE_DISTRHO
 LinuxWebViewUI::LinuxWebViewUI(uint widthCssPx, uint heightCssPx,
         const char* backgroundCssColor, bool startLoading)
     : WebViewUI(widthCssPx, heightCssPx, backgroundCssColor, device_pixel_ratio())
+#if defined(HIPHOP_NETWORK_UI) && defined(HIPHOP_LINUX_WEBVIEW_CEF)
+    , fFirstClient(false)
+#endif
 {
     if (isDryRun()) {
         return;
@@ -63,3 +66,21 @@ void LinuxWebViewUI::processStandaloneEvents()
 {
     // TODO - standalone support
 }
+
+// No way for setting WebSocket request headers for the CEF web view. Force user
+// agent for the first connected client instead. While this depends on timing,
+// in practice the first client will be always the plugin embedded web view.
+#if defined(HIPHOP_NETWORK_UI) && defined(HIPHOP_LINUX_WEBVIEW_CEF)
+void LinuxWebViewUI::onClientConnected(Client client)
+{
+    if (fFirstClient) {
+        return;
+    }
+
+    fFirstClient = true;
+
+    String userAgent(kWebViewUserAgent);
+    getServer().setClientUserAgent(client, userAgent);
+
+}
+#endif

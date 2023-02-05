@@ -172,6 +172,15 @@ Client WebServer::getClientByUserAgentComponent(String& userAgentComponent)
     return nullptr;
 }
 
+void WebServer::setClientUserAgent(Client client, String& userAgent)
+{
+    ClientContextMap::iterator it = fClients.find(client);
+
+    if (it != fClients.end()) {
+        it->second.userAgent = userAgent;
+    }
+}
+
 int WebServer::lwsCallback(struct lws* wsi, enum lws_callback_reasons reason,
                            void* user, void* in, size_t len)
 {

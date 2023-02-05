@@ -134,6 +134,7 @@ int CefHelper::run(const CefMainArgs& args)
     settings.log_severity = LOGSEVERITY_DISABLE;
     settings.chrome_runtime = false;
     CefString(&settings.cache_path) = Path::getUserData();
+    //CefString(&settings.user_agent) = ... does not work for WebSockets
 
     // Initialize CEF for the browser process
     CefInitialize(args, settings, this, nullptr);
@@ -200,7 +201,7 @@ void CefHelper::dispatch(const tlv_t& packet)
 {
     switch (static_cast<msg_opcode_t>(packet.t)) {
         case OP_REALIZE:
-            realize(static_cast<const msg_win_cfg_t*>(packet.v));
+            realize(static_cast<const msg_view_cfg_t*>(packet.v));
             break;
         case OP_NAVIGATE:
             navigate(static_cast<const char*>(packet.v));
@@ -215,7 +216,7 @@ void CefHelper::dispatch(const tlv_t& packet)
             injectScript(static_cast<const char*>(packet.v));
             break;
         case OP_SET_SIZE:
-            setSize(static_cast<const msg_win_size_t*>(packet.v));
+            setSize(static_cast<const msg_view_size_t*>(packet.v));
             break;
         case OP_SET_KEYBOARD_FOCUS:
             setKeyboardFocus(*static_cast<const bool*>(packet.v) == 1);
@@ -287,6 +288,29 @@ CefHelper::GetResourceRequestHandler(CefRefPtr<CefBrowser> browser,
     }
 
     return nullptr;
+}
+
+CefResourceRequestHandler::ReturnValue
+CefHelper::OnBeforeResourceLoad(CefRefPtr<CefBrowser> browser,
+                                CefRefPtr<CefFrame> frame,
+                                CefRefPtr<CefRequest> request,
+                                CefRefPtr<CefCallback> callback)
+{
+    // TODO : this only seems to affect the main document request headers,
+    //        not resource requests or WebSockets.
+    
+    /*CefRequest::HeaderMap headers;
+    request->GetHeaderMap(headers);
+    CefRequest::HeaderMap::iterator it = headers.find("User-Agent");
+
+    if (it != headers.end()) {
+        std::string userAgent = it->second.ToString() + " " + fUserAgent;
+        headers.erase(it);
+        headers.insert(CefRequest::HeaderMap::value_type("User-Agent", userAgent));
+        request->SetHeaderMap(headers);
+    }*/
+
+    return RV_CONTINUE;
 }
 
 CefResponseFilter::FilterStatus
@@ -382,7 +406,7 @@ bool CefHelper::OnFileDialog(CefRefPtr<CefBrowser> browser,
     return true;
 }
 
-void CefHelper::realize(const msg_win_cfg_t* config)
+void CefHelper::realize(const msg_view_cfg_t* config)
 {
     // Top view is needed to ensure 24-bit colormap otherwise CreateBrowserSync()
     // will fail producing multiple Xlib errors. This can only be reproduced on
@@ -411,6 +435,8 @@ void CefHelper::realize(const msg_win_cfg_t* config)
     const ::Window w = static_cast<::Window>(fBrowser->GetHost()->GetWindowHandle());
     XSetWindowBackground(fDisplay, w, config->color); // reduce artifacts when resizing
     XResizeWindow(fDisplay, w, config->size.width, config->size.height);
+
+    fUserAgent = config->userAgent;
 }
 
 void CefHelper::navigate(const char* url)
@@ -429,7 +455,7 @@ void CefHelper::injectScript(const char* js)
     fScripts->SetString(fScripts->GetSize(), js);
 }
 
-void CefHelper::setSize(const msg_win_size_t* size)
+void CefHelper::setSize(const msg_view_size_t* size)
 {
     const unsigned width = size->width;
     const unsigned height = size->height;

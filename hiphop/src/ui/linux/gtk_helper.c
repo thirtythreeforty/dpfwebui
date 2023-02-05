@@ -58,25 +58,25 @@
 #define JS_POST_MESSAGE_SHIM "window.host.postMessage = (payload) => window.webkit.messageHandlers.host.postMessage(payload);"
 
 typedef struct {
-    ipc_t*         ipc;
-    Display*       display;
-    float          pixelRatio;
-    float          zoom;
-    msg_win_size_t size;
-    Window         container;
-    GtkWindow*     window;
-    WebKitWebView* webView;
-    gboolean       focus;
-    Window         focusXWin;
-    pthread_t      watchdog;
-    char           scripts[262144];
+    ipc_t*          ipc;
+    Display*        display;
+    float           pixelRatio;
+    float           zoom;
+    msg_view_size_t size;
+    Window          container;
+    GtkWindow*      window;
+    WebKitWebView * webView;
+    gboolean        focus;
+    Window          focusXWin;
+    pthread_t       watchdog;
+    char            scripts[262144];
 } context_t;
 
-static void realize(context_t *ctx, const msg_win_cfg_t *config);
+static void realize(context_t *ctx, const msg_view_cfg_t *config);
 static void navigate(context_t *ctx, const char *url);
 static void run_script(const context_t *ctx, const char *js);
 static void inject_script(context_t *ctx, const char *js);
-static void set_size(context_t *ctx, const msg_win_size_t *size);
+static void set_size(context_t *ctx, const msg_view_size_t *size);
 static void apply_size(const context_t *ctx);
 static void set_keyboard_focus(context_t *ctx, gboolean focus);
 static void* focus_watchdog_worker(void *arg);
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-static void realize(context_t *ctx, const msg_win_cfg_t *config)
+static void realize(context_t *ctx, const msg_view_cfg_t *config)
 {
     // Create a native container window
 #if HIPHOP_UI_LINUX_GTK_WEBVIEW_FAKE_VIEWPORT
@@ -185,7 +185,19 @@ static void realize(context_t *ctx, const msg_win_cfg_t *config)
     // Note this renders viewport based units useless (vw/vh/vmin/vmax). 
     gtk_window_resize(ctx->window, width, height);
 
-    ctx->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
+    char *name = (char*)config->userAgent;
+    char *sep = strstr(name, "/");
+    char *version = NULL;
+
+    if (sep != NULL) {
+        version = strlen(sep) > 1 ? sep + 1 : sep;
+        name[sep - name] = '\0';
+    }
+
+    WebKitSettings *settings = webkit_settings_new();
+    webkit_settings_set_user_agent_with_application_details(settings, name, version);
+
+    ctx->webView = WEBKIT_WEB_VIEW(webkit_web_view_new_with_settings(settings));
 
     if (ctx->zoom > 0) {
         webkit_web_view_set_zoom_level(ctx->webView, ctx->zoom);
@@ -225,7 +237,7 @@ static void inject_script(context_t *ctx, const char *js)
     strcat(ctx->scripts, (const char *)js);
 }
 
-static void set_size(context_t *ctx, const msg_win_size_t *size)
+static void set_size(context_t *ctx, const msg_view_size_t *size)
 {
     ctx->size = *size;
 
@@ -427,7 +439,7 @@ static gboolean ipc_read_cb(GIOChannel *source, GIOCondition condition, gpointer
 
     switch (packet.t) {
         case OP_REALIZE:
-            realize(ctx, (const msg_win_cfg_t *)packet.v);
+            realize(ctx, (const msg_view_cfg_t *)packet.v);
             break;
         case OP_NAVIGATE:
             navigate(ctx, (const char *)packet.v);
@@ -442,7 +454,7 @@ static gboolean ipc_read_cb(GIOChannel *source, GIOCondition condition, gpointer
             inject_script(ctx, (const char *)packet.v);
             break;
         case OP_SET_SIZE:
-            set_size(ctx, (const msg_win_size_t *)packet.v);
+            set_size(ctx, (const msg_view_size_t *)packet.v);
             break;
         case OP_SET_KEYBOARD_FOCUS:
             set_keyboard_focus(ctx, *((char *)packet.v) == 1 ? TRUE : FALSE);
