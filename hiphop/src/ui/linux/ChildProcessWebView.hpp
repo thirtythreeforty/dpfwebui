@@ -35,7 +35,7 @@ START_NAMESPACE_DISTRHO
 class ChildProcessWebView : public WebViewBase
 {
 public:
-    ChildProcessWebView();
+    ChildProcessWebView(String userAgentComponent = String());
     virtual ~ChildProcessWebView();
 
     float getDevicePixelRatio() override;

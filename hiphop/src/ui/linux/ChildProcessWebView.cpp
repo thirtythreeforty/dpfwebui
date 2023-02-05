@@ -49,7 +49,7 @@ USE_NAMESPACE_DISTRHO
 
 #define IF_CHANNEL_CLOSED_RETURN() if (fIpc == nullptr) return
 
-ChildProcessWebView::ChildProcessWebView()
+ChildProcessWebView::ChildProcessWebView(String userAgentComponent)
     : fDisplay(0)
     , fBackground(0)
     , fPipeFd {{-1, -1}, {-1, -1}}

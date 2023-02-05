@@ -31,7 +31,7 @@ LinuxWebViewUI::LinuxWebViewUI(uint widthCssPx, uint heightCssPx,
         return;
     }
 
-    setWebView(new ChildProcessWebView()); // base class owns web view
+    setWebView(new ChildProcessWebView(String(kWebViewUserAgent)));
 
     if (startLoading) {
         load();

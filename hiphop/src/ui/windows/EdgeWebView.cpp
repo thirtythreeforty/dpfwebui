@@ -46,7 +46,7 @@ LRESULT CALLBACK KeyboardFilterProc(int nCode, WPARAM wParam, LPARAM lParam);
 
 USE_NAMESPACE_DISTRHO
 
-EdgeWebView::EdgeWebView()
+EdgeWebView::EdgeWebView(String userAgentComponent)
     : fHelperClassName(nullptr)
     , fHelperHwnd(0)
     , fKeyboardHook(0)

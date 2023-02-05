@@ -52,7 +52,7 @@ class WeakWebView2EventHandler;
 class EdgeWebView : public WebViewBase, public edge::WebView2EventHandler
 {
 public:
-    EdgeWebView();
+    EdgeWebView(String userAgentComponent = String());
     virtual ~EdgeWebView();
 
     static float getMonitorScaleFactor(HWND hWnd);

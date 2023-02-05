@@ -37,7 +37,7 @@ WindowsWebViewUI::WindowsWebViewUI(uint widthCssPx, uint heightCssPx,
     // is disabled (right-click plugin). Cannot control this programmatically.
     // https://forum.juce.com/t/blurry-ui-running-vst-in-ableton-live-10/42472/5
     
-    EdgeWebView* view = new EdgeWebView();
+    EdgeWebView* view = new EdgeWebView(String(kWebViewUserAgent));
 
     // Some hosts need key events delivered directly to their main window
     EnumWindows(FindHostWindowProc, reinterpret_cast<LPARAM>(&fHostHWnd));
