@@ -149,7 +149,13 @@ void NetworkUI::postMessage(const Variant& payload, uintptr_t destination, uintp
 #if HIPHOP_UI_PROTOCOL_BINARY
     BinaryData data = payload.toBSON();
     if (destination == kDestinationAll) {
-        fServer.broadcast(data.data(), data.size(), reinterpret_cast<Client>(exclude));
+        if (exclude == kDestinationWebView) {
+            String userAgent(kWebViewUserAgent);
+            Client excClient = fServer.getClientByUserAgentComponent(userAgent);
+            fServer.broadcast(data.data(), data.size(), excClient);
+        } else {
+            fServer.broadcast(data.data(), data.size());
+        }
     } else if (destination == kDestinationWebView) {
         String userAgent(kWebViewUserAgent);
         Client client = fServer.getClientByUserAgentComponent(userAgent);
@@ -161,7 +167,13 @@ void NetworkUI::postMessage(const Variant& payload, uintptr_t destination, uintp
     }
 #else
     if (destination == kDestinationAll) {
-        fServer.broadcast(payload.toJSON(), reinterpret_cast<Client>(exclude));
+        if (exclude == kDestinationWebView) {
+            String userAgent(kWebViewUserAgent);
+            Client excClient = fServer.getClientByUserAgentComponent(userAgent);
+            fServer.broadcast(payload.toJSON(), excClient);
+        } else {
+            fServer.broadcast(payload.toJSON());
+        }
     } else if (destination == kDestinationWebView) {
         String userAgent(kWebViewUserAgent);
         Client client = fServer.getClientByUserAgentComponent(userAgent);

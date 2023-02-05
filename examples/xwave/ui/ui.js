@@ -89,7 +89,7 @@ class XWaveExampleUI extends DISTRHO.UI {
         const maxBufferSize = Math.floor(NETWORK_REFRESH_FREQ / 60 * this._sampleRate),
               numSamples = this._sampleBuffer.length;
 
-        if (numSamples > maxBufferSize) { // avoid buffer overflow
+        if (numSamples > 3*maxBufferSize) { // avoid buffer overflow
             this._sampleBuffer.splice(0, numSamples - maxBufferSize);
         }
     }
@@ -121,8 +121,8 @@ class XWaveExampleUI extends DISTRHO.UI {
                 this._sampleBuffer.splice(0, k);
                 this._waveform.analyserData = bins;
 
-                //console.log(`DBG : sr=${this._sampleRate} dt=${deltaMs}ms \
-                //            pop=${k} left=${this._sampleBuffer.length}`);
+                //console.log(`DBG : sr=${this._sampleRate} dt=${deltaMs}ms`
+                //            + ` pop=${k} left=${this._sampleBuffer.length}`);
             }
         }
 
