@@ -812,9 +812,9 @@ endif
 
 ifeq ($(WEB_UI),true)
 HIPHOP_TARGET += lib_ui_plugin
+LIB_UI_DIR = ui
 ifneq ($(HIPHOP_INJECT_FRAMEWORK_JS),true)
 HIPHOP_TARGET += lib_ui_framework
-LIB_UI_DIR = ui
 LIB_JS_PATH = $(LIB_UI_DIR)/$(HIPHOP_JS_LIB_TARGET_PATH)
 LIB_JS_FILES = $(HIPHOP_SRC_PATH)/ui/dpf.js
 ifeq ($(HIPHOP_SUPPORT_BSON),true)
