@@ -289,6 +289,11 @@ void ChildProcessWebView::cleanup()
     if (fIpc != 0) {
         if (fPid != -1) {
             fIpc->write(OP_TERMINATE);
+#if defined(HIPHOP_LINUX_WEBVIEW_CEF)
+            kill(fPid, SIGTERM);
+#endif
+            int stat;
+            waitpid(fPid, &stat, 0);
             fPid = -1;
         }
 
