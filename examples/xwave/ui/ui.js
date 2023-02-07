@@ -83,14 +83,15 @@ class XWaveExampleUI extends DISTRHO.UI {
     }
 
     _addSamples(/*Uint8Array*/loResSamples) {
-        const floatSamples = new Float32Array(loResSamples).map(s => s / 255);
-        this._sampleBuffer.push(...floatSamples);
+        const maxSize = Math.floor(NETWORK_REFRESH_FREQ / 60 * this._sampleRate),
+              newSize = this._sampleBuffer.length + loResSamples.length;
 
-        const maxBufferSize = Math.floor(NETWORK_REFRESH_FREQ / 60 * this._sampleRate),
-              numSamples = this._sampleBuffer.length;
+        if (newSize > maxSize) { // avoid buffer overflow
+            this._sampleBuffer.splice(0, maxSize - loResSamples.length);
+        }
 
-        if (numSamples > 3*maxBufferSize) { // avoid buffer overflow
-            this._sampleBuffer.splice(0, numSamples - maxBufferSize);
+        for (const k of loResSamples) {
+            this._sampleBuffer.push(k / 255);
         }
     }
 
