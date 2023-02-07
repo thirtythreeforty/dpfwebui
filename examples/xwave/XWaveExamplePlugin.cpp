@@ -78,7 +78,13 @@ public:
         if (fVisData != nullptr) {
             if (fVisDataBusy.test_and_set()) {
                 // fVisDataBusy was true, wait for current render cycle to end.
-                while (fVisDataBusy.test_and_set()) {};
+                // The max wait counter only seems to be required on Windows,
+                // where the wait loop can sometimes result in a deadlock.
+                // Behavior reproducible on REAPER, not tested on other DAWs.
+                int maxWaitMs = 1000;
+                while ((maxWaitMs-- > 0) && fVisDataBusy.test_and_set()) {
+                    d_msleep(1);
+                }
             } else {
                 // fVisDataBusy was false and now true, free to proceed.
             }
