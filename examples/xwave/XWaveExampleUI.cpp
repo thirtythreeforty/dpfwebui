@@ -30,7 +30,7 @@ public:
     ~XWaveExampleUI()
     {
         if (fVisData != nullptr) {
-             // See comment in XWaveExampleUI::sharedMemoryWillDisconnect()
+             // See comment in XWaveExamplePlugin::sharedMemoryWillDisconnect()
             notifySharedMemoryWillDisconnect();
             fVisData->~VisualizationData();
             fVisData = nullptr;
