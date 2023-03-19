@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef VARIANT_HELPER_HPP
-#define VARIANT_HELPER_HPP
+#ifndef VARIANT_UTIL_HPP
+#define VARIANT_UTIL_HPP
 
 #include <vector>
 
@@ -79,4 +79,4 @@ T& joinVariantArrays(T& a, const T& b) noexcept
 
 END_NAMESPACE_DISTRHO
 
-#endif // VARIANT_HELPER_HPP
+#endif // VARIANT_UTIL_HPP

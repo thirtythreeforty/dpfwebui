@@ -25,7 +25,7 @@
 #include "distrho/extra/String.hpp"
 #include "thirdparty/cJSON.h"
 
-#include "VariantHelper.hpp"
+#include "VariantUtil.hpp"
 
 START_NAMESPACE_DISTRHO
 

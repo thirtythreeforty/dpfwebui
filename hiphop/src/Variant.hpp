@@ -22,10 +22,10 @@
 #include "DistrhoPluginInfo.h"
 
 #if HIPHOP_UI_PROTOCOL_BINARY
-# include "BSONVariant.hpp"
+# include "extra/BSONVariant.hpp"
 typedef BSONVariant Variant;
 #else
-# include "JSONVariant.hpp"
+# include "extra/JSONVariant.hpp"
 typedef JSONVariant Variant;
 #endif
 

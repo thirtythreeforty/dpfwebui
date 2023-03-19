@@ -27,8 +27,8 @@
 #include <winuser.h>
 
 #include "extra/macro.h"
-#include "extra/Variant.hpp"
 #include "extra/Path.hpp"
+#include "Variant.hpp"
 
 #include "DistrhoPluginInfo.h"
 

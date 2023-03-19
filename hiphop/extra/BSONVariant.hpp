@@ -28,7 +28,7 @@
 #include "distrho/extra/String.hpp"
 #include "bson.h"
 
-#include "VariantHelper.hpp"
+#include "VariantUtil.hpp"
 
 START_NAMESPACE_DISTRHO
 

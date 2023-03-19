@@ -26,10 +26,10 @@
 
 #include "WebUIBase.hpp"
 #include "WebServer.hpp"
+#include "Variant.hpp"
 #if HIPHOP_UI_ZEROCONF
 # include "Zeroconf.hpp"
 #endif
-#include "extra/Variant.hpp"
 
 START_NAMESPACE_DISTRHO
 

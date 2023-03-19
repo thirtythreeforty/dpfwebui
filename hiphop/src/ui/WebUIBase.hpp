@@ -28,8 +28,8 @@
 #include "distrho/extra/Mutex.hpp"
 
 #include "extra/UIEx.hpp"
-#include "extra/Variant.hpp"
 #include "extra/StringHash.hpp"
+#include "Variant.hpp"
 
 START_NAMESPACE_DISTRHO
 

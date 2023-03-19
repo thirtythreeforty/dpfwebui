@@ -24,7 +24,7 @@
 #include "distrho/extra/String.hpp"
 #include "Window.hpp"
 
-#include "extra/Variant.hpp"
+#include "Variant.hpp"
 
 START_NAMESPACE_DISTRHO
 
