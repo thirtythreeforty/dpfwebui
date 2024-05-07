@@ -12,22 +12,22 @@ NAME = xwave
 # --------------------------------------------------------------
 # Project version for generating unique symbol names
 
-HIPHOP_PROJECT_VERSION = 1
+DPF_WEBUI_PROJECT_VERSION = 1
 
 # --------------------------------------------------------------
 # Enable Web UI by setting web files location
 
-HIPHOP_WEB_UI_PATH = ui
+DPF_WEBUI_WEB_UI_PATH = ui
 
 # --------------------------------------------------------------
 # Enable Web UI control from devices in the local network
 
-HIPHOP_NETWORK_UI = true
+DPF_WEBUI_NETWORK_UI = true
 
 # --------------------------------------------------------------
 # Build BSONVariant required by the binary protocol
 
-HIPHOP_SUPPORT_BSON = true
+DPF_WEBUI_SUPPORT_BSON = true
 
 # --------------------------------------------------------------
 # Files to build
@@ -51,6 +51,6 @@ include ../../Makefile.plugins.mk
 
 TARGETS += lv2_sep clap vst3 vst
 
-all: $(TARGETS) $(HIPHOP_TARGET)
+all: $(TARGETS) $(DPF_WEBUI_TARGET)
 
 # --------------------------------------------------------------

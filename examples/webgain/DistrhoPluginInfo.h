@@ -37,13 +37,13 @@
    The plugin URI when exporting in LV2 format.
    @note This macro is required.
  */
-#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/hiphop/webgain"
+#define DISTRHO_PLUGIN_URI "https://lucianoiam.com/dpfwebui/webgain"
 
 /**
    The plugin id when exporting in CLAP format, in reverse URI form.
    @note This macro is required when building CLAP plugins
 */
-#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.hiphop.webgain"
+#define DISTRHO_PLUGIN_CLAP_ID "com.lucianoiam.dpfwebui.webgain"
 
 /**
    Wherever the plugin has a custom %UI.

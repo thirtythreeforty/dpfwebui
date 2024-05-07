@@ -6,8 +6,6 @@ Library|Author|License|Notes
 [MongoDB C Driver](https://github.com/mongodb/mongo-c-driver)|MongoDB Inc.|Apache 2.0|Optionally required by network UI
 [js-bson](https://github.com/mongodb/js-bson)|MongoDB Inc.|Apache 2.0|Optionally required by network UI
 [Mbed TLS](https://github.com/ARMmbed/mbedtls)|The Mbed TLS Contributors|Apache 2.0|Optionally required by network UI
-[WAMR](https://github.com/bytecodealliance/wasm-micro-runtime)|Intel Corp.|Apache 2.0|Required by AssemblyScript DSP
-[Wasmer](https://github.com/wasmerio/wasmer)|Wasmer Inc.|MIT|Optionally required by AssemblyScript DSP
 [Base64](https://developer.mozilla.org/en-US/docs/Glossary/Base64)|MDN contributors|CC
 [event-target](https://github.com/ungap/event-target)|Andrea Giammarchi|ISC|Required by old macOS web views
 [qrcode-svg](https://github.com/papnkukn/qrcode-svg)|Kazuhiko Arase|MIT

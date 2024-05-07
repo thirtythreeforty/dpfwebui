@@ -1,6 +1,6 @@
 /*
- * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2023 Luciano Iam <oss@lucianoiam.com>
+ * dpfwebui / Web User Interfaces support for DISTRHO Plugin Framework
+ * Copyright (C) 2021-2024 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #ifndef VISUALIZATION_DATA_HPP
 #define VISUALIZATION_DATA_HPP
 
-#define SAMPLE_BUFFER_SIZE (HIPHOP_SHARED_MEMORY_SIZE - /* this */1024)
+#define SAMPLE_BUFFER_SIZE (DPF_WEBUI_SHARED_MEMORY_SIZE - /* this */1024)
 
 #define RT_SAFE
 

@@ -1,6 +1,5 @@
-Hip-Hop
--------
-*High Performance Hybrid Audio Plugins*
+Web User Interfaces for DPF
+---------------------------
 
 This project builds on top of the [DPF](http://github.com/DISTRHO/DPF) audio
 plugin framework to add web-based UI support. Plugins can leverage JavaScript
@@ -16,21 +15,11 @@ the plugin and optionally over the local network.
 ### Features
 
 * Based on DISTRHO Plugin Framework (DPF)
-* Subset of the `UI` and `Plugin` interfaces ported to JavaScript and [AssemblyScript](https://www.assemblyscript.org)
-* C++ sill possible for DSP development
+* C++ for DSP development
 * WebKitGTK or CEF on Linux, WKWebView on macOS, Edge WebView2 on Windows
 * VST3 / VST2 / CLAP / LV2 plugin formats
-* Network UI support, for example for remote control using a tablet
+* Network UI support, eg. for remote control using a tablet
 * Just the powerful basics
-
-The following language combinations are possible:
-
-DSP|UI |Comments
----|---|---------------------------------------------------------------------------
-C++|JS |Web view user interface, see examples [zcomp](https://github.com/lucianoiam/hiphop/tree/master/examples/zcomp) and [webgain](https://github.com/lucianoiam/hiphop/tree/master/examples/webgain).
-AS |JS |Web view user interface, see example [jitdrum](https://github.com/lucianoiam/hiphop/tree/master/examples/jitdrum).
-AS |C++|DPF Graphics Library (DGL), see example [astone](https://github.com/lucianoiam/hiphop/tree/master/examples/astone).
-C++|C++|No need for this project, use DPF instead.
 
 ### Example JavaScript UI code
 
@@ -60,36 +49,7 @@ class ExampleUI extends DISTRHO.UI {
 }
 ```
 
-The complete UI interface is defined [here](https://github.com/lucianoiam/hiphop/blob/master/hiphop/src/ui/dpf.js).
-
-### Example AssemblyScript DSP code
-
-```TypeScript
-export default class ExamplePlugin extends DISTRHO.Plugin implements DISTRHO.PluginInterface {
-
-    private gain: f32
-
-    setParameterValue(index: u32, value: f32): void {
-        // Host informs a parameter change, update local value
-
-        switch (index) {
-            case 0:
-                this.gain = value
-        }
-    }
-
-    run(inputs: Float32Array[], outputs: Float32Array[], midiEvents: DISTRHO.MidiEvent[]): void {
-        // Process a single audio channel, input and output buffers have equal size
-
-        for (let i = 0; i < inputs[0].length; ++i) {
-            outputs[0][i] = this.gain * inputs[0][i]
-        }
-    }
-
-}
-```
-
-The complete plugin interface is defined [here](https://github.com/lucianoiam/hiphop/blob/master/hiphop/src/dsp/dpf.ts).
+The complete UI interface is defined [here](https://github.com/lucianoiam/dpfwebui/blob/master/webui/src/ui/dpf.js).
 
 ### Plugin implementations
 

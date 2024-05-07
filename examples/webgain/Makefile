@@ -12,17 +12,17 @@ NAME = webgain
 # --------------------------------------------------------------
 # Project version for generating unique symbol names
 
-HIPHOP_PROJECT_VERSION = 1
+DPF_WEBUI_PROJECT_VERSION = 1
 
 # --------------------------------------------------------------
 # Automatically inject dpf.js
 
-HIPHOP_INJECT_FRAMEWORK_JS = true
+DPF_WEBUI_INJECT_FRAMEWORK_JS = true
 
 # --------------------------------------------------------------
 # Enable Web UI by setting web files location
 
-HIPHOP_WEB_UI_PATH = ui
+DPF_WEBUI_WEB_UI_PATH = ui
 
 # --------------------------------------------------------------
 # Files to build
@@ -46,6 +46,6 @@ include ../../Makefile.plugins.mk
 
 TARGETS += lv2_sep clap vst3 vst
 
-all: $(TARGETS) $(HIPHOP_TARGET)
+all: $(TARGETS) $(DPF_WEBUI_TARGET)
 
 # --------------------------------------------------------------

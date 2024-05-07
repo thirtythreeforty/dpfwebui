@@ -1,6 +1,6 @@
 /*
- * Hip-Hop / High Performance Hybrid Audio Plugins
- * Copyright (C) 2021-2022 Luciano Iam <oss@lucianoiam.com>
+ * dpfwebui / Web User Interfaces support for DISTRHO Plugin Framework
+ * Copyright (C) 2021-2024 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ class WebGainExampleUI extends DISTRHO.UI {
 //
 // Not sure this is a bug or feature of WebKitGTK. These elements do not
 // react to touches on Linux but do on other platforms. It does not seem to
-// be a hiphop bug as touch works as expected for every other element.
+// be a dpfwebui bug as touch works as expected for every other element.
 //
 if (DISTRHO.env.noRangeInputTouch) {
     document.querySelectorAll('input[type=range]').forEach((el) => {

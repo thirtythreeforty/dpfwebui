@@ -1,5 +1,5 @@
 /*
- * Hip-Hop / High Performance Hybrid Audio Plugins
+ * dpfwebui / Web User Interfaces support for DISTRHO Plugin Framework
  * Copyright (C) 2021 Luciano Iam <oss@lucianoiam.com>
  *
  * This program is free software: you can redistribute it and/or modify
